@@ -144,12 +144,12 @@ This is deliberately narrower than `gf180mcu_fd_ip_sram`'s 15-corner-per-depth
 Liberty characterization documented in `spec/bitcell-decision.md`
 (`{ff,ss,tt} x {n40C,025C,125C}` against **three separate voltage rails**
 — 1.8 V, 3.3 V, and 5 V domains — because that IP supports multiple I/O
-voltage options). This macro's target spec has a single 3.3 V supply (see
-`README.md`'s spec table), so only one voltage axis applies; a ±10% sweep
-around that single rail is the comparable corner density for this repo's
-narrower voltage scope, not a shortfall against the foundry IP's count. The
-foundry IP's per-corner Liberty data remains the reference/comparison
-dataset this repo's own results are checked against, per
+voltage options). This macro's target spec has a single 3.3 V supply, as
+ratified in the corner-set table above, so only one voltage axis applies; a
+±10% sweep around that single rail is the comparable corner density for this
+repo's narrower voltage scope, not a shortfall against the foundry IP's
+count. The foundry IP's per-corner Liberty data remains the
+reference/comparison dataset this repo's own results are checked against, per
 `spec/bitcell-decision.md`'s "Consequence for spec."
 
 ### Signoff definition
