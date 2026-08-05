@@ -7,6 +7,6 @@ Ratified spec and decision records for this block.
   fixed-depth `gf180mcu_fd_ip_sram` hardened macros, not as a standalone
   primitive. Decides this repo draws a custom bitcell/array rather than
   integrating the hardened macro, with rationale.
-
-The target spec itself (organization, ports, deliverables, characterization)
-is tracked in #2, blocked until now on the bitcell decision above.
+- [`sram.md`](sram.md) — resolves #2: ratifies the target macro spec
+  (organization, ports, deliverables, characterization) that was left as a
+  DRAFT table in `README.md`, building on the bitcell decision above.
