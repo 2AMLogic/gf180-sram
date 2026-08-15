@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-08-15
+
+- **Issue #13** (closed): T1/bronze checklist re-read against current evidence (2026-08-15)
+
 ### 2026-08-05
 
 - **Issue #2** (closed): Ratify the target spec
