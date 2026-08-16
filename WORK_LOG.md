@@ -5,8 +5,10 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-08-16
 
-- **PR #31**: ci: add CI workflow validating harness and evidence-record format
+- **Issue #21** (closed): Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
+- **PR #37**: design: add 6T bitcell + 256x32 array schematics and derived netlists
 - **Issue #28** (closed): Add CI that validates the harness and evidence-record formats (T1 item 10)
+- **PR #31**: ci: add CI workflow validating harness and evidence-record format
 - **Issue #18** (closed): Decompose the T1 re-read's failing items (#13) into dispatchable issues
 
 ### 2026-08-15

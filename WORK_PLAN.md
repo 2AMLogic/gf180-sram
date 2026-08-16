@@ -17,14 +17,12 @@ _None._
 Issues flagged as highest priority (`loom:urgent`).
 
 - **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
-- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
 
 ## Ready
 
 Human-approved issues ready for implementation (`loom:issue`).
 
 - **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
-- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
 
 ## In Progress
 
@@ -36,7 +34,7 @@ _None._
 
 PRs waiting on Judge (`loom:review-requested`).
 
-_None._
+- **#36**: layout: add 256x32 array-tiling generator infra with placeholder bitcell
 
 ## Approved (Awaiting Merge)
 
@@ -50,7 +48,6 @@ Issues carrying `loom:curated`.
 
 - **#23**: Run DRC, LVS, and post-layout PEX verification on the SRAM macro (T1 items 3, 4, 7) *(curated)*
 - **#22**: Produce the SRAM macro layout / GDS (T1 item 2) *(curated)*
-- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -69,12 +66,12 @@ _None._
 | Tier | Count |
 |------|-------|
 | Operator merge-risk holds | 0 |
-| Urgent | 2 |
-| Ready (`loom:issue`) | 2 |
+| Urgent | 1 |
+| Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 0 |
-| PRs awaiting review | 0 |
+| PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 3 |
+| Curated | 2 |
 | Architect / Hermit proposals | 5 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
