@@ -1,0 +1,48 @@
+name: CI
+
+# Validates the design harness and the evidence-record format on every PR
+# (T1 checklist item 10, issue #28). This is intentionally thin scaffolding:
+# no design sources or testbenches have landed yet (#21, #24), so today the
+# `harness` job runs whatever the project's standard `npm run lint` / `npm
+# run test` entry points do (currently a structural evidence-format check
+# and a stub, respectively), and `evidence-format` runs the same lint
+# directly so it is visible as its own status check. Both jobs are meant to
+# grow real content as the design/testbench issues land, per the issue's
+# "Notes" section — they are not meant to invent the eventual evidence
+# grammar themselves.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    name: harness (npm run check:ci)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run harness checks (lint + testbenches)
+        run: npm run check:ci
+
+  evidence-format:
+    name: evidence-record format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate sim/ layout/ measurements/ evidence-record format
+        run: ./scripts/ci/check-evidence-format.sh
