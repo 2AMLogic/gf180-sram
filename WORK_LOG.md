@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-08-16
+
+- **Issue #18** (closed): Decompose the T1 re-read's failing items (#13) into dispatchable issues
+
 ### 2026-08-15
 
 - **Issue #13** (closed): T1/bronze checklist re-read against current evidence (2026-08-15)
