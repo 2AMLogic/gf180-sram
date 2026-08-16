@@ -16,20 +16,21 @@ _None._
 
 Issues flagged as highest priority (`loom:urgent`).
 
-_None._
+- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
+- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
 
 ## Ready
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-_None._
+- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
+- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
-- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
+_None._
 
 ## PRs Awaiting Review
 
@@ -68,9 +69,9 @@ _None._
 | Tier | Count |
 |------|-------|
 | Operator merge-risk holds | 0 |
-| Urgent | 0 |
-| Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 2 |
+| Urgent | 2 |
+| Ready (`loom:issue`) | 2 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
 | Curated | 3 |
