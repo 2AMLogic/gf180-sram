@@ -4,7 +4,7 @@ An SRAM macro on the [gf180mcu](https://github.com/google/gf180mcu-pdk) open
 PDK, built and verified by AI agents driving
 [klayout-tools](https://github.com/2AMLogic/klayout-tools).
 
-**Status: just opened, specification phase.** Nothing is designed yet.
+**Status: spec ratified, bitcell/array design and layout underway.**
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
