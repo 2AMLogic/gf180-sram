@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-08-16
 
+- **PR #31**: ci: add CI workflow validating harness and evidence-record format
+- **Issue #28** (closed): Add CI that validates the harness and evidence-record formats (T1 item 10)
 - **Issue #18** (closed): Decompose the T1 re-read's failing items (#13) into dispatchable issues
 
 ### 2026-08-15
