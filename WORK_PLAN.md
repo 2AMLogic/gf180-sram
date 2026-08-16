@@ -28,7 +28,8 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
+- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1)
 
 ## PRs Awaiting Review
 
@@ -46,7 +47,9 @@ _None._
 
 Issues carrying `loom:curated`.
 
-_None._
+- **#23**: Run DRC, LVS, and post-layout PEX verification on the SRAM macro (T1 items 3, 4, 7) *(curated)*
+- **#22**: Produce the SRAM macro layout / GDS (T1 item 2) *(curated)*
+- **#21**: Commit the SRAM bitcell/array schematic sources and derived netlist (T1 item 1) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -67,10 +70,10 @@ _None._
 | Operator merge-risk holds | 0 |
 | Urgent | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 0 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 0 |
+| Curated | 3 |
 | Architect / Hermit proposals | 5 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
