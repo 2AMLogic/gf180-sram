@@ -94,14 +94,51 @@ if ! git -C "$MAIN" rev-parse HEAD >/dev/null 2>&1 || [[ ! -f "$WT/.loom-managed
     exit 0
 fi
 
+# --- second fixture: main checkout reached through a SYMLINKED ancestor -----
+# (gf180-sram#69). The default Linux $TMPDIR (/tmp) is not itself a symlink,
+# so the macOS bug (TMPDIR=/var/folders/... -> /private/var/folders/...)
+# can't reproduce by luck of the host here — it has to be built deliberately.
+# SYMROOT is a symlink pointing at a second mktemp -d tree; every path fed to
+# the hook below (cwd AND command text) is spelled through the symlink, the
+# same way a real macOS TMPDIR write target would be, while the hook's own
+# `pwd -P` resolution of _WT_MAIN_ROOT still canonicalizes it away.
+SYMTARGET="$(mktemp -d)"
+SYMROOT="${SYMTARGET}-symlink"
+ln -s "$SYMTARGET" "$SYMROOT"
+trap 'rm -rf "$TMPROOT" "$SYMTARGET" "$SYMROOT"' EXIT
+
+SMAIN="$SYMROOT/repo"
+mkdir -p "$SMAIN/sim/access-time/testbench" "$SMAIN/.loom/hooks" "$SMAIN/.loom/scripts/lib"
+cp "$SRC_HOOK" "$SMAIN/.loom/hooks/guard-destructive-generic.sh"
+[[ -f "$SRC_LIB_DIR/config-resolver.sh" ]] && \
+    cp "$SRC_LIB_DIR/config-resolver.sh" "$SMAIN/.loom/scripts/lib/config-resolver.sh"
+SHOOK="$SMAIN/.loom/hooks/guard-destructive-generic.sh"
+
+git -C "$SMAIN" init -q . >/dev/null 2>&1
+git -C "$SMAIN" symbolic-ref HEAD refs/heads/main >/dev/null 2>&1
+printf 'x\n' > "$SMAIN/sim/access-time/testbench/tb_read_access_time.spice"
+printf 'fixture\n' > "$SMAIN/CLAUDE.md"
+git -C "$SMAIN" add -A >/dev/null 2>&1
+git -C "$SMAIN" -c user.email=t@example.invalid -c user.name=test commit -qm init >/dev/null 2>&1
+
+SWT="$SMAIN/.loom/worktrees/issue-24"
+git -C "$SMAIN" worktree add -q "$SWT" -b feature/issue-24 >/dev/null 2>&1
+touch "$SWT/.loom-managed"
+SYMLINK_FIXTURE_OK=1
+if ! git -C "$SMAIN" rev-parse HEAD >/dev/null 2>&1 || [[ ! -f "$SWT/.loom-managed" ]]; then
+    SYMLINK_FIXTURE_OK=""
+fi
+
 # Run the hook with the given cwd + command. Echoes the permissionDecision
-# ("allow" when the hook stays silent, which is its allow contract).
+# ("allow" when the hook stays silent, which is its allow contract). Optional
+# $3 overrides which hook copy to invoke (default $HOOK) -- used by the
+# symlinked-ancestor fixture below, which runs against its own $SHOOK copy.
 run_guard() {
-    local cwd="$1" cmd="$2" out rc=0
+    local cwd="$1" cmd="$2" hook="${3:-$HOOK}" out rc=0
     out=$(jq -n --arg cwd "$cwd" --arg cmd "$cmd" \
             '{cwd:$cwd, tool_name:"Bash", tool_input:{command:$cmd}}' \
           | env -u LOOM_FORCE_SCOPE -u LOOM_GUARD_DECISION_LOG \
-                bash "$HOOK" 2>/dev/null) || rc=$?
+                bash "$hook" 2>/dev/null) || rc=$?
     if [[ "$rc" -ne 0 ]]; then
         printf 'HOOK-EXIT-%s' "$rc"   # fail-open contract violation
         return
@@ -242,6 +279,43 @@ assert_decision "(d5) non-empty BSD suffix is still an operand-shaped token -> d
 # deny text points agents at "a spelled-out /tmp path for scratch".
 assert_decision "(d6) sed -i '' on an out-of-repo scratch file -> allow" \
     allow "$(run_guard "$MAIN" "sed -i '' \"s|x|y|\" $TMPROOT/bitcell_check.sp")"
+
+# --- (e) symlinked-ancestor main checkout (gf180-sram#69) ---------------------
+# Reproduces the macOS-symlinked-TMPDIR bug deliberately on any host: SMAIN /
+# SWT sit under $SYMROOT, a symlink to a second mktemp -d tree. The hook's
+# `_WT_MAIN_ROOT` is always resolved via `pwd -P` (physical), but a write
+# TARGET built from raw command text stays in whatever spelling the command
+# used — here, the symlinked one. Every case below has an exact analogue in
+# section (c)/(d) above (against the un-symlinked $MAIN fixture); pairing them
+# pins that the symlinked-ancestor path gets the SAME verdict, not a
+# different (bypassed) one.
+if [[ -n "$SYMLINK_FIXTURE_OK" ]]; then
+    assert_decision "(e1 = c1) .. traversal target into a symlinked-ancestor main checkout -> deny" \
+        deny "$(run_guard "$SWT" "sed -i '' 's|a|b|' ../../../sim/a.spice" "$SHOOK")"
+
+    assert_decision "(e2 = c3) absolute write into a symlinked-ancestor main checkout -> deny" \
+        deny "$(run_guard "$SWT" "echo x > $SMAIN/CLAUDE.md" "$SHOOK")"
+
+    assert_decision "(e3 = c4) absolute scratch write outside a symlinked-ancestor repo -> allow" \
+        allow "$(run_guard "$SWT" "echo x > $SYMROOT/scratch.txt" "$SHOOK")"
+
+    assert_decision "(e4 = d2) sed -i '' writing an actual file in a symlinked-ancestor main checkout -> deny" \
+        deny "$(run_guard "$SWT" "sed -i '' 's|a|b|' $SMAIN/sim/access-time/testbench/tb_read_access_time.spice" "$SHOOK")"
+
+    assert_decision "(e5 = d3) GNU attached suffix sed -i.bak into a symlinked-ancestor main checkout -> deny" \
+        deny "$(run_guard "$SWT" "sed -i.bak 's|a|b|' $SMAIN/CLAUDE.md" "$SHOOK")"
+
+    assert_decision "(e6 = d4) GNU sed -i -e <script> into a symlinked-ancestor main checkout -> deny" \
+        deny "$(run_guard "$SWT" "sed -i -e 's|a|b|' $SMAIN/CLAUDE.md" "$SHOOK")"
+
+    assert_decision "(e7 = d5) non-empty BSD suffix into a symlinked-ancestor main checkout -> deny" \
+        deny "$(run_guard "$SWT" "sed -i .bak 's|a|b|' $SMAIN/CLAUDE.md" "$SHOOK")"
+
+    assert_decision "(e8 = c2) literal relative target inside a symlinked-ancestor worktree -> allow" \
+        allow "$(run_guard "$SMAIN" "cd $SWT && sed -i '' 's|a|b|' sim/a.spice" "$SHOOK")"
+else
+    echo "SKIP: symlinked-ancestor fixture unavailable on this host -- (e) cases not run"
+fi
 
 echo "=== $PASS/$TOTAL passed ==="
 [[ "$FAIL" -eq 0 ]]
