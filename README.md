@@ -59,6 +59,35 @@ recorded across all 27 corners; the formal per-corner pass/fail synthesis
 against spec/sram.md's positive-margin signoff requirement is still
 outstanding).**
 
+## Macro ceiling, and where this block sits relative to it
+
+gf180mcu's open PDK ships exactly **four** hardened SRAM macros
+(`gf180mcu_fd_ip_sram`, see `spec/bitcell-decision.md`), all fixed-depth,
+×8-bit only: `64×8`, `128×8`, `256×8`, and `512×8`. The largest single
+instance is **`512×8` = 4,096 bits = 512 bytes = 0.5 KB** — that is the PDK's
+own macro ceiling, measured directly from its shipped `LEF` (`SIZE` field),
+not estimated.
+
+**This repo is not a wrapper or tiler over those four macros, and it is not
+a KB-scale replacement for them.** Per `spec/bitcell-decision.md` this repo
+draws a **new, custom 6T bitcell and array** from scratch, and its ratified
+target (`spec/sram.md`) is a single fixed 256 × 32 (1 kB) instance — built to
+exercise array generation, macro-level LVS, and abstract/Liberty
+*generation* tooling, not to serve as a general-purpose KB-scale IP product.
+A parameterized generator that could grow past 1 kB is only a stretch goal,
+not built yet.
+
+An integrator who needs more than ~1 kB (an 8–32 KB MCU-class want, say) has
+no path from this repo today. [`spec/kb-scale-integration.md`](spec/kb-scale-integration.md)
+records the options that do exist in the wider gf180mcu ecosystem — tiling
+the foundry `512×8` macros, DFFRAM (standard-cell RAM, gf180mcu target
+configured but not yet signoff-clean), and OpenRAM (no gf180mcu SRAM support
+at all) — with measured/derived area and timing figures, evidence tiers
+labelled, and the bank-select/mux cost flagged as not yet modeled. It also
+notes, in one sentence, that the open kit has no dense NVM macro (an
+`efuse_cell` primitive only) — code storage for an MCU-class chip on this
+kit is an architecture decision, not a part the PDK provides.
+
 ## Repo layout
 
 ```
