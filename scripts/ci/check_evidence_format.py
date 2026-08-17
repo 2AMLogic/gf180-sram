@@ -19,6 +19,20 @@ exists today:
   3. Relative markdown links between tracked docs resolve to a file that
      actually exists, so cross-references (spec/ <-> design/ <-> sim/ <->
      README.md) don't silently rot as the repo grows.
+  4. `sim/signoff-summary.md` -- the derived per-corner PASS/FAIL rollup
+     over the append-only records under `sim/*/records/` -- is byte-identical
+     to what `sim/lib/render_signoff_table.py` renders from those records
+     today. The rollup is a *derivation*, so a new corner-sweep record that
+     supersedes an old one silently invalidates it; this check turns that
+     into a CI failure with the regeneration command attached, rather than a
+     stale signoff table nobody notices. Pure Python -- it reads committed
+     records, it does not run ngspice or need a PDK.
+  5. `measurements/characterization-report.md` -- the aggregated per-spec-row
+     characterization report (issue #27) combining the deterministic
+     27-corner evidence with the Monte Carlo / yield evidence (issue #26) --
+     is byte-identical to what `measurements/generate_report.py` renders
+     today, the same freshness enforcement as check 4 above, applied to the
+     report that depends on both the corner records and the MC/yield records.
 
 As the harness and evidence-record grammar land (#21, #24), this script is
 the place to grow real per-record field validation -- it does not invent
@@ -46,9 +60,12 @@ EVIDENCE_DIRS = ["sim", "layout", "measurements"]
 # committed, mirroring the *.raw / *.log / *.vcd / *.vvp rules in .gitignore.
 RAW_ARTIFACT_EXTENSIONS = {".raw", ".log", ".vcd", ".vvp"}
 
-# The one documented exception (see .gitignore): per-corner ngspice logs are
-# committed append-only evidence.
-RAW_ARTIFACT_ALLOW_GLOBS = ["sim/*/corners/**/*.log"]
+# The documented exceptions (see .gitignore): per-corner ngspice logs and
+# per-sample Monte Carlo logs are committed append-only evidence.
+RAW_ARTIFACT_ALLOW_GLOBS = [
+    "sim/*/corners/**/*.log",
+    "sim/*/mc/raw-logs/**/*.log",
+]
 
 # Markdown/doc files to link-check. Kept to design-relevant docs (not the
 # Loom-managed .loom/ or .claude/ trees, which are out of this issue's scope).
@@ -67,6 +84,17 @@ LINK_CHECK_GLOBS = [
 ]
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+
+# The derived per-corner PASS/FAIL rollup and the script that renders it from
+# the append-only records under sim/*/records/ (see check 4 above).
+SIGNOFF_SUMMARY = "sim/signoff-summary.md"
+SIGNOFF_RENDERER = "sim/lib/render_signoff_table.py"
+
+# The derived aggregated characterization report and the script that renders
+# it from the append-only records under sim/*/records/ and sim/*/mc/records/
+# (see check 5 above).
+CHARACTERIZATION_REPORT = "measurements/characterization-report.md"
+CHARACTERIZATION_RENDERER = "measurements/generate_report.py"
 
 
 def tracked_files() -> list[str]:
@@ -103,8 +131,9 @@ def check_raw_artifacts(tracked: set[str], errors: list[str]) -> None:
         errors.append(
             f"disallowed raw artifact committed: {path} (extension {ext!r}) "
             "-- raw/scratch simulator output is not evidence; only "
-            "sim/<experiment>/corners/**/*.log is a documented append-only "
-            "exception (see .gitignore)"
+            "sim/<experiment>/corners/**/*.log and "
+            "sim/<experiment>/mc/raw-logs/**/*.log are documented "
+            "append-only exceptions (see .gitignore)"
         )
 
 
@@ -148,6 +177,73 @@ def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
                 )
 
 
+def check_signoff_summary_fresh(tracked: set[str], errors: list[str]) -> None:
+    """Assert sim/signoff-summary.md still matches its generator's output."""
+    if SIGNOFF_SUMMARY not in tracked or SIGNOFF_RENDERER not in tracked:
+        # Neither file exists yet in this checkout -- nothing to derive from.
+        return
+
+    try:
+        rendered = subprocess.run(
+            [sys.executable, str(REPO_ROOT / SIGNOFF_RENDERER), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    except subprocess.CalledProcessError as exc:
+        errors.append(
+            f"{SIGNOFF_RENDERER} failed (exit {exc.returncode}); it must be "
+            f"able to re-derive {SIGNOFF_SUMMARY} from the committed records "
+            f"under sim/*/records/. stderr:\n{exc.stderr.strip()}"
+        )
+        return
+
+    committed = (REPO_ROOT / SIGNOFF_SUMMARY).read_text(encoding="utf-8")
+    if committed != rendered:
+        errors.append(
+            f"{SIGNOFF_SUMMARY} is stale: it does not match what "
+            f"{SIGNOFF_RENDERER} renders from the records currently under "
+            f"sim/*/records/ (a newer record probably superseded one of its "
+            f"sources). Regenerate and commit it:\n"
+            f"      python3 {SIGNOFF_RENDERER} > {SIGNOFF_SUMMARY}"
+        )
+
+
+def check_characterization_report_fresh(tracked: set[str], errors: list[str]) -> None:
+    """Assert measurements/characterization-report.md still matches its
+    generator's output (see check 5 in the module docstring)."""
+    if CHARACTERIZATION_REPORT not in tracked or CHARACTERIZATION_RENDERER not in tracked:
+        # Neither file exists yet in this checkout -- nothing to derive from.
+        return
+
+    try:
+        rendered = subprocess.run(
+            [sys.executable, str(REPO_ROOT / CHARACTERIZATION_RENDERER), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    except subprocess.CalledProcessError as exc:
+        errors.append(
+            f"{CHARACTERIZATION_RENDERER} failed (exit {exc.returncode}); it "
+            f"must be able to re-derive {CHARACTERIZATION_REPORT} from the "
+            f"committed records under sim/*/records/ and sim/*/mc/records/. "
+            f"stderr:\n{exc.stderr.strip()}"
+        )
+        return
+
+    committed = (REPO_ROOT / CHARACTERIZATION_REPORT).read_text(encoding="utf-8")
+    if committed != rendered:
+        errors.append(
+            f"{CHARACTERIZATION_REPORT} is stale: it does not match what "
+            f"{CHARACTERIZATION_RENDERER} renders from the records currently "
+            f"under sim/*/records/ and sim/*/mc/records/ (a newer record "
+            f"probably superseded one of its sources). Regenerate and commit "
+            f"it:\n      python3 {CHARACTERIZATION_RENDERER} > "
+            f"{CHARACTERIZATION_REPORT}"
+        )
+
+
 def main() -> int:
     tracked = set(tracked_files())
     errors: list[str] = []
@@ -155,6 +251,8 @@ def main() -> int:
     check_readmes(tracked, errors)
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
+    check_signoff_summary_fresh(tracked, errors)
+    check_characterization_report_fresh(tracked, errors)
 
     if errors:
         print("evidence-format check FAILED:\n", file=sys.stderr)
@@ -166,7 +264,9 @@ def main() -> int:
     print(
         f"evidence-format check passed: {len(tracked)} tracked files, "
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
-        "raw artifacts, no broken relative doc links."
+        "raw artifacts, no broken relative doc links, "
+        f"{SIGNOFF_SUMMARY} in sync with {SIGNOFF_RENDERER}, "
+        f"{CHARACTERIZATION_REPORT} in sync with {CHARACTERIZATION_RENDERER}."
     )
     return 0
 

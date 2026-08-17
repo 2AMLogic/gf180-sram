@@ -6,8 +6,12 @@ __pycache__/
 .DS_Store
 
 # sim/ harness: per-corner ngspice logs under corners/ are committed evidence
-# (append-only record trail), so they escape the *.log rule.
+# (append-only record trail), so they escape the *.log rule. Same for the
+# per-sample Monte Carlo logs under mc/raw-logs/ -- they carry the seed and
+# recorded value of every individual MC draw, which is what makes a yield
+# report auditable rather than a summary to be taken on trust.
 !sim/*/corners/**/*.log
+!sim/*/mc/raw-logs/**/*.log
 sim/build/
 # synthesis / P&R scratch
 flow/build/
