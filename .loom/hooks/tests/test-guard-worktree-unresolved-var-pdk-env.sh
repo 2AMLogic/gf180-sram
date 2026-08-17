@@ -46,6 +46,15 @@
 #     exemption is per-variable, not per-command)
 #   - `rm -rf` on a SUBPATH of the scratch dir (not the whole directory)
 #     does not count as self-cleaning -> still DENIES
+#   - PR #65 review regressions: the exemption must never skip path
+#     confinement, only the "unresolved variable" deny REASON --
+#       * `..` traversal AFTER the exempted variable that escapes the
+#         scratch dir and lands in the main checkout still DENIES
+#       * `mktemp -d -p <protected-area>` / `--tmpdir=` / a same-command
+#         `TMPDIR=<protected-area>` (which make the "scratch lands outside
+#         the guarded tree" assumption unsound) still DENY
+#       * a `..` that stays INSIDE the scratch dir is still ALLOWED (the
+#         re-validation is a confinement check, not a blanket `..` ban)
 #
 # The hook under test is copied into an isolated temp git tree (mirroring
 # the .loom/worktrees/issue-<N> layout this guard inspects) so REPO_ROOT /
@@ -235,6 +244,60 @@ cd $WT && scratch=\$(mktemp -d) && source sim/lib/pdk_env.sh && echo "x" > /tmp/
 EOF
 result=$(run_hook "$CMDDIR/I.txt" "$WT")
 assert_allow "(I) unrelated LITERAL /tmp write target (not the guard's concern here) -> allow" "$result"
+
+# --- PR #65 review regressions ------------------------------------------------
+# (J) Path traversal AFTER the exempted variable. Every ingredient is genuine
+# (real mktemp -d, real pdk_env.sh source, real trailing rm -rf that only
+# removes the now-empty scratch dir), but the `..` segments walk the write
+# straight back out of the scratch dir and into the MAIN CHECKOUT's README.md.
+# The exemption must only skip the "unresolved variable" deny reason, never
+# path confinement -> must DENY.
+cat > "$CMDDIR/J.txt" <<EOF
+cd $WT && scratch=\$(mktemp -d) && source sim/lib/pdk_env.sh && echo PWNED > "\$scratch/../../../../../../..$TMPROOT/README.md" && rm -rf "\$scratch"
+EOF
+result=$(run_hook "$CMDDIR/J.txt" "$WT")
+assert_deny "(J) '..' traversal after the exempted var into the main checkout -> deny" "$result"
+
+# (K) `mktemp -d -p <main-checkout-root>` points the "self-cleaning scratch
+# dir" INSIDE the protected area, so the exemption's core assumption (the
+# scratch dir lands outside the guarded tree) no longer holds -> must DENY.
+cat > "$CMDDIR/K.txt" <<EOF
+cd $WT && scratch=\$(mktemp -d -p $TMPROOT) && source sim/lib/pdk_env.sh && cp sim/read-snm/testbench/tb_read_snm.spice "\$scratch/" && rm -rf "\$scratch"
+EOF
+result=$(run_hook "$CMDDIR/K.txt" "$WT")
+assert_deny "(K) mktemp -d -p <protected area> as the scratch parent -> deny" "$result"
+
+# (K2) Same, via the long spelling `--tmpdir=<main-checkout-root>`.
+cat > "$CMDDIR/K2.txt" <<EOF
+cd $WT && scratch=\$(mktemp -d --tmpdir=$TMPROOT) && source sim/lib/pdk_env.sh && cp sim/read-snm/testbench/tb_read_snm.spice "\$scratch/" && rm -rf "\$scratch"
+EOF
+result=$(run_hook "$CMDDIR/K2.txt" "$WT")
+assert_deny "(K2) mktemp -d --tmpdir=<protected area> as the scratch parent -> deny" "$result"
+
+# (K3) Same, via a positional TEMPLATE argument naming a directory inside the
+# protected area (`mktemp -d <main-root>/XXXXXX`) -- no flag involved at all.
+cat > "$CMDDIR/K3.txt" <<EOF
+cd $WT && scratch=\$(mktemp -d $TMPROOT/scratch.XXXXXX) && source sim/lib/pdk_env.sh && cp sim/read-snm/testbench/tb_read_snm.spice "\$scratch/" && rm -rf "\$scratch"
+EOF
+result=$(run_hook "$CMDDIR/K3.txt" "$WT")
+assert_deny "(K3) mktemp -d <protected area>/XXXXXX positional template -> deny" "$result"
+
+# (L) A same-command `TMPDIR=<main-checkout-root>` assignment redirects a bare
+# `mktemp -d` into the protected area just as effectively as `-p` -> deny.
+cat > "$CMDDIR/L.txt" <<EOF
+cd $WT && TMPDIR=$TMPROOT && scratch=\$(mktemp -d) && source sim/lib/pdk_env.sh && cp sim/read-snm/testbench/tb_read_snm.spice "\$scratch/" && rm -rf "\$scratch"
+EOF
+result=$(run_hook "$CMDDIR/L.txt" "$WT")
+assert_deny "(L) same-command TMPDIR= assignment redirecting mktemp -> deny" "$result"
+
+# (M) Anti-over-correction control: a `..` segment that stays INSIDE the
+# scratch dir resolves back under it, so the write is still confined and must
+# remain ALLOWED. The fix is a confinement re-check, not a blanket `..` ban.
+cat > "$CMDDIR/M.txt" <<EOF
+cd $WT && scratch=\$(mktemp -d) && source sim/lib/pdk_env.sh && cp sim/read-snm/testbench/tb_read_snm.spice "\$scratch/sub/../corner.inc" && rm -rf "\$scratch"
+EOF
+result=$(run_hook "$CMDDIR/M.txt" "$WT")
+assert_allow "(M) '..' contained within the scratch dir -> still allow" "$result"
 
 echo
 echo "=== Results: $PASS/$TOTAL passed ==="
