@@ -96,11 +96,19 @@ fi
 
 # Run the hook with the given cwd + command. Echoes the permissionDecision
 # ("allow" when the hook stays silent, which is its allow contract).
+#
+# Optional third argument pins LOOM_SED_FLAVOR ("gnu"/"bsd", same convention
+# as test-guard-destructive-sed-branch.sh) for the handful of assertions below
+# that specifically exercise the BSD "no backup" `sed -i ''` idiom: its
+# real-vs-phantom write target depends on which sed would actually execute
+# the command (gf180-sram #49 review), so those cases must not depend on the
+# flavor of sed installed on whatever host runs this suite.
 run_guard() {
-    local cwd="$1" cmd="$2" out rc=0
+    local cwd="$1" cmd="$2" flavor="${3:-}" out rc=0
     out=$(jq -n --arg cwd "$cwd" --arg cmd "$cmd" \
             '{cwd:$cwd, tool_name:"Bash", tool_input:{command:$cmd}}' \
           | env -u LOOM_FORCE_SCOPE -u LOOM_GUARD_DECISION_LOG \
+                ${flavor:+LOOM_SED_FLAVOR="$flavor"} \
                 bash "$HOOK" 2>/dev/null) || rc=$?
     if [[ "$rc" -ne 0 ]]; then
         printf 'HOOK-EXIT-%s' "$rc"   # fail-open contract violation
@@ -130,8 +138,13 @@ for f in sim/access-time/testbench/tb_read_access_time.spice sim/access-time/tes
 done"
 
 # --- (a) the reported false positive now allows -------------------------------
+# Pinned "bsd": the reported #63 idiom is BSD/macOS-specific (`sed -i ""` with
+# the backup suffix as a separate argument) -- on an actual GNU host this
+# exact command would behave differently at runtime (see the #49 review), so
+# the assertion pins the flavor it was written to describe rather than
+# depending on whatever sed happens to be on PATH for this suite run.
 assert_decision "(a1) cd into own worktree + for-loop relative sed -i -> allow" \
-    allow "$(run_guard "$MAIN" "$LOOP_CMD_IN_WORKTREE")"
+    allow "$(run_guard "$MAIN" "$LOOP_CMD_IN_WORKTREE" bsd)"
 
 assert_decision "(a2) already cwd'd in the worktree, for-loop relative sed -i -> allow" \
     allow "$(run_guard "$WT" "for f in sim/a.spice sim/b.spice; do
@@ -221,7 +234,7 @@ assert_decision "(c5) plain read-only command -> allow" \
 # (exactly the documented `sim/` `.include` fix-up) then resolved out of the
 # worktree and denied an edit that never leaves it.
 assert_decision "(d1) in-worktree sed -i '' whose SCRIPT text contains ../ -> allow" \
-    allow "$(run_guard "$WT" "sed -i '' \"s|.include '../../../design/n.spice'|.include '/abs/design/n.spice'|\" sim/a.spice")"
+    allow "$(run_guard "$WT" "sed -i '' \"s|.include '../../../design/n.spice'|.include '/abs/design/n.spice'|\" sim/a.spice" bsd)"
 
 assert_decision "(d2) sed -i '' writing an actual MAIN-checkout file -> deny" \
     deny "$(run_guard "$WT" "sed -i '' 's|a|b|' $MAIN/sim/access-time/testbench/tb_read_access_time.spice")"
@@ -241,7 +254,7 @@ assert_decision "(d5) non-empty BSD suffix is still an operand-shaped token -> d
 # into the main checkout — this guard has never protected /tmp, and its own
 # deny text points agents at "a spelled-out /tmp path for scratch".
 assert_decision "(d6) sed -i '' on an out-of-repo scratch file -> allow" \
-    allow "$(run_guard "$MAIN" "sed -i '' \"s|x|y|\" $TMPROOT/bitcell_check.sp")"
+    allow "$(run_guard "$MAIN" "sed -i '' \"s|x|y|\" $TMPROOT/bitcell_check.sp" bsd)"
 
 echo "=== $PASS/$TOTAL passed ==="
 [[ "$FAIL" -eq 0 ]]
