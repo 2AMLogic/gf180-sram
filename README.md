@@ -53,7 +53,11 @@ integrating that hardened macro.
 Maturity ladder: bitcell question answered → spec ratified → bitcell
 characterized → array assembled → DRC/LVS-clean → abstract and Liberty views
 generated and checked → shuttle seat → measured silicon. **Current position:
-spec ratified, bitcell characterization not yet started.**
+spec ratified, bitcell characterization underway (9-corner PVT testbenches
+shipped with read SNM / hold SNM / write margin / access-time results
+recorded across all 9 corners; the formal per-corner pass/fail synthesis
+against spec/sram.md's positive-margin signoff requirement is still
+outstanding).**
 
 ## Repo layout
 
