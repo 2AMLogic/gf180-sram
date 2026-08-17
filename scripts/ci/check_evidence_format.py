@@ -19,6 +19,14 @@ exists today:
   3. Relative markdown links between tracked docs resolve to a file that
      actually exists, so cross-references (spec/ <-> design/ <-> sim/ <->
      README.md) don't silently rot as the repo grows.
+  4. `sim/signoff-summary.md` -- the derived per-corner PASS/FAIL rollup
+     over the append-only records under `sim/*/records/` -- is byte-identical
+     to what `sim/lib/render_signoff_table.py` renders from those records
+     today. The rollup is a *derivation*, so a new corner-sweep record that
+     supersedes an old one silently invalidates it; this check turns that
+     into a CI failure with the regeneration command attached, rather than a
+     stale signoff table nobody notices. Pure Python -- it reads committed
+     records, it does not run ngspice or need a PDK.
 
 As the harness and evidence-record grammar land (#21, #24), this script is
 the place to grow real per-record field validation -- it does not invent
@@ -67,6 +75,11 @@ LINK_CHECK_GLOBS = [
 ]
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+
+# The derived per-corner PASS/FAIL rollup and the script that renders it from
+# the append-only records under sim/*/records/ (see check 4 above).
+SIGNOFF_SUMMARY = "sim/signoff-summary.md"
+SIGNOFF_RENDERER = "sim/lib/render_signoff_table.py"
 
 
 def tracked_files() -> list[str]:
@@ -148,6 +161,38 @@ def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
                 )
 
 
+def check_signoff_summary_fresh(tracked: set[str], errors: list[str]) -> None:
+    """Assert sim/signoff-summary.md still matches its generator's output."""
+    if SIGNOFF_SUMMARY not in tracked or SIGNOFF_RENDERER not in tracked:
+        # Neither file exists yet in this checkout -- nothing to derive from.
+        return
+
+    try:
+        rendered = subprocess.run(
+            [sys.executable, str(REPO_ROOT / SIGNOFF_RENDERER), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    except subprocess.CalledProcessError as exc:
+        errors.append(
+            f"{SIGNOFF_RENDERER} failed (exit {exc.returncode}); it must be "
+            f"able to re-derive {SIGNOFF_SUMMARY} from the committed records "
+            f"under sim/*/records/. stderr:\n{exc.stderr.strip()}"
+        )
+        return
+
+    committed = (REPO_ROOT / SIGNOFF_SUMMARY).read_text(encoding="utf-8")
+    if committed != rendered:
+        errors.append(
+            f"{SIGNOFF_SUMMARY} is stale: it does not match what "
+            f"{SIGNOFF_RENDERER} renders from the records currently under "
+            f"sim/*/records/ (a newer record probably superseded one of its "
+            f"sources). Regenerate and commit it:\n"
+            f"      python3 {SIGNOFF_RENDERER} > {SIGNOFF_SUMMARY}"
+        )
+
+
 def main() -> int:
     tracked = set(tracked_files())
     errors: list[str] = []
@@ -155,6 +200,7 @@ def main() -> int:
     check_readmes(tracked, errors)
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
+    check_signoff_summary_fresh(tracked, errors)
 
     if errors:
         print("evidence-format check FAILED:\n", file=sys.stderr)
@@ -166,7 +212,8 @@ def main() -> int:
     print(
         f"evidence-format check passed: {len(tracked)} tracked files, "
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
-        "raw artifacts, no broken relative doc links."
+        "raw artifacts, no broken relative doc links, "
+        f"{SIGNOFF_SUMMARY} in sync with {SIGNOFF_RENDERER}."
     )
     return 0
 
