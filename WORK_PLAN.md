@@ -16,25 +16,26 @@ _None._
 
 Issues flagged as highest priority (`loom:urgent`).
 
-- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
+- **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9)
 
 ## Ready
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
+_None._
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9)
+- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#36**: layout: add 256x32 array-tiling generator infra with placeholder bitcell
+_None._
 
 ## Approved (Awaiting Merge)
 
@@ -46,6 +47,7 @@ _None._
 
 Issues carrying `loom:curated`.
 
+- **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9) *(curated)*
 - **#23**: Run DRC, LVS, and post-layout PEX verification on the SRAM macro (T1 items 3, 4, 7) *(curated)*
 - **#22**: Produce the SRAM macro layout / GDS (T1 item 2) *(curated)*
 
@@ -67,11 +69,11 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 0 |
 | Urgent | 1 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 0 |
-| PRs awaiting review | 1 |
+| Ready (`loom:issue`) | 0 |
+| In Progress (`loom:building`) | 2 |
+| PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 2 |
+| Curated | 3 |
 | Architect / Hermit proposals | 5 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
