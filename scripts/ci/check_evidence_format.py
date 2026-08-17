@@ -54,9 +54,12 @@ EVIDENCE_DIRS = ["sim", "layout", "measurements"]
 # committed, mirroring the *.raw / *.log / *.vcd / *.vvp rules in .gitignore.
 RAW_ARTIFACT_EXTENSIONS = {".raw", ".log", ".vcd", ".vvp"}
 
-# The one documented exception (see .gitignore): per-corner ngspice logs are
-# committed append-only evidence.
-RAW_ARTIFACT_ALLOW_GLOBS = ["sim/*/corners/**/*.log"]
+# The documented exceptions (see .gitignore): per-corner ngspice logs and
+# per-sample Monte Carlo logs are committed append-only evidence.
+RAW_ARTIFACT_ALLOW_GLOBS = [
+    "sim/*/corners/**/*.log",
+    "sim/*/mc/raw-logs/**/*.log",
+]
 
 # Markdown/doc files to link-check. Kept to design-relevant docs (not the
 # Loom-managed .loom/ or .claude/ trees, which are out of this issue's scope).
@@ -116,8 +119,9 @@ def check_raw_artifacts(tracked: set[str], errors: list[str]) -> None:
         errors.append(
             f"disallowed raw artifact committed: {path} (extension {ext!r}) "
             "-- raw/scratch simulator output is not evidence; only "
-            "sim/<experiment>/corners/**/*.log is a documented append-only "
-            "exception (see .gitignore)"
+            "sim/<experiment>/corners/**/*.log and "
+            "sim/<experiment>/mc/raw-logs/**/*.log are documented "
+            "append-only exceptions (see .gitignore)"
         )
 
 

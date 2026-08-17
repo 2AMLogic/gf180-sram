@@ -1,0 +1,1074 @@
+{
+  "samples": "/Users/rwalters/GitHub/gf180-sram/.loom/worktrees/issue-26/sim/read-snm/mc/samples/20260817-102455-ce56f59.json",
+  "limits": null,
+  "source": {
+    "kind": "sample-set",
+    "netlist": null,
+    "monte_carlo": null,
+    "sample_count": 1800
+  },
+  "schema_version": 1,
+  "confidence": 0.95,
+  "target_ci_halfwidth": 0.01,
+  "min_samples": 2,
+  "status": "reported",
+  "measurement_count": 9,
+  "measurements": [
+    {
+      "name": "read_snm_v@ff_-40c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ff_-40c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.34567444,
+        "stddev": 0.020936846173309483,
+        "min": 0.301531,
+        "max": 0.407502,
+        "median": 0.3449775,
+        "skewness": 0.24931953084873468,
+        "excess_kurtosis": -0.29525662965025967,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.3398157267756631,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 5.503446525782053,
+        "cpk_confidence_interval": {
+          "low": 4.960795299284273,
+          "high": 6.046097752279833
+        },
+        "sigma_to_spec": 16.51033957734616,
+        "sigma_to_spec_confidence_interval": {
+          "low": 14.882385897852819,
+          "high": 18.138293256839496
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 95,
+        "errored": 5,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.49473684210526314,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.39053176407728074,
+              "high": 0.599278922925844
+            },
+            "n": 95
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7076747987886399,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6336032840180826,
+              "high": 0.7817463135591972
+            },
+            "n": 95
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@ff_-40c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@ff_25c_3.30v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ff_25c_3.30v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.291693115,
+        "stddev": 0.027768130906707336,
+        "min": 0.211341,
+        "max": 0.351279,
+        "median": 0.29090550000000004,
+        "skewness": -0.11843128057391705,
+        "excess_kurtosis": -0.25305676875254246,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.29866999239914577,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 3.5015334182916638,
+        "cpk_confidence_interval": {
+          "low": 3.1544403111614496,
+          "high": 3.848626525421878
+        },
+        "sigma_to_spec": 10.50460025487499,
+        "sigma_to_spec_confidence_interval": {
+          "low": 9.463320933484349,
+          "high": 11.545879576265634
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 95,
+        "errored": 5,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.5052631578947369,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.40072107707415605,
+              "high": 0.6094682359227193
+            },
+            "n": 95
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7042105818048902,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6299112387312574,
+              "high": 0.7785099248785229
+            },
+            "n": 95
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@ff_25c_3.30v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@ff_125c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ff_125c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.21599502999999987,
+        "stddev": 0.02822315428808313,
+        "min": 0.131392,
+        "max": 0.294148,
+        "median": 0.2164345,
+        "skewness": -0.0026564089681643446,
+        "excess_kurtosis": -0.0545758076570646,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.1866612278190676,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 0.9999999999999902,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.999999999999932,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 2.5510381511018303,
+        "cpk_confidence_interval": {
+          "low": 2.2961915708629395,
+          "high": 2.805884731340721
+        },
+        "sigma_to_spec": 7.653114453305491,
+        "sigma_to_spec_confidence_interval": {
+          "low": 6.888574712588818,
+          "high": 8.417654194022163
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 97,
+        "errored": 3,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.36082474226804123,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.2657553498733589,
+              "high": 0.4646403976076282
+            },
+            "n": 97
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.6262165739211754,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.5489051091186548,
+              "high": 0.703528038723696
+            },
+            "n": 97
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@ff_125c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@tt_-40c_3.63v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "tt_-40c_3.63v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.4545461199999999,
+        "stddev": 0.023696237612764653,
+        "min": 0.372573,
+        "max": 0.51655,
+        "median": 0.4562645,
+        "skewness": -0.2804866547537405,
+        "excess_kurtosis": 0.39527405928245196,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.46266067102981384,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 6.394068788866095,
+        "cpk_confidence_interval": {
+          "low": 5.764192762097608,
+          "high": 7.023944815634582
+        },
+        "sigma_to_spec": 19.182206366598287,
+        "sigma_to_spec_confidence_interval": {
+          "low": 17.292578286292823,
+          "high": 21.071834446903747
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 94,
+        "errored": 6,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.7127659574468085,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6102419767165292,
+              "high": 0.8014330261764835
+            },
+            "n": 94
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8051167987108896,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7399072836433379,
+              "high": 0.8703263137784413
+            },
+            "n": 94
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@tt_-40c_3.63v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@tt_25c_3.30v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "tt_25c_3.30v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.37892019499999996,
+        "stddev": 0.023862482898840645,
+        "min": 0.320378,
+        "max": 0.433471,
+        "median": 0.379544,
+        "skewness": -0.14934624005177638,
+        "excess_kurtosis": -0.5763253264393029,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.520081098483935,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 5.293109363435238,
+        "cpk_confidence_interval": {
+          "low": 4.7710445441257,
+          "high": 5.815174182744776
+        },
+        "sigma_to_spec": 15.879328090305712,
+        "sigma_to_spec_confidence_interval": {
+          "low": 14.313133632377099,
+          "high": 17.445522548234326
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 92,
+        "errored": 8,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.6195652173913043,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.5123835409683379,
+              "high": 0.7188234498204966
+            },
+            "n": 92
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7764524543743954,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7071292162488712,
+              "high": 0.8457756924999196
+            },
+            "n": 92
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@tt_25c_3.30v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@tt_125c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "tt_125c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.29753883500000006,
+        "stddev": 0.02331385978421344,
+        "min": 0.235892,
+        "max": 0.343798,
+        "median": 0.2988945,
+        "skewness": -0.09129286435002577,
+        "excess_kurtosis": -0.5541732169039357,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.40849196641262103,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 4.254105179693341,
+        "cpk_confidence_interval": {
+          "low": 3.833618957533574,
+          "high": 4.6745914018531085
+        },
+        "sigma_to_spec": 12.762315539080024,
+        "sigma_to_spec_confidence_interval": {
+          "low": 11.500856872600723,
+          "high": 14.023774205559326
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 91,
+        "errored": 9,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.5054945054945055,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.39861866779498456,
+              "high": 0.6120028320582471
+            },
+            "n": 91
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7284778047937676,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6543192264730636,
+              "high": 0.8026363831144715
+            },
+            "n": 91
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@tt_125c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@ss_-40c_3.63v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ss_-40c_3.63v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.561535545,
+        "stddev": 0.022892115841847336,
+        "min": 0.500063,
+        "max": 0.630397,
+        "median": 0.5632550000000001,
+        "skewness": -0.16003797123604702,
+        "excess_kurtosis": 0.03674899817766342,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.5822329903092897,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 8.176549354072078,
+        "cpk_confidence_interval": {
+          "low": 7.371924212802803,
+          "high": 8.981174495341353
+        },
+        "sigma_to_spec": 24.529648062216232,
+        "sigma_to_spec_confidence_interval": {
+          "low": 22.11577263840841,
+          "high": 26.94352348602406
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 95,
+        "errored": 5,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.7684210526315789,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6706438783506414,
+              "high": 0.8488226344441308
+            },
+            "n": 95
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8525175260971526,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7948318697824648,
+              "high": 0.9102031824118404
+            },
+            "n": 95
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@ss_-40c_3.63v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@ss_25c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ss_25c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.47255088,
+        "stddev": 0.020239379287302173,
+        "min": 0.414922,
+        "max": 0.520311,
+        "median": 0.473092,
+        "skewness": -0.1072719764887851,
+        "excess_kurtosis": 0.04052694137030732,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.23550130462837934,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 7.78269717484979,
+        "cpk_confidence_interval": {
+          "low": 7.01669864473934,
+          "high": 8.548695704960242
+        },
+        "sigma_to_spec": 23.34809152454937,
+        "sigma_to_spec_confidence_interval": {
+          "low": 21.05009593421802,
+          "high": 25.646087114880725
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 94,
+        "errored": 6,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.7553191489361702,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6558161987850397,
+              "high": 0.8381370614815651
+            },
+            "n": 94
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8551457494813115,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7976272331199158,
+              "high": 0.9126642658427072
+            },
+            "n": 94
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@ss_25c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "read_snm_v@ss_125c_3.63v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ss_125c_3.63v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 0.40847390499999997,
+        "stddev": 0.026886058770616797,
+        "min": 0.335848,
+        "max": 0.474912,
+        "median": 0.409665,
+        "skewness": -0.0024895938402305917,
+        "excess_kurtosis": -0.05286431993000962,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.21972407804199454,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 5.064259120125761,
+        "cpk_confidence_interval": {
+          "low": 4.564585332902288,
+          "high": 5.563932907349233
+        },
+        "sigma_to_spec": 15.192777360377281,
+        "sigma_to_spec_confidence_interval": {
+          "low": 13.693755998706864,
+          "high": 16.6917987220477
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')",
+        "n": 97,
+        "errored": 3,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.6185567010309279,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.5143250955786354,
+              "high": 0.7153429624387846
+            },
+            "n": 97
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7521724651848601,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6823022575995259,
+              "high": 0.8220426727701944
+            },
+            "n": 97
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'read_snm_v@ss_125c_3.63v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    }
+  ],
+  "warnings": [
+    "no measurement declared a target_yield, so no yield claim was checked -- the estimates below are reported, never failed"
+  ]
+}
