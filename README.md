@@ -67,7 +67,8 @@ design/        bitcell and periphery schematics
 sim/           testbenches + PVT corner results (ngspice)
 layout/        GDS + DRC/LVS reports (klayout-tools driven)
 views/         generated LEF / Liberty abstracts
-measurements/  silicon characterization (empty until tape-out)
+measurements/  aggregated characterization report (schematic-level today;
+               silicon measurements supersede it after tape-out)
 ```
 
 ## License

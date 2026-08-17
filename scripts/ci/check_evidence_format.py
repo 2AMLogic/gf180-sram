@@ -27,6 +27,12 @@ exists today:
      into a CI failure with the regeneration command attached, rather than a
      stale signoff table nobody notices. Pure Python -- it reads committed
      records, it does not run ngspice or need a PDK.
+  5. `measurements/characterization-report.md` -- the aggregated per-spec-row
+     characterization report (issue #27) combining the deterministic
+     27-corner evidence with the Monte Carlo / yield evidence (issue #26) --
+     is byte-identical to what `measurements/generate_report.py` renders
+     today, the same freshness enforcement as check 4 above, applied to the
+     report that depends on both the corner records and the MC/yield records.
 
 As the harness and evidence-record grammar land (#21, #24), this script is
 the place to grow real per-record field validation -- it does not invent
@@ -83,6 +89,12 @@ LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 # the append-only records under sim/*/records/ (see check 4 above).
 SIGNOFF_SUMMARY = "sim/signoff-summary.md"
 SIGNOFF_RENDERER = "sim/lib/render_signoff_table.py"
+
+# The derived aggregated characterization report and the script that renders
+# it from the append-only records under sim/*/records/ and sim/*/mc/records/
+# (see check 5 above).
+CHARACTERIZATION_REPORT = "measurements/characterization-report.md"
+CHARACTERIZATION_RENDERER = "measurements/generate_report.py"
 
 
 def tracked_files() -> list[str]:
@@ -197,6 +209,41 @@ def check_signoff_summary_fresh(tracked: set[str], errors: list[str]) -> None:
         )
 
 
+def check_characterization_report_fresh(tracked: set[str], errors: list[str]) -> None:
+    """Assert measurements/characterization-report.md still matches its
+    generator's output (see check 5 in the module docstring)."""
+    if CHARACTERIZATION_REPORT not in tracked or CHARACTERIZATION_RENDERER not in tracked:
+        # Neither file exists yet in this checkout -- nothing to derive from.
+        return
+
+    try:
+        rendered = subprocess.run(
+            [sys.executable, str(REPO_ROOT / CHARACTERIZATION_RENDERER), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    except subprocess.CalledProcessError as exc:
+        errors.append(
+            f"{CHARACTERIZATION_RENDERER} failed (exit {exc.returncode}); it "
+            f"must be able to re-derive {CHARACTERIZATION_REPORT} from the "
+            f"committed records under sim/*/records/ and sim/*/mc/records/. "
+            f"stderr:\n{exc.stderr.strip()}"
+        )
+        return
+
+    committed = (REPO_ROOT / CHARACTERIZATION_REPORT).read_text(encoding="utf-8")
+    if committed != rendered:
+        errors.append(
+            f"{CHARACTERIZATION_REPORT} is stale: it does not match what "
+            f"{CHARACTERIZATION_RENDERER} renders from the records currently "
+            f"under sim/*/records/ and sim/*/mc/records/ (a newer record "
+            f"probably superseded one of its sources). Regenerate and commit "
+            f"it:\n      python3 {CHARACTERIZATION_RENDERER} > "
+            f"{CHARACTERIZATION_REPORT}"
+        )
+
+
 def main() -> int:
     tracked = set(tracked_files())
     errors: list[str] = []
@@ -205,6 +252,7 @@ def main() -> int:
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
     check_signoff_summary_fresh(tracked, errors)
+    check_characterization_report_fresh(tracked, errors)
 
     if errors:
         print("evidence-format check FAILED:\n", file=sys.stderr)
@@ -217,7 +265,8 @@ def main() -> int:
         f"evidence-format check passed: {len(tracked)} tracked files, "
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
         "raw artifacts, no broken relative doc links, "
-        f"{SIGNOFF_SUMMARY} in sync with {SIGNOFF_RENDERER}."
+        f"{SIGNOFF_SUMMARY} in sync with {SIGNOFF_RENDERER}, "
+        f"{CHARACTERIZATION_REPORT} in sync with {CHARACTERIZATION_RENDERER}."
     )
     return 0
 
