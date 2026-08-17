@@ -16,7 +16,7 @@ _None._
 
 Issues flagged as highest priority (`loom:urgent`).
 
-- **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9)
+_None._
 
 ## Ready
 
@@ -47,6 +47,7 @@ _None._
 
 Issues carrying `loom:curated`.
 
+- **#44**: Guard-decision review: git clean -fd ask fired on scoped worktree cleanup, propose keep-flagged *(curated)*
 - **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9) *(curated)*
 - **#23**: Run DRC, LVS, and post-layout PEX verification on the SRAM macro (T1 items 3, 4, 7) *(curated)*
 - **#22**: Produce the SRAM macro layout / GDS (T1 item 2) *(curated)*
@@ -68,12 +69,12 @@ _None._
 | Tier | Count |
 |------|-------|
 | Operator merge-risk holds | 0 |
-| Urgent | 1 |
+| Urgent | 0 |
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 3 |
+| Curated | 4 |
 | Architect / Hermit proposals | 5 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
