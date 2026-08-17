@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """sim/lib/run_mc_campaign.py -- Monte Carlo mismatch campaign for a
 sim/<experiment>/testbench/*.spice fixture, at a caller-selected subset of
-the ratified 9-corner PVT matrix (spec/sram.md "Characterization" -> "Corner
+the ratified 27-corner PVT matrix (spec/sram.md "Characterization" -> "Corner
 set"), producing a `klt yield` sample-set document and JSON/text yield
 report per sim/README.md's MC/yield evidence-record convention.
 
 Issue #26 ("Produce Monte Carlo / yield evidence for the SRAM stability
 margins"): the buildable half of T1 checklist item 6 -- no `klt yield`
 report existed anywhere in this repo before this script. Builds on top of
-sim/lib/run_corner_sweep.sh's deterministic 9-corner evidence (#24/#25):
+sim/lib/run_corner_sweep.sh's deterministic 27-corner evidence (#24/#25):
 this script does not replace that evidence, it *combines* with it -- MC runs
-at a caller-selected subset of the same 9 corners (never nominal-only), so
+at a caller-selected subset of the same 27 corners (never nominal-only), so
 the two data sets sit side by side under the same claim.
 
 ## Mismatch mechanism
@@ -75,7 +75,7 @@ silently rediscovered later.
 `sim/hold-snm/testbench/tb_hold_snm.spice` are decoupled *single* half-cell
 fixtures (see each file's own header for why -- `bitcell_6t`'s Q/QB nodes
 are not independently accessible from outside the subcircuit). The
-deterministic 9-corner claim (#24/#25) gets away with a single sweep because
+deterministic 27-corner claim (#24/#25) gets away with a single sweep because
 `sim/lib/snm_extract.py`'s self-composed method (`f(f(x))`) assumes the two
 physical half-cells are *identical* devices -- true with mismatch off. Under
 `sw_stat_mismatch=1`, that assumption is exactly what a real inter-inverter
@@ -492,7 +492,7 @@ def render_record(summary: dict, sample_doc: dict, json_report_text: str, text_r
         "",
         "With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the "
         "number the deterministic corner sweep already recorded for the same corner. This is what ties the MC "
-        "evidence to the ratified 9-corner evidence rather than leaving it a parallel, unanchored claim.",
+        "evidence to the ratified 27-corner evidence rather than leaving it a parallel, unanchored claim.",
         "",
         "| Corner | N | errored | distinct value(s) (V) | verdict |",
         "|---|---|---|---|---|",
@@ -520,7 +520,7 @@ def render_record(summary: dict, sample_doc: dict, json_report_text: str, text_r
         f"- `klt yield` JSON report: [`{summary['json_report_path']}`](../yield-reports/{summary['record_id']}.json)",
         f"- `klt yield` text report: [`{summary['text_report_path']}`](../yield-reports/{summary['record_id']}.txt)",
         f"- Per-sample raw logs: [`{summary['raw_logs_dir']}`](../raw-logs/{summary['record_id']})",
-        f"- Deterministic 9-corner records for the same claim: `sim/{summary['experiment']}/records/`",
+        f"- Deterministic 27-corner records for the same claim: `sim/{summary['experiment']}/records/`",
         "",
         "## Reproduce",
         "",
@@ -564,12 +564,12 @@ def main() -> int:
         required=True,
         dest="corners",
         metavar="process:temp:vdd",
-        help="a corner from the ratified 9-corner matrix to run MC at, e.g. tt:25:3.30 -- repeatable, must appear at least twice (AC: multiple corners, not nominal-only)",
+        help="a corner from the ratified 27-corner matrix to run MC at, e.g. tt:25:3.30 -- repeatable, must appear at least twice (AC: multiple corners, not nominal-only)",
     )
     ap.add_argument("--n", type=int, default=100, help="mismatch samples per corner (default: 100)")
     ap.add_argument(
         "--n-control", type=int, default=8,
-        help="deterministic (mismatch-off) control samples per corner (default: 8). This is the harness-fidelity control: with sw_stat_mismatch=0 every draw must collapse onto ONE value, and that value must be the same number sim/lib/run_corner_sweep.sh's deterministic 9-corner record reports for this corner. It is NOT the negative control -- see --n-nc.",
+        help="deterministic (mismatch-off) control samples per corner (default: 8). This is the harness-fidelity control: with sw_stat_mismatch=0 every draw must collapse onto ONE value, and that value must be the same number sim/lib/run_corner_sweep.sh's deterministic 27-corner record reports for this corner. It is NOT the negative control -- see --n-nc.",
     )
     ap.add_argument(
         "--n-nc", type=int, default=0,
@@ -713,7 +713,7 @@ def main() -> int:
         # must collapse onto one value, and that value must equal what
         # sim/lib/run_corner_sweep.sh's deterministic record reports for this
         # corner -- the check that this MC harness is driving the same
-        # fixture the 9-corner evidence was taken from, i.e. that these MC
+        # fixture the 27-corner evidence was taken from, i.e. that these MC
         # results *combine with* the process corners rather than replace them.
         det_raw, det_seed_labels = do_batch("ctrl", args.n_control, 0, process, temp, vdd, cid)
         det_values, det_errors, det_log_lines = collect(

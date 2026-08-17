@@ -2,7 +2,7 @@
 *
 * Claim under test: spec/sram.md "Characterization" -- hold static noise
 * margin (hold SNM), one of the four ratified measurements, swept across
-* the 9-corner PVT matrix.
+* the 27-corner PVT matrix.
 *
 * Identical fixture and methodology to sim/read-snm/testbench/tb_read_snm.spice
 * (see that file's header for the full rationale on why this is a

@@ -2,7 +2,7 @@
 *
 * Claim under test: spec/sram.md "Characterization" -- read static noise
 * margin (read SNM), one of the four ratified measurements, swept across
-* the 9-corner PVT matrix.
+* the 27-corner PVT matrix.
 *
 * Corner selection is provided by ./corner.inc (a small fragment written by
 * sim/lib/run_corner_sweep.sh immediately before each ngspice invocation --

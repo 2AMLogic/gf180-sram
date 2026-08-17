@@ -7,7 +7,7 @@ unlike the testbenches themselves. What they pin down is the extraction
 *mathematics*, which is where this repo's SNM numbers actually come from:
 
   * the self-composed (symmetric, one-sweep) method used for the
-    deterministic 9-corner claim,
+    deterministic 27-corner claim,
   * the two-curve `--pair` method used for the Monte Carlo mismatch claim
     (issue #26), including that inter-inverter asymmetry *reduces* the
     reported margin -- the entire reason the MC campaign runs the fixture
