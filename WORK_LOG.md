@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-08-17
+
+- **PR #46**: sim: add 9-corner PVT testbenches for read SNM, hold SNM, write margin, and access time
+- **Issue #24** (closed): Ship the ratified 9-corner spec testbenches (T1 item 9)
+
 ### 2026-08-16
 
 - **PR #36**: layout: add 256x32 array-tiling generator infra with placeholder bitcell
