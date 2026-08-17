@@ -4000,6 +4000,31 @@ extract_write_targets() {
             seg = segs[i]
             origlen = length(seg)
             sub(/^[ \t]+/, "", seg)
+            # Leading shell keyword stripped BEFORE the sudo strip (gf180-sram
+            # #67): a one-line compound statement such as
+            # `for f in x; do sed -i "" "s|a|b|" file; done` or
+            # `if true; then sed -i ... file; fi` reaches this loop as a
+            # SEGMENT whose first token is the keyword `do`/`then`/etc, not
+            # the command itself, once qsplit() has already broken the
+            # command on `;`. Every write-idiom branch below keys on
+            # toks[1] (`tee`/`sed`/`cp`/`mv`), so without this strip the
+            # toks[1] of such a segment is literally "do" and the scan
+            # silently finds NOTHING -- a #4178 write-confinement BYPASS: the identical
+            # command with its body on its own line (not one-line) already
+            # denies correctly, since there `do`/`then` is its own separate
+            # (write-idiom-free) segment and the body is a plain segment
+            # whose toks[1] IS the real command. Mirrors the `sudo` strip
+            # immediately below (same technique, same fail-closed contract):
+            # stripping a keyword can only ever EXPOSE more of the real
+            # command to the write-idiom scan, never hide one, so this can
+            # only turn a missed target into a found one (widen a deny),
+            # never the reverse. `{` (brace-group opener, e.g.
+            # `x() { sed -i ... file; }` or `{ sed -i ... file; }`) is
+            # included alongside the do/then/else/elif keywords for the same
+            # reason -- it is a control-flow token, not a command word, and
+            # can lead a one-line segment exactly like `do`/`then` can.
+            sub(/^(do|then|else|elif|\{)[ \t]+/, "", seg)
+            sub(/^[ \t]+/, "", seg)
             sub(/^sudo[ \t]+/, "", seg)
             sub(/^[ \t]+/, "", seg)
             if (seg == "") continue
@@ -4143,10 +4168,55 @@ extract_write_targets() {
                     # widen a deny into an allow (same fallback contract as
                     # #4926).
                     cdclass = strip_cd_quoting(cdarg)
-                    if (cdclass ~ /^\//) {
-                        curcwd = cdarg
+                    # SAME-COMMAND VARIABLE RESOLUTION FOR `cd` (gf180-sram
+                    # #68): `resolve_var()` (#4881, defined above) already
+                    # resolves a `$NAME`/`${NAME}[...]` write-idiom TARGET
+                    # from a same-command `NAME=value` assignment; the `cd`
+                    # argument never got the same treatment, so
+                    # `SB=/tmp/scratch; cd "$SB/repo"; echo x > sim/a.spice`
+                    # built `curcwd` as `<worktree>/"$SB/repo"` (the raw,
+                    # unresolved token) rather than `/tmp/scratch/repo`,
+                    # misjudging an out-of-repo `cd` destination as an
+                    # in-repo one and denying a write that never lands in the
+                    # main checkout.
+                    #
+                    # cdclass is already the quote-STRIPPED form (computed
+                    # just above for the absolute/relative classification
+                    # test), so a token like `"$SB/repo"` reduces to the bare
+                    # `$SB/repo` shape resolve_var() requires -- the same
+                    # "(unquoted) token" contract resolve_var() already has on
+                    # the write-target side. cdresolved is used ONLY when it
+                    # is FULLY resolved (no `$` survives): resolve_var()
+                    # returns its argument UNCHANGED for every unresolvable
+                    # shape (no matching assignment, `$(...)`/`${VAR:-x}`/`$1`,
+                    # or the AMBIG sentinel for a conflicting reassignment,
+                    # #4914), so an unresolved `$` staying in cdresolved means
+                    # "leave it exactly as today" -- both cdcls (fed to the
+                    # classification test) and cdtarget (joined into curcwd)
+                    # fall back to cdclass/cdarg respectively, the PRE-#68
+                    # behaviour, never widening a deny into an allow on
+                    # anything this resolver cannot prove (same fail-closed
+                    # contract as #4881/#4914).
+                    #
+                    # A resolved variable landing INSIDE the repo is not a
+                    # bypass either: curcwd is simply set to that (correct,
+                    # in-repo) absolute path, so a later out-of-worktree
+                    # write via a relative segment off it still resolves
+                    # in-repo and still denies -- this only ever corrects
+                    # the curcwd value, it never turns off the confinement
+                    # check downstream.
+                    cdresolved = resolve_var(cdclass)
+                    if (index(cdresolved, "$") == 0) {
+                        cdcls = cdresolved
+                        cdtarget = cdresolved
+                    } else {
+                        cdcls = cdclass
+                        cdtarget = cdarg
+                    }
+                    if (cdcls ~ /^\//) {
+                        curcwd = cdtarget
                     } else if (curcwd != "") {
-                        curcwd = curcwd "/" cdarg
+                        curcwd = curcwd "/" cdtarget
                     }
                 }
                 continue
@@ -4224,9 +4294,70 @@ extract_write_targets() {
                 }
             }
 
+            # STDOUT-REDIRECTION EXCLUSION (gf180-sram #68) -- the mirror
+            # image of the STDIN-REDIRECTION EXCLUSION immediately above, for
+            # the opposite operator direction. `>`/`>>` (optionally
+            # fd-prefixed, e.g. `2>`) is a redirection operator, never a
+            # write-idiom operand, so neither it nor the token it redirects TO
+            # may be scanned as a tee / sed -i / cp-mv operand by the loops
+            # below -- exactly the same false-DENY shape #5369 fixed for `<`,
+            # just for `>` instead:
+            #
+            #   cp a b/ 2>/dev/null   -- attached form: "2>/dev/null" was the
+            #                            LAST non-flag token, so the cp/mv
+            #                            branch (which takes the LAST token as
+            #                            the destination) picked it over the
+            #                            REAL destination "b/", manufacturing
+            #                            a phantom `<repo>/2>/dev/null` target
+            #                            and denying an ordinary, harmless
+            #                            `cp`/`mv` invocation.
+            #   mv a b >log           -- same shape, bare `mv`.
+            #   tee f 2>/dev/null     -- the tee operand loop (not "last token
+            #                            wins", but every non-excluded,
+            #                            non-flag token IS scanned) misread
+            #                            the redirection as an EXTRA tee
+            #                            target, e.g. a phantom
+            #                            `<repo>/2>/dev/null` sink.
+            #   sed -i "" "s/a/b/" f 2>/dev/null -- same shape as tee, one
+            #                            more phantom sed FILE operand.
+            #
+            # Token-boundary test, identical in structure to the `<` scan:
+            #   `>` / `>>` / `0>` / `2>>` (bare, optionally fd-prefixed)
+            #               consumes the NEXT non-empty token, which is the
+            #               file redirected TO.
+            #   `>file` / `2>/dev/null` / `>>file` (attached, optionally
+            #               fd-prefixed) consumes only itself.
+            #
+            # The attached-form pattern deliberately excludes a leading `&`
+            # right after the operator (`[^ \t&]`) -- so the dup-to-fd
+            # attached spelling `>&2` does NOT match and is therefore not
+            # added to this exclusion set, exactly mirroring how the existing
+            # generic `>`/`>>` write-target loop below (lines ~4181+) already
+            # declines to treat `>&2` as an attached redirection with a real
+            # destination file. This exclusion set is built from mtoks[]
+            # (quote- and arith/test-context-masked, #4245/#5515) so a `>`
+            # that is only quoted DATA, or a comparison inside `((...))`/
+            # `[[...]]`, can never match here either -- same rationale as the
+            # `stdin_redir` scan immediately above.
+            delete stdout_redir
+            for (j = 1; j <= m; j++) {
+                if (toks[j] == "") continue
+                if (mtoks[j] ~ /^[0-9]*>>?$/) {
+                    stdout_redir[j] = 1
+                    for (k = j + 1; k <= m; k++) {
+                        if (toks[k] == "") continue
+                        stdout_redir[k] = 1
+                        break
+                    }
+                } else if (mtoks[j] ~ /^[0-9]*>>?[^ \t&]/) {
+                    stdout_redir[j] = 1
+                }
+            }
+
             if (toks[1] == "tee") {
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
+                    if (j in stdout_redir) continue
                     if (toks[j] == "" || toks[j] ~ /^-/) continue
                     # Heredoc/herestring redirection (attached or quoted
                     # delimiter, or the bare double-angle-bracket / dashed
@@ -4259,6 +4390,7 @@ extract_write_targets() {
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
+                    if (j in stdout_redir) continue
                     if (toks[j] == "-i") { has_i = 1; bare_i = 1 }
                     else if (toks[j] ~ /^-i/) has_i = 1
                     if (toks[j] ~ /^-/) continue
@@ -4346,6 +4478,7 @@ extract_write_targets() {
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
+                    if (j in stdout_redir) continue
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
                     # Same heredoc/herestring exclusion as the `tee` branch
@@ -4732,20 +4865,85 @@ if worktree_isolation_guard_enabled && \
         _any_managed_worktree_exists "$_WT_WRITE_BASE"
     }
 
+    # Resolve $1 (an absolute, lexically-normalized path that may not exist
+    # on disk — a write TARGET, not necessarily a real file yet) to its
+    # PHYSICAL form: walk up to the nearest EXISTING ancestor directory,
+    # canonicalize THAT with `cd ... && pwd -P`, and re-append the remaining
+    # (possibly-nonexistent) tail components unchanged. Pure bash, no
+    # `realpath -m` (GNU-only, silently no-ops on macOS — see
+    # normalize_abs_path() above for the same constraint).
+    #
+    # Companion to _WT_MAIN_ROOT's own `pwd -P` resolution a few lines above
+    # (#4495). _WT_MAIN_ROOT is always physical, but a write target is built
+    # from the raw command text via normalize_abs_path(), which is LEXICAL
+    # ONLY — it never touches the filesystem, so a target reached through a
+    # symlinked ancestor (macOS `TMPDIR=/var/folders/... ->
+    # /private/var/folders/...`, a symlinked $HOME, a bind-mounted
+    # workspace, ...) stayed in its un-resolved spelling while
+    # `_WT_MAIN_ROOT`/`_WT_MAIN_ROOT_LOGICAL` were both already physical (the
+    # "LOGICAL" spelling can never recover a symlink already resolved away by
+    # `git rev-parse --git-common-dir`, which macOS's `/var/folders` mount
+    # already is). Neither root string was ever a prefix of the unresolved
+    # target, so the confinement check below silently ALLOWED writes that
+    # should have been DENIED — a real guard-bypass, not test flakiness
+    # (gf180-sram#69). Resolving the target to physical form too, and
+    # checking that form as a fallback, closes it without needing the two
+    # root spellings to somehow stay in sync.
+    #
+    # Fails open to the unmodified input if no ancestor resolves (bare "/",
+    # or every `cd` along the way fails) — never narrows an existing allow,
+    # only ever adds a SECOND spelling the confinement checks can match.
+    _wt_physical_form() {
+        local _p="$1" _dir _tail="" _phys
+        [[ "$_p" == /* ]] || { printf '%s' "$_p"; return; }
+        _dir="$_p"
+        while :; do
+            if [[ -d "$_dir" ]]; then
+                _phys=$(cd "$_dir" 2>/dev/null && pwd -P) || _phys=""
+                if [[ -n "$_phys" ]]; then
+                    printf '%s%s' "$_phys" "$_tail"
+                    return
+                fi
+                break
+            fi
+            [[ "$_dir" == "/" ]] && break
+            _tail="/${_dir##*/}${_tail}"
+            _dir="${_dir%/*}"
+            [[ -z "$_dir" ]] && _dir="/"
+        done
+        printf '%s' "$_p"
+    }
+
+    # True if $1 (an absolute, normalized path) resolves inside the main
+    # checkout — tried as the raw string first (both the physical
+    # `_WT_MAIN_ROOT` and whatever `_WT_MAIN_ROOT_LOGICAL` happened to
+    # capture), then again via `_wt_physical_form` (#69) so a target reached
+    # through a symlinked ancestor still matches the (always-physical)
+    # `_WT_MAIN_ROOT` even when the logical spelling was lost upstream.
+    _wt_path_in_main_checkout() {
+        local _p="$1" _pphys
+        [[ -n "$_p" && -n "$_WT_MAIN_ROOT" ]] || return 1
+        case "$_p" in
+            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
+            "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) return 0 ;;
+        esac
+        _pphys=$(_wt_physical_form "$_p")
+        case "$_pphys" in
+            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
+        esac
+        return 1
+    }
+
     # True if $1 (an absolute, normalized path) sits anywhere in the area this
     # guard protects: inside a managed worktree, inside the main checkout
-    # (either spelling), or under the configured worktree base (which may live
-    # on an external volume, outside the main checkout entirely).
+    # (either spelling, or its physical resolution — #69), or under the
+    # configured worktree base (which may live on an external volume, outside
+    # the main checkout entirely).
     _wt_in_protected_area() {
         local _p="$1"
         [[ -n "$_p" ]] || return 1
         _in_any_managed_worktree "$_p" && return 0
-        if [[ -n "$_WT_MAIN_ROOT" ]]; then
-            case "$_p" in
-                "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
-                "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) return 0 ;;
-            esac
-        fi
+        _wt_path_in_main_checkout "$_p" && return 0
         if [[ -z "$_WT_WRITE_BASE_DONE" ]]; then
             _WT_WRITE_BASE=$(resolve_worktree_root "$_WT_MAIN_ROOT")
             _WT_WRITE_BASE_DONE=1
@@ -5248,12 +5446,13 @@ if worktree_isolation_guard_enabled && \
 
         # Not under any worktree. If it's also not under the main checkout,
         # there is nothing this guard protects (e.g. /tmp scratch) -> allow.
+        # _wt_path_in_main_checkout() tries the raw string against both root
+        # spellings AND the target's own physical resolution against the
+        # (always-physical) _WT_MAIN_ROOT, so a target reached through a
+        # symlinked ancestor (macOS TMPDIR, a symlinked $HOME, ...) still
+        # matches instead of silently falling through to allow (#69).
         [[ -z "$_WT_MAIN_ROOT" ]] && continue
-        case "$_wabs" in
-            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) : ;;
-            "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) : ;;
-            *) continue ;;
-        esac
+        _wt_path_in_main_checkout "$_wabs" || continue
 
         # Target resolves inside the main checkout and outside every
         # worktree. Deny only if worktree isolation is actually in play for
