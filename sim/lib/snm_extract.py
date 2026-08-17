@@ -76,7 +76,7 @@ Usage:
     snm_extract.py <data-file> <label>
         Single-curve / self-composed mode (unchanged since this script's
         original version) -- used by sim/lib/run_corner_sweep.sh for the
-        deterministic 9-corner PVT claim.
+        deterministic 27-corner PVT claim.
 
     snm_extract.py --pair <data-file-1> <data-file-2> <label>
         Two-curve mode -- used by sim/lib/run_mc_campaign.py for the

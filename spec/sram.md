@@ -137,8 +137,15 @@ regardless of whether a testbench merely completed without an error.
 | Temperature | `-40 C`, `25 C`, `125 C` |
 | Voltage | `2.97 V`, `3.30 V`, `3.63 V` (±10% of this macro's single 3.3 V supply target) |
 
-3 × 3 × 3 = **9 corners**, all reported per `sim/`'s append-only evidence
+3 × 3 × 3 = **27 corners**, all reported per `sim/`'s append-only evidence
 convention (`CLAUDE.md`: "`sim/` results are append-only evidence").
+
+> The three axes above are fully crossed ("all combinations"), so the corner
+> count is their product, 27. This sentence read `= **9 corners**` from
+> ratification until 2026-08-17; that was an arithmetic slip in the prose,
+> corrected per `spec/corner-count-correction.md`. The axes, the corner set
+> itself, and the Signoff definition below are unchanged, and every sweep
+> this repo has ever run already executed all 27 points.
 
 This is deliberately narrower than `gf180mcu_fd_ip_sram`'s 15-corner-per-depth
 Liberty characterization documented in `spec/bitcell-decision.md`
@@ -156,7 +163,7 @@ reference/comparison dataset this repo's own results are checked against, per
 
 Combining with the existing DRAFT table's Signoff row: this macro is
 **functional across PVT** once DRC and LVS are clean on the full array, and
-every one of the 9 corners above has a recorded, strictly-positive read SNM,
+every one of the 27 corners above has a recorded, strictly-positive read SNM,
 hold SNM, and write margin, plus a recorded access time feeding the Liberty
 views. Any corner that cannot be closed is recorded as an open result in
 `sim/`, not silently dropped from the corner set — this spec is not relaxed
@@ -167,6 +174,9 @@ to make a failing corner disappear.
 - `spec/bitcell-decision.md` — resolves #1, decides Option 2 (custom
   bitcell/array), and is the source for the Ports and Deliverables
   conclusions ratified above.
+- `spec/corner-count-correction.md` — resolves #53, the decision record for
+  the "Corner set" corner-count correction (9 → 27). Label-only: it changes
+  no axis, no corner, and no Signoff threshold.
 - `README.md`, "Target specification (DRAFT...)" section — the pre-existing
   draft table this record ratifies and supersedes.
 - `libs.ref/gf180mcu_fd_ip_sram/` under `~/.volare/gf180mcu{A,B,C,D}`

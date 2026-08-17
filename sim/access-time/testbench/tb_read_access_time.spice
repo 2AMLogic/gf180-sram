@@ -1,7 +1,7 @@
 * Read access time testbench -- bitcell_6t, DUT netlist `.include`d directly.
 *
 * Claim under test: spec/sram.md "Characterization" -- read/write access
-* time, one of the four ratified measurements, swept across the 9-corner
+* time, one of the four ratified measurements, swept across the 27-corner
 * PVT matrix. This file is the read half; see tb_write_access_time.spice
 * for the write half.
 *

@@ -2,7 +2,7 @@
 * directly.
 *
 * Claim under test: spec/sram.md "Characterization" -- read/write access
-* time, one of the four ratified measurements, swept across the 9-corner
+* time, one of the four ratified measurements, swept across the 27-corner
 * PVT matrix. This file is the write half; see tb_read_access_time.spice
 * for the read half and its proxy-metric rationale (this file measures
 * the internal storage node Q directly, since a write's "completion" is

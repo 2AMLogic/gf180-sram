@@ -6,11 +6,9 @@ identified against the five append-only evidence records `run_corner_sweep.sh`
 already produced under `sim/*/records/` (read SNM, hold SNM, write margin,
 read access time, write access time -- all covering the ratified
 process x temperature x voltage PVT matrix, `spec/sram.md` "Corner set",
-27 distinct corner points -- see the "Note on corner count" this script
-emits, and #53, for why that is 27 rather than the "9" spec/sram.md's own
-prose computes): those records list raw measured values plus a single
-aggregate `Overall: recorded` line, not an explicit per-corner PASS/FAIL
-verdict against `spec/sram.md`'s Signoff definition.
+27 distinct corner points): those records list raw measured values plus a
+single aggregate `Overall: recorded` line, not an explicit per-corner
+PASS/FAIL verdict against `spec/sram.md`'s Signoff definition.
 
 This script does not re-run any simulation and does not modify any
 committed record (`sim/`'s append-only rule, `sim/README.md` "Append-only
@@ -46,10 +44,8 @@ import sys
 from pathlib import Path
 
 # Ratified PVT matrix, spec/sram.md "Corner set" -- process x temperature x
-# voltage, 3x3x3 = 27 points (see the "Note on corner count" this script
-# emits, and #53, for why spec/sram.md's own prose computes this product as
-# "9 corners" instead). Same order sim/lib/run_corner_sweep.sh iterates so
-# every record's corner ordering already matches this.
+# voltage, 3x3x3 = 27 points. Same order sim/lib/run_corner_sweep.sh
+# iterates so every record's corner ordering already matches this.
 PROCESSES = ["ff", "tt", "ss"]
 TEMPS = ["-40", "25", "125"]
 VDDS = ["2.97", "3.30", "3.63"]
@@ -270,15 +266,15 @@ def main() -> int:
         f" (`{len(PROCESSES)} x {len(TEMPS)} x {len(VDDS)} ="
         f" {len(CORNER_ORDER)}`), matching every one of the five source"
         " records above (each has exactly this many `- **<corner-id>**:`"
-        " rows). `spec/sram.md`'s \"Corner set\" section computes this same"
-        " product as \"9 corners\" -- an arithmetic inconsistency in the"
-        " ratified spec text (3 x 3 x 3 = 27, not 9), repeated in"
-        " `sim/README.md` and in `sim/lib/run_corner_sweep.sh`'s own"
-        " generated-record and terminal-output text. Tracked separately as"
-        " #53 (not fixed here -- `spec/sram.md` edits are out of this"
-        " issue's guardrails, and the discrepancy doesn't change any"
-        " verdict below: the actually-executed sweep is a superset of any"
-        " 9-point reading of the ratified matrix, and all 27 points pass)."
+        " rows) and `spec/sram.md`'s \"Corner set\" section. That section"
+        " computed the same product as \"9 corners\" until #53 corrected"
+        " the arithmetic (3 x 3 x 3 = 27, not 9) -- see"
+        " `spec/corner-count-correction.md`; the corner set, the Signoff"
+        " definition, and every verdict below are unchanged by that"
+        " correction. Records written before it still say \"9 corner"
+        " points\" in their own generated prose while listing all 27 rows,"
+        " because records are never edited after the fact"
+        " (`sim/README.md`, \"Append-only rule\")."
     )
     lines.append("")
     lines.append("## Per-corner results")

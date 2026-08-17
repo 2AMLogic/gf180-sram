@@ -1,7 +1,7 @@
 * Write margin testbench -- bitcell_6t, DUT netlist `.include`d directly.
 *
 * Claim under test: spec/sram.md "Characterization" -- write margin, one of
-* the four ratified measurements, swept across the 9-corner PVT matrix.
+* the four ratified measurements, swept across the 27-corner PVT matrix.
 * Defined here as spec/sram.md's "write trip voltage" variant: "the
 * minimum bit-line / write-driver drive ... that successfully flips the
 * cell's stored value within the write pulse width." This testbench finds

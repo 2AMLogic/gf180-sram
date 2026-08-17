@@ -10,3 +10,7 @@ Ratified spec and decision records for this block.
 - [`sram.md`](sram.md) — resolves #2: ratifies the target macro spec
   (organization, ports, deliverables, characterization) that was left as a
   DRAFT table in `README.md`, building on the bitcell decision above.
+- [`corner-count-correction.md`](corner-count-correction.md) — resolves #53:
+  corrects `sram.md`'s "Corner set" arithmetic (`3 × 3 × 3` is 27, not 9).
+  A label-only correction — the ratified corner set, the Signoff definition,
+  and every committed record are unchanged.

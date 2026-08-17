@@ -44,10 +44,10 @@ sim/
   `netlist-snapshots/`, or `records/` is ever edited or deleted after being
   committed (see "Append-only rule" below).
 - **`<corner-id>`** = `<process>_<temp>c_<supply>v`, e.g. `ff_-40c_2.97v`,
-  `tt_25c_3.30v`, `ss_125c_3.63v` -- one per point in the ratified 9-corner
+  `tt_25c_3.30v`, `ss_125c_3.63v` -- one per point in the ratified 27-corner
   matrix below.
 
-## The ratified 9-corner PVT matrix
+## The ratified 27-corner PVT matrix
 
 Per `spec/sram.md`'s "Characterization" -> "Corner set" (which this repo's
 testbenches sweep exhaustively, not as a subset):
@@ -58,11 +58,17 @@ testbenches sweep exhaustively, not as a subset):
 | Temperature | `-40 C`, `25 C`, `125 C` |
 | Supply | `2.97 V`, `3.30 V`, `3.63 V` (±10% of the 3.3V target) |
 
-3 x 3 x 3 = 9 corners, every one of them run for every record -- a corner
+3 x 3 x 3 = 27 corners, every one of them run for every record -- a corner
 that fails to converge or measure is recorded as an **open result** (see
 each testbench's own comments and `sim/lib/run_corner_sweep.sh`'s record
 generation), never silently dropped from the set, per `spec/sram.md`'s
 Signoff definition.
+
+`spec/sram.md`'s "Corner set" section computed this same product as "9
+corners" until #53 corrected it to 27 (`spec/corner-count-correction.md`);
+the *set* never changed, and records committed before that correction carry
+the old "9" in their generated prose while listing all 27 rows, because
+records are never edited after the fact (see "Append-only rule" below).
 
 `process` labels `ff`/`tt`/`ss` map onto the PDK model file's own `.LIB`
 section names as `ff`->`ff`, `tt`->`typical`, `ss`->`ss` (gf180mcu's
@@ -94,7 +100,7 @@ file's header for the exact resolution order).
 export PDK_ROOT="$HOME/.volare"      # parent of gf180mcuC/ -- adjust to your install
 export PDK=gf180mcuC
 
-# 2. From a clean checkout, run any one testbench across the full 9-corner
+# 2. From a clean checkout, run any one testbench across the full 27-corner
 #    matrix (each of the 5 testbenches below takes well under a minute; a
 #    single-bitcell circuit has no reason to be slow):
 ./sim/lib/run_corner_sweep.sh sim/read-snm      sim/read-snm/testbench/tb_read_snm.spice           "snm:read_snm_sweep.txt:read_snm"   "spec/sram.md Characterization -- read SNM"
@@ -277,7 +283,7 @@ replacing them:
 ```
 sim/
   <experiment-slug>/
-    corners/ records/ ...        # the deterministic 9-corner evidence above
+    corners/ records/ ...        # the deterministic 27-corner evidence above
     mc/
       samples/
         <record-id>.json         # the klt yield sample-set document: every
@@ -459,10 +465,10 @@ printed beside it.
 ## Interpreting these results against sign-off
 
 `spec/sram.md`'s Signoff definition requires read SNM, hold SNM, and write
-margin to be **strictly positive** at every one of the 9 corners, plus a
+margin to be **strictly positive** at every one of the 27 corners, plus a
 recorded access time, before this macro is "functional across PVT." The
 records generated during this issue's own implementation (see
-`sim/*/records/*.md`) show exactly that -- all 9 corners, all four
+`sim/*/records/*.md`) show exactly that -- all 27 corners, all four
 measurements, strictly positive margins and recorded access times -- for
 the current `bitcell_6t` sizing. That is a real, if narrow, first data
 point: it is evidence this sizing has *some* margin at every ratified
@@ -513,11 +519,11 @@ signoff table. The renderer always reads the *latest* record per claim (by
 `<record-id>`, which sorts chronologically), so superseding a record is the
 only action needed on the evidence side.
 
-`sim/signoff-summary.md` also notes a corner-count discrepancy worth
-flagging here: it reports 27 corner points per record (`process x
+`sim/signoff-summary.md` reports 27 corner points per record (`process x
 temperature x voltage`, `3 x 3 x 3`), matching what every one of the five
-records above actually contains, while `spec/sram.md`'s "Corner set"
-section computes that same product as "9 corners" -- see #53 for the
-tracked spec-text correction (unaffected pass/fail outcome; not fixed here
-since `spec/sram.md` edits are out of scope for the issue that added this
-rollup).
+records above actually contains. `spec/sram.md`'s "Corner set" section used
+to compute that same product as "9 corners"; #53 corrected the spec text to
+27 (`spec/corner-count-correction.md`), so the two now agree. The
+correction changed no axis, no corner, and no verdict -- records written
+before it still carry the old "9" in their own generated prose, which the
+append-only rule preserves as-is.

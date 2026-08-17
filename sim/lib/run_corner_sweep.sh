@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # sim/lib/run_corner_sweep.sh -- sweep one testbench across the ratified
-# 9-corner PVT matrix (spec/sram.md "Characterization" -> "Corner set":
-# process {ff,tt,ss} x temperature {-40,25,125}C x supply {2.97,3.30,3.63}V)
+# 27-corner PVT matrix (spec/sram.md "Characterization" -> "Corner set":
+# process {ff,tt,ss} x temperature {-40,25,125}C x supply {2.97,3.30,3.63}V,
+# fully crossed: 3 x 3 x 3 = 27 points)
 # and write an append-only evidence record, following the directory/naming
 # convention documented in sim/README.md (adapted from 2AMLogic/gf180-bandgap's
 # sim/README.md).
@@ -82,10 +83,17 @@ mkdir -p "$CORNERS_DIR" "$RECORDS_DIR" "$SNAPSHOT_DIR"
 
 cp "$TESTBENCH_FILE" "$SNAPSHOT_DIR/$RECORD_ID.spice"
 
-# Ratified 9-corner matrix, spec/sram.md "Corner set".
+# Ratified corner matrix, spec/sram.md "Corner set" -- three fully-crossed
+# axes, so the corner count is their product (3 x 3 x 3 = 27 today).
 PROCESSES=(ff tt ss)
 TEMPS=(-40 25 125)
 VDDS=(2.97 3.30 3.63)
+# Derived, never hardcoded: every place this script reports a corner count
+# (generated record text, terminal summary) uses this, so the reported number
+# cannot drift from the loop below if an axis ever changes. spec/sram.md's
+# own prose said "9" for this product until #53 corrected it to 27 -- see
+# spec/corner-count-correction.md.
+CORNER_COUNT=$(( ${#PROCESSES[@]} * ${#TEMPS[@]} * ${#VDDS[@]} ))
 
 # Process-corner label -> gf180mcu model .LIB section name (sm141064.ngspice
 # defines `.LIB typical` / `.LIB ff` / `.LIB ss` for the nfet_03v3/pfet_03v3
@@ -172,7 +180,7 @@ RECORD_FILE="$RECORDS_DIR/$RECORD_ID.md"
   echo "  - Process: ${PROCESSES[*]}"
   echo "  - Temperature: ${TEMPS[*]} C"
   echo "  - Supply: ${VDDS[*]} V"
-  echo "  - (9 corner points total -- full process x temp x supply matrix, per spec/sram.md's ratified corner set)"
+  echo "  - ($CORNER_COUNT corner points total -- full process x temp x supply matrix, per spec/sram.md's ratified corner set)"
   echo "- **Statistical convention**: N/A (corner-matrix claim, not a distribution claim)"
   echo "- **Result**:"
   for line in "${RESULT_LINES[@]}"; do
@@ -181,7 +189,7 @@ RECORD_FILE="$RECORDS_DIR/$RECORD_ID.md"
   if [[ "$OVERALL_OPEN" -eq 1 ]]; then
     echo "  - **Overall: OPEN** -- at least one corner did not produce a valid measured result (see per-corner notes above); per spec/sram.md's Signoff definition this corner is recorded as an open result, not dropped from the corner set."
   else
-    echo "  - **Overall: recorded** -- all 9 corners produced a measured result; see sim/README.md for how to interpret sign-off against spec/sram.md's positive-margin requirement."
+    echo "  - **Overall: recorded** -- all $CORNER_COUNT corners produced a measured result; see sim/README.md for how to interpret sign-off against spec/sram.md's positive-margin requirement."
   fi
   echo "- **Links**:"
   echo "  - Testbench: \`$(python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))" "$TESTBENCH_FILE" "$REPO_ROOT")\`"
@@ -196,7 +204,7 @@ RECORD_FILE="$RECORDS_DIR/$RECORD_ID.md"
 } > "$RECORD_FILE"
 
 echo
-echo "Wrote 9 corner logs under $CORNERS_DIR"
+echo "Wrote $CORNER_COUNT corner logs under $CORNERS_DIR"
 echo "Wrote netlist snapshot: $SNAPSHOT_DIR/$RECORD_ID.spice"
 echo "Wrote record: $RECORD_FILE"
 echo "record-id: $RECORD_ID"
