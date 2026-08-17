@@ -1,0 +1,73 @@
+* Read SNM testbench -- bitcell_6t, decoupled half-cell fixture.
+*
+* Claim under test: spec/sram.md "Characterization" -- read static noise
+* margin (read SNM), one of the four ratified measurements, swept across
+* the 9-corner PVT matrix.
+*
+* Corner selection is provided by ./corner.inc (a small fragment written by
+* sim/lib/run_corner_sweep.sh immediately before each ngspice invocation --
+* see sim/README.md for the generated content and invocation). It sets:
+*   .param VDDC=<corner supply>
+*   .temp <corner temperature>
+*   .lib '<gf180mcu model file>' <corner process section>
+*   .include '<gf180mcu design.ngspice>' (default corner-switch params the
+*             model file's .LIB sections require, e.g. fnoicor)
+.include './corner.inc'
+
+* ---------------------------------------------------------------------
+* Why this is a device-level replica, not a `.include` of
+* design/netlist/bitcell_6t.spice, and why one replica (not two) suffices
+* ---------------------------------------------------------------------
+* The classic butterfly-curve SNM extraction (Seevinck et al., "Static-
+* Noise Margin Analysis of MOS SRAM Cells," IEEE JSSC 1987) needs
+* independent access to both cross-coupled storage nodes (Q, QB) so one
+* inverter's input can be swept while its output -- loaded exactly as it
+* would be in the real cell -- is measured. `bitcell_6t`'s netlist
+* (design/netlist/bitcell_6t.spice) exposes only BL, BLB, WL, VDD, VSS as
+* ports; Q and QB are internal to that subcircuit's cross-coupled wiring
+* and cannot be independently driven from outside it (SPICE has no way to
+* inject a source between two nodes where one is a subcircuit's private
+* internal node without editing the subcircuit itself, which is out of
+* this issue's scope -- design/ is a read-only dependency here).
+*
+* This fixture instead builds ONE storage inverter + its access transistor
+* directly, device-for-device identical to bitcell_6t.spice's left/right
+* half (same models, same W/L, same parasitic-area formulas -- copied
+* verbatim from design/netlist/bitcell_6t.spice, which the design decision
+* in design/README.md documents as sized: MPL/MPR pfet_03v3 W=0.22u
+* L=0.28u, MNL/MNR nfet_03v3 W=0.36u L=0.28u, MAL/MAR nfet_03v3 W=0.24u
+* L=0.28u). Because bitcell_6t's two half-cells are identical devices,
+* one inverter's Vout-vs-Vin sweep IS the other inverter's transfer
+* function too -- the second butterfly branch is this same curve mirrored
+* about the y=x diagonal, not a second circuit. sim/lib/snm_extract.py
+* builds that mirror numerically (by composing the sweep with itself,
+* f(f(x)), rather than constructing an explicit inverse table -- see that
+* script's module docstring for why) and reports the minimum inscribed
+* square as the SNM.
+*
+* Read condition: BL held at VDD (precharged, as in a real read access)
+* and WL asserted, so the access transistor loads the storage node exactly
+* as it would during a read -- this is what makes the "read" in "read
+* SNM" real rather than nominal.
+.param VIN_STOP='VDDC'
+
+VVDD VDD 0 DC VDDC
+VSS VSS 0 DC 0
+VIN IN 0 DC 0
+VBL BLLOAD 0 DC VDDC
+VWL WL 0 DC VDDC
+
+XMP OUT IN VDD VDD pfet_03v3 L=0.28u W=0.22u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u' pd='2*int((nf+1)/2) * (W/nf + 0.18u)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W' sa=0 sb=0 sd=0 m=1
+XMN OUT IN VSS VSS nfet_03v3 L=0.28u W=0.36u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u' pd='2*int((nf+1)/2) * (W/nf + 0.18u)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W' sa=0 sb=0 sd=0 m=1
+XMA BLLOAD WL OUT VSS nfet_03v3 L=0.28u W=0.24u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u' pd='2*int((nf+1)/2) * (W/nf + 0.18u)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W' sa=0 sb=0 sd=0 m=1
+
+.dc VIN 0 {VIN_STOP} 0.005
+
+.control
+run
+wrdata read_snm_sweep.txt v(OUT)
+.endc
+.end

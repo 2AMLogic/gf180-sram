@@ -1,0 +1,19 @@
+
+Note: Compatibility modes selected: hs a
+
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+
+Circuit: * read snm testbench -- bitcell_6t, decoupled half-cell fixture.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 727
+Note: Simulation executed from .control section 
+=== corner: ss_25c_3.63v (process=ss temp=25C vdd=3.63V) ===
+=== ngspice exit status: 0 ===
+RESULT: read_snm_lobe_low_v = 1.051086
+RESULT: read_snm_lobe_high_v = 0.493503
+RESULT: read_snm_v = 0.493503

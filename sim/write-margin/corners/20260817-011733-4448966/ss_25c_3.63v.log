@@ -1,0 +1,1120 @@
+
+Note: Compatibility modes selected: hs a
+
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Circuit: * write margin testbench -- bitcell_6t, dut netlist `.include`d directly.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+bl                                        3.63
+blb                                          0
+wl                                           0
+q                                      1.92367
+qb                                     1.92369
+vss                                   0.847542
+vwl#branch                                   0
+vblb#branch                        2.12343e-05
+vbl#branch                        -2.78267e-12
+vvdd#branch                       -2.12343e-05
+
+
+No. of Data Rows : 429
+RESULT: write_trip_voltage_v = 2.178
+RESULT: write_vdd_v = 3.63
+Note: Simulation executed from .control section 
+=== corner: ss_25c_3.63v (process=ss temp=25C vdd=3.63V) ===
+=== ngspice exit status: 0 ===

@@ -6,7 +6,7 @@
     "worktree:return": "./.loom/scripts/worktree-return.sh",
     "check:ci": "npm run lint && npm run test",
     "check:all": "npm run check:ci",
-    "test": "echo 'No testbenches committed yet (see issues #21, #24) - nothing to run.' && exit 0",
+    "test": "echo 'Testbenches are committed under sim/ (issue #24) but require ngspice + the pinned gf180mcu PDK, not assumed present in CI -- see sim/README.md for cold-start invocation. Nothing to run here.' && exit 0",
     "lint": "./scripts/ci/check-evidence-format.sh"
   }
 }
