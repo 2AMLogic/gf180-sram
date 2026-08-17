@@ -21,8 +21,11 @@ happens.
 Verdict rule, per `spec/sram.md`'s Signoff definition ("### Signoff
 definition"):
   - read SNM, hold SNM: PASS iff the recorded value is strictly > 0 V.
-  - write margin (VDD - WTV, computed from the write-margin record's two
-    RESULT lines per corner): PASS iff strictly > 0 V.
+  - write margin (the write trip voltage, WTV, taken directly from the
+    write-margin record's `write_trip_voltage_v` RESULT line per corner --
+    the minimum bit-line/write-driver drive that still flips the cell, per
+    spec/sram.md's "What must be measured, not just asserted"): PASS iff
+    strictly > 0 V.
   - read/write access time: the spec only requires these be *recorded*
     (feeding Liberty views later), not compared against a numeric
     threshold -- so every corner with a valid measured value is marked
@@ -156,8 +159,8 @@ def main() -> int:
 
         rs_v = rs.get("read_snm_v") if isinstance(rs, dict) else None
         hs_v = hs.get("hold_snm_v") if isinstance(hs, dict) else None
-        if isinstance(wm, dict) and "write_vdd_v" in wm and "write_trip_voltage_v" in wm:
-            wm_v: float | None = wm["write_vdd_v"] - wm["write_trip_voltage_v"]
+        if isinstance(wm, dict) and "write_trip_voltage_v" in wm:
+            wm_v: float | None = wm["write_trip_voltage_v"]
         else:
             wm_v = None
         rat_v = rat.get("read_access_time_s") if isinstance(rat, dict) else None
@@ -238,7 +241,7 @@ def main() -> int:
     lines.append("")
     lines.append(f"- Read SNM: `{rel(read_snm_record)}`")
     lines.append(f"- Hold SNM: `{rel(hold_snm_record)}`")
-    lines.append(f"- Write margin: `{rel(write_margin_record)}` (margin computed as `write_vdd_v - write_trip_voltage_v`)")
+    lines.append(f"- Write margin: `{rel(write_margin_record)}` (margin is `write_trip_voltage_v` (WTV) directly -- the minimum write-driver drive that still flips the cell)")
     lines.append(f"- Read access time: `{rel(read_at_record)}`")
     lines.append(f"- Write access time: `{rel(write_at_record)}`")
     lines.append("")
