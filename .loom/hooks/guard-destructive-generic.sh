@@ -3850,6 +3850,31 @@ extract_write_targets() {
             seg = segs[i]
             origlen = length(seg)
             sub(/^[ \t]+/, "", seg)
+            # Leading shell keyword stripped BEFORE the sudo strip (gf180-sram
+            # #67): a one-line compound statement such as
+            # `for f in x; do sed -i "" "s|a|b|" file; done` or
+            # `if true; then sed -i ... file; fi` reaches this loop as a
+            # SEGMENT whose first token is the keyword `do`/`then`/etc, not
+            # the command itself, once qsplit() has already broken the
+            # command on `;`. Every write-idiom branch below keys on
+            # toks[1] (`tee`/`sed`/`cp`/`mv`), so without this strip the
+            # toks[1] of such a segment is literally "do" and the scan
+            # silently finds NOTHING -- a #4178 write-confinement BYPASS: the identical
+            # command with its body on its own line (not one-line) already
+            # denies correctly, since there `do`/`then` is its own separate
+            # (write-idiom-free) segment and the body is a plain segment
+            # whose toks[1] IS the real command. Mirrors the `sudo` strip
+            # immediately below (same technique, same fail-closed contract):
+            # stripping a keyword can only ever EXPOSE more of the real
+            # command to the write-idiom scan, never hide one, so this can
+            # only turn a missed target into a found one (widen a deny),
+            # never the reverse. `{` (brace-group opener, e.g.
+            # `x() { sed -i ... file; }` or `{ sed -i ... file; }`) is
+            # included alongside the do/then/else/elif keywords for the same
+            # reason -- it is a control-flow token, not a command word, and
+            # can lead a one-line segment exactly like `do`/`then` can.
+            sub(/^(do|then|else|elif|\{)[ \t]+/, "", seg)
+            sub(/^[ \t]+/, "", seg)
             sub(/^sudo[ \t]+/, "", seg)
             sub(/^[ \t]+/, "", seg)
             if (seg == "") continue
