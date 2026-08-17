@@ -4426,6 +4426,140 @@ if worktree_isolation_guard_enabled && \
         return 1
     }
 
+    # =========================================================================
+    # pdk_env.sh-sourced, mktemp -d, same-command rm -rf scratch-var exemption
+    # (issue #64 — repo-local, NOT upstreamed; see the file header).
+    #
+    # Narrows the unresolved-`$`-var catastrophic-deny block immediately below
+    # for exactly one shape: this repo's own documented "cold-start ngspice
+    # invocation" (sim/README.md) —
+    #
+    #   scratch=$(mktemp -d) && \
+    #   source sim/lib/pdk_env.sh && \
+    #   cp testbench.spice "$scratch/" && cat > "$scratch/corner.inc" <<EOF
+    #   ...
+    #   EOF
+    #   ngspice -b -o out.log ... ; rm -rf "$scratch"
+    #
+    # Investigation note (recorded so a future reader does not "fix" this the
+    # way the issue text describes): replaying the issue's exact reproduction
+    # against this hook shows the catastrophic deny actually fires on
+    # `$scratch` (assigned via `scratch=$(mktemp -d)`), NOT on
+    # `$GF180_DESIGN_INC`/`$GF180_MODEL_FILE` — those two only ever appear
+    # inside the `cat > ... <<EOF` heredoc BODY, which extract_write_targets()
+    # already masks out via mask_heredoc_bodies_selective() before the scan
+    # ever sees them, so they were never candidate write-target text to begin
+    # with. The exemption below is therefore keyed on the variable that
+    # actually triggers the deny (the mktemp -d scratch var), gated by BOTH
+    # requirements below so it stays the narrow, auditable carve-out the
+    # issue's Safety Note requires — never a general unresolved-var allow:
+    #
+    #   (1) the SAME command sources this repo's own sim/lib/pdk_env.sh (any
+    #       relative/absolute spelling, `source` or `.`) — ties the exemption
+    #       to this repo's fixed, checked-in, small-and-enumerable PDK-env
+    #       script, not an arbitrary mktemp+rm-rf command from anywhere.
+    #   (2) for the SPECIFIC variable at the root of the write target, the
+    #       SAME command contains BOTH a literal `NAME=$(mktemp -d ...)`
+    #       assignment AND a later `rm -rf ... "$NAME"` (or `$NAME`/`"$NAME/"`)
+    #       removing that exact name — i.e. the scratch dir this write target
+    #       lands in is created AND self-cleaned within the one command being
+    #       judged, so it can never collide with or outlive worktree state.
+    #
+    # A command missing either gate — no pdk_env.sh source, or the var isn't a
+    # tracked mktemp -d + same-command rm -rf name — is untouched by this
+    # block and keeps the pre-#64 fail-closed deny (Safety Note: a genuine
+    # out-of-worktree write via an unrelated unresolved var, or a mktemp
+    # scratch write with no pdk_env.sh source, still denies).
+    # =========================================================================
+    _WT_PDK_SCRATCH_VARS_DONE=""
+    _WT_PDK_SCRATCH_VARS_CACHE=""
+    _wt_pdk_scratch_exempt_varnames() {
+        if [[ -n "$_WT_PDK_SCRATCH_VARS_DONE" ]]; then
+            printf '%s' "$_WT_PDK_SCRATCH_VARS_CACHE"
+            return 0
+        fi
+        _WT_PDK_SCRATCH_VARS_DONE=1
+
+        # Gate (1): this repo's own sim/lib/pdk_env.sh sourced somewhere in
+        # the same command (COMMAND_NO_LITERAL_TEXT — heredoc/comment/quoted
+        # -flag-value text already excluded, mirroring the rm-target scan
+        # just below; a bare substring match is deliberately loose — a miss
+        # here only costs the (fail-closed) exemption, never widens a deny).
+        if ! printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
+             grep -qE '(^|[;&|(`]|[[:space:]])(source|\.)[[:space:]]+[^;&|]*pdk_env\.sh'; then
+            return 0
+        fi
+
+        # Gate (2a): every `NAME=$(mktemp ... -d ...)` assignment name in the
+        # command. Requires the LITERAL `$(mktemp ...)` command-substitution
+        # form (per the issue's own proposed refinement) with a standalone
+        # `-d` flag inside the parens — not `-different`/`-dt` or similar.
+        local _wt_names _wt_name
+        _wt_names=$(printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
+            grep -oE '[A-Za-z_][A-Za-z0-9_]*=\$\([^()]*\)' | \
+            while IFS= read -r _asn; do
+                _rhs="${_asn#*=}"
+                case "$_rhs" in
+                    '$('*mktemp*')')
+                        if printf '%s' "$_rhs" | grep -qE '(^|[[:space:]])-d([[:space:]]|$|\))'; then
+                            printf '%s\n' "${_asn%%=*}"
+                        fi
+                        ;;
+                esac
+            done | sort -u)
+        [[ -n "$_wt_names" ]] || return 0
+
+        # Gate (2b): a later `rm -r.../-f...` (has_rf, per extract_rm_targets)
+        # on that EXACT variable, alone (optionally with a trailing `/`) —
+        # `rm -rf "$scratch"` / `rm -rf $scratch/` qualify; `rm -rf
+        # "$scratch/sub"` (a subpath, not the whole scratch dir) does not.
+        local _wt_rmtargets _wt_rmt _wt_rmvar
+        _wt_rmtargets=$(extract_rm_targets "$COMMAND_NO_LITERAL_TEXT")
+        while IFS= read -r _wt_name; do
+            [[ -z "$_wt_name" ]] && continue
+            while IFS= read -r _wt_rmt; do
+                [[ -z "$_wt_rmt" ]] && continue
+                mark_expandable_dollars "$_wt_rmt"
+                _wt_rmvar="${_MARKED_TOKEN%/}"
+                if [[ "$_wt_rmvar" == $'\001'"$_wt_name" ]]; then
+                    _WT_PDK_SCRATCH_VARS_CACHE="$_WT_PDK_SCRATCH_VARS_CACHE $_wt_name"
+                    break
+                fi
+            done <<<"$_wt_rmtargets"
+        done <<<"$_wt_names"
+
+        printf '%s' "$_WT_PDK_SCRATCH_VARS_CACHE"
+    }
+
+    # True if $1 (a bare variable name) passed BOTH gates above for this
+    # command — i.e. is exempt from the unresolved-`$`-var catastrophic deny.
+    _wt_is_pdk_scratch_var() {
+        local _wt_name="$1" _wt_list
+        [[ -n "$_wt_name" ]] || return 1
+        _wt_list=$(_wt_pdk_scratch_exempt_varnames)
+        case " $_wt_list " in
+            *" $_wt_name "*) return 0 ;;
+        esac
+        return 1
+    }
+
+    # Extract the identifier immediately following the FIRST SOH (marked
+    # expandable `$`) in a mark_expandable_dollars()-produced string, handling
+    # both `$NAME...` (-> SOH + NAME) and `${NAME}...` (-> SOH + {NAME}...)
+    # shapes. Empty if $1 carries no SOH or the character(s) right after it
+    # are not a valid identifier start.
+    _wt_first_marked_varname() {
+        local _wt_s="$1" _wt_rest
+        [[ "$_wt_s" == *$'\001'* ]] || return 1
+        _wt_rest="${_wt_s#*$'\001'}"
+        if [[ "$_wt_rest" == '{'* ]]; then
+            _wt_rest="${_wt_rest#\{}"
+            printf '%s' "${_wt_rest%%\}*}"
+        elif [[ "$_wt_rest" =~ ^([A-Za-z_][A-Za-z0-9_]*) ]]; then
+            printf '%s' "${BASH_REMATCH[1]}"
+        fi
+    }
+
     WRITE_TARGETS=$(extract_write_targets "$COMMAND_ASK_SCAN" "$CWD" | head -20)
     while IFS=$'\037' read -r _wcwd _wtarget; do
         [[ -z "$_wtarget" ]] && continue
@@ -4528,6 +4662,13 @@ if worktree_isolation_guard_enabled && \
                 # (`/$X`, `/$X/evil`, whose runtime value picks the top-level
                 # directory — the main checkout's own included).
                 if [[ "$_wmarked" == $'\001'* || "$_wmarked" == /$'\001'* ]]; then
+                    # #64: pdk_env.sh-sourced, mktemp -d, same-command
+                    # rm -rf scratch var — narrow exemption, see the helper
+                    # functions' doc comment above for the two required gates.
+                    _wscratchvar=$(_wt_first_marked_varname "$_wmarked")
+                    if [[ -n "$_wscratchvar" ]] && _wt_is_pdk_scratch_var "$_wscratchvar"; then
+                        continue
+                    fi
                     if _wt_isolation_in_play; then
                         deny "BLOCKED: Bash-tool write target '${_wtarget}' is an unexpanded shell variable from the path root down, so this guard cannot tell where the write lands — it may resolve to an absolute path inside the main repository checkout ('${_WT_MAIN_ROOT}'), and a Loom-managed worktree exists in this repository. Unresolvable write targets fail closed (#4921). Write to an explicit literal path — inside your issue worktree (.loom/worktrees/issue-<N>) for repo files, or a spelled-out /tmp path for scratch. (#4178)" "worktree-write-confinement-unresolved-var"
                     fi
@@ -4559,7 +4700,16 @@ if worktree_isolation_guard_enabled && \
                         # (`> /$A/evil`, `> /tmp/../$A/evil`), whose runtime
                         # value picks a top-level directory, the main
                         # checkout's own included. Same verdict as (1).
-                        if _wt_isolation_in_play; then
+                        #
+                        # #64: same narrow scratch-var exemption as (1) above,
+                        # tested against the joined effective path (_weff) so
+                        # it still fires when the variable reaches this branch
+                        # via a `cd "$scratch"`-derived cwd rather than as the
+                        # write target's own literal first character.
+                        _wscratchvar=$(_wt_first_marked_varname "$_weff")
+                        if [[ -n "$_wscratchvar" ]] && _wt_is_pdk_scratch_var "$_wscratchvar"; then
+                            :
+                        elif _wt_isolation_in_play; then
                             deny "BLOCKED: Bash-tool write target '${_wtarget}' has an unexpanded shell variable as its first real path component, so this guard cannot tell where the write lands — it may resolve inside the main repository checkout ('${_WT_MAIN_ROOT}'), and a Loom-managed worktree exists in this repository. Unresolvable write targets fail closed (#4921). Write to an explicit literal path — inside your issue worktree (.loom/worktrees/issue-<N>) for repo files, or a spelled-out /tmp path for scratch. (#4178)" "worktree-write-confinement-unresolved-var"
                         fi
                     elif _wt_in_protected_area "$_wknown"; then
