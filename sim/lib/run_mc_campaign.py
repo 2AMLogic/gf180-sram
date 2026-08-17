@@ -107,7 +107,7 @@ Usage:
 
     sim/lib/run_mc_campaign.py --experiment write-margin \\
         --testbench sim/write-margin/testbench/tb_write_margin.spice \\
-        --mode direct --key write_trip_voltage_v --margin-vdd-key write_vdd_v \\
+        --mode direct --key write_trip_voltage_v \\
         --corner tt:25:3.30 --corner tt:-40:2.97 \\
         --claim "spec/sram.md Characterization -- write margin (Monte Carlo)" \\
         --n 100 --n-control 8 --seed 20260817
@@ -184,7 +184,7 @@ def derive_seed(base_seed: int, corner_id: str, kind: str, sample_index: int) ->
     sample_index), never Python's salted built-in hash() -- same
     reproducibility bar docs/cli/sim.md's own seed contract states
     (`2AMLogic/klayout-tools`). `kind` is "mm" (mismatch) or "ctrl"
-    (deterministic negative control) so the two draws never collide even at
+    (determinism control) so the two draws never collide even at
     the same sample_index.
     """
     digest = hashlib.sha256(f"{base_seed}:{corner_id}:{kind}:{sample_index}".encode()).hexdigest()
@@ -529,7 +529,6 @@ def render_record(summary: dict, sample_doc: dict, json_report_text: str, text_r
         f"  --experiment {args.experiment} \\",
         f"  --testbench {prov['testbench']} \\",
         f"  --mode '{args.mode}' --key {args.key} \\",
-        *([f"  --margin-vdd-key {args.margin_vdd_key} \\"] if args.margin_vdd_key else []),
         *[f"  --corner {c} \\" for c in args.corners],
         f"  --n {args.n} --n-control {args.n_control} --n-nc {args.n_nc} \\",
         f"  --nc-mismatch-scale {args.nc_mismatch_scale:g}"
@@ -558,10 +557,6 @@ def main() -> int:
         help='"direct" (see sim/lib/run_corner_sweep.sh), "snm:<datafile>:<label>" (single-curve, self-composed -- not recommended for MC, see module docstring), or "snm-pair:<datafile>:<label>" (two independent half-cell instances per sample -- used for read/hold SNM MC)',
     )
     ap.add_argument("--key", required=True, help="RESULT key to extract as this campaign's measurement, e.g. read_snm_v")
-    ap.add_argument(
-        "--margin-vdd-key", default=None,
-        help="RESULT key holding this corner's VDD (e.g. write_vdd_v); when given, the recorded measurement is (that value - --key's value) -- spec/sram.md's margin = VDD - WTV definition for write margin, rather than the raw trip-voltage key itself -- and the output measurement name gains a '_margin' suffix.",
-    )
     ap.add_argument("--claim", required=True, help="free-text spec/sram.md claim this record substantiates")
     ap.add_argument(
         "--corner",
@@ -655,19 +650,19 @@ def main() -> int:
     per_corner_summary = []
 
     def extract_value(results: dict[str, float]) -> float | None:
-        """Raw --key value, or (--margin-vdd-key value - --key value) when
-        --margin-vdd-key is given (spec/sram.md's margin = VDD - WTV
-        definition for write margin) -- None if a needed key is missing.
+        """The raw --key value as reported by the testbench -- None when the
+        key is missing. Deliberately no VDD-relative transform: spec/sram.md
+        defines write margin as the *minimum* write-driver drive that flips
+        the cell (i.e. WTV itself), and a `VDD - WTV` recasting would invert
+        the direction of merit -- an unwritable draw (which this harness
+        reports as a negative WTV) would score as the *largest* margin in the
+        distribution and inflate yield/Cpk instead of counting against them.
         """
         if args.key not in results:
             return None
-        if args.margin_vdd_key is None:
-            return results[args.key]
-        if args.margin_vdd_key not in results:
-            return None
-        return results[args.margin_vdd_key] - results[args.key]
+        return results[args.key]
 
-    measurement_key = args.key if args.margin_vdd_key is None else f"{args.key}_margin"
+    measurement_key = args.key
 
     def collect(raw, seed_labels, heading: str) -> tuple[list[float], int, list[str]]:
         """Turn one batch's raw per-sample results into (values, errored,
