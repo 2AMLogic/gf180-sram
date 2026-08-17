@@ -3495,6 +3495,10 @@ extract_rm_targets() {
 #     are file targets. Exactly one non-flag argument is genuinely ambiguous
 #     (could be an -f scriptfile with no positional file yet) and is SKIPPED
 #     rather than guessed — allow on uncertainty, never deny on uncertainty.
+#     The BSD/macOS spelling `sed -i '' <script> <file>` passes the backup
+#     suffix as a SEPARATE argument; an EMPTY suffix directly after a
+#     standalone `-i` is consumed as such rather than counted as the script,
+#     so the script is not shifted into the file-target list (gf180-sram #63).
 #   - `cp` / `mv ... <dest>`     — the LAST non-flag argument (the common
 #     `cp/mv src... dest` shape).
 #
@@ -3688,6 +3692,89 @@ extract_write_targets() {
         }
         varmap[vname] = vval
     }
+    # --- `for NAME in <words>` loop-variable binding (gf180-sram #63) --------
+    #
+    # A `for` loop word list is the ONE other place (besides a `NAME=value`
+    # assignment) where a write-idiom token spelled `$f` / `"$f"` has its set
+    # of possible values written out LITERALLY in the same command:
+    #
+    #   cd <worktree>
+    #   for f in sim/a.spice sim/b.spice; do
+    #       sed -i "" "s|x|y|" "$f"
+    #   done
+    #
+    # Without this binding, `"$f"` reached the shell layer as an unresolvable
+    # `$` token and hit the #4921 fail-closed deny ("unexpanded shell variable
+    # from the path root down") no matter where the write actually lands --
+    # so an ordinary in-worktree `sim/` maintenance loop was denied twice in a
+    # row with no path forward for the agent.
+    #
+    # loop_word_confined() is the safety valve, and it is deliberately much
+    # stricter than record_assign(): a word only counts when it is a LITERAL
+    # RELATIVE path that cannot leave the directory the write resolves
+    # against -- no leading "/", no leading "~", no "$", no glob/backquote/
+    # backslash, and no ".." component. Any other list shape (an absolute
+    # path, a traversal, a nested expansion, a glob) poisons the name to the
+    # unresolvable sentinel "" so the token keeps its RAW spelling and the
+    # existing fail-closed deny fires exactly as today. That is what keeps
+    # this from becoming a #4178 bypass: the only tokens it can ever resolve
+    # are ones whose runtime value is provably a subpath of the cwd the guard
+    # already judges for a literal relative target.
+    #
+    # Only the FIRST list word is bound, not all of them. Every accepted word
+    # is ".."-free and relative, so all of them land under the SAME cwd and
+    # are confinement-equivalent -- emitting one target per word would change
+    # nothing about the verdict while inflating the target stream against the
+    # 20-target cap the caller applies, which would let a genuinely dangerous
+    # later target be truncated out of the scan.
+    function loop_word_confined(w,   c1) {
+        if (w == "") return 0
+        c1 = substr(w, 1, 1)
+        if (c1 == "/" || c1 == "~" || c1 == "-") return 0
+        if (index(w, "$") > 0) return 0
+        if (index(w, "*") > 0 || index(w, "?") > 0 || index(w, "[") > 0) return 0
+        if (index(w, "`") > 0) return 0
+        if (index(w, "\\") > 0) return 0
+        if (w == "..") return 0
+        if (w ~ /^\.\.\//) return 0
+        if (w ~ /\/\.\.\//) return 0
+        if (w ~ /\/\.\.$/) return 0
+        return 1
+    }
+    # Resolve a WHOLE-token loop-variable reference (`$f`, `${f}`, `"$f"`,
+    # `"${f}"`) to its bound value. A SINGLE-quoted spelling is not a
+    # variable reference at all to the shell, so it is left alone -- same
+    # literal-vs-expandable distinction mark_expandable_dollars() makes. An
+    # explicit `NAME=value` assignment always wins (including its AMBIG
+    # poison): a name the assignment scan already refused to resolve must not
+    # be resolved here by a second, independent mechanism.
+    function resolve_loop(tok,   inner, ilen, vname) {
+        inner = tok
+        ilen = length(inner)
+        if (ilen >= 2 && substr(inner, 1, 1) == DQ && substr(inner, ilen, 1) == DQ) {
+            inner = substr(inner, 2, ilen - 2)
+        }
+        if (substr(inner, 1, 1) != "$") return tok
+        if (match(inner, /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/)) {
+            vname = substr(inner, 3, RLENGTH - 3)
+        } else if (match(inner, /^\$[A-Za-z_][A-Za-z0-9_]*$/)) {
+            vname = substr(inner, 2, RLENGTH - 1)
+        } else {
+            return tok
+        }
+        if (vname in varmap) return tok
+        if (!(vname in loopmap)) return tok
+        if (loopmap[vname] == "") return tok
+        return loopmap[vname]
+    }
+    # Single entry point every write-target print site uses: same-command
+    # assignment resolution first (#4881), then the loop-variable binding.
+    # Both return the token UNCHANGED when they cannot prove a value, so an
+    # unresolvable target still reaches the shell layer raw and still fails
+    # closed.
+    function resolve_wtarget(tok) {
+        return resolve_loop(resolve_var(tok))
+    }
     BEGIN {
         SEP = sprintf("%c", 31)
         DQ = sprintf("%c", 34)
@@ -3830,6 +3917,36 @@ extract_write_targets() {
             # ORIGINAL toks[] (unmasked) once a real operator is confirmed.
             mseg = substr(gsegs[i], stripped + 1)
             mm = split(mseg, mtoks, /[ \t]+/)
+
+            # `for NAME in w1 w2 ...` — record the loop binding, then FALL
+            # THROUGH (no `continue`, unlike the `cd` branch below): the
+            # redirection scan at the bottom of this loop must still see the
+            # segment, so a `for ... > file` shape cannot lose a target by
+            # being recognized here. The tee/sed/cp/mv branches key on
+            # toks[1] and simply do not match "for".
+            if (toks[1] == "for" && m >= 4 && toks[3] == "in") {
+                lvname = toks[2]
+                lvfirst = ""
+                lvbad = 0
+                for (j = 4; j <= m; j++) {
+                    if (toks[j] == "") continue
+                    # qsplit() already segments on `;`, so a trailing `do`
+                    # normally lands in the NEXT segment; break on it anyway
+                    # rather than treating a keyword as a path word.
+                    if (toks[j] == "do" || toks[j] == ";") break
+                    lvword = strip_cd_quoting(toks[j])
+                    if (!loop_word_confined(lvword)) { lvbad = 1; break }
+                    if (lvfirst == "") lvfirst = lvword
+                }
+                if (lvbad) lvfirst = ""
+                if ((lvname in loopmap) && loopmap[lvname] != lvfirst) {
+                    # Same name bound by two different loops in one command —
+                    # poison it rather than pick one (mirrors record_assign).
+                    loopmap[lvname] = ""
+                } else {
+                    loopmap[lvname] = lvfirst
+                }
+            }
 
             if (toks[1] == "cd") {
                 if (m >= 2 && toks[2] != "" && toks[2] != "-") {
@@ -3983,17 +4100,47 @@ extract_write_targets() {
                         if (toks[j] == "<<" || toks[j] == "<<-" || toks[j] == "<<<") j++
                         continue
                     }
-                    print curcwd SEP resolve_var(toks[j])
+                    print curcwd SEP resolve_wtarget(toks[j])
                 }
             } else if (toks[1] == "sed") {
                 has_i = 0
                 nf = 0
+                ipos = 0
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (toks[j] ~ /^-i/) has_i = 1
+                    if (toks[j] ~ /^-i/) {
+                        has_i = 1
+                        # BSD/macOS `sed -i <suffix>` takes the backup suffix
+                        # as a SEPARATE argument; GNU sed only accepts it
+                        # ATTACHED (`-i.bak`). Remember where a STANDALONE
+                        # `-i` sat so the suffix immediately after it is not
+                        # mistaken for an operand (gf180-sram #63).
+                        if (toks[j] == "-i") ipos = j
+                    }
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
+                    # The EMPTY suffix of the BSD in-place spelling
+                    # (`sed -i "" <script> <file>`) shifted the operand list
+                    # by one, so the first non-flag argument -- assumed below
+                    # to be the sed SCRIPT -- was the suffix, and the script
+                    # itself was scanned as a FILE target. That phantom
+                    # target inherits whatever `..` segments the script text
+                    # happens to contain, so an ordinary in-worktree
+                    # `.include` path rewrite -- whose script text carries a
+                    # relative `../../../design/...` -- resolved clean out of
+                    # the acting worktree and into the main checkout, denying
+                    # a write that never leaves the worktree (gf180-sram #63).
+                    #
+                    # Consumed ONLY when it is an EMPTY quoted string sitting
+                    # IMMEDIATELY after a standalone `-i`: no real sed script
+                    # and no real filename is the empty string, and the exact
+                    # adjacency requirement is what BSD sed itself enforces.
+                    # Any other operand -- and the GNU spellings `-i.bak` /
+                    # `sed -i -e ... file` -- is untouched, so the FILE
+                    # operands this scan exists to find are unaffected in
+                    # every spelling.
+                    if (j == ipos + 1 && (toks[j] == SQ SQ || toks[j] == DQ DQ)) continue
                     # Same heredoc/herestring exclusion as the `tee` branch
                     # above (#5232) -- a trailing `sed -i ... file <<EOF` (or
                     # `... <<< word`) must not misread the redirection
@@ -4007,7 +4154,7 @@ extract_write_targets() {
                     nfargs[nf] = toks[j]
                 }
                 if (has_i && nf >= 2) {
-                    for (j = 2; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
+                    for (j = 2; j <= nf; j++) print curcwd SEP resolve_wtarget(nfargs[j])
                 }
             } else if (toks[1] == "cp" || toks[1] == "mv") {
                 nf = 0
@@ -4029,7 +4176,7 @@ extract_write_targets() {
                     nf++
                     nfargs[nf] = toks[j]
                 }
-                if (nf >= 2) print curcwd SEP resolve_var(nfargs[nf])
+                if (nf >= 2) print curcwd SEP resolve_wtarget(nfargs[nf])
             }
 
             # >/>>  redirection — token-boundary detection only (never a
@@ -4047,7 +4194,7 @@ extract_write_targets() {
                     # Bare operator token. Dup-to-fd (`> &1`) is recognized by
                     # the NEXT token starting with `&` and excluded.
                     if (j + 1 <= m && toks[j+1] != "" && mtoks[j+1] !~ /^&/) {
-                        print curcwd SEP resolve_var(toks[j+1])
+                        print curcwd SEP resolve_wtarget(toks[j+1])
                     }
                     continue
                 }
@@ -4055,7 +4202,7 @@ extract_write_targets() {
                     # Attached form (`>file`, `2>file`, `>>file`).
                     op = toks[j]
                     sub(/^[0-9]*>>?/, "", op)
-                    if (op != "") print curcwd SEP resolve_var(op)
+                    if (op != "") print curcwd SEP resolve_wtarget(op)
                 }
             }
         }
