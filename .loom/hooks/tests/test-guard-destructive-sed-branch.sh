@@ -28,6 +28,16 @@
 #     which was already correct, is unchanged
 #   - a GENUINE out-of-worktree write via the real file argument (not a
 #     script-text fragment) still DENIES -- fail-closed is preserved
+#   - the #49-review regression: a CRAFTED `sed -i "" <out-of-worktree-path>
+#     <innocuous-file>` has the SAME token count and flag shape as the BSD
+#     idiom above, but its second non-flag argument is a real file operand
+#     under GNU semantics -- widening the skip on position/count alone turned
+#     that into a silent worktree-confinement BYPASS. It must DENY under every
+#     sed flavor (cases J/K/L/M below)
+#
+# Several cases pin `LOOM_SED_FLAVOR` so the expected verdict does not depend
+# on whether the host running the suite has GNU or BSD sed; case N exercises
+# the unpinned autodetect path against the host's own sed.
 #
 # The hook under test is copied into an isolated temp git tree (mirroring
 # the .loom/worktrees/issue-<N> layout this guard inspects) so REPO_ROOT /
@@ -81,14 +91,26 @@ echo "old text" > "$WT/README.md"
 
 # Run the hook with COMMAND as the Bash tool_input.command and CWD as the
 # acting session's cwd (the managed worktree, the canonical builder setup).
-# Prints "<exit_code>|<stdout>".
+# Optional third argument pins LOOM_SED_FLAVOR ("gnu"/"bsd") so a case's
+# expected verdict does not depend on the host's own sed; omit it to exercise
+# the hook's autodetection. Prints "<exit_code>|<stdout>".
 run_hook() {
-    local cmd="$1" cwd="$2"
+    local cmd="$1" cwd="$2" flavor="${3:-}"
     local exit_code=0 output
     output=$(jq -n --arg cmd "$cmd" --arg cwd "$cwd" \
         '{tool_name:"Bash", tool_input:{command:$cmd}, cwd:$cwd}' \
-        | bash "$HOOK" 2>/dev/null) || exit_code=$?
+        | env ${flavor:+LOOM_SED_FLAVOR="$flavor"} bash "$HOOK" 2>/dev/null) || exit_code=$?
     printf '%s|%s' "$exit_code" "$output"
+}
+
+# What convention the host's own sed uses -- mirrors detect_sed_inplace_flavor()
+# in the hook, used only by case (N) to state that case's expectation.
+host_sed_flavor() {
+    if command sed --version </dev/null 2>&1 | head -n 1 | grep -q "GNU sed"; then
+        printf 'gnu'
+    else
+        printf 'bsd'
+    fi
 }
 
 assert_allow() {
@@ -124,24 +146,24 @@ echo "=== guard-destructive-generic.sh sed-branch tests (#49) ==="
 # (A) Exact minimal reproduction from #49: BSD `-i ""`, script contains a
 # space AND a `../`-shaped substring, real target is a literal in-worktree
 # file. Must now ALLOW (was falsely DENIED before the fix).
-result=$(run_hook 'sed -i "" "s|old text|../../../etc/passwd|" README.md' "$WT")
+result=$(run_hook 'sed -i "" "s|old text|../../../etc/passwd|" README.md' "$WT" bsd)
 assert_allow "(A) minimal repro: BSD -i \"\", space+../ in script, real in-worktree target -> allow" "$result"
 
 # (B) Exact real-world SPICE .include rewrite pattern from the two logged
 # denials (2026-08-17T01:16:49Z / 01:45:51Z, Builder work on issue #24).
-result=$(run_hook "sed -i '' \"s|\\.include '\\.\\./\\.\\./\\.\\./design/netlist/bitcell_6t\\.spice'|.include '@@REPO_ROOT@@/design/netlist/bitcell_6t.spice'|\" README.md" "$WT")
+result=$(run_hook "sed -i '' \"s|\\.include '\\.\\./\\.\\./\\.\\./design/netlist/bitcell_6t\\.spice'|.include '@@REPO_ROOT@@/design/netlist/bitcell_6t.spice'|\" README.md" "$WT" bsd)
 assert_allow "(B) real-world SPICE .include rewrite pattern -> allow" "$result"
 
 # (C) Control: BSD -i \"\" with a ../-shaped substring but NO space in the
 # script. Must ALLOW (this was already a latent false-deny too -- the #49
 # report's own control-test claim about this shape not denying does not hold
 # against direct hook replay; both shapes are fixed by the same change).
-result=$(run_hook 'sed -i "" "s|old|../../../etc/passwd|" README.md' "$WT")
+result=$(run_hook 'sed -i "" "s|old|../../../etc/passwd|" README.md' "$WT" bsd)
 assert_allow "(C) BSD -i \"\" script with ../ but no space -> allow" "$result"
 
 # (D) Control: BSD -i \"\" with a space but no ../ in the script. Was already
 # allowed; must stay allowed (no regression).
-result=$(run_hook 'sed -i "" "s|old text|newtext|" README.md' "$WT")
+result=$(run_hook 'sed -i "" "s|old text|newtext|" README.md' "$WT" bsd)
 assert_allow "(D) BSD -i \"\" script with space but no ../ -> allow (unchanged)" "$result"
 
 # (E) Control: GNU-style attached -i (no separate extension argument). Was
@@ -178,6 +200,56 @@ if [[ "$reason" == *"etc/passwd"* && "$reason" != *"s|a|b|"* ]]; then
 else
     fail "(I) deny reason names the real file target, not the sed script text (got: $reason)"
 fi
+
+# --- #49 review regression: the widened skip must not become a bypass -------
+#
+# `sed -i "" X Y` is token-for-token indistinguishable from the BSD idiom in
+# (A)-(D): a bare `-i`, a quote-empty next token, and three non-flag
+# arguments. But under GNU semantics `-i` takes NO separate extension, so the
+# quote-empty token is the (no-op) SCRIPT and BOTH X and Y are real file
+# operands that sed opens and rewrites in place. The first cut of this fix
+# widened the skip on that token COUNT/POSITION alone, so an X pointing
+# outside the worktree was dropped from the scan entirely -- a command `main`
+# correctly denied started sailing through silently. The verdict must not
+# depend on which sed the host happens to have, so (J)/(K) pin both.
+
+# (J) The exact reported repro, with the crafted out-of-worktree path in the
+# nfargs[2] ("script") slot and an innocuous real file after it, on a BSD
+# host. The path is not SHAPED like a sed script, so it stays a candidate.
+result=$(run_hook 'sed -i "" "../../../etc/passwd" README.md' "$WT" bsd)
+assert_deny "(J) crafted 3-arg -i \"\" <out-of-worktree path> <real file>, BSD host -> deny" "$result"
+
+# (K) Same command on a GNU host, where nfargs[2] is unambiguously a real file
+# operand and the skip must never widen at all.
+result=$(run_hook 'sed -i "" "../../../etc/passwd" README.md' "$WT" gnu)
+assert_deny "(K) crafted 3-arg -i \"\" <out-of-worktree path> <real file>, GNU host -> deny" "$result"
+
+# (L) Same shape, unquoted path token -- quoting must not change the verdict.
+result=$(run_hook 'sed -i "" ../../../etc/passwd README.md' "$WT" bsd)
+assert_deny "(L) crafted 3-arg -i \"\" with UNQUOTED out-of-worktree path -> deny" "$result"
+
+# (M) The BSD idiom itself, evaluated on a GNU host: there the script-looking
+# token really is a file operand, so ambiguity must resolve toward the deny,
+# never toward the allow (A) grants on a BSD host.
+result=$(run_hook 'sed -i "" "s|old text|../../../etc/passwd|" README.md' "$WT" gnu)
+assert_deny "(M) BSD idiom on a GNU host -> deny (ambiguity never widens an allow)" "$result"
+
+# (N) Autodetect path (no LOOM_SED_FLAVOR pinned): the hook asks the host's
+# own sed, so the #49 idiom is allowed on a BSD host and denied on a GNU one.
+# This is what wires detect_sed_inplace_flavor() into the decision at all.
+result=$(run_hook 'sed -i "" "s|old text|../../../etc/passwd|" README.md' "$WT")
+if [[ "$(host_sed_flavor)" == "gnu" ]]; then
+    assert_deny "(N) autodetect on a GNU host: #49 idiom -> deny" "$result"
+else
+    assert_allow "(N) autodetect on a BSD host: #49 idiom -> allow" "$result"
+fi
+
+# (O) A script-SHAPED token whose trailing `w` flag makes sed itself write to
+# a file is NOT a plain in-memory substitution: it must stay in the scan so
+# its out-of-worktree operand is still judged, rather than being skipped as
+# inert script text.
+result=$(run_hook 'sed -i "" "s|a|b|w ../../../etc/passwd" README.md' "$WT" bsd)
+assert_deny "(O) sed script with a file-writing w flag is not skipped -> deny" "$result"
 
 echo
 echo "=== Results: $PASS/$TOTAL passed ==="
