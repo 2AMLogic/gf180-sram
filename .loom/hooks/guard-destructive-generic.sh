@@ -3688,6 +3688,22 @@ extract_write_targets() {
         }
         varmap[vname] = vval
     }
+    # is_quoted_empty(tok) -- true when tok is exactly a matched pair of empty
+    # quotes (two double-quote characters, or two single-quote characters,
+    # back to back with nothing between them), never true for anything else
+    # (including the unquoted empty string, which this scanner own
+    # toks[j] == "" check already treats as "no token" and skips before this
+    # is ever reached). Used ONLY by the sed branch below (#49) to recognize
+    # BSD/macOS sed mandatory, separate -i EXTENSION argument in its
+    # overwhelmingly common "no backup" spelling -- never to reinterpret any
+    # other token shape.
+    function is_quoted_empty(tok,   n, c1, c2) {
+        n = length(tok)
+        if (n != 2) return 0
+        c1 = substr(tok, 1, 1)
+        c2 = substr(tok, 2, 1)
+        return (c1 == DQ && c2 == DQ) || (c1 == SQ && c2 == SQ)
+    }
     BEGIN {
         SEP = sprintf("%c", 31)
         DQ = sprintf("%c", 34)
@@ -3987,11 +4003,13 @@ extract_write_targets() {
                 }
             } else if (toks[1] == "sed") {
                 has_i = 0
+                bare_i = 0
                 nf = 0
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (toks[j] ~ /^-i/) has_i = 1
+                    if (toks[j] == "-i") { has_i = 1; bare_i = 1 }
+                    else if (toks[j] ~ /^-i/) has_i = 1
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
                     # Same heredoc/herestring exclusion as the `tee` branch
@@ -4006,8 +4024,35 @@ extract_write_targets() {
                     nf++
                     nfargs[nf] = toks[j]
                 }
-                if (has_i && nf >= 2) {
-                    for (j = 2; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
+                # BSD/macOS sed -i EXTENSION takes the extension as a
+                # SEPARATE argument (unlike GNU attached-only -i[SUFFIX]),
+                # almost always spelled as the empty-string "no backup" idiom
+                # -i "" (or the single-quoted spelling) -- the exact idiom
+                # this repo own SPICE testbench-editing pattern uses (#49).
+                # The stock GNU assumption below (nfargs[1] is the sed
+                # SCRIPT, real file targets start at nfargs[2]) then
+                # misidentifies nfargs[1] as the script when it is really
+                # that extension, so the ACTUAL script (nfargs[2]) leaks
+                # through as a phantom write-target candidate -- and once
+                # resolved against curcwd, any ../-shaped substring inside
+                # the script text can walk the candidate outside the
+                # worktree and produce a false DENY naming a garbled script
+                # fragment instead of the real, safe target (the reported
+                # bug).
+                #
+                # skip_first only ever WIDENS from 1 to 2 -- it can never
+                # narrow the existing skip -- and only fires when there are
+                # at least 3 non-flag arguments (extension, script, >=1 real
+                # file target), so a 1- or 2-arg `sed -i ...` invocation keeps
+                # its original interpretation untouched. This can only ever
+                # DROP a phantom script-text candidate from the scan, never a
+                # genuine file target: the real file argument(s) always sit
+                # AFTER the script in both the GNU and BSD calling
+                # conventions, so nothing past skip_first is ever skipped.
+                skip_first = 1
+                if (bare_i && nf >= 3 && is_quoted_empty(nfargs[1])) skip_first = 2
+                if (has_i && nf > skip_first) {
+                    for (j = skip_first + 1; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
                 }
             } else if (toks[1] == "cp" || toks[1] == "mv") {
                 nf = 0
