@@ -63,7 +63,7 @@ This document derives an explicit **per-corner, per-metric PASS/FAIL verdict** f
 - Read access time: 27/27 RECORDED
 - Write access time: 27/27 RECORDED
 
-**Overall signoff (read SNM + hold SNM + write margin, all 9 corners, per `spec/sram.md`'s Signoff definition): PASS.**
+**Overall signoff (read SNM + hold SNM + write margin, all 27 corner points, per `spec/sram.md`'s Signoff definition): PASS.**
 
-Footnote: issue #47 notes the write-margin testbench records the write trip voltage (WTV) at the first *failing* sweep step rather than the last *succeeding* one, a quantization of one sweep step (~0.08-0.09 V at these corners, ~2.5% of VDD). Non-blocking here -- it shifts the reported write margin by at most that amount against margins of 1.19-1.54 V above, orders of magnitude of headroom, per #47's own impact assessment.
+Footnote on write-margin resolution: issue #47 (WTV recorded at the first *failing* sweep step rather than the last *succeeding* one) was fixed in #54 and closed; the write-margin record cited above is a post-fix re-run, so that off-by-one does not apply to any number in this table. What remains is the search's inherent resolution: `tb_write_margin.spice` sweeps the trip voltage on a `VDD/40` grid (~0.074 V at 2.97 V, ~0.091 V at 3.63 V), so the true trip point lies within one step above each recorded WTV and every write margin above is optimistic by at most one step. That bound is ~17x smaller than the smallest margin in the table, so no corner's PASS verdict turns on it.
 
