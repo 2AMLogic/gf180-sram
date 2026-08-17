@@ -14,3 +14,10 @@ Ratified spec and decision records for this block.
   corrects `sram.md`'s "Corner set" arithmetic (`3 × 3 × 3` is 27, not 9).
   A label-only correction — the ratified corner set, the Signoff definition,
   and every committed record are unchanged.
+- [`kb-scale-integration.md`](kb-scale-integration.md) — resolves #73:
+  informational (not a change to the ratified spec). States the PDK's
+  fixed-macro ceiling (`512×8` = 0.5 KB, measured from the shipped LEF),
+  what this repo's own custom macro does and does not offer above it, and a
+  KB-scale integrator's path (tiled foundry macros vs. DFFRAM vs. OpenRAM,
+  with area/timing evidence tiers labelled and the mux/bank-select cost
+  flagged as unmeasured). Also notes the open kit's lack of dense NVM.
