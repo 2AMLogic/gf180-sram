@@ -13,7 +13,7 @@ append-only evidence."
 |---|---|---|---|
 | `sim/read-snm/` | `testbench/tb_read_snm.spice` | Read SNM (butterfly-curve square side, cell held under a read access: BL precharged, WL asserted) | Device-level replica of one `bitcell_6t` half-cell (see "Why two of the testbenches don't `.include` the DUT" below) |
 | `sim/hold-snm/` | `testbench/tb_hold_snm.spice` | Hold SNM (same fixture, WL deasserted -- standby/retention condition) | Device-level replica, as above |
-| `sim/write-margin/` | `testbench/tb_write_margin.spice` | Write margin, as write trip voltage (WTV): the weakest "0" a write driver can present on the losing bit line and still flip the cell within a fixed pulse width. Margin = VDD − WTV. | `.include`s `design/netlist/bitcell_6t.spice` directly |
+| `sim/write-margin/` | `testbench/tb_write_margin.spice` | Write margin, as write trip voltage (WTV): the weakest "0" a write driver can present on the losing bit line and still flip the cell within a fixed pulse width. WTV **is** the recorded margin — a real write driver presents 0 V, so WTV is exactly its head-room before the write stops working, and `spec/sram.md`'s "positive margin at every corner" applies to it verbatim. (`sim/signoff-summary.md` currently derives it the other way round, as `VDD - WTV`; both are positive at every corner so no verdict differs, but the definition still needs settling once — tracked as #59.) | `.include`s `design/netlist/bitcell_6t.spice` directly |
 | `sim/access-time/` | `testbench/tb_read_access_time.spice` | Read access time: WL assertion to a defined bit-line sensing differential (3% of VDD) developing on the precharged-then-floated bit-line pair -- see "Read access time is a proxy metric" below | `.include`s `design/netlist/bitcell_6t.spice` directly |
 | `sim/access-time/` | `testbench/tb_write_access_time.spice` | Write access time: WL assertion to the internal storage node `Q` crossing VDD/2 | `.include`s `design/netlist/bitcell_6t.spice` directly |
 
@@ -229,9 +229,11 @@ carries:
   this record via **Supersedes**).
 - **Corner matrix run** -- always the full 9-point matrix (see above); a
   record that ever runs a subset must say why, per this convention.
-- **Statistical convention** -- `N/A` for every testbench here (a
-  corner-matrix claim, not a Monte Carlo/mismatch distribution claim; no
-  such claim exists yet in this repo).
+- **Statistical convention** -- `N/A` for every record under `corners/` (a
+  corner-matrix claim, not a Monte Carlo/mismatch distribution claim). The
+  Monte Carlo/mismatch claims live in their own record tree under
+  `sim/<experiment>/mc/` and carry their own convention field -- see
+  "Monte Carlo / yield evidence records" below.
 - **Result** -- every corner's `RESULT:` line(s) verbatim, plus an overall
   `recorded`/`OPEN` rollup (`OPEN` for any corner that produced no valid
   `RESULT:` line -- see "Append-only rule" below for what happens to that
@@ -255,6 +257,205 @@ in `sim/`, not silently dropped from the corner set"). A fix (to the
 testbench, the bitcell sizing, or the corner itself) gets verified by a
 **new** record, referencing the one it supersedes.
 
+## Monte Carlo / yield evidence records
+
+The corner records above answer "does this sizing have margin at every
+ratified PVT point?" They cannot answer "does it have margin on a part that
+actually came out of a fab?", because a corner matrix moves every device
+together and real silicon does not: the two halves of a 6T cell draw
+*independent* threshold and current-factor offsets, and inter-inverter
+mismatch is the dominant real failure mode for both SNM and write margin.
+That is a statistical claim, and per klayout-tools'
+`docs/design-evidence-tiers.md` item 6 a statistical claim needs Monte Carlo
+evidence with a recorded seed, a sample count, a deterministic negative
+control, and results **combined with — not instead of —** process corners,
+published as a `klt yield` JSON report.
+
+Those records live in a parallel tree beside the corner records, never
+replacing them:
+
+```
+sim/
+  <experiment-slug>/
+    corners/ records/ ...        # the deterministic 9-corner evidence above
+    mc/
+      samples/
+        <record-id>.json         # the klt yield sample-set document: every
+                                 #   individual draw, per corner, plus the
+                                 #   negative control's own draws
+      yield-reports/
+        <record-id>.json         # `klt yield --format json` -- the machine-
+                                 #   checkable artifact item 6 asks for
+        <record-id>.txt          # the same report, `--format text`
+      raw-logs/
+        <record-id>/
+          <corner-id>.log        # one line per draw: sample index, the seed
+                                 #   that produced it, and its value (or the
+                                 #   reason it produced none)
+          summary.json           # per-corner rollup + full campaign metadata
+      records/
+        <record-id>.md           # append-only summary record, same field set
+                                 #   as the corner records plus the MC rows
+```
+
+`<record-id>` and the append-only rule are exactly as above: a re-run mints a
+new id and never edits an existing record.
+
+### Running a campaign
+
+`sim/lib/run_mc_campaign.py` drives it (`--help` documents every flag). The
+three campaigns whose records are committed here were produced by:
+
+```bash
+C9="--corner ff:-40:2.97 --corner ff:25:3.30 --corner ff:125:2.97 \
+    --corner tt:-40:3.63 --corner tt:25:3.30 --corner tt:125:2.97 \
+    --corner ss:-40:3.63 --corner ss:25:2.97 --corner ss:125:3.63"
+
+./sim/lib/run_mc_campaign.py --experiment read-snm \
+  --testbench sim/read-snm/testbench/tb_read_snm.spice \
+  --mode snm-pair:read_snm_sweep.txt:read_snm --key read_snm_v \
+  $C9 --n 200 --n-control 4 --n-nc 100 --nc-mismatch-scale 20 \
+  --seed 20260817 --claim "spec/sram.md Characterization -- read SNM (Monte Carlo ...)"
+```
+
+(the hold-SNM and write-margin invocations differ only in testbench, mode,
+key, and negative-control defect — each committed record's own "Reproduce"
+section carries its exact command line).
+
+### Which corners, and why not all of them
+
+`spec/sram.md`'s corner set is process × temperature × voltage, "all
+combinations". The MC campaigns run a **9-point subset** of it, chosen to
+cover every one of the nine process × temperature cells and all three supply
+levels, and to include the corner the deterministic records already identify
+as worst for read SNM (`ff_125c_2.97v`) and the one they identify as best
+(`ss_-40c_3.63v`), so the campaign brackets the observed range rather than
+sampling the middle of it. Each committed record names its own corner list.
+
+This is a subset because MC multiplies the corner count by the sample count,
+not because the remaining points are uninteresting — the deterministic
+records still cover the matrix exhaustively, and the MC records say so in
+their "Corner matrix run" field. **No estimate is pooled across corners**:
+each corner is its own measurement with its own limits, its own confidence
+interval, and its own negative control, because each corner is a different
+population.
+
+### What is randomized
+
+Per-instance device mismatch only — gf180mcu's `sm141064.ngspice` gates
+threshold-voltage and current-factor jitter (`delvto='mis_vth*sw_stat_mismatch'`,
+`mulu0='1-mis_k*sw_stat_mismatch'`) behind the single `.param
+sw_stat_mismatch` switch, and the campaign sets it per batch. Global process
+variation is *not* resampled: it is carried by the corner axis, which is what
+"combined with, not instead of, process corners" means here concretely.
+
+Seeding is reproducible end to end. The campaign takes one base `--seed`, and
+each individual draw's ngspice `.options seed=` value is
+`sha256(base_seed:corner_id:batch_kind:sample_index)` truncated to a positive
+31-bit integer — never Python's salted built-in `hash()`. Every seed is
+written into `raw-logs/<record-id>/<corner-id>.log` next to the value it
+produced, so any single draw can be re-run in isolation.
+
+### Two controls, doing different jobs
+
+| Batch | `sw_stat_mismatch` | Question it answers |
+|---|---|---|
+| mismatch | `1` | The measurement. What does the margin distribution look like? |
+| determinism control | `0` | Is this harness even driving the same fixture the corner records came from? Every draw must collapse onto **one** value, and that value must equal the corner record's own number for that corner. |
+| negative control | a deliberate defect | Can these statistics detect a bad design at all, or are they only ever confirming a good one? |
+
+The determinism control is what anchors the MC evidence to the ratified
+corner evidence. The negative control is `docs/cli/yield.md`'s requirement:
+"a yield statistic that has never been shown to detect a bad design is not
+evidence, it is an assumption." `klt yield` analyses the control's own draws
+against the *same* spec limits and returns `detected` only when the control's
+yield is lower **and** its exact confidence interval does not overlap the
+nominal draw's — a point estimate that merely looks worse is not enough.
+
+The defect differs per measurement because the physical failure mechanisms
+differ, and each record states its own:
+
+- **read SNM** — mismatch drawn at 20× the PDK's own sigma (`docs/cli/yield.md`'s
+  "a mismatch seed pushed past spec"). Read stability is mismatch-limited, so
+  inflating mismatch alone breaks it.
+- **hold SNM** — supply collapsed to 0.50 V, far below the ratified 2.97 V
+  minimum and below this cell's data-retention voltage, with 12× mismatch.
+  Hold stability is *not* mismatch-limited at 3.3 V (20× mismatch does not
+  produce a single failing draw); its real failure mechanism is retention
+  voltage, so that is what the control attacks.
+- **write margin** — supply collapsed to 0.60 V with 6× mismatch: a write
+  that no longer completes inside the fixed 1.8 ns pulse.
+
+### A failing draw must be a number, not an error
+
+This is the subtlety that decides whether a yield campaign means anything.
+`klt yield` excludes a null/errored sample from every statistic (correctly —
+an errored sample is a *measurement* failure, not a *design* failure). So if
+the harness reports a design failure as an error, the exact draws the
+campaign exists to count disappear from the yield, and the estimate silently
+becomes "the yield among the parts that worked well enough to measure."
+
+That is not hypothetical: the first version of this campaign did exactly
+that, and its deliberately-degraded negative control came back
+`not_detected` — every failing draw had been filed as an error. Both
+extraction paths were changed so a failure is a value:
+
+- `sim/lib/snm_extract.py` reports a **signed** SNM. Positive values are the
+  classical Seevinck butterfly square; a draw whose two mismatched half-cells
+  no longer latch reports `-d`, the *bistability deficit* — how far the
+  composed loop map misses re-crossing the diagonal. `d → 0` at the
+  bifurcation, so the quantity is continuous through zero rather than a
+  sentinel bolted onto the failing side; `sim/lib/test_snm_extract.py` pins
+  that continuity down against analytic VTCs.
+- `sim/write-margin/testbench/tb_write_margin.spice` reports a **negative**
+  WTV (one search resolution below zero) for a cell that does not flip even
+  with the bit line pulled to ground. Previously that case was
+  indistinguishable from a genuine WTV of exactly 0.
+
+Only a draw with no measurable structure at all is still an open result, and
+the campaign counts those separately (`errored` in the report, `n_errored` in
+`summary.json`). **A record with a non-zero errored count states a yield
+conditioned on a measurable draw** — read the two numbers together.
+
+The same episode is why `tb_write_margin.spice` now bisects instead of
+scanning 41 points: at VDD/40 resolution the trip point quantized onto one
+grid value for every draw at a corner, giving a sample standard deviation of
+5e-16 V and a Cpk of 1.3e15. A measurement whose resolution swamps the effect
+under study cannot substantiate a statistical claim. Because that changed the
+testbench, the deterministic write-margin corner record was re-run against it
+and the new record's **Supersedes** field names the one it replaces — the
+older record stays committed, as the append-only rule requires, but stops
+being the current answer. Every one of the 27 determinism-control draws
+across the three campaigns reproduces its corner record's value exactly.
+
+### Limits, and the one number this repo does not invent
+
+Each measurement is analysed against `min = 0` — `spec/sram.md`'s own
+requirement that read SNM, hold SNM, and write margin be strictly positive at
+every corner. Note that `klt yield`'s `min` is **inclusive**, so a draw of
+exactly `0.0` would count as passing; both extraction paths above therefore
+report a failing draw as strictly negative, never as zero.
+
+No `target_yield` is declared, and that is deliberate. `spec/sram.md`
+ratifies no yield target for these rows — whether they are statistical rows
+at all, and what they would have to hit, is the open operator decision
+tracked as issue #20 — and agents do not extend the ratified spec to make a
+result pass or fail. So `klt yield` reports these measurements rather than
+grading them, and emits a run-level warning saying so. That warning is
+accurate and is left in the committed reports on purpose: it is the machine-
+readable form of a real, open spec gap, not noise to be silenced. The
+quantitative margin statement in the meantime is **Cpk / sigma-to-spec** —
+the fitted distance from the mean to the spec limit, in sample standard
+deviations, with its own confidence interval.
+
+Read the two yield estimates the report prints side by side, as
+`docs/cli/yield.md` describes: the empirical (Clopper-Pearson) estimate
+cannot see past the samples it has, so with zero observed failures it can
+only bound from below ("at least 98.17% at 95% confidence, N = 200" — never
+"100% yield"); the parametric estimate extrapolates into a tail nothing was
+sampled from, and is only as good as the Anderson-Darling normality verdict
+printed beside it.
+
 ## Interpreting these results against sign-off
 
 `spec/sram.md`'s Signoff definition requires read SNM, hold SNM, and write
@@ -265,11 +466,24 @@ records generated during this issue's own implementation (see
 measurements, strictly positive margins and recorded access times -- for
 the current `bitcell_6t` sizing. That is a real, if narrow, first data
 point: it is evidence this sizing has *some* margin at every ratified
-corner, not a full characterization (no Monte Carlo/mismatch analysis
-exists yet -- spec/sram.md's Signoff definition does not require one, and
-none is claimed here) and not yet informed by any deliberate SNM/write-margin
+corner, and it is not yet informed by any deliberate SNM/write-margin
 optimization (`design/README.md` already flags the current sizing as "a
 first cut, not yet SNM/write-margin optimized").
+
+The Monte Carlo records under `sim/*/mc/` extend that, but do not turn it
+into a sign-off claim either. `spec/sram.md`'s Signoff definition asks for a
+strictly-positive recorded margin per corner, which the corner records
+supply; the MC records add what a corner matrix structurally cannot -- a
+mismatch-driven distribution behind each of those numbers, with a confidence
+interval and a sigma-to-spec figure. What they still do not supply is a
+*yield claim*, because the spec states no yield target to claim against
+(issue #20), and because a plain-random campaign at N = 200 per corner
+bounds the empirical per-cell yield only to roughly 98% at 95% confidence --
+whereas an 8192-bit array needs per-cell yield far beyond what a few hundred
+samples can resolve. Closing that gap needs a ratified target and a
+variance-reduced (importance-sampled) campaign, not more of the same draws.
+Both records are schematic-level; a post-layout re-run against an extracted
+netlist would supersede them.
 
 ### Explicit per-corner pass/fail rollup
 

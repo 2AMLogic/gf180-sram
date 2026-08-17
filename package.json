@@ -6,7 +6,7 @@
     "worktree:return": "./.loom/scripts/worktree-return.sh",
     "check:ci": "npm run lint && npm run test",
     "check:all": "npm run check:ci",
-    "test": "echo 'Testbenches are committed under sim/ (issue #24) but require ngspice + the pinned gf180mcu PDK, not assumed present in CI -- see sim/README.md for cold-start invocation. Nothing to run here.' && exit 0",
+    "test": "echo 'The ngspice testbenches under sim/ need the pinned gf180mcu PDK, which CI does not install -- see sim/README.md for cold-start invocation. What DOES run here is the pure-Python extraction math those testbenches feed.' && python3 sim/lib/test_snm_extract.py",
     "lint": "./scripts/ci/check-evidence-format.sh"
   }
 }

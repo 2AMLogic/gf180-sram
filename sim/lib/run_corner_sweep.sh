@@ -27,6 +27,12 @@
 #   <claim>             free-text description of the spec/sram.md claim this
 #                        run substantiates, written verbatim into the
 #                        generated record's Claim field (quote it).
+#   <supersedes>        optional record id (plus any explanation) this run
+#                        supersedes, written into the generated record's
+#                        Supersedes field. Pass it whenever the testbench
+#                        changed since the previous record for this claim --
+#                        the older record stays committed (append-only) but
+#                        stops being the current answer.
 #
 # Requires: ngspice on PATH; python3 on PATH (snm mode only); PDK resolvable
 # per sim/lib/pdk_env.sh (PDK_ROOT+PDK, GF180_PDK_PATH, or a standard
@@ -46,7 +52,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 if [[ $# -lt 3 ]]; then
-  echo "usage: $0 <experiment-dir> <testbench-file> <mode> [mode-args...]" >&2
+  echo "usage: $0 <experiment-dir> <testbench-file> <mode> [claim] [supersedes-record-id]" >&2
   exit 2
 fi
 
@@ -54,6 +60,11 @@ EXPERIMENT_DIR="$(cd "$1" && pwd)"
 TESTBENCH_FILE="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"
 MODE="$3"
 CLAIM="${4:-(no claim text provided)}"
+# Optional 5th argument: the record id this run supersedes. Required whenever
+# the testbench itself changed, so the record trail says which earlier record
+# a reader should stop treating as current (the append-only rule keeps the
+# superseded record in place; it does not keep it authoritative).
+SUPERSEDES="${5:-}"
 
 if [[ ! -f "$TESTBENCH_FILE" ]]; then
   echo "run_corner_sweep.sh: testbench not found: $TESTBENCH_FILE" >&2
@@ -177,7 +188,11 @@ RECORD_FILE="$RECORDS_DIR/$RECORD_ID.md"
   echo "  - Netlist snapshot: \`$(python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))" "$SNAPSHOT_DIR/$RECORD_ID.spice" "$REPO_ROOT")\`"
   echo "  - Raw logs: \`$(python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))" "$CORNERS_DIR" "$REPO_ROOT")/\`"
   echo "- **Timestamp / author**: $(date -u +%Y-%m-%dT%H:%M:%SZ), agent-builder"
-  echo "- **Supersedes**: (none -- first record for this claim)"
+  if [[ -n "$SUPERSEDES" ]]; then
+    echo "- **Supersedes**: $SUPERSEDES"
+  else
+    echo "- **Supersedes**: (none -- first record for this claim)"
+  fi
 } > "$RECORD_FILE"
 
 echo
