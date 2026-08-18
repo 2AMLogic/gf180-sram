@@ -19,7 +19,7 @@ existed) is gone.
 | Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 142.72 x 1379.84 um (0.1969 mm²) |
 | DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
-| LVS | `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 9/9 nets (with one documented tool-imposed substitution, see "Known tool gaps") |
+| LVS | `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior) |
 
 Everything above is reproduced end-to-end by `./layout/verify.sh` (see
 "Reproducing and re-checking"). What is *not* claimed is in "What this does
@@ -31,7 +31,8 @@ and does not prove".
 layout/
   README.md                             this file
   verify.sh                             regenerate + re-run every check quoted here
-  lvs_reference.py                      bulk-terminal rewrite for the LVS reference
+  lvs_reference.py                      bulk-terminal rewrite for the LVS reference,
+                                        derived from an actual extracted netlist
                                         (see "Known tool gaps")
   bitcell/
     generate.py                         draws the 6T bitcell (klayout.db API)
@@ -84,9 +85,10 @@ copies of the cell.
 The only array-level geometry is two `Metal3` straps (one `VDD`, one `VSS`)
 that drop a `Via2` onto each column's corresponding `Metal2` stripe — that is
 what makes `VDD`/`VSS` *single* nets across the array instead of 32 isolated
-column rails. Extraction confirms it: the full array extracts to 16,963 nets
-= 256 wordlines + 64 bitlines + 2 supplies + 16,384 storage nodes + 256 wells
-+ 1 substrate.
+column rails. Extraction confirms it: the full array extracts to 16,706 nets
+= 256 wordlines + 64 bitlines + 2 supplies + 16,384 storage nodes (every
+cell's well/substrate tie is folded directly into those 2 supply nets — see
+"Known tool gaps" #1).
 
 ### Scope: the storage-array core, matching `design/`
 
@@ -110,7 +112,7 @@ captures.
   abutment tile (so tiling itself introduces no violation), and across the
   full 8,192-cell array.
 * The layout **is** the committed schematic: `klt lvs` reports
-  `status: match`, 6/6 devices and 9/9 nets, against
+  `status: match`, 6/6 devices and 7/7 nets, against
   `design/netlist/bitcell_6t.spice`, with device `W`/`L` read back from the
   drawn geometry.
 * The array tiles into the ratified organization with the right connectivity:
@@ -177,19 +179,37 @@ no periphery at all.
 
 Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
 
-1. **No tap/tie layer in the gf180mcu extraction deck.** The deck declares
-   `tap=None`, so drawn well/substrate ties cannot be recognised: every
-   extracted NMOS body lands on a synthesized global substrate net and every
-   PMOS body on an anonymous `Nwell` net, regardless of what the layout
-   draws. `klt extract` says so itself ("`gf180mcu` has no distinct
-   well-tie/tap layer for this PMOS body"). Consequence: a schematic
-   reference that ties bulk to `VDD`/`VSS` — i.e. every real schematic —
-   can never report `status: match`. `layout/lvs_reference.py` works around
-   it by mechanically rewriting *only* the four bulk terminals of the
-   reference netlist to the extractor's own body-net names, changing nothing
-   else; with that substitution the compare is a clean 6/6, 9/9 match. Filed
-   as [klayout-tools#1084](https://github.com/2AMLogic/klayout-tools/issues/1084).
-   (Related, already-closed precedent for sky130: klayout-tools#490.)
+1. **No tap/tie layer in the gf180mcu extraction deck — filed, and since
+   fixed upstream, but the fix changed what this repo's compare needs to
+   do.** The deck originally declared `tap=None`, so drawn well/substrate
+   ties could not be recognised: every extracted NMOS body landed on a
+   synthesized global substrate net and every PMOS body on an anonymous
+   `Nwell` net, regardless of what the layout drew. Filed as
+   [klayout-tools#1084](https://github.com/2AMLogic/klayout-tools/issues/1084)
+   (related, already-closed precedent for sky130: klayout-tools#490);
+   upstream fixed it in
+   [klayout-tools#1113](https://github.com/2AMLogic/klayout-tools/pull/1113)
+   ("derive gf180mcu well/substrate tap from Nplus/Pplus implants"), merged
+   2026-08-17. Installed `klt` builds after that PR now fold this cell's
+   drawn ties straight into the `VDD`/`VSS` nets they physically contact —
+   the same nets the schematic reference already uses — so no bulk-terminal
+   substitution is needed for a match today (`nets: layout=7 reference=7
+   matched=7`). Because `klt` is installed unpinned
+   (`uv tool install git+https://github.com/2AMLogic/klayout-tools`, see
+   "Tool / PDK versions"), two hosts can report the *same* `klt --version`
+   string (`0.2.0`) while running different behavior depending on when each
+   installed it relative to #1113 — this is exactly what happened in
+   [gf180-sram#75](https://github.com/2AMLogic/gf180-sram/issues/75): a host
+   that had already picked up #1113's fix (bulk tied straight to `VDD`/`VSS`)
+   ran against `layout/lvs_reference.py`'s then-hardcoded `vsubs`/`vnw`
+   rewrite, which assumed the pre-#1113 anonymous-net behavior and actively
+   *broke* what would otherwise have been a clean match. `layout/lvs_reference.py`
+   no longer hardcodes body-net
+   names: it takes `--layout-netlist <klt extract output>` and derives each
+   device type's actual bulk net from that run's real extraction, then
+   rewrites *only* the four bulk terminals of the reference netlist to
+   match — a no-op today, and still correct if a future extraction deck (or
+   a bitcell without ties drawn inside it) reintroduces a synthesized net.
 2. **`klt extract` is flat-only**, by design ("Flat (not hierarchical)
    extraction, deliberately"). The committed array GDS *is* hierarchical (one
    bitcell cell, one `CellInstArray`) and the committed reference netlist is
@@ -249,7 +269,8 @@ klt precheck --deck gf180mcu --grid-um 0.005 layout/bitcell/sram_bitcell_6t.gds
 klt drc --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds
 klt drc --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds   # ~1 min
 klt extract --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds -o /tmp/bc.spice
-python3 layout/lvs_reference.py design/netlist/bitcell_6t.spice -o /tmp/bc_ref.spice
+python3 layout/lvs_reference.py design/netlist/bitcell_6t.spice \
+    --layout-netlist /tmp/bc.spice -o /tmp/bc_ref.spice
 klt lvs '{"layout":{"netlist":"/tmp/bc.spice","top":"sram_bitcell_6t"},
           "reference":{"netlist":"/tmp/bc_ref.spice","form":"subckt-call"}}'
 
@@ -273,8 +294,8 @@ Expected results, as committed (2026-08-16):
 | `klt drc --deck gf180mcu` (bitcell) | `status: clean`, 0 violations |
 | `klt drc --deck gf180mcu` (3x3 tile) | `status: clean`, 0 violations |
 | `klt drc --deck gf180mcu` (full array) | `status: clean`, 0 violations (~66 s) |
-| `klt extract` (bitcell) | 6 devices (4 nfet + 2 pfet), 9 nets, W/L per `design/netlist/bitcell_6t.spice` |
-| `klt extract` (full array) | 49,152 devices, 16,963 nets, 323 pins (~94 s) |
+| `klt extract` (bitcell) | 6 devices (4 nfet + 2 pfet), 7 nets, W/L per `design/netlist/bitcell_6t.spice` |
+| `klt extract` (full array) | 49,152 devices, 16,706 nets, 322 pins (~94 s) |
 | `klt lvs` (bitcell vs. rewritten reference) | `status: match`, 0 mismatches |
 | `klt stats` (bitcell) | `bbox_um: (0.0, 0.0) - (4.46, 5.39)`, 38 polygons |
 | `klt stats` (array) | `bbox_um: (0.0, 0.0) - (142.72, 1379.84)` |
@@ -300,7 +321,12 @@ Expected results, as committed (2026-08-16):
 different default behaviour. The sibling `gf180-bandgap`'s
 `layout/bandgap_top/generate.py` has the same property; this repo follows that
 existing convention rather than diverging unilaterally. Pinning is a
-reasonable follow-up, not this issue's scope.
+reasonable follow-up, not this issue's scope. `klt` itself is installed the
+same unpinned way (`uv tool install git+https://github.com/2AMLogic/klayout-tools`,
+"Install `klt`" below) — a real instance of this gap already surfaced as
+[gf180-sram#75](https://github.com/2AMLogic/gf180-sram/issues/75) (see "Known
+tool gaps" #1), where an upstream extractor behavior change landed between two
+installs without changing the reported `klt --version`.
 
 ## Freshness / staleness (per `design-evidence-tiers.md`)
 
