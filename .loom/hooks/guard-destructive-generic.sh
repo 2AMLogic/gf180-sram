@@ -4648,8 +4648,56 @@ extract_rm_targets() {
 # file's broader "ambiguity never widens a deny" contract is about not
 # inventing NEW denies; preserving an EXISTING one is the conservative side.)
 # =============================================================================
+# detect_sed_inplace_flavor() — which in-place `sed -i` calling convention the
+# sed that would ACTUALLY execute this command uses (#77, corroborated by #51's
+# review of #49).
+#
+# GNU sed and BSD/macOS sed disagree about the token immediately following a
+# BARE `-i`:
+#   GNU — `-i[SUFFIX]` is ATTACHED-ONLY, so `sed -i "" A B` parses as
+#         script="" plus TWO file operands A and B: `A` is a REAL write target
+#         that sed opens and rewrites in place.
+#   BSD — `-i EXTENSION` takes the backup extension as a SEPARATE argument, so
+#         the identical tokens parse as extension="", script=A, file=B: `A` is
+#         script TEXT and is never touched on disk.
+# The command text alone cannot distinguish the two, and guessing "BSD" for a
+# shape that is really GNU silently drops a genuine out-of-worktree file
+# operand from the scan — the exact fail-open regression #77 reports. The
+# guard and the command it is judging run on the SAME host through the same
+# PATH, so the authoritative answer is available locally: ask sed itself.
+#
+# GNU sed answers `--version` with a "GNU sed" banner; BSD sed rejects the
+# option outright. Anything else (no sed on PATH, a wrapper, a container image
+# whose sed answers neither way) is reported as "bsd" — but that is NOT a free
+# pass: the caller (extract_write_targets' sed branch) gates the widened skip
+# on an INDEPENDENT script-shape test as well (looks_like_sed_script), so an
+# undetectable host still cannot get a real file operand skipped.
+#
+# LOOM_SED_FLAVOR pins the answer to `gnu`/`bsd` (the hook test suites set it
+# so their expectations do not depend on the host's sed). It can only choose
+# between the two real conventions — it can never disable the shape test that
+# actually closes the bypass, so it cannot be used to widen an allow.
+#
+# Called exactly once per hook invocation (extract_write_targets has a single
+# call site), so the one extra `sed --version` fork is bounded and needs no
+# memoization.
+detect_sed_inplace_flavor() {
+    case "${LOOM_SED_FLAVOR:-}" in
+        gnu | bsd)
+            printf '%s' "$LOOM_SED_FLAVOR"
+            return 0
+            ;;
+    esac
+    local banner=""
+    banner=$(command sed --version </dev/null 2>&1 | head -n 1 || true)
+    case "$banner" in
+        *"GNU sed"*) printf 'gnu' ;;
+        *) printf 'bsd' ;;
+    esac
+}
+
 extract_write_targets() {
-    printf '%s' "$1" | awk -v startcwd="$2" -v home="$HOME" "$_QSPLIT_AWK""$_CDEXPAND_AWK""$_CDQUOTE_AWK""$_VARRESOLVE_AWK""$_MASKGT_AWK""$_MASKWS_AWK""$_MASKHEREDOC_AWK"'
+    printf '%s' "$1" | awk -v startcwd="$2" -v home="$HOME" -v sedflavor="$(detect_sed_inplace_flavor)" "$_QSPLIT_AWK""$_CDEXPAND_AWK""$_CDQUOTE_AWK""$_VARRESOLVE_AWK""$_MASKGT_AWK""$_MASKWS_AWK""$_MASKHEREDOC_AWK"'
     # resolve_var()/record_assign() (same-command $VAR resolution, #4881) and
     # the DQ/SQ/AMBIG constants they use now come from the shared
     # _VARRESOLVE_AWK snippet above (#6152) — see its header comment for the
@@ -4658,6 +4706,108 @@ extract_write_targets() {
     # when it lands in the main checkout). Fail-closed by construction: this
     # function can only ever REPLACE a token with a value it actually proved,
     # never make one disappear.
+    # is_quoted_empty(tok) -- true when tok is exactly a matched pair of empty
+    # quotes (two double-quote characters, or two single-quote characters,
+    # back to back with nothing between them), never true for anything else
+    # (including the unquoted empty string, which this scanner own
+    # toks[j] == "" check already treats as "no token" and skips before this
+    # is ever reached). Used ONLY by the sed branch below (#66/#77) to
+    # recognize BSD/macOS sed mandatory, separate -i EXTENSION argument in its
+    # overwhelmingly common "no backup" spelling -- never to reinterpret any
+    # other token shape. DQ/SQ come from the shared _VARRESOLVE_AWK BEGIN
+    # block above.
+    function is_quoted_empty(tok,   n, c1, c2) {
+        n = length(tok)
+        if (n != 2) return 0
+        c1 = substr(tok, 1, 1)
+        c2 = substr(tok, 2, 1)
+        return (c1 == DQ && c2 == DQ) || (c1 == SQ && c2 == SQ)
+    }
+    # strip_matched_quotes(tok) -- tok with ONE matched pair of surrounding
+    # quote characters removed. qsplit copies quote characters into the token
+    # VERBATIM (#3755), so the shape test below has to look past them; a token
+    # that is not wrapped in a matched pair is returned unchanged.
+    function strip_matched_quotes(tok,   n, c1, c2) {
+        n = length(tok)
+        if (n < 2) return tok
+        c1 = substr(tok, 1, 1)
+        c2 = substr(tok, n, 1)
+        if ((c1 == DQ && c2 == DQ) || (c1 == SQ && c2 == SQ)) return substr(tok, 2, n - 2)
+        return tok
+    }
+    # looks_like_sed_script(tok) -- 1 only when tok has the recognizable SHAPE
+    # of a sed substitute/transliterate script (`s|a|b|`, `s/a/b/g`,
+    # `2,5s#a#b#`, `y/abc/xyz/`, and `;`-chained sequences of those), 0 for
+    # anything that merely OCCUPIES the script argument position (#77). This
+    # is what lets the sed branch below tell a real BSD
+    # `-i EXTENSION SCRIPT FILE` invocation apart from a crafted
+    # `sed -i "" <out-of-worktree-path> <innocuous-file>`, which has the
+    # identical token count and flag shape but whose second non-flag argument
+    # is a genuine file operand under GNU semantics.
+    #
+    # Deliberately STRICT and deliberately one-directional: an unrecognized
+    # script shape (an address-prefixed `d`/`p`/`a`, a `-f scriptfile`, an
+    # exotic command) merely fails the test, which keeps the token IN the scan
+    # -- i.e. the pre-#66 behavior, fail-closed. Only a positively recognized
+    # script is ever dropped from the candidate set.
+    #
+    # `w`/`W`/`e`/`r`/`R` are NOT accepted as trailing flags or commands: those
+    # are the sed file-writing / command-executing forms, whose operand is a
+    # real path this scanner should keep looking at rather than skip.
+    function looks_like_sed_script(tok) {
+        return sed_script_shape(strip_matched_quotes(tok))
+    }
+    function sed_script_shape(s,   n, i, c, d, seen, ch) {
+        n = length(s)
+        # Shortest possible accepted form is `s|a|b|` style: 4 characters
+        # (`y//$/` etc. included) -- anything shorter cannot carry three
+        # delimiters plus a command letter.
+        if (n < 4) return 0
+        i = 1
+        # Optional leading numeric address / numeric range (`3s|a|b|`,
+        # `2,5s|a|b|`). A `/regex/` or `$` address is intentionally NOT
+        # accepted: those start with a character a relative PATH can also
+        # start with, and refusing them only costs a (fail-closed) missed
+        # widening.
+        while (i <= n && substr(s, i, 1) ~ /^[0-9]$/) i++
+        if (i <= n && substr(s, i, 1) == ",") {
+            i++
+            while (i <= n && substr(s, i, 1) ~ /^[0-9]$/) i++
+        }
+        c = substr(s, i, 1)
+        if (c != "s" && c != "y") return 0
+        i++
+        d = substr(s, i, 1)
+        # The delimiter is any punctuation character -- never alphanumeric,
+        # never whitespace, never a backslash (which would start an escape).
+        if (d == "" || d ~ /^[0-9A-Za-z]$/ || d == " " || d == "\t" || d == "\n" || d == "\\") return 0
+        i++
+        # Walk to the CLOSING (third) delimiter, honouring backslash escapes
+        # so an escaped delimiter inside the pattern/replacement does not end
+        # the command early.
+        seen = 0
+        while (i <= n) {
+            ch = substr(s, i, 1)
+            if (ch == "\\") { i += 2; continue }
+            if (ch == d) {
+                seen++
+                if (seen == 2) break
+            }
+            i++
+        }
+        if (seen != 2) return 0
+        i++
+        # Trailing flags: the substitute flags that carry no file/command
+        # operand. `w`, `W`, `e`, `r` and `R` are excluded on purpose (see
+        # above).
+        while (i <= n && substr(s, i, 1) ~ /^[gpiImM0-9]$/) i++
+        if (i > n) return 1
+        ch = substr(s, i, 1)
+        # A `;`- or newline-chained sequence is a script only if EVERY link in
+        # the chain is itself a recognized command.
+        if (ch == ";" || ch == "\n") return sed_script_shape(substr(s, i + 1, n - i))
+        return 0
+    }
     BEGIN {
         SEP = sprintf("%c", 31)
         curcwd = startcwd
@@ -4996,44 +5146,78 @@ extract_write_targets() {
                 }
             } else if (toks[1] == "sed") {
                 has_i = 0
+                bare_i = 0
                 # BSD `-i` SEPARATE-ARGUMENT FORM (#5674): unlike GNU sed
                 # (where the -i option optional backup suffix is always
                 # ATTACHED to the same token -- bare `-i` or `-i.bak` -- so
-                # the very next
-                # non-flag token is always the mandatory SCRIPT argument, not
-                # a file), BSD/macOS sed requires `-i` to take its backup
-                # suffix as a SEPARATE following token, almost always the
-                # empty string (`sed -i` followed by an empty-quote argument
-                # then the script, e.g. `sed -i EMPTYQUOTES s/a/b/ file` --
-                # the idiom every reported false positive used). That
-                # inserts ONE EXTRA
-                # non-file token (the suffix) before the script, so the
-                # "skip exactly nfargs[1]" logic below -- correct for GNU,
-                # where nfargs[1] IS the script -- instead skips the suffix
-                # and lets the SCRIPT (nfargs[2], e.g. `s/a/b/`) fall through
-                # as a phantom file target, resolved against curcwd and
-                # denied as a worktree-confinement bypass for a file that was
-                # never actually written.
+                # the very next non-flag token is always the mandatory SCRIPT
+                # argument, not a file), BSD/macOS sed requires `-i` to take
+                # its backup suffix as a SEPARATE following token, almost
+                # always the empty string (`sed -i` followed by an
+                # empty-quote argument then the script, e.g.
+                # `sed -i EMPTYQUOTES s/a/b/ file` -- the idiom every reported
+                # false positive used). That inserts ONE EXTRA non-file token
+                # (the suffix) before the script, so the "skip exactly
+                # nfargs[1]" logic -- correct for GNU, where nfargs[1] IS the
+                # script -- instead skips the suffix and lets the SCRIPT
+                # (nfargs[2], e.g. `s/a/b/`) fall through as a phantom file
+                # target, resolved against curcwd and denied as a
+                # worktree-confinement bypass for a file that was never
+                # actually written.
                 #
-                # Detected narrowly and safely: only a BARE `-i` token (not
-                # `-i.bak`, which is unambiguous GNU-attached-form and
-                # already handled) immediately followed by a token that,
-                # quote-stripped, is the EMPTY STRING -- never a plausible
-                # relative path and never a meaningful backup suffix on its
-                # own, so treating it purely as "the BSD marker" cannot hide
-                # a real write target. sed_skip then covers both the suffix
-                # AND the script (2 tokens) instead of just the script (1);
-                # every FILE argument after that is still fully scanned, so a
-                # genuine main-checkout target among them still denies.
-                bare_i_pending = 0
-                sed_skip = 1
+                # The #66 fix widened the skip whenever it saw a bare
+                # `-i` immediately followed by a quote-empty token --
+                # unconditionally, without checking whether the token AFTER
+                # that could plausibly be a real out-of-worktree file operand
+                # rather than the sed script. That let a CRAFTED
+                # `sed -i "" <out-of-worktree-path> <real-file>` (identical
+                # token shape under BOTH GNU and BSD conventions) widen the
+                # skip and let the out-of-worktree path escape scanning
+                # entirely -- the fail-open regression #77 reports.
+                #
+                # skip_first now only ever WIDENS from 1 to 2 when EVERY one
+                # of the following holds (#77, corroborated by the review on
+                # #51 of #49) -- token POSITION and argument COUNT alone are
+                # explicitly NOT sufficient, since `sed -i "" X Y` has the
+                # identical shape under both conventions and under GNU
+                # semantics X is a REAL file operand:
+                #   bare_i                      a literal, unattached `-i`
+                #                               token -- the only spelling
+                #                               that can take a SEPARATE
+                #                               extension argument at all.
+                #   nf >= 3                     extension, script, >=1 real
+                #                               file target. A 1- or 2-arg
+                #                               `sed -i ...` keeps its
+                #                               original interpretation.
+                #   is_quoted_empty(nfargs[1])  the BSD "no backup" extension
+                #                               idiom `-i ""` / `-i ''`.
+                #   sedflavor != "gnu"          the sed that will actually
+                #                               run this command does not use
+                #                               the attached-only GNU form
+                #                               (detect_sed_inplace_flavor()).
+                #                               On a GNU host nfargs[2] is a
+                #                               file operand, full stop.
+                #   looks_like_sed_script(...)  nfargs[2] positively has the
+                #                               SHAPE of a sed script, not
+                #                               merely its position. Content,
+                #                               not argument arithmetic, is
+                #                               what separates a real script
+                #                               from a path smuggled into the
+                #                               script slot -- and it holds
+                #                               even if the flavor probe is
+                #                               wrong or unavailable.
+                #
+                # With those in force this can only ever DROP a phantom
+                # script-text candidate from the scan, never a genuine file
+                # target. Every unrecognized or ambiguous shape falls back to
+                # skip_first = 1 -- the pre-#66 behavior, fail-closed.
                 nf = 0
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
                     if (j in numfd_redir) continue
-                    if (toks[j] == "-i") { has_i = 1; bare_i_pending = 1; continue }
-                    if (toks[j] ~ /^-i/) has_i = 1
+                    if (toks[j] == "-i") { has_i = 1; bare_i = 1 }
+                    else if (toks[j] ~ /^-i/) has_i = 1
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
                     # Same heredoc/herestring exclusion as the `tee` branch
@@ -5047,13 +5231,12 @@ extract_write_targets() {
                     }
                     nf++
                     nfargs[nf] = toks[j]
-                    if (bare_i_pending && nf == 1 && strip_cd_quoting(toks[j]) == "") {
-                        sed_skip = 2
-                    }
-                    bare_i_pending = 0
                 }
-                if (has_i && nf > sed_skip) {
-                    for (j = sed_skip + 1; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
+                skip_first = 1
+                if (bare_i && nf >= 3 && is_quoted_empty(nfargs[1]) &&
+                    sedflavor != "gnu" && looks_like_sed_script(nfargs[2])) skip_first = 2
+                if (has_i && nf > skip_first) {
+                    for (j = skip_first + 1; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
                 }
             } else if (toks[1] == "cp" || toks[1] == "mv") {
                 nf = 0
