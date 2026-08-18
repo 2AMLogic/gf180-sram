@@ -4960,6 +4960,31 @@ extract_write_targets() {
             seg = segs[i]
             origlen = length(seg)
             sub(/^[ \t]+/, "", seg)
+            # Leading shell keyword stripped BEFORE the sudo strip (gf180-sram
+            # #67): a one-line compound statement such as
+            # `for f in x; do sed -i "" "s|a|b|" file; done` or
+            # `if true; then sed -i ... file; fi` reaches this loop as a
+            # SEGMENT whose first token is the keyword `do`/`then`/etc, not
+            # the command itself, once qsplit() has already broken the
+            # command on `;`. Every write-idiom branch below keys on
+            # toks[1] (`tee`/`sed`/`cp`/`mv`), so without this strip the
+            # toks[1] of such a segment is literally "do" and the scan
+            # silently finds NOTHING -- a #4178 write-confinement BYPASS: the identical
+            # command with its body on its own line (not one-line) already
+            # denies correctly, since there `do`/`then` is its own separate
+            # (write-idiom-free) segment and the body is a plain segment
+            # whose toks[1] IS the real command. Mirrors the `sudo` strip
+            # immediately below (same technique, same fail-closed contract):
+            # stripping a keyword can only ever EXPOSE more of the real
+            # command to the write-idiom scan, never hide one, so this can
+            # only turn a missed target into a found one (widen a deny),
+            # never the reverse. `{` (brace-group opener, e.g.
+            # `x() { sed -i ... file; }` or `{ sed -i ... file; }`) is
+            # included alongside the do/then/else/elif keywords for the same
+            # reason -- it is a control-flow token, not a command word, and
+            # can lead a one-line segment exactly like `do`/`then` can.
+            sub(/^(do|then|else|elif|\{)[ \t]+/, "", seg)
+            sub(/^[ \t]+/, "", seg)
             sub(/^sudo[ \t]+/, "", seg)
             sub(/^[ \t]+/, "", seg)
             if (seg == "") continue
@@ -5103,10 +5128,55 @@ extract_write_targets() {
                     # widen a deny into an allow (same fallback contract as
                     # #4926).
                     cdclass = strip_cd_quoting(cdarg)
-                    if (cdclass ~ /^\//) {
-                        curcwd = cdarg
+                    # SAME-COMMAND VARIABLE RESOLUTION FOR `cd` (gf180-sram
+                    # #68): `resolve_var()` (#4881, defined above) already
+                    # resolves a `$NAME`/`${NAME}[...]` write-idiom TARGET
+                    # from a same-command `NAME=value` assignment; the `cd`
+                    # argument never got the same treatment, so
+                    # `SB=/tmp/scratch; cd "$SB/repo"; echo x > sim/a.spice`
+                    # built `curcwd` as `<worktree>/"$SB/repo"` (the raw,
+                    # unresolved token) rather than `/tmp/scratch/repo`,
+                    # misjudging an out-of-repo `cd` destination as an
+                    # in-repo one and denying a write that never lands in the
+                    # main checkout.
+                    #
+                    # cdclass is already the quote-STRIPPED form (computed
+                    # just above for the absolute/relative classification
+                    # test), so a token like `"$SB/repo"` reduces to the bare
+                    # `$SB/repo` shape resolve_var() requires -- the same
+                    # "(unquoted) token" contract resolve_var() already has on
+                    # the write-target side. cdresolved is used ONLY when it
+                    # is FULLY resolved (no `$` survives): resolve_var()
+                    # returns its argument UNCHANGED for every unresolvable
+                    # shape (no matching assignment, `$(...)`/`${VAR:-x}`/`$1`,
+                    # or the AMBIG sentinel for a conflicting reassignment,
+                    # #4914), so an unresolved `$` staying in cdresolved means
+                    # "leave it exactly as today" -- both cdcls (fed to the
+                    # classification test) and cdtarget (joined into curcwd)
+                    # fall back to cdclass/cdarg respectively, the PRE-#68
+                    # behaviour, never widening a deny into an allow on
+                    # anything this resolver cannot prove (same fail-closed
+                    # contract as #4881/#4914).
+                    #
+                    # A resolved variable landing INSIDE the repo is not a
+                    # bypass either: curcwd is simply set to that (correct,
+                    # in-repo) absolute path, so a later out-of-worktree
+                    # write via a relative segment off it still resolves
+                    # in-repo and still denies -- this only ever corrects
+                    # the curcwd value, it never turns off the confinement
+                    # check downstream.
+                    cdresolved = resolve_var(cdclass)
+                    if (index(cdresolved, "$") == 0) {
+                        cdcls = cdresolved
+                        cdtarget = cdresolved
+                    } else {
+                        cdcls = cdclass
+                        cdtarget = cdarg
+                    }
+                    if (cdcls ~ /^\//) {
+                        curcwd = cdtarget
                     } else if (curcwd != "") {
-                        curcwd = curcwd "/" cdarg
+                        curcwd = curcwd "/" cdtarget
                     }
                 }
                 continue
@@ -5184,54 +5254,80 @@ extract_write_targets() {
                 }
             }
 
-            # NUMBERED-FD OUTPUT-REDIRECT EXCLUSION (#6326) -- a same-line
-            # numbered file-descriptor redirect (`2>/dev/null`, `2>&1`,
-            # `1>/tmp/x`, ...) is a REDIRECTION OPERATOR (plus, for the
-            # attached fd-to-file form, its own operand), never an extra
-            # tee/sed-i/cp/mv file argument. Mirrors the stdin_redir exclusion
-            # immediately above, but for `[0-9]+>`/`[0-9]+>>` rather than
-            # `[0-9]*<`.
+            # STDOUT-REDIRECTION EXCLUSION (gf180-sram #68, subsumes upstream
+            # #6326) -- the mirror image of the STDIN-REDIRECTION EXCLUSION
+            # immediately above, for the opposite operator direction. `>`/`>>`
+            # (optionally fd-prefixed, e.g. `2>`) is a redirection operator,
+            # never a write-idiom operand, so neither it nor the token it
+            # redirects TO may be scanned as a tee / sed -i / cp-mv operand by
+            # the loops below -- exactly the same false-DENY shape #5369
+            # fixed for `<`, just for `>` instead:
             #
-            # Deliberately requires AT LEAST ONE leading digit (`[0-9]+`, not
-            # `[0-9]*`): a bare `>`/`>>` with NO leading digit is intentionally
-            # left OUTSIDE this exclusion and keeps flowing into the tee/sed/
-            # cp-mv loops exactly as before this fix -- narrowing an
-            # over-broad match must never also widen an unrelated one.
+            #   cp a b/ 2>/dev/null   -- attached form: "2>/dev/null" was the
+            #                            LAST non-flag token, so the cp/mv
+            #                            branch (which takes the LAST token as
+            #                            the destination) picked it over the
+            #                            REAL destination "b/", manufacturing
+            #                            a phantom `<repo>/2>/dev/null` target
+            #                            and denying an ordinary, harmless
+            #                            `cp`/`mv` invocation.
+            #   mv a b >log           -- same shape, bare `mv`.
+            #   tee f 2>/dev/null     -- the tee operand loop (not "last token
+            #                            wins", but every non-excluded,
+            #                            non-flag token IS scanned) misread
+            #                            the redirection as an EXTRA tee
+            #                            target, e.g. a phantom
+            #                            `<repo>/2>/dev/null` sink.
+            #   sed -i "" "s/a/b/" f 2>/dev/null -- same shape as tee, one
+            #                            more phantom sed FILE operand.
             #
-            # The genuine write-target text such a token carries is still
-            # captured separately by the dedicated `>`/`>>` scan below (which
-            # already supports an optional leading digit, `[0-9]*>>?`) --
-            # excluding the token HERE only stops it from being
-            # misappropriated as a tee/sed-i/cp/mv FILE OPERAND; it is not
-            # dropped from write-target scanning altogether.
+            # Token-boundary test, identical in structure to the `<` scan:
+            #   `>` / `>>` / `0>` / `2>>` (bare, optionally fd-prefixed)
+            #               consumes the NEXT non-empty token, which is the
+            #               file redirected TO.
+            #   `>file` / `2>/dev/null` / `>>file` (attached, optionally
+            #               fd-prefixed) consumes only itself.
             #
-            # Bare-operator form (`2>` followed by a separate token, e.g.
-            # `sed -i s/a/b/ file 2> /tmp/err`): the operator token AND the
-            # single token it consumes as its target are both excluded,
-            # UNLESS that next token starts with `&` (a spaced dup-to-fd form,
-            # `2> &1` -- which duplicates a file descriptor, not a file, so
-            # nothing after it is a real operand to exclude).
+            # The attached-form pattern deliberately excludes a leading `&`
+            # right after the operator (`[^ \t&]`) -- so the dup-to-fd
+            # attached spelling `>&2` does NOT match and is therefore not
+            # added to this exclusion set, exactly mirroring how the existing
+            # generic `>`/`>>` write-target loop below (lines ~4181+) already
+            # declines to treat `>&2` as an attached redirection with a real
+            # destination file. This exclusion set is built from mtoks[]
+            # (quote- and arith/test-context-masked, #4245/#5515) so a `>`
+            # that is only quoted DATA, or a comparison inside `((...))`/
+            # `[[...]]`, can never match here either -- same rationale as the
+            # `stdin_redir` scan immediately above.
             #
-            # Attached form (`2>/dev/null`, `2>>/tmp/log`): the single token
-            # already carries both the operator and its target, so only that
-            # one token needs excluding.
-            delete numfd_redir
+            # DELIBERATELY uses an OPTIONAL leading digit (`[0-9]*`, not
+            # `[0-9]+`): the independent upstream #6326 fix required at least
+            # one leading digit and left bare `>`/`>>` (no fd prefix) flowing
+            # into the tee/sed/cp-mv loops below, which does NOT close the
+            # `mv a b >log` / `tee f > out` shapes covered by the tests here.
+            # `[0-9]*` matches every string `[0-9]+` matches plus the
+            # zero-digit case, so this exclusion set is a strict superset of
+            # the #6326 `numfd_redir` exclusion and there is no need to keep
+            # both.
+            delete stdout_redir
             for (j = 1; j <= m; j++) {
                 if (toks[j] == "") continue
-                if (mtoks[j] ~ /^[0-9]+>>?$/) {
-                    numfd_redir[j] = 1
-                    if (j + 1 <= m && toks[j+1] != "" && mtoks[j+1] !~ /^&/) {
-                        numfd_redir[j+1] = 1
+                if (mtoks[j] ~ /^[0-9]*>>?$/) {
+                    stdout_redir[j] = 1
+                    for (k = j + 1; k <= m; k++) {
+                        if (toks[k] == "") continue
+                        stdout_redir[k] = 1
+                        break
                     }
-                } else if (mtoks[j] ~ /^[0-9]+>>?[^ \t&]/) {
-                    numfd_redir[j] = 1
+                } else if (mtoks[j] ~ /^[0-9]*>>?[^ \t&]/) {
+                    stdout_redir[j] = 1
                 }
             }
 
             if (toks[1] == "tee") {
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (j in numfd_redir) continue
+                    if (j in stdout_redir) continue
                     if (toks[j] == "" || toks[j] ~ /^-/) continue
                     # Heredoc/herestring redirection (attached or quoted
                     # delimiter, or the bare double-angle-bracket / dashed
@@ -5328,7 +5424,7 @@ extract_write_targets() {
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (j in numfd_redir) continue
+                    if (j in stdout_redir) continue
                     if (toks[j] == "-i") { has_i = 1; bare_i = 1 }
                     else if (toks[j] ~ /^-i/) has_i = 1
                     if (toks[j] ~ /^-/) continue
@@ -5356,7 +5452,7 @@ extract_write_targets() {
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (j in numfd_redir) continue
+                    if (j in stdout_redir) continue
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
                     # Same heredoc/herestring exclusion as the `tee` branch
