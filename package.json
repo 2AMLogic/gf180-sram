@@ -6,7 +6,7 @@
     "worktree:return": "./.loom/scripts/worktree-return.sh",
     "check:ci": "npm run lint && npm run test && npm run test:guards",
     "check:all": "npm run check:ci",
-    "test:guards": "./.loom/hooks/tests/test-guard-write-confinement-loopvar.sh && ./.loom/hooks/tests/test-guard-destructive-sed-branch.sh",
+    "test:guards": "./.loom/hooks/tests/test-guard-write-confinement-loopvar.sh && ./.loom/hooks/tests/test-guard-destructive-sed-branch.sh && ./.loom/hooks/tests/test-guard-write-confinement-keyword.sh && ./.loom/hooks/tests/test-guard-write-confinement-redir-cd.sh",
     "test": "echo 'The ngspice testbenches under sim/ need the pinned gf180mcu PDK, which CI does not install -- see sim/README.md for cold-start invocation. What DOES run here is the pure-Python extraction math those testbenches feed.' && python3 sim/lib/test_snm_extract.py",
     "lint": "./scripts/ci/check-evidence-format.sh"
   }
