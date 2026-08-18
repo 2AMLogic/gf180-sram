@@ -133,11 +133,16 @@ fi
 # ("allow" when the hook stays silent, which is its allow contract). Optional
 # $3 overrides which hook copy to invoke (default $HOOK) -- used by the
 # symlinked-ancestor fixture below, which runs against its own $SHOOK copy.
+# Optional $4 pins LOOM_SED_FLAVOR ("gnu"/"bsd") for cases whose expected
+# verdict depends on which `sed -i` convention the acting host uses (#77);
+# unset means the hook autodetects against the host's own sed, which is what
+# every other case here wants.
 run_guard() {
-    local cwd="$1" cmd="$2" hook="${3:-$HOOK}" out rc=0
+    local cwd="$1" cmd="$2" hook="${3:-$HOOK}" flavor="${4:-}" out rc=0
     out=$(jq -n --arg cwd "$cwd" --arg cmd "$cmd" \
             '{cwd:$cwd, tool_name:"Bash", tool_input:{command:$cmd}}' \
           | env -u LOOM_FORCE_SCOPE -u LOOM_GUARD_DECISION_LOG \
+                ${flavor:+LOOM_SED_FLAVOR="$flavor"} \
                 bash "$hook" 2>/dev/null) || rc=$?
     if [[ "$rc" -ne 0 ]]; then
         printf 'HOOK-EXIT-%s' "$rc"   # fail-open contract violation
@@ -257,8 +262,19 @@ assert_decision "(c5) plain read-only command -> allow" \
 # was scanned as a file target. A rewrite script whose text contains `../`
 # (exactly the documented `sim/` `.include` fix-up) then resolved out of the
 # worktree and denied an edit that never leaves it.
+#
+# (d1)/(d6) below assert the BSD reading of `sed -i '' SCRIPT FILE` (the empty
+# token is the backup EXTENSION, so the script is skipped and only FILE is a
+# write target), so they pin LOOM_SED_FLAVOR=bsd. Under GNU sed that same
+# command line means something genuinely different -- `-i` takes no separate
+# extension, so BOTH remaining tokens are real in-place file operands -- and
+# since #77 the hook's scan correctly follows the acting host's actual sed
+# flavor instead of assuming the BSD reading unconditionally. Without the pin
+# these two cases would assert BSD behaviour on a GNU host (the ubuntu CI
+# runner) and fail there for the right reason. The GNU reading of the same
+# shape is covered by the sed-branch suite (test-guard-destructive-sed-branch.sh).
 assert_decision "(d1) in-worktree sed -i '' whose SCRIPT text contains ../ -> allow" \
-    allow "$(run_guard "$WT" "sed -i '' \"s|.include '../../../design/n.spice'|.include '/abs/design/n.spice'|\" sim/a.spice")"
+    allow "$(run_guard "$WT" "sed -i '' \"s|.include '../../../design/n.spice'|.include '/abs/design/n.spice'|\" sim/a.spice" "" bsd)"
 
 assert_decision "(d2) sed -i '' writing an actual MAIN-checkout file -> deny" \
     deny "$(run_guard "$WT" "sed -i '' 's|a|b|' $MAIN/sim/access-time/testbench/tb_read_access_time.spice")"
@@ -278,7 +294,7 @@ assert_decision "(d5) non-empty BSD suffix is still an operand-shaped token -> d
 # into the main checkout — this guard has never protected /tmp, and its own
 # deny text points agents at "a spelled-out /tmp path for scratch".
 assert_decision "(d6) sed -i '' on an out-of-repo scratch file -> allow" \
-    allow "$(run_guard "$MAIN" "sed -i '' \"s|x|y|\" $TMPROOT/bitcell_check.sp")"
+    allow "$(run_guard "$MAIN" "sed -i '' \"s|x|y|\" $TMPROOT/bitcell_check.sp" "" bsd)"
 
 # --- (e) symlinked-ancestor main checkout (gf180-sram#69) ---------------------
 # Reproduces the macOS-symlinked-TMPDIR bug deliberately on any host: SMAIN /
