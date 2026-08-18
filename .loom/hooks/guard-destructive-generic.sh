@@ -4808,6 +4808,89 @@ extract_write_targets() {
         if (ch == ";" || ch == "\n") return sed_script_shape(substr(s, i + 1, n - i))
         return 0
     }
+    # --- `for NAME in <words>` loop-variable binding (gf180-sram #63/#66) ----
+    #
+    # A `for` loop word list is the ONE other place (besides a `NAME=value`
+    # assignment) where a write-idiom token spelled `$f` / `"$f"` has its set
+    # of possible values written out LITERALLY in the same command:
+    #
+    #   cd <worktree>
+    #   for f in sim/a.spice sim/b.spice; do
+    #       sed -i "" "s|x|y|" "$f"
+    #   done
+    #
+    # Without this binding, `"$f"` reaches the shell layer as an unresolvable
+    # `$` token and hits the #4921 fail-closed deny ("unexpanded shell variable
+    # from the path root down") no matter where the write actually lands -- so
+    # an ordinary in-worktree `sim/` maintenance loop is denied twice in a row
+    # with no path forward for the agent.
+    #
+    # loop_word_confined() is the safety valve, and it is deliberately much
+    # stricter than record_assign(): a word only counts when it is a LITERAL
+    # RELATIVE path that cannot leave the directory the write resolves
+    # against -- no leading "/", no leading "~", no "$", no glob/backquote/
+    # backslash, and no ".." component. Any other list shape (an absolute
+    # path, a traversal, a nested expansion, a glob) poisons the name to the
+    # unresolvable sentinel "" so the token keeps its RAW spelling and the
+    # existing fail-closed deny fires exactly as today. That is what keeps
+    # this from becoming a #4178 bypass: the only tokens it can ever resolve
+    # are ones whose runtime value is provably a subpath of the cwd the guard
+    # already judges for a literal relative target.
+    #
+    # Only the FIRST list word is bound, not all of them. Every accepted word
+    # is ".."-free and relative, so all of them land under the SAME cwd and
+    # are confinement-equivalent -- emitting one target per word would change
+    # nothing about the verdict while inflating the target stream against the
+    # 20-target cap the caller applies, which would let a genuinely dangerous
+    # later target be truncated out of the scan.
+    function loop_word_confined(w,   c1) {
+        if (w == "") return 0
+        c1 = substr(w, 1, 1)
+        if (c1 == "/" || c1 == "~" || c1 == "-") return 0
+        if (index(w, "$") > 0) return 0
+        if (index(w, "*") > 0 || index(w, "?") > 0 || index(w, "[") > 0) return 0
+        if (index(w, "`") > 0) return 0
+        if (index(w, "\\") > 0) return 0
+        if (w == "..") return 0
+        if (w ~ /^\.\.\//) return 0
+        if (w ~ /\/\.\.\//) return 0
+        if (w ~ /\/\.\.$/) return 0
+        return 1
+    }
+    # Resolve a WHOLE-token loop-variable reference (`$f`, `${f}`, `"$f"`,
+    # `"${f}"`) to its bound value. A SINGLE-quoted spelling is not a
+    # variable reference at all to the shell, so it is left alone -- same
+    # literal-vs-expandable distinction mark_expandable_dollars() makes. An
+    # explicit `NAME=value` assignment always wins (including its AMBIG
+    # poison): a name the assignment scan already refused to resolve must not
+    # be resolved here by a second, independent mechanism.
+    function resolve_loop(tok,   inner, ilen, vname) {
+        inner = tok
+        ilen = length(inner)
+        if (ilen >= 2 && substr(inner, 1, 1) == DQ && substr(inner, ilen, 1) == DQ) {
+            inner = substr(inner, 2, ilen - 2)
+        }
+        if (substr(inner, 1, 1) != "$") return tok
+        if (match(inner, /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/)) {
+            vname = substr(inner, 3, RLENGTH - 3)
+        } else if (match(inner, /^\$[A-Za-z_][A-Za-z0-9_]*$/)) {
+            vname = substr(inner, 2, RLENGTH - 1)
+        } else {
+            return tok
+        }
+        if (vname in varmap) return tok
+        if (!(vname in loopmap)) return tok
+        if (loopmap[vname] == "") return tok
+        return loopmap[vname]
+    }
+    # Single entry point every write-target print site uses: same-command
+    # assignment resolution first (#4881), then the loop-variable binding.
+    # Both return the token UNCHANGED when they cannot prove a value, so an
+    # unresolvable target still reaches the shell layer raw and still fails
+    # closed.
+    function resolve_wtarget(tok) {
+        return resolve_loop(resolve_var(tok))
+    }
     BEGIN {
         SEP = sprintf("%c", 31)
         curcwd = startcwd
@@ -4944,6 +5027,36 @@ extract_write_targets() {
             # ORIGINAL toks[] (unmasked) once a real operator is confirmed.
             mseg = substr(gsegs[i], stripped + 1)
             mm = split(mseg, mtoks, /[ \t]+/)
+
+            # `for NAME in w1 w2 ...` — record the loop binding, then FALL
+            # THROUGH (no `continue`, unlike the `cd` branch below): the
+            # redirection scan at the bottom of this loop must still see the
+            # segment, so a `for ... > file` shape cannot lose a target by
+            # being recognized here. The tee/sed/cp/mv branches key on
+            # toks[1] and simply do not match "for".
+            if (toks[1] == "for" && m >= 4 && toks[3] == "in") {
+                lvname = toks[2]
+                lvfirst = ""
+                lvbad = 0
+                for (lj = 4; lj <= m; lj++) {
+                    if (toks[lj] == "") continue
+                    # qsplit() already segments on `;`, so a trailing `do`
+                    # normally lands in the NEXT segment; break on it anyway
+                    # rather than treating a keyword as a path word.
+                    if (toks[lj] == "do" || toks[lj] == ";") break
+                    lvword = strip_cd_quoting(toks[lj])
+                    if (!loop_word_confined(lvword)) { lvbad = 1; break }
+                    if (lvfirst == "") lvfirst = lvword
+                }
+                if (lvbad) lvfirst = ""
+                if ((lvname in loopmap) && loopmap[lvname] != lvfirst) {
+                    # Same name bound by two different loops in one command —
+                    # poison it rather than pick one (mirrors record_assign).
+                    loopmap[lvname] = ""
+                } else {
+                    loopmap[lvname] = lvfirst
+                }
+            }
 
             if (toks[1] == "cd") {
                 if (m >= 2 && toks[2] != "" && toks[2] != "-") {
@@ -5142,7 +5255,7 @@ extract_write_targets() {
                         if (toks[j] == "<<" || toks[j] == "<<-" || toks[j] == "<<<") j++
                         continue
                     }
-                    print curcwd SEP resolve_var(toks[j])
+                    print curcwd SEP resolve_wtarget(toks[j])
                 }
             } else if (toks[1] == "sed") {
                 has_i = 0
@@ -5236,7 +5349,7 @@ extract_write_targets() {
                 if (bare_i && nf >= 3 && is_quoted_empty(nfargs[1]) &&
                     sedflavor != "gnu" && looks_like_sed_script(nfargs[2])) skip_first = 2
                 if (has_i && nf > skip_first) {
-                    for (j = skip_first + 1; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
+                    for (j = skip_first + 1; j <= nf; j++) print curcwd SEP resolve_wtarget(nfargs[j])
                 }
             } else if (toks[1] == "cp" || toks[1] == "mv") {
                 nf = 0
@@ -5259,7 +5372,7 @@ extract_write_targets() {
                     nf++
                     nfargs[nf] = toks[j]
                 }
-                if (nf >= 2) print curcwd SEP resolve_var(nfargs[nf])
+                if (nf >= 2) print curcwd SEP resolve_wtarget(nfargs[nf])
             }
 
             # >/>>  redirection — token-boundary detection only (never a
@@ -5277,7 +5390,7 @@ extract_write_targets() {
                     # Bare operator token. Dup-to-fd (`> &1`) is recognized by
                     # the NEXT token starting with `&` and excluded.
                     if (j + 1 <= m && toks[j+1] != "" && mtoks[j+1] !~ /^&/) {
-                        print curcwd SEP resolve_var(toks[j+1])
+                        print curcwd SEP resolve_wtarget(toks[j+1])
                     }
                     continue
                 }
@@ -5285,7 +5398,7 @@ extract_write_targets() {
                     # Attached form (`>file`, `2>file`, `>>file`).
                     op = toks[j]
                     sub(/^[0-9]*>>?/, "", op)
-                    if (op != "") print curcwd SEP resolve_var(op)
+                    if (op != "") print curcwd SEP resolve_wtarget(op)
                 }
             }
         }
@@ -5717,20 +5830,85 @@ if worktree_isolation_guard_enabled && \
         _any_managed_worktree_exists "$_WT_WRITE_BASE"
     }
 
+    # Resolve $1 (an absolute, lexically-normalized path that may not exist
+    # on disk — a write TARGET, not necessarily a real file yet) to its
+    # PHYSICAL form: walk up to the nearest EXISTING ancestor directory,
+    # canonicalize THAT with `cd ... && pwd -P`, and re-append the remaining
+    # (possibly-nonexistent) tail components unchanged. Pure bash, no
+    # `realpath -m` (GNU-only, silently no-ops on macOS — see
+    # normalize_abs_path() above for the same constraint).
+    #
+    # Companion to _WT_MAIN_ROOT's own `pwd -P` resolution a few lines above
+    # (#4495). _WT_MAIN_ROOT is always physical, but a write target is built
+    # from the raw command text via normalize_abs_path(), which is LEXICAL
+    # ONLY — it never touches the filesystem, so a target reached through a
+    # symlinked ancestor (macOS `TMPDIR=/var/folders/... ->
+    # /private/var/folders/...`, a symlinked $HOME, a bind-mounted
+    # workspace, ...) stays in its un-resolved spelling while
+    # `_WT_MAIN_ROOT`/`_WT_MAIN_ROOT_LOGICAL` are both already physical (the
+    # "LOGICAL" spelling can never recover a symlink already resolved away by
+    # `git rev-parse --git-common-dir`, which returns an ALREADY-PHYSICAL
+    # path). Neither root string is ever a prefix of the unresolved target,
+    # so the confinement check below silently ALLOWS writes that should have
+    # been DENIED — a real guard-bypass, not test flakiness (gf180-sram#69).
+    # Resolving the target to physical form too, and checking that form as a
+    # fallback, closes it without needing the two root spellings to somehow
+    # stay in sync.
+    #
+    # Fails open to the unmodified input if no ancestor resolves (bare "/",
+    # or every `cd` along the way fails) — never narrows an existing allow,
+    # only ever adds a SECOND spelling the confinement checks can match.
+    _wt_physical_form() {
+        local _p="$1" _dir _tail="" _phys
+        [[ "$_p" == /* ]] || { printf '%s' "$_p"; return; }
+        _dir="$_p"
+        while :; do
+            if [[ -d "$_dir" ]]; then
+                _phys=$(cd "$_dir" 2>/dev/null && pwd -P) || _phys=""
+                if [[ -n "$_phys" ]]; then
+                    printf '%s%s' "$_phys" "$_tail"
+                    return
+                fi
+                break
+            fi
+            [[ "$_dir" == "/" ]] && break
+            _tail="/${_dir##*/}${_tail}"
+            _dir="${_dir%/*}"
+            [[ -z "$_dir" ]] && _dir="/"
+        done
+        printf '%s' "$_p"
+    }
+
+    # True if $1 (an absolute, normalized path) resolves inside the main
+    # checkout — tried as the raw string first (both the physical
+    # `_WT_MAIN_ROOT` and whatever `_WT_MAIN_ROOT_LOGICAL` happened to
+    # capture), then again via `_wt_physical_form` (#69) so a target reached
+    # through a symlinked ancestor still matches the (always-physical)
+    # `_WT_MAIN_ROOT` even when the logical spelling was lost upstream.
+    _wt_path_in_main_checkout() {
+        local _p="$1" _pphys
+        [[ -n "$_p" && -n "$_WT_MAIN_ROOT" ]] || return 1
+        case "$_p" in
+            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
+            "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) return 0 ;;
+        esac
+        _pphys=$(_wt_physical_form "$_p")
+        case "$_pphys" in
+            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
+        esac
+        return 1
+    }
+
     # True if $1 (an absolute, normalized path) sits anywhere in the area this
     # guard protects: inside a managed worktree, inside the main checkout
-    # (either spelling), or under the configured worktree base (which may live
-    # on an external volume, outside the main checkout entirely).
+    # (either spelling, or its physical resolution — #69), or under the
+    # configured worktree base (which may live on an external volume, outside
+    # the main checkout entirely).
     _wt_in_protected_area() {
         local _p="$1"
         [[ -n "$_p" ]] || return 1
         _in_any_managed_worktree "$_p" && return 0
-        if [[ -n "$_WT_MAIN_ROOT" ]]; then
-            case "$_p" in
-                "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
-                "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) return 0 ;;
-            esac
-        fi
+        _wt_path_in_main_checkout "$_p" && return 0
         if [[ -z "$_WT_WRITE_BASE_DONE" ]]; then
             _WT_WRITE_BASE=$(resolve_worktree_root "$_WT_MAIN_ROOT")
             _WT_WRITE_BASE_DONE=1
@@ -5938,12 +6116,13 @@ if worktree_isolation_guard_enabled && \
 
         # Not under any worktree. If it's also not under the main checkout,
         # there is nothing this guard protects (e.g. /tmp scratch) -> allow.
+        # _wt_path_in_main_checkout() tries the raw string against both root
+        # spellings AND the target's own physical resolution against the
+        # (always-physical) _WT_MAIN_ROOT, so a target reached through a
+        # symlinked ancestor (macOS TMPDIR, a symlinked $HOME, ...) still
+        # matches instead of silently falling through to allow (#69).
         [[ -z "$_WT_MAIN_ROOT" ]] && continue
-        case "$_wabs" in
-            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) : ;;
-            "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) : ;;
-            *) continue ;;
-        esac
+        _wt_path_in_main_checkout "$_wabs" || continue
 
         # CARVE-OUT (#6021): a read-only-by-role session (no Write/Edit tool
         # at all, see _WT_READONLY_ROLES doc comment above) staging a
