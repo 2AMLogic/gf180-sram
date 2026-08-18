@@ -172,8 +172,21 @@ for f in sim/access-time/testbench/tb_read_access_time.spice sim/access-time/tes
 done"
 
 # --- (a) the reported false positive now allows -------------------------------
+# (a1) pins LOOM_SED_FLAVOR=bsd for the SAME reason (d1)/(d6) below do (#77):
+# LOOP_CMD_IN_WORKTREE is the verbatim macOS command text from the #63 report,
+# and its `sed -i "" <script> "$f"` spelling only means "empty backup suffix,
+# then script, then file" under BSD sed. Under GNU sed `-i` takes no separate
+# extension, so `""` is an (empty) SCRIPT and the `s|...'../../../design/...'|`
+# token is a genuine FILE operand that really does resolve out of the worktree
+# — a deny there is the correct verdict, not a false positive, and it is what
+# the hook produces on a GNU host. Without this pin (a1) asserts BSD behaviour
+# on a GNU host (the ubuntu CI runner) and fails for the right reason, which is
+# precisely the Linux-only half of #78. The GNU reading of this exact idiom is
+# pinned separately as case (M) of test-guard-destructive-sed-branch.sh.
+# (a2)-(a5) deliberately stay unpinned: they carry no BSD-ambiguous `sed -i ""`
+# operand shape, so they exercise the for-loop binding alone on either host.
 assert_decision "(a1) cd into own worktree + for-loop relative sed -i -> allow" \
-    allow "$(run_guard "$MAIN" "$LOOP_CMD_IN_WORKTREE")"
+    allow "$(run_guard "$MAIN" "$LOOP_CMD_IN_WORKTREE" "" bsd)"
 
 assert_decision "(a2) already cwd'd in the worktree, for-loop relative sed -i -> allow" \
     allow "$(run_guard "$WT" "for f in sim/a.spice sim/b.spice; do
