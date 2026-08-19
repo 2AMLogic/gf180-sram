@@ -28,3 +28,13 @@ Ratified spec and decision records for this block.
   bitcell/array and the xschem + ngspice PVT characterization approach); does
   not pre-commit any future periphery to a kind. `sram.md` gains a pointer
   to this record; no existing ratified value changes.
+- [`statistical-treatment-decision.md`](statistical-treatment-decision.md) —
+  resolves #20: ratifies read SNM, hold SNM, and write margin as statistical
+  (mismatch-driven) spec rows requiring Monte Carlo evidence per
+  klayout-tools' `docs/design-evidence-tiers.md` item 6, combined with —
+  never replacing — the ratified 27-corner deterministic matrix. Additive
+  only to `sram.md`'s Characterization section. Cites the three Monte Carlo
+  / `klt yield` records PR #58 already committed (`sim/read-snm/mc/`,
+  `sim/hold-snm/mc/`, `sim/write-margin/mc/`) as satisfying evidence, and
+  explicitly defers ratifying a numeric `target_yield` bar as a named
+  follow-up.

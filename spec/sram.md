@@ -136,6 +136,24 @@ strictly positive and the measured access time is recorded; a corner where
 any of those degrades to zero or is not measured is not a signed-off corner,
 regardless of whether a testbench merely completed without an error.
 
+**Statistical treatment**: read SNM, hold SNM, and write margin are
+**statistical (mismatch-driven) rows** — device Vt/beta mismatch between the
+cross-coupled inverters and access transistors is the dominant real-silicon
+failure mode for both stability margins, and a corner matrix alone cannot
+exercise it (every device on a corner-matrix run moves together; real
+mismatch does not). Per klayout-tools' `docs/design-evidence-tiers.md` item
+6, each of these three rows requires Monte Carlo (device-mismatch) evidence
+— a recorded seed, a sample count, a deterministic negative control, and a
+`klt yield` report — **combined with, never substituting for,** the
+deterministic corner-matrix evidence above. Read/write access time is not a
+matching/offset quantity in this macro's target spec and is not classified
+as statistical by this record. See `spec/statistical-treatment-decision.md`
+for the ratification record (resolves #20) and `sim/README.md` § "Monte
+Carlo / yield evidence records" for the harness and record-tree convention
+this requirement is checked against. No numeric `target_yield` bar is
+ratified for these rows; that is an explicitly deferred follow-up (see
+`spec/statistical-treatment-decision.md` § "Deferred: `target_yield`").
+
 ### Corner set
 
 **Process** × **temperature** × **voltage**, all combinations:
@@ -186,6 +204,11 @@ to make a failing corner disappear.
 - `spec/corner-count-correction.md` — resolves #53, the decision record for
   the "Corner set" corner-count correction (9 → 27). Label-only: it changes
   no axis, no corner, and no Signoff threshold.
+- `spec/statistical-treatment-decision.md` — resolves #20, the decision
+  record ratifying read SNM, hold SNM, and write margin as statistical
+  (mismatch-driven, Monte-Carlo-requiring) rows. Additive only: it adds the
+  "Statistical treatment" paragraph above and changes no corner, axis, or
+  Signoff threshold.
 - `README.md`, "Target specification (DRAFT...)" section — the pre-existing
   draft table this record ratifies and supersedes.
 - `libs.ref/gf180mcu_fd_ip_sram/` under `~/.volare/gf180mcu{A,B,C,D}`
