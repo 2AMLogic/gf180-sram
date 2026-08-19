@@ -4,6 +4,18 @@
 **Resolves**: #1 ("Answer the bitcell question before ratifying anything")
 **Blocks unblocked by this record**: #2 ("Ratify the target spec")
 
+> **Note (2026-08-19)**: this record's `gf180mcuC` citations below are
+> verbatim, dated terminal transcripts of what was actually run on
+> 2026-08-05 (`gf180mcuC` was used incidentally, as "any of the four"
+> process variants, not as a deliberate pin) and are left unedited per this
+> repo's evidence conventions. The variant this repo actually builds and
+> cites against is now ratified as `gf180mcuD` —
+> see [`pdk-variant-decision.md`](pdk-variant-decision.md), which also shows
+> every artifact this record cites (`gf180mcu_fd_ip_sram`'s SPICE/GDS/LEF,
+> `open_pdks` commit `c6d73a35f524070e85faff4a6a9eef49553ebc2b`) is
+> byte-identical between the two variants, so nothing below is stale as a
+> result.
+
 ## Question
 
 Does gf180mcu ship a usable 6T SRAM bitcell, or must one be drawn? Per

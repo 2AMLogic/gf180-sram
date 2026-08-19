@@ -307,14 +307,18 @@ Expected results, as committed (2026-08-16):
 - `klayout` pip package, via `uv run --with klayout` (unpinned — see the
   note below)
 - Python 3.12+ for the generators (stdlib + `klayout` only)
-- PDK: `gf180mcuC`, `open_pdks` commit
+- PDK: `gf180mcuD`, `open_pdks` commit
   `c6d73a35f524070e85faff4a6a9eef49553ebc2b` (the commit
   `spec/bitcell-decision.md` and `design/README.md` both verify against),
   installed via [volare](https://github.com/efabless/volare) under
-  `~/.volare/gf180mcuC`. The PDK is read here only for the layer/datatype map
-  and the foundry-bitcell area comparison — the generators themselves depend
-  on nothing but `klayout.db`, so `verify.sh`'s DRC/LVS steps run without a
-  PDK install.
+  `~/.volare/gf180mcuD` — see `spec/pdk-variant-decision.md` for why
+  `gf180mcuD`, not the `gf180mcuC` this section cited before. The PDK is
+  read here only for the layer/datatype map and the foundry-bitcell area
+  comparison — the generators themselves depend on nothing but
+  `klayout.db`, so `verify.sh`'s DRC/LVS steps run without a PDK install,
+  and neither the layer/datatype map nor the area comparison (both
+  confirmed byte-identical between `gf180mcuC` and `gf180mcuD` in that
+  decision record) changed as a result of the re-pin.
 
 **Known gap, noted rather than fixed**: neither generator pins an exact
 `klayout` package version, so a future run could pick up a release with
@@ -352,6 +356,10 @@ re-layout work.
   than integrate `gf180mcu_fd_ip_sram`, and the note that the custom
   bitcell's DRC waiver/special-rule status (the `SramCore`-marker rules
   discussed under "Area") is not yet established.
+- `spec/pdk-variant-decision.md` — pins `gf180mcuD` as the PDK variant cited
+  above, with direct evidence that this directory's DRC/LVS/area results
+  (Metal1-Metal3 only, via `klt`'s variant-agnostic curated deck) do not
+  depend on the C-vs-D Metal5 delta.
 - `design/README.md` — the schematic side, including the device sizing table
   this layout draws from and the same core-vs-periphery scope boundary.
 - Issue #23 — DRC/LVS/PEX sign-off, which consumes this layout: the PDK-native

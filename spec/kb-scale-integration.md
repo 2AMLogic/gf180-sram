@@ -42,7 +42,7 @@ Option A below tiles the deepest macro rather than a shallower one.)
 own `LEF` `SIZE` statement, not estimated — reproduce with:
 
 ```bash
-grep SIZE ~/.volare/gf180mcuC/libs.ref/gf180mcu_fd_ip_sram/lef/gf180mcu_fd_ip_sram__sram512x8m8wm1.lef
+grep SIZE ~/.volare/gf180mcuD/libs.ref/gf180mcu_fd_ip_sram/lef/gf180mcu_fd_ip_sram__sram512x8m8wm1.lef
 ```
 
 ### What this block does about it

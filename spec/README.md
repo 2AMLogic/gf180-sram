@@ -38,3 +38,11 @@ Ratified spec and decision records for this block.
   `sim/hold-snm/mc/`, `sim/write-margin/mc/`) as satisfying evidence, and
   explicitly defers ratifying a numeric `target_yield` bar as a named
   follow-up.
+- [`pdk-variant-decision.md`](pdk-variant-decision.md) — resolves #86: pins
+  `gf180mcuD` (not `gf180mcuC`) as the PDK variant this repo cites and
+  builds against, per the fleet-wide `gf180-tmds-tx#9` DR-0006 ruling.
+  Citation-only correction — with direct evidence (byte-identical SPICE
+  models, no Metal4/Metal5 use in this repo's layout, a variant-agnostic
+  `klt` curated DRC/LVS deck) that none of this repo's read/write margin,
+  access-time, or Monte Carlo yield figures are sensitive to the C-vs-D
+  metal-stack delta, so no `sim/` or `layout/` evidence is re-run.
