@@ -123,8 +123,8 @@ multiplexing `BL<n>`/`BLB<n>` to `D`/`Q`), which is not drawn here, matching
 ## Regenerating the netlists
 
 ```bash
-export PDK_ROOT="$HOME/.volare"     # parent of gf180mcuC/ -- adjust to your install
-export PDK=gf180mcuC
+export PDK_ROOT="$HOME/.volare"     # parent of gf180mcuD/ -- adjust to your install
+export PDK=gf180mcuD
 
 # 1. (Only if sram_256x32_array.sch needs to change) regenerate the array
 #    schematic from the generator -- pure function of --rows/--cols, no
@@ -170,10 +170,14 @@ schematic — regenerate and re-commit both together.
   required to regenerate the netlists themselves)
 - Python 3.14 (`generate_array.py`; stdlib only, no third-party
   dependencies)
-- PDK: `gf180mcuC`, `open_pdks` commit
+- PDK: `gf180mcuD`, `open_pdks` commit
   `c6d73a35f524070e85faff4a6a9eef49553ebc2b` (same commit
   `spec/bitcell-decision.md` verified against), installed via
-  [volare](https://github.com/efabless/volare) under `~/.volare/gf180mcuC`
+  [volare](https://github.com/efabless/volare) under `~/.volare/gf180mcuD`
+  — see `spec/pdk-variant-decision.md` for why `gf180mcuD`, not the
+  `gf180mcuC` this section cited before, and why nothing above needed to be
+  re-run as a result (SPICE device models are byte-identical between the
+  two variants)
 
 ## Related
 
@@ -182,6 +186,9 @@ schematic — regenerate and re-commit both together.
 - `spec/bitcell-decision.md` — the decision record establishing that
   gf180mcu's 6T bitcell exists only embedded in `gf180mcu_fd_ip_sram`, not
   as a standalone primitive, so this repo draws its own.
+- `spec/pdk-variant-decision.md` — pins `gf180mcuD` as the PDK variant cited
+  above, and shows why none of this design's netlists needed to be
+  regenerated as a result.
 - `layout/README.md` — the parallel GDS-side array-tiling generator (issue
   #22, PR #36), built against an explicitly-labeled placeholder bitcell
   because this issue had not landed yet; that placeholder should be

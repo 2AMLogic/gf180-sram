@@ -80,7 +80,12 @@ vocabulary).
 ## Pinned PDK revision
 
 `open_pdks` commit `c6d73a35f524070e85faff4a6a9eef49553ebc2b`, same pin
-already recorded in `spec/bitcell-decision.md` and `design/README.md`.
+already recorded in `spec/bitcell-decision.md` and `design/README.md`, on
+variant `gf180mcuD` (`spec/pdk-variant-decision.md` -- the SPICE model files
+`sim/lib/pdk_env.sh` resolves below are byte-identical between `gf180mcuC`
+and `gf180mcuD`, so every record committed under `sim/*/records/` and
+`sim/*/mc/records/` while this repo cited `gf180mcuC` remains valid
+evidence; a re-run against `gf180mcuD` would reproduce the same values).
 `sim/lib/pdk_env.sh` resolves the installed PDK (via `PDK_ROOT`+`PDK`,
 `GF180_PDK_PATH`, or a standard install prefix -- same resolution order
 `design/xschemrc` already established) and reports the resolved
@@ -97,8 +102,8 @@ file's header for the exact resolution order).
 ```bash
 # 1. Install/point at the pinned PDK revision, e.g. via volare:
 #      volare enable --pdk gf180mcu c6d73a35f524070e85faff4a6a9eef49553ebc2b
-export PDK_ROOT="$HOME/.volare"      # parent of gf180mcuC/ -- adjust to your install
-export PDK=gf180mcuC
+export PDK_ROOT="$HOME/.volare"      # parent of gf180mcuD/ -- adjust to your install
+export PDK=gf180mcuD
 
 # 2. From a clean checkout, run any one testbench across the full 27-corner
 #    matrix (each of the 5 testbenches below takes well under a minute; a

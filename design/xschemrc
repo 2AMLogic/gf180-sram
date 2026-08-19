@@ -33,8 +33,8 @@ if {[info exists env(PDK)]} {
 ####
 #### Resolution order, matching the convention gf180-bandgap's design/xschemrc
 #### established for this org's other gf180mcu canary blocks:
-####   1. GF180_PDK_PATH (variant dir, e.g. .../gf180mcuC), if set
-####   2. PDK_ROOT + PDK (default variant gf180mcuC if PDK unset)
+####   1. GF180_PDK_PATH (variant dir, e.g. .../gf180mcuD), if set
+####   2. PDK_ROOT + PDK (default variant gf180mcuD if PDK unset)
 ####   3. the usual install prefixes, volare first
 #### Nothing here hardcodes a PDK path.
 
@@ -43,9 +43,9 @@ if { [info exists env(GF180_PDK_PATH)] && $env(GF180_PDK_PATH) ne {} } {
     set GF180_VARIANT [file tail $env(GF180_PDK_PATH)]
 } elseif { [info exists env(PDK_ROOT)] && $env(PDK_ROOT) ne {} } {
     set GF180_ROOT $env(PDK_ROOT)
-    set GF180_VARIANT [expr {[info exists env(PDK)] && $env(PDK) ne {} ? $env(PDK) : {gf180mcuC}}]
+    set GF180_VARIANT [expr {[info exists env(PDK)] && $env(PDK) ne {} ? $env(PDK) : {gf180mcuD}}]
 } else {
-    set GF180_VARIANT {gf180mcuC}
+    set GF180_VARIANT {gf180mcuD}
     set GF180_ROOT {}
     foreach candidate [list [file join $env(HOME) .volare] \
                             [file join $env(HOME) .ciel] \
@@ -60,7 +60,7 @@ if { [info exists env(GF180_PDK_PATH)] && $env(GF180_PDK_PATH) ne {} } {
 
 if { $GF180_ROOT eq {} } {
     puts stderr "xschemrc: no gf180mcu install found."
-    puts stderr "xschemrc: set PDK_ROOT (parent of gf180mcuC/) and PDK=gf180mcuC, or GF180_PDK_PATH=<.../gf180mcuC>, and re-run."
+    puts stderr "xschemrc: set PDK_ROOT (parent of gf180mcuD/) and PDK=gf180mcuD, or GF180_PDK_PATH=<.../gf180mcuD>, and re-run."
 } else {
     # The PDK ships its own xschemrc; it sets XSCHEM_LIBRARY_PATH and the
     # device symbol libraries (nfet_03v3.sym, pfet_03v3.sym, etc. -- see

@@ -367,6 +367,25 @@ def main() -> int:
         " this sizing, not yet informed by any such optimization pass."
     )
     lines.append("")
+    lines.append(
+        "**PDK-variant correction (2026-08-19, `spec/pdk-variant-decision.md`"
+        " -- resolves #86)**: every source record embedded below was run"
+        " against, and its own `PDK:` field cites, `gf180mcuC` -- those"
+        " per-record citations are historical and unchanged, per this"
+        " repo's append-only evidence convention (`sim/README.md`,"
+        " \"Append-only rule\"). This repo's ratified PDK-variant pin is now"
+        " `gf180mcuD` (`spec/pdk-variant-decision.md`), not `gf180mcuC`."
+        " That record shows directly -- not asserted -- that this"
+        " correction changes no number on this page: the SPICE device model"
+        " files every corner sweep and Monte Carlo campaign below actually"
+        " sources (`sm141064.ngspice`, `sm141064_mim.ngspice`,"
+        " `design.ngspice`, `smbb000149.ngspice`) are byte-identical between"
+        " `gf180mcuC` and `gf180mcuD`; the two variants differ only in"
+        " Metal5-scoped DRC/parasitic rules this repo's device-level"
+        " testbenches never exercise. A `gf180mcuD` re-run would reproduce"
+        " every value below unchanged."
+    )
+    lines.append("")
 
     # --- Provenance / staleness check -------------------------------------
     lines.append("## Provenance (staleness check)")
