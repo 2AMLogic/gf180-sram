@@ -176,7 +176,12 @@ echo "--- committed record value for tt_25c_3.30v ---"
 grep "tt_25c_3.30v" -A0 sim/read-snm/records/*.md
 rm -rf "$scratch"
 EOF
-sed -i "s#/tmp/wt#$WT#" "$CMDDIR/A.txt"
+# Portable in-place edit: `sed -i <script> <file>` is GNU-only -- BSD/macOS sed
+# reads the argument after -i as the backup SUFFIX and then fails on the real
+# script ("invalid command code"), which aborted this whole suite on macOS
+# before the first assertion ran. Redirect through a temp file instead so the
+# suite runs identically on both seds.
+sed "s#/tmp/wt#$WT#" "$CMDDIR/A.txt" > "$CMDDIR/A.subst" && mv "$CMDDIR/A.subst" "$CMDDIR/A.txt"
 result=$(run_hook "$CMDDIR/A.txt" "$WT")
 assert_allow "(A) exact #64 reproduction (source, cp+cat targets, trailing rm -rf) -> allow" "$result"
 
