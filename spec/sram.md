@@ -87,6 +87,15 @@ in the original DRAFT table or this issue's AC.
 
 ## Characterization: what "functional across PVT" means for this macro
 
+### Block kind
+
+**Analog.** Per `klayout-tools/docs/design-evidence-tiers.md`'s "Block
+kind" requirement, this block's T1 evidence-tier kind is `analog`, ratified
+in `spec/block-kind-decision.md`. Scoped to everything ratified in this
+document today (custom bitcell/array, xschem + ngspice PVT
+characterization below); it does not pre-commit any future periphery to a
+kind.
+
 This is the item `spec/bitcell-decision.md` explicitly left open ("The
 custom bitcell's own DRC waiver/special-rule status is not yet
 established... in scope for whichever issue does the actual bitcell

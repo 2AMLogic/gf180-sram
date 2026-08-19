@@ -21,3 +21,10 @@ Ratified spec and decision records for this block.
   KB-scale integrator's path (tiled foundry macros vs. DFFRAM vs. OpenRAM,
   with area/timing evidence tiers labelled and the mux/bank-select cost
   flagged as unmeasured). Also notes the open kit's lack of dense NVM.
+- [`block-kind-decision.md`](block-kind-decision.md) — resolves #19:
+  ratifies this block's T1 evidence-tier kind (per
+  `klayout-tools/docs/design-evidence-tiers.md`'s "Block kind" requirement)
+  as `analog`, scoped to everything currently ratified (the custom
+  bitcell/array and the xschem + ngspice PVT characterization approach); does
+  not pre-commit any future periphery to a kind. `sram.md` gains a pointer
+  to this record; no existing ratified value changes.
