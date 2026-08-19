@@ -4648,56 +4648,8 @@ extract_rm_targets() {
 # file's broader "ambiguity never widens a deny" contract is about not
 # inventing NEW denies; preserving an EXISTING one is the conservative side.)
 # =============================================================================
-# detect_sed_inplace_flavor() — which in-place `sed -i` calling convention the
-# sed that would ACTUALLY execute this command uses (#77, corroborated by #51's
-# review of #49).
-#
-# GNU sed and BSD/macOS sed disagree about the token immediately following a
-# BARE `-i`:
-#   GNU — `-i[SUFFIX]` is ATTACHED-ONLY, so `sed -i "" A B` parses as
-#         script="" plus TWO file operands A and B: `A` is a REAL write target
-#         that sed opens and rewrites in place.
-#   BSD — `-i EXTENSION` takes the backup extension as a SEPARATE argument, so
-#         the identical tokens parse as extension="", script=A, file=B: `A` is
-#         script TEXT and is never touched on disk.
-# The command text alone cannot distinguish the two, and guessing "BSD" for a
-# shape that is really GNU silently drops a genuine out-of-worktree file
-# operand from the scan — the exact fail-open regression #77 reports. The
-# guard and the command it is judging run on the SAME host through the same
-# PATH, so the authoritative answer is available locally: ask sed itself.
-#
-# GNU sed answers `--version` with a "GNU sed" banner; BSD sed rejects the
-# option outright. Anything else (no sed on PATH, a wrapper, a container image
-# whose sed answers neither way) is reported as "bsd" — but that is NOT a free
-# pass: the caller (extract_write_targets' sed branch) gates the widened skip
-# on an INDEPENDENT script-shape test as well (looks_like_sed_script), so an
-# undetectable host still cannot get a real file operand skipped.
-#
-# LOOM_SED_FLAVOR pins the answer to `gnu`/`bsd` (the hook test suites set it
-# so their expectations do not depend on the host's sed). It can only choose
-# between the two real conventions — it can never disable the shape test that
-# actually closes the bypass, so it cannot be used to widen an allow.
-#
-# Called exactly once per hook invocation (extract_write_targets has a single
-# call site), so the one extra `sed --version` fork is bounded and needs no
-# memoization.
-detect_sed_inplace_flavor() {
-    case "${LOOM_SED_FLAVOR:-}" in
-        gnu | bsd)
-            printf '%s' "$LOOM_SED_FLAVOR"
-            return 0
-            ;;
-    esac
-    local banner=""
-    banner=$(command sed --version </dev/null 2>&1 | head -n 1 || true)
-    case "$banner" in
-        *"GNU sed"*) printf 'gnu' ;;
-        *) printf 'bsd' ;;
-    esac
-}
-
 extract_write_targets() {
-    printf '%s' "$1" | awk -v startcwd="$2" -v home="$HOME" -v sedflavor="$(detect_sed_inplace_flavor)" "$_QSPLIT_AWK""$_CDEXPAND_AWK""$_CDQUOTE_AWK""$_VARRESOLVE_AWK""$_MASKGT_AWK""$_MASKWS_AWK""$_MASKHEREDOC_AWK"'
+    printf '%s' "$1" | awk -v startcwd="$2" -v home="$HOME" "$_QSPLIT_AWK""$_CDEXPAND_AWK""$_CDQUOTE_AWK""$_VARRESOLVE_AWK""$_MASKGT_AWK""$_MASKWS_AWK""$_MASKHEREDOC_AWK"'
     # resolve_var()/record_assign() (same-command $VAR resolution, #4881) and
     # the DQ/SQ/AMBIG constants they use now come from the shared
     # _VARRESOLVE_AWK snippet above (#6152) — see its header comment for the
@@ -4706,191 +4658,6 @@ extract_write_targets() {
     # when it lands in the main checkout). Fail-closed by construction: this
     # function can only ever REPLACE a token with a value it actually proved,
     # never make one disappear.
-    # is_quoted_empty(tok) -- true when tok is exactly a matched pair of empty
-    # quotes (two double-quote characters, or two single-quote characters,
-    # back to back with nothing between them), never true for anything else
-    # (including the unquoted empty string, which this scanner own
-    # toks[j] == "" check already treats as "no token" and skips before this
-    # is ever reached). Used ONLY by the sed branch below (#66/#77) to
-    # recognize BSD/macOS sed mandatory, separate -i EXTENSION argument in its
-    # overwhelmingly common "no backup" spelling -- never to reinterpret any
-    # other token shape. DQ/SQ come from the shared _VARRESOLVE_AWK BEGIN
-    # block above.
-    function is_quoted_empty(tok,   n, c1, c2) {
-        n = length(tok)
-        if (n != 2) return 0
-        c1 = substr(tok, 1, 1)
-        c2 = substr(tok, 2, 1)
-        return (c1 == DQ && c2 == DQ) || (c1 == SQ && c2 == SQ)
-    }
-    # strip_matched_quotes(tok) -- tok with ONE matched pair of surrounding
-    # quote characters removed. qsplit copies quote characters into the token
-    # VERBATIM (#3755), so the shape test below has to look past them; a token
-    # that is not wrapped in a matched pair is returned unchanged.
-    function strip_matched_quotes(tok,   n, c1, c2) {
-        n = length(tok)
-        if (n < 2) return tok
-        c1 = substr(tok, 1, 1)
-        c2 = substr(tok, n, 1)
-        if ((c1 == DQ && c2 == DQ) || (c1 == SQ && c2 == SQ)) return substr(tok, 2, n - 2)
-        return tok
-    }
-    # looks_like_sed_script(tok) -- 1 only when tok has the recognizable SHAPE
-    # of a sed substitute/transliterate script (`s|a|b|`, `s/a/b/g`,
-    # `2,5s#a#b#`, `y/abc/xyz/`, and `;`-chained sequences of those), 0 for
-    # anything that merely OCCUPIES the script argument position (#77). This
-    # is what lets the sed branch below tell a real BSD
-    # `-i EXTENSION SCRIPT FILE` invocation apart from a crafted
-    # `sed -i "" <out-of-worktree-path> <innocuous-file>`, which has the
-    # identical token count and flag shape but whose second non-flag argument
-    # is a genuine file operand under GNU semantics.
-    #
-    # Deliberately STRICT and deliberately one-directional: an unrecognized
-    # script shape (an address-prefixed `d`/`p`/`a`, a `-f scriptfile`, an
-    # exotic command) merely fails the test, which keeps the token IN the scan
-    # -- i.e. the pre-#66 behavior, fail-closed. Only a positively recognized
-    # script is ever dropped from the candidate set.
-    #
-    # `w`/`W`/`e`/`r`/`R` are NOT accepted as trailing flags or commands: those
-    # are the sed file-writing / command-executing forms, whose operand is a
-    # real path this scanner should keep looking at rather than skip.
-    function looks_like_sed_script(tok) {
-        return sed_script_shape(strip_matched_quotes(tok))
-    }
-    function sed_script_shape(s,   n, i, c, d, seen, ch) {
-        n = length(s)
-        # Shortest possible accepted form is `s|a|b|` style: 4 characters
-        # (`y//$/` etc. included) -- anything shorter cannot carry three
-        # delimiters plus a command letter.
-        if (n < 4) return 0
-        i = 1
-        # Optional leading numeric address / numeric range (`3s|a|b|`,
-        # `2,5s|a|b|`). A `/regex/` or `$` address is intentionally NOT
-        # accepted: those start with a character a relative PATH can also
-        # start with, and refusing them only costs a (fail-closed) missed
-        # widening.
-        while (i <= n && substr(s, i, 1) ~ /^[0-9]$/) i++
-        if (i <= n && substr(s, i, 1) == ",") {
-            i++
-            while (i <= n && substr(s, i, 1) ~ /^[0-9]$/) i++
-        }
-        c = substr(s, i, 1)
-        if (c != "s" && c != "y") return 0
-        i++
-        d = substr(s, i, 1)
-        # The delimiter is any punctuation character -- never alphanumeric,
-        # never whitespace, never a backslash (which would start an escape).
-        if (d == "" || d ~ /^[0-9A-Za-z]$/ || d == " " || d == "\t" || d == "\n" || d == "\\") return 0
-        i++
-        # Walk to the CLOSING (third) delimiter, honouring backslash escapes
-        # so an escaped delimiter inside the pattern/replacement does not end
-        # the command early.
-        seen = 0
-        while (i <= n) {
-            ch = substr(s, i, 1)
-            if (ch == "\\") { i += 2; continue }
-            if (ch == d) {
-                seen++
-                if (seen == 2) break
-            }
-            i++
-        }
-        if (seen != 2) return 0
-        i++
-        # Trailing flags: the substitute flags that carry no file/command
-        # operand. `w`, `W`, `e`, `r` and `R` are excluded on purpose (see
-        # above).
-        while (i <= n && substr(s, i, 1) ~ /^[gpiImM0-9]$/) i++
-        if (i > n) return 1
-        ch = substr(s, i, 1)
-        # A `;`- or newline-chained sequence is a script only if EVERY link in
-        # the chain is itself a recognized command.
-        if (ch == ";" || ch == "\n") return sed_script_shape(substr(s, i + 1, n - i))
-        return 0
-    }
-    # --- `for NAME in <words>` loop-variable binding (gf180-sram #63/#66) ----
-    #
-    # A `for` loop word list is the ONE other place (besides a `NAME=value`
-    # assignment) where a write-idiom token spelled `$f` / `"$f"` has its set
-    # of possible values written out LITERALLY in the same command:
-    #
-    #   cd <worktree>
-    #   for f in sim/a.spice sim/b.spice; do
-    #       sed -i "" "s|x|y|" "$f"
-    #   done
-    #
-    # Without this binding, `"$f"` reaches the shell layer as an unresolvable
-    # `$` token and hits the #4921 fail-closed deny ("unexpanded shell variable
-    # from the path root down") no matter where the write actually lands -- so
-    # an ordinary in-worktree `sim/` maintenance loop is denied twice in a row
-    # with no path forward for the agent.
-    #
-    # loop_word_confined() is the safety valve, and it is deliberately much
-    # stricter than record_assign(): a word only counts when it is a LITERAL
-    # RELATIVE path that cannot leave the directory the write resolves
-    # against -- no leading "/", no leading "~", no "$", no glob/backquote/
-    # backslash, and no ".." component. Any other list shape (an absolute
-    # path, a traversal, a nested expansion, a glob) poisons the name to the
-    # unresolvable sentinel "" so the token keeps its RAW spelling and the
-    # existing fail-closed deny fires exactly as today. That is what keeps
-    # this from becoming a #4178 bypass: the only tokens it can ever resolve
-    # are ones whose runtime value is provably a subpath of the cwd the guard
-    # already judges for a literal relative target.
-    #
-    # Only the FIRST list word is bound, not all of them. Every accepted word
-    # is ".."-free and relative, so all of them land under the SAME cwd and
-    # are confinement-equivalent -- emitting one target per word would change
-    # nothing about the verdict while inflating the target stream against the
-    # 20-target cap the caller applies, which would let a genuinely dangerous
-    # later target be truncated out of the scan.
-    function loop_word_confined(w,   c1) {
-        if (w == "") return 0
-        c1 = substr(w, 1, 1)
-        if (c1 == "/" || c1 == "~" || c1 == "-") return 0
-        if (index(w, "$") > 0) return 0
-        if (index(w, "*") > 0 || index(w, "?") > 0 || index(w, "[") > 0) return 0
-        if (index(w, "`") > 0) return 0
-        if (index(w, "\\") > 0) return 0
-        if (w == "..") return 0
-        if (w ~ /^\.\.\//) return 0
-        if (w ~ /\/\.\.\//) return 0
-        if (w ~ /\/\.\.$/) return 0
-        return 1
-    }
-    # Resolve a WHOLE-token loop-variable reference (`$f`, `${f}`, `"$f"`,
-    # `"${f}"`) to its bound value. A SINGLE-quoted spelling is not a
-    # variable reference at all to the shell, so it is left alone -- same
-    # literal-vs-expandable distinction mark_expandable_dollars() makes. An
-    # explicit `NAME=value` assignment always wins (including its AMBIG
-    # poison): a name the assignment scan already refused to resolve must not
-    # be resolved here by a second, independent mechanism.
-    function resolve_loop(tok,   inner, ilen, vname) {
-        inner = tok
-        ilen = length(inner)
-        if (ilen >= 2 && substr(inner, 1, 1) == DQ && substr(inner, ilen, 1) == DQ) {
-            inner = substr(inner, 2, ilen - 2)
-        }
-        if (substr(inner, 1, 1) != "$") return tok
-        if (match(inner, /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/)) {
-            vname = substr(inner, 3, RLENGTH - 3)
-        } else if (match(inner, /^\$[A-Za-z_][A-Za-z0-9_]*$/)) {
-            vname = substr(inner, 2, RLENGTH - 1)
-        } else {
-            return tok
-        }
-        if (vname in varmap) return tok
-        if (!(vname in loopmap)) return tok
-        if (loopmap[vname] == "") return tok
-        return loopmap[vname]
-    }
-    # Single entry point every write-target print site uses: same-command
-    # assignment resolution first (#4881), then the loop-variable binding.
-    # Both return the token UNCHANGED when they cannot prove a value, so an
-    # unresolvable target still reaches the shell layer raw and still fails
-    # closed.
-    function resolve_wtarget(tok) {
-        return resolve_loop(resolve_var(tok))
-    }
     BEGIN {
         SEP = sprintf("%c", 31)
         curcwd = startcwd
@@ -4960,31 +4727,6 @@ extract_write_targets() {
             seg = segs[i]
             origlen = length(seg)
             sub(/^[ \t]+/, "", seg)
-            # Leading shell keyword stripped BEFORE the sudo strip (gf180-sram
-            # #67): a one-line compound statement such as
-            # `for f in x; do sed -i "" "s|a|b|" file; done` or
-            # `if true; then sed -i ... file; fi` reaches this loop as a
-            # SEGMENT whose first token is the keyword `do`/`then`/etc, not
-            # the command itself, once qsplit() has already broken the
-            # command on `;`. Every write-idiom branch below keys on
-            # toks[1] (`tee`/`sed`/`cp`/`mv`), so without this strip the
-            # toks[1] of such a segment is literally "do" and the scan
-            # silently finds NOTHING -- a #4178 write-confinement BYPASS: the identical
-            # command with its body on its own line (not one-line) already
-            # denies correctly, since there `do`/`then` is its own separate
-            # (write-idiom-free) segment and the body is a plain segment
-            # whose toks[1] IS the real command. Mirrors the `sudo` strip
-            # immediately below (same technique, same fail-closed contract):
-            # stripping a keyword can only ever EXPOSE more of the real
-            # command to the write-idiom scan, never hide one, so this can
-            # only turn a missed target into a found one (widen a deny),
-            # never the reverse. `{` (brace-group opener, e.g.
-            # `x() { sed -i ... file; }` or `{ sed -i ... file; }`) is
-            # included alongside the do/then/else/elif keywords for the same
-            # reason -- it is a control-flow token, not a command word, and
-            # can lead a one-line segment exactly like `do`/`then` can.
-            sub(/^(do|then|else|elif|\{)[ \t]+/, "", seg)
-            sub(/^[ \t]+/, "", seg)
             sub(/^sudo[ \t]+/, "", seg)
             sub(/^[ \t]+/, "", seg)
             if (seg == "") continue
@@ -5053,36 +4795,6 @@ extract_write_targets() {
             mseg = substr(gsegs[i], stripped + 1)
             mm = split(mseg, mtoks, /[ \t]+/)
 
-            # `for NAME in w1 w2 ...` — record the loop binding, then FALL
-            # THROUGH (no `continue`, unlike the `cd` branch below): the
-            # redirection scan at the bottom of this loop must still see the
-            # segment, so a `for ... > file` shape cannot lose a target by
-            # being recognized here. The tee/sed/cp/mv branches key on
-            # toks[1] and simply do not match "for".
-            if (toks[1] == "for" && m >= 4 && toks[3] == "in") {
-                lvname = toks[2]
-                lvfirst = ""
-                lvbad = 0
-                for (lj = 4; lj <= m; lj++) {
-                    if (toks[lj] == "") continue
-                    # qsplit() already segments on `;`, so a trailing `do`
-                    # normally lands in the NEXT segment; break on it anyway
-                    # rather than treating a keyword as a path word.
-                    if (toks[lj] == "do" || toks[lj] == ";") break
-                    lvword = strip_cd_quoting(toks[lj])
-                    if (!loop_word_confined(lvword)) { lvbad = 1; break }
-                    if (lvfirst == "") lvfirst = lvword
-                }
-                if (lvbad) lvfirst = ""
-                if ((lvname in loopmap) && loopmap[lvname] != lvfirst) {
-                    # Same name bound by two different loops in one command —
-                    # poison it rather than pick one (mirrors record_assign).
-                    loopmap[lvname] = ""
-                } else {
-                    loopmap[lvname] = lvfirst
-                }
-            }
-
             if (toks[1] == "cd") {
                 if (m >= 2 && toks[2] != "" && toks[2] != "-") {
                     cdarg = expand_cd_arg(toks[2], home)   # #5315
@@ -5128,55 +4840,10 @@ extract_write_targets() {
                     # widen a deny into an allow (same fallback contract as
                     # #4926).
                     cdclass = strip_cd_quoting(cdarg)
-                    # SAME-COMMAND VARIABLE RESOLUTION FOR `cd` (gf180-sram
-                    # #68): `resolve_var()` (#4881, defined above) already
-                    # resolves a `$NAME`/`${NAME}[...]` write-idiom TARGET
-                    # from a same-command `NAME=value` assignment; the `cd`
-                    # argument never got the same treatment, so
-                    # `SB=/tmp/scratch; cd "$SB/repo"; echo x > sim/a.spice`
-                    # built `curcwd` as `<worktree>/"$SB/repo"` (the raw,
-                    # unresolved token) rather than `/tmp/scratch/repo`,
-                    # misjudging an out-of-repo `cd` destination as an
-                    # in-repo one and denying a write that never lands in the
-                    # main checkout.
-                    #
-                    # cdclass is already the quote-STRIPPED form (computed
-                    # just above for the absolute/relative classification
-                    # test), so a token like `"$SB/repo"` reduces to the bare
-                    # `$SB/repo` shape resolve_var() requires -- the same
-                    # "(unquoted) token" contract resolve_var() already has on
-                    # the write-target side. cdresolved is used ONLY when it
-                    # is FULLY resolved (no `$` survives): resolve_var()
-                    # returns its argument UNCHANGED for every unresolvable
-                    # shape (no matching assignment, `$(...)`/`${VAR:-x}`/`$1`,
-                    # or the AMBIG sentinel for a conflicting reassignment,
-                    # #4914), so an unresolved `$` staying in cdresolved means
-                    # "leave it exactly as today" -- both cdcls (fed to the
-                    # classification test) and cdtarget (joined into curcwd)
-                    # fall back to cdclass/cdarg respectively, the PRE-#68
-                    # behaviour, never widening a deny into an allow on
-                    # anything this resolver cannot prove (same fail-closed
-                    # contract as #4881/#4914).
-                    #
-                    # A resolved variable landing INSIDE the repo is not a
-                    # bypass either: curcwd is simply set to that (correct,
-                    # in-repo) absolute path, so a later out-of-worktree
-                    # write via a relative segment off it still resolves
-                    # in-repo and still denies -- this only ever corrects
-                    # the curcwd value, it never turns off the confinement
-                    # check downstream.
-                    cdresolved = resolve_var(cdclass)
-                    if (index(cdresolved, "$") == 0) {
-                        cdcls = cdresolved
-                        cdtarget = cdresolved
-                    } else {
-                        cdcls = cdclass
-                        cdtarget = cdarg
-                    }
-                    if (cdcls ~ /^\//) {
-                        curcwd = cdtarget
+                    if (cdclass ~ /^\//) {
+                        curcwd = cdarg
                     } else if (curcwd != "") {
-                        curcwd = curcwd "/" cdtarget
+                        curcwd = curcwd "/" cdarg
                     }
                 }
                 continue
@@ -5254,80 +4921,54 @@ extract_write_targets() {
                 }
             }
 
-            # STDOUT-REDIRECTION EXCLUSION (gf180-sram #68, subsumes upstream
-            # #6326) -- the mirror image of the STDIN-REDIRECTION EXCLUSION
-            # immediately above, for the opposite operator direction. `>`/`>>`
-            # (optionally fd-prefixed, e.g. `2>`) is a redirection operator,
-            # never a write-idiom operand, so neither it nor the token it
-            # redirects TO may be scanned as a tee / sed -i / cp-mv operand by
-            # the loops below -- exactly the same false-DENY shape #5369
-            # fixed for `<`, just for `>` instead:
+            # NUMBERED-FD OUTPUT-REDIRECT EXCLUSION (#6326) -- a same-line
+            # numbered file-descriptor redirect (`2>/dev/null`, `2>&1`,
+            # `1>/tmp/x`, ...) is a REDIRECTION OPERATOR (plus, for the
+            # attached fd-to-file form, its own operand), never an extra
+            # tee/sed-i/cp/mv file argument. Mirrors the stdin_redir exclusion
+            # immediately above, but for `[0-9]+>`/`[0-9]+>>` rather than
+            # `[0-9]*<`.
             #
-            #   cp a b/ 2>/dev/null   -- attached form: "2>/dev/null" was the
-            #                            LAST non-flag token, so the cp/mv
-            #                            branch (which takes the LAST token as
-            #                            the destination) picked it over the
-            #                            REAL destination "b/", manufacturing
-            #                            a phantom `<repo>/2>/dev/null` target
-            #                            and denying an ordinary, harmless
-            #                            `cp`/`mv` invocation.
-            #   mv a b >log           -- same shape, bare `mv`.
-            #   tee f 2>/dev/null     -- the tee operand loop (not "last token
-            #                            wins", but every non-excluded,
-            #                            non-flag token IS scanned) misread
-            #                            the redirection as an EXTRA tee
-            #                            target, e.g. a phantom
-            #                            `<repo>/2>/dev/null` sink.
-            #   sed -i "" "s/a/b/" f 2>/dev/null -- same shape as tee, one
-            #                            more phantom sed FILE operand.
+            # Deliberately requires AT LEAST ONE leading digit (`[0-9]+`, not
+            # `[0-9]*`): a bare `>`/`>>` with NO leading digit is intentionally
+            # left OUTSIDE this exclusion and keeps flowing into the tee/sed/
+            # cp-mv loops exactly as before this fix -- narrowing an
+            # over-broad match must never also widen an unrelated one.
             #
-            # Token-boundary test, identical in structure to the `<` scan:
-            #   `>` / `>>` / `0>` / `2>>` (bare, optionally fd-prefixed)
-            #               consumes the NEXT non-empty token, which is the
-            #               file redirected TO.
-            #   `>file` / `2>/dev/null` / `>>file` (attached, optionally
-            #               fd-prefixed) consumes only itself.
+            # The genuine write-target text such a token carries is still
+            # captured separately by the dedicated `>`/`>>` scan below (which
+            # already supports an optional leading digit, `[0-9]*>>?`) --
+            # excluding the token HERE only stops it from being
+            # misappropriated as a tee/sed-i/cp/mv FILE OPERAND; it is not
+            # dropped from write-target scanning altogether.
             #
-            # The attached-form pattern deliberately excludes a leading `&`
-            # right after the operator (`[^ \t&]`) -- so the dup-to-fd
-            # attached spelling `>&2` does NOT match and is therefore not
-            # added to this exclusion set, exactly mirroring how the existing
-            # generic `>`/`>>` write-target loop below (lines ~4181+) already
-            # declines to treat `>&2` as an attached redirection with a real
-            # destination file. This exclusion set is built from mtoks[]
-            # (quote- and arith/test-context-masked, #4245/#5515) so a `>`
-            # that is only quoted DATA, or a comparison inside `((...))`/
-            # `[[...]]`, can never match here either -- same rationale as the
-            # `stdin_redir` scan immediately above.
+            # Bare-operator form (`2>` followed by a separate token, e.g.
+            # `sed -i s/a/b/ file 2> /tmp/err`): the operator token AND the
+            # single token it consumes as its target are both excluded,
+            # UNLESS that next token starts with `&` (a spaced dup-to-fd form,
+            # `2> &1` -- which duplicates a file descriptor, not a file, so
+            # nothing after it is a real operand to exclude).
             #
-            # DELIBERATELY uses an OPTIONAL leading digit (`[0-9]*`, not
-            # `[0-9]+`): the independent upstream #6326 fix required at least
-            # one leading digit and left bare `>`/`>>` (no fd prefix) flowing
-            # into the tee/sed/cp-mv loops below, which does NOT close the
-            # `mv a b >log` / `tee f > out` shapes covered by the tests here.
-            # `[0-9]*` matches every string `[0-9]+` matches plus the
-            # zero-digit case, so this exclusion set is a strict superset of
-            # the #6326 `numfd_redir` exclusion and there is no need to keep
-            # both.
-            delete stdout_redir
+            # Attached form (`2>/dev/null`, `2>>/tmp/log`): the single token
+            # already carries both the operator and its target, so only that
+            # one token needs excluding.
+            delete numfd_redir
             for (j = 1; j <= m; j++) {
                 if (toks[j] == "") continue
-                if (mtoks[j] ~ /^[0-9]*>>?$/) {
-                    stdout_redir[j] = 1
-                    for (k = j + 1; k <= m; k++) {
-                        if (toks[k] == "") continue
-                        stdout_redir[k] = 1
-                        break
+                if (mtoks[j] ~ /^[0-9]+>>?$/) {
+                    numfd_redir[j] = 1
+                    if (j + 1 <= m && toks[j+1] != "" && mtoks[j+1] !~ /^&/) {
+                        numfd_redir[j+1] = 1
                     }
-                } else if (mtoks[j] ~ /^[0-9]*>>?[^ \t&]/) {
-                    stdout_redir[j] = 1
+                } else if (mtoks[j] ~ /^[0-9]+>>?[^ \t&]/) {
+                    numfd_redir[j] = 1
                 }
             }
 
             if (toks[1] == "tee") {
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (j in stdout_redir) continue
+                    if (j in numfd_redir) continue
                     if (toks[j] == "" || toks[j] ~ /^-/) continue
                     # Heredoc/herestring redirection (attached or quoted
                     # delimiter, or the bare double-angle-bracket / dashed
@@ -5351,82 +4992,48 @@ extract_write_targets() {
                         if (toks[j] == "<<" || toks[j] == "<<-" || toks[j] == "<<<") j++
                         continue
                     }
-                    print curcwd SEP resolve_wtarget(toks[j])
+                    print curcwd SEP resolve_var(toks[j])
                 }
             } else if (toks[1] == "sed") {
                 has_i = 0
-                bare_i = 0
                 # BSD `-i` SEPARATE-ARGUMENT FORM (#5674): unlike GNU sed
                 # (where the -i option optional backup suffix is always
                 # ATTACHED to the same token -- bare `-i` or `-i.bak` -- so
-                # the very next non-flag token is always the mandatory SCRIPT
-                # argument, not a file), BSD/macOS sed requires `-i` to take
-                # its backup suffix as a SEPARATE following token, almost
-                # always the empty string (`sed -i` followed by an
-                # empty-quote argument then the script, e.g.
-                # `sed -i EMPTYQUOTES s/a/b/ file` -- the idiom every reported
-                # false positive used). That inserts ONE EXTRA non-file token
-                # (the suffix) before the script, so the "skip exactly
-                # nfargs[1]" logic -- correct for GNU, where nfargs[1] IS the
-                # script -- instead skips the suffix and lets the SCRIPT
-                # (nfargs[2], e.g. `s/a/b/`) fall through as a phantom file
-                # target, resolved against curcwd and denied as a
-                # worktree-confinement bypass for a file that was never
-                # actually written.
+                # the very next
+                # non-flag token is always the mandatory SCRIPT argument, not
+                # a file), BSD/macOS sed requires `-i` to take its backup
+                # suffix as a SEPARATE following token, almost always the
+                # empty string (`sed -i` followed by an empty-quote argument
+                # then the script, e.g. `sed -i EMPTYQUOTES s/a/b/ file` --
+                # the idiom every reported false positive used). That
+                # inserts ONE EXTRA
+                # non-file token (the suffix) before the script, so the
+                # "skip exactly nfargs[1]" logic below -- correct for GNU,
+                # where nfargs[1] IS the script -- instead skips the suffix
+                # and lets the SCRIPT (nfargs[2], e.g. `s/a/b/`) fall through
+                # as a phantom file target, resolved against curcwd and
+                # denied as a worktree-confinement bypass for a file that was
+                # never actually written.
                 #
-                # The #66 fix widened the skip whenever it saw a bare
-                # `-i` immediately followed by a quote-empty token --
-                # unconditionally, without checking whether the token AFTER
-                # that could plausibly be a real out-of-worktree file operand
-                # rather than the sed script. That let a CRAFTED
-                # `sed -i "" <out-of-worktree-path> <real-file>` (identical
-                # token shape under BOTH GNU and BSD conventions) widen the
-                # skip and let the out-of-worktree path escape scanning
-                # entirely -- the fail-open regression #77 reports.
-                #
-                # skip_first now only ever WIDENS from 1 to 2 when EVERY one
-                # of the following holds (#77, corroborated by the review on
-                # #51 of #49) -- token POSITION and argument COUNT alone are
-                # explicitly NOT sufficient, since `sed -i "" X Y` has the
-                # identical shape under both conventions and under GNU
-                # semantics X is a REAL file operand:
-                #   bare_i                      a literal, unattached `-i`
-                #                               token -- the only spelling
-                #                               that can take a SEPARATE
-                #                               extension argument at all.
-                #   nf >= 3                     extension, script, >=1 real
-                #                               file target. A 1- or 2-arg
-                #                               `sed -i ...` keeps its
-                #                               original interpretation.
-                #   is_quoted_empty(nfargs[1])  the BSD "no backup" extension
-                #                               idiom `-i ""` / `-i ''`.
-                #   sedflavor != "gnu"          the sed that will actually
-                #                               run this command does not use
-                #                               the attached-only GNU form
-                #                               (detect_sed_inplace_flavor()).
-                #                               On a GNU host nfargs[2] is a
-                #                               file operand, full stop.
-                #   looks_like_sed_script(...)  nfargs[2] positively has the
-                #                               SHAPE of a sed script, not
-                #                               merely its position. Content,
-                #                               not argument arithmetic, is
-                #                               what separates a real script
-                #                               from a path smuggled into the
-                #                               script slot -- and it holds
-                #                               even if the flavor probe is
-                #                               wrong or unavailable.
-                #
-                # With those in force this can only ever DROP a phantom
-                # script-text candidate from the scan, never a genuine file
-                # target. Every unrecognized or ambiguous shape falls back to
-                # skip_first = 1 -- the pre-#66 behavior, fail-closed.
+                # Detected narrowly and safely: only a BARE `-i` token (not
+                # `-i.bak`, which is unambiguous GNU-attached-form and
+                # already handled) immediately followed by a token that,
+                # quote-stripped, is the EMPTY STRING -- never a plausible
+                # relative path and never a meaningful backup suffix on its
+                # own, so treating it purely as "the BSD marker" cannot hide
+                # a real write target. sed_skip then covers both the suffix
+                # AND the script (2 tokens) instead of just the script (1);
+                # every FILE argument after that is still fully scanned, so a
+                # genuine main-checkout target among them still denies.
+                bare_i_pending = 0
+                sed_skip = 1
                 nf = 0
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (j in stdout_redir) continue
-                    if (toks[j] == "-i") { has_i = 1; bare_i = 1 }
-                    else if (toks[j] ~ /^-i/) has_i = 1
+                    if (j in numfd_redir) continue
+                    if (toks[j] == "-i") { has_i = 1; bare_i_pending = 1; continue }
+                    if (toks[j] ~ /^-i/) has_i = 1
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
                     # Same heredoc/herestring exclusion as the `tee` branch
@@ -5440,19 +5047,20 @@ extract_write_targets() {
                     }
                     nf++
                     nfargs[nf] = toks[j]
+                    if (bare_i_pending && nf == 1 && strip_cd_quoting(toks[j]) == "") {
+                        sed_skip = 2
+                    }
+                    bare_i_pending = 0
                 }
-                skip_first = 1
-                if (bare_i && nf >= 3 && is_quoted_empty(nfargs[1]) &&
-                    sedflavor != "gnu" && looks_like_sed_script(nfargs[2])) skip_first = 2
-                if (has_i && nf > skip_first) {
-                    for (j = skip_first + 1; j <= nf; j++) print curcwd SEP resolve_wtarget(nfargs[j])
+                if (has_i && nf > sed_skip) {
+                    for (j = sed_skip + 1; j <= nf; j++) print curcwd SEP resolve_var(nfargs[j])
                 }
             } else if (toks[1] == "cp" || toks[1] == "mv") {
                 nf = 0
                 delete nfargs
                 for (j = 2; j <= m; j++) {
                     if (j in stdin_redir) continue
-                    if (j in stdout_redir) continue
+                    if (j in numfd_redir) continue
                     if (toks[j] ~ /^-/) continue
                     if (toks[j] == "") continue
                     # Same heredoc/herestring exclusion as the `tee` branch
@@ -5468,7 +5076,7 @@ extract_write_targets() {
                     nf++
                     nfargs[nf] = toks[j]
                 }
-                if (nf >= 2) print curcwd SEP resolve_wtarget(nfargs[nf])
+                if (nf >= 2) print curcwd SEP resolve_var(nfargs[nf])
             }
 
             # >/>>  redirection — token-boundary detection only (never a
@@ -5486,7 +5094,7 @@ extract_write_targets() {
                     # Bare operator token. Dup-to-fd (`> &1`) is recognized by
                     # the NEXT token starting with `&` and excluded.
                     if (j + 1 <= m && toks[j+1] != "" && mtoks[j+1] !~ /^&/) {
-                        print curcwd SEP resolve_wtarget(toks[j+1])
+                        print curcwd SEP resolve_var(toks[j+1])
                     }
                     continue
                 }
@@ -5494,7 +5102,7 @@ extract_write_targets() {
                     # Attached form (`>file`, `2>file`, `>>file`).
                     op = toks[j]
                     sub(/^[0-9]*>>?/, "", op)
-                    if (op != "") print curcwd SEP resolve_wtarget(op)
+                    if (op != "") print curcwd SEP resolve_var(op)
                 }
             }
         }
@@ -5628,458 +5236,6 @@ expand_leading_tilde() {
     esac
 }
 
-# =============================================================================
-# SHARED WORKTREE / PROTECTED-AREA RESOLUTION + THE pdk_env.sh SCRATCH-VAR
-# EXEMPTION HELPERS — hoisted to file scope (issue #82)
-#
-# These definitions used to live INSIDE the
-# `if worktree_isolation_guard_enabled && { … }` Bash-write-confinement block
-# further down, which put them out of reach of the `rm-scope-unresolved-var`
-# check (guards.rmScope=repo) that runs EARLIER in this file. That check fires
-# on the same unexpanded-`$`-var shape and `deny()` exits the hook
-# immediately, so it denied this repo's documented cold-start ngspice idiom
-# (`mktemp -d` scratch + `source sim/lib/pdk_env.sh` + trailing
-# `rm -rf "$scratch"`) before the #64/#65 exemption below was ever reached —
-# masking that exemption entirely under the DEFAULT guard config (#82).
-#
-# ONLY THE DEFINITIONS MOVED — order of evaluation is unchanged. Nothing here
-# executes eagerly: the one piece of real work (deriving the main-checkout
-# root, which shells out to git) is wrapped in `_wt_resolve_main_root()` and
-# cached behind `_WT_MAIN_ROOT_DONE`, invoked lazily by its consumers and
-# still called unconditionally at the top of the write-confinement block —
-# exactly where it used to run.
-# =============================================================================
-_WT_WRITE_BASE=""
-_WT_WRITE_BASE_DONE=""
-
-_WT_MAIN_ROOT=""
-_WT_MAIN_ROOT_LOGICAL=""
-_WT_MAIN_ROOT_DONE=""
-
-# Derive the TRUE main-checkout root — NOT REPO_ROOT. REPO_ROOT is resolved
-# via `git rev-parse --show-toplevel`, which returns the *worktree* root when
-# CWD is a linked worktree (the canonical builder setup: `cd
-# .loom/worktrees/issue-N`). Keying the "resolves inside the main checkout"
-# test below on REPO_ROOT would therefore miss an absolute-path (or
-# `cd $MAIN && …`) Bash write into the main checkout issued from a builder's
-# own worktree — the exact "denied on Edit/Write → retry via Bash" escape
-# this block exists to close (#4178). Mirror the sibling guard
-# guard-worktree-paths.sh: `--git-common-dir/..` is always the main checkout,
-# from a worktree or not. `pwd -P` resolves symlinks so it matches the
-# git-resolved forms consistently (and sidesteps the macOS
-# /tmp -> /private/tmp mismatch vs. normalize_abs_path's lexical-only form).
-# Fail open to REPO_ROOT if the git resolution is unavailable.
-#
-# Idempotent + cached (#82): callers may reach this from either the rm-scope
-# scan or the write-confinement block, whichever runs first for a given
-# command. The body below is the pre-#82 code verbatim.
-_wt_resolve_main_root() {
-    [[ -n "$_WT_MAIN_ROOT_DONE" ]] && return 0
-    _WT_MAIN_ROOT_DONE=1
-    local _wt_common
-    _WT_MAIN_ROOT=""
-    _WT_MAIN_ROOT_LOGICAL=""
-    if [[ -n "$CWD" && -d "$CWD" ]]; then
-        _wt_common=$(cd "$CWD" 2>/dev/null && git rev-parse --git-common-dir 2>/dev/null) || _wt_common=""
-        if [[ -n "$_wt_common" ]]; then
-            _WT_MAIN_ROOT=$(cd "$CWD" 2>/dev/null && cd "$_wt_common/.." 2>/dev/null && pwd -P) || _WT_MAIN_ROOT=""
-            # ...and the LOGICAL spelling of the same root (symlinks intact).
-            # `pwd -P` alone was NOT sufficient (#4495): the write targets this
-            # block compares against are produced by normalize_abs_path(), which
-            # is lexical-only and therefore keeps a symlinked ancestor intact. A
-            # repo reached through a symlinked path (a `/tmp` checkout on macOS,
-            # a symlinked home, a bind-mounted workspace) produced targets that
-            # never string-matched the physical root, so EVERY Bash write into
-            # the main checkout was silently allowed there — the exact #4178
-            # escape this block exists to close. Both spellings are checked.
-            _WT_MAIN_ROOT_LOGICAL=$(cd "$CWD" 2>/dev/null && cd "$_wt_common/.." 2>/dev/null && pwd) || _WT_MAIN_ROOT_LOGICAL=""
-        fi
-    fi
-    [[ -n "$_WT_MAIN_ROOT" ]] || _WT_MAIN_ROOT="$REPO_ROOT"
-    [[ -n "$_WT_MAIN_ROOT_LOGICAL" ]] || _WT_MAIN_ROOT_LOGICAL="$_WT_MAIN_ROOT"
-}
-
-# "Worktree isolation is actually in play for this repo/session" — a
-# managed worktree exists somewhere under the worktree base derived from
-# the SAME main-checkout root the containment tests use. Resolved lazily
-# and cached, so a command with no confinement-relevant target never pays
-# for the find(1). Reads the _WT_MAIN_ROOT / _WT_WRITE_BASE* state above, so
-# it resolves the root first (cached no-op after the first call — #82).
-_wt_isolation_in_play() {
-    _wt_resolve_main_root
-    if [[ -z "$_WT_WRITE_BASE_DONE" ]]; then
-        _WT_WRITE_BASE=$(resolve_worktree_root "$_WT_MAIN_ROOT")
-        _WT_WRITE_BASE_DONE=1
-    fi
-    _any_managed_worktree_exists "$_WT_WRITE_BASE"
-}
-
-# Resolve $1 (an absolute, lexically-normalized path that may not exist
-# on disk — a write TARGET, not necessarily a real file yet) to its
-# PHYSICAL form: walk up to the nearest EXISTING ancestor directory,
-# canonicalize THAT with `cd ... && pwd -P`, and re-append the remaining
-# (possibly-nonexistent) tail components unchanged. Pure bash, no
-# `realpath -m` (GNU-only, silently no-ops on macOS — see
-# normalize_abs_path() above for the same constraint).
-#
-# Companion to _WT_MAIN_ROOT's own `pwd -P` resolution a few lines above
-# (#4495). _WT_MAIN_ROOT is always physical, but a write target is built
-# from the raw command text via normalize_abs_path(), which is LEXICAL
-# ONLY — it never touches the filesystem, so a target reached through a
-# symlinked ancestor (macOS `TMPDIR=/var/folders/... ->
-# /private/var/folders/...`, a symlinked $HOME, a bind-mounted
-# workspace, ...) stays in its un-resolved spelling while
-# `_WT_MAIN_ROOT`/`_WT_MAIN_ROOT_LOGICAL` are both already physical (the
-# "LOGICAL" spelling can never recover a symlink already resolved away by
-# `git rev-parse --git-common-dir`, which returns an ALREADY-PHYSICAL
-# path). Neither root string is ever a prefix of the unresolved target,
-# so the confinement check below silently ALLOWS writes that should have
-# been DENIED — a real guard-bypass, not test flakiness (gf180-sram#69).
-# Resolving the target to physical form too, and checking that form as a
-# fallback, closes it without needing the two root spellings to somehow
-# stay in sync.
-#
-# Fails open to the unmodified input if no ancestor resolves (bare "/",
-# or every `cd` along the way fails) — never narrows an existing allow,
-# only ever adds a SECOND spelling the confinement checks can match.
-_wt_physical_form() {
-    local _p="$1" _dir _tail="" _phys
-    [[ "$_p" == /* ]] || { printf '%s' "$_p"; return; }
-    _dir="$_p"
-    while :; do
-        if [[ -d "$_dir" ]]; then
-            _phys=$(cd "$_dir" 2>/dev/null && pwd -P) || _phys=""
-            if [[ -n "$_phys" ]]; then
-                printf '%s%s' "$_phys" "$_tail"
-                return
-            fi
-            break
-        fi
-        [[ "$_dir" == "/" ]] && break
-        _tail="/${_dir##*/}${_tail}"
-        _dir="${_dir%/*}"
-        [[ -z "$_dir" ]] && _dir="/"
-    done
-    printf '%s' "$_p"
-}
-
-# True if $1 (an absolute, normalized path) resolves inside the main
-# checkout — tried as the raw string first (both the physical
-# `_WT_MAIN_ROOT` and whatever `_WT_MAIN_ROOT_LOGICAL` happened to
-# capture), then again via `_wt_physical_form` (#69) so a target reached
-# through a symlinked ancestor still matches the (always-physical)
-# `_WT_MAIN_ROOT` even when the logical spelling was lost upstream.
-_wt_path_in_main_checkout() {
-    local _p="$1" _pphys
-    _wt_resolve_main_root
-    [[ -n "$_p" && -n "$_WT_MAIN_ROOT" ]] || return 1
-    case "$_p" in
-        "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
-        "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) return 0 ;;
-    esac
-    _pphys=$(_wt_physical_form "$_p")
-    case "$_pphys" in
-        "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
-    esac
-    return 1
-}
-
-# True if $1 (an absolute, normalized path) sits anywhere in the area this
-# guard protects: inside a managed worktree, inside the main checkout
-# (either spelling, or its physical resolution — #69), or under the
-# configured worktree base (which may live on an external volume, outside
-# the main checkout entirely).
-_wt_in_protected_area() {
-    local _p="$1"
-    _wt_resolve_main_root
-    [[ -n "$_p" ]] || return 1
-    _in_any_managed_worktree "$_p" && return 0
-    _wt_path_in_main_checkout "$_p" && return 0
-    if [[ -z "$_WT_WRITE_BASE_DONE" ]]; then
-        _WT_WRITE_BASE=$(resolve_worktree_root "$_WT_MAIN_ROOT")
-        _WT_WRITE_BASE_DONE=1
-    fi
-    if [[ -n "$_WT_WRITE_BASE" ]]; then
-        case "$_p" in
-            "$_WT_WRITE_BASE"|"$_WT_WRITE_BASE"/*) return 0 ;;
-        esac
-    fi
-    return 1
-}
-
-# =========================================================================
-# pdk_env.sh-sourced, mktemp -d, same-command rm -rf scratch-var exemption
-# (issue #64 — repo-local, NOT upstreamed; see the file header).
-#
-# Narrows the unresolved-`$`-var catastrophic-deny block immediately below
-# for exactly one shape: this repo's own documented "cold-start ngspice
-# invocation" (sim/README.md) —
-#
-#   scratch=$(mktemp -d) && \
-#   source sim/lib/pdk_env.sh && \
-#   cp testbench.spice "$scratch/" && cat > "$scratch/corner.inc" <<EOF
-#   ...
-#   EOF
-#   ngspice -b -o out.log ... ; rm -rf "$scratch"
-#
-# Investigation note (recorded so a future reader does not "fix" this the
-# way the issue text describes): replaying the issue's exact reproduction
-# against this hook shows the catastrophic deny actually fires on
-# `$scratch` (assigned via `scratch=$(mktemp -d)`), NOT on
-# `$GF180_DESIGN_INC`/`$GF180_MODEL_FILE` — those two only ever appear
-# inside the `cat > ... <<EOF` heredoc BODY, which extract_write_targets()
-# already masks out via mask_heredoc_bodies_selective() before the scan
-# ever sees them, so they were never candidate write-target text to begin
-# with. The exemption below is therefore keyed on the variable that
-# actually triggers the deny (the mktemp -d scratch var), gated by BOTH
-# requirements below so it stays the narrow, auditable carve-out the
-# issue's Safety Note requires — never a general unresolved-var allow:
-#
-#   (1) the SAME command sources this repo's own sim/lib/pdk_env.sh (any
-#       relative/absolute spelling, `source` or `.`) — ties the exemption
-#       to this repo's fixed, checked-in, small-and-enumerable PDK-env
-#       script, not an arbitrary mktemp+rm-rf command from anywhere.
-#   (2) for the SPECIFIC variable at the root of the write target, the
-#       SAME command contains BOTH a literal `NAME=$(mktemp -d ...)`
-#       assignment AND a later `rm -rf ... "$NAME"` (or `$NAME`/`"$NAME/"`)
-#       removing that exact name — i.e. the scratch dir this write target
-#       lands in is created AND self-cleaned within the one command being
-#       judged, so it can never collide with or outlive worktree state.
-#
-# A command missing either gate — no pdk_env.sh source, or the var isn't a
-# tracked mktemp -d + same-command rm -rf name — is untouched by this
-# block and keeps the pre-#64 fail-closed deny (Safety Note: a genuine
-# out-of-worktree write via an unrelated unresolved var, or a mktemp
-# scratch write with no pdk_env.sh source, still denies).
-# =========================================================================
-_WT_PDK_SCRATCH_VARS_DONE=""
-_WT_PDK_SCRATCH_VARS_CACHE=""
-_wt_pdk_scratch_exempt_varnames() {
-    if [[ -n "$_WT_PDK_SCRATCH_VARS_DONE" ]]; then
-        printf '%s' "$_WT_PDK_SCRATCH_VARS_CACHE"
-        return 0
-    fi
-    _WT_PDK_SCRATCH_VARS_DONE=1
-
-    # Gate (1): this repo's own sim/lib/pdk_env.sh sourced somewhere in
-    # the same command (COMMAND_NO_LITERAL_TEXT — heredoc/comment/quoted
-    # -flag-value text already excluded, mirroring the rm-target scan
-    # just below; a bare substring match is deliberately loose — a miss
-    # here only costs the (fail-closed) exemption, never widens a deny).
-    if ! printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
-         grep -qE '(^|[;&|(`]|[[:space:]])(source|\.)[[:space:]]+[^;&|]*pdk_env\.sh'; then
-        return 0
-    fi
-
-    # Gate (1b, PR #65 review): the whole exemption rests on the scratch
-    # directory landing OUTSIDE the area this guard protects. `mktemp`
-    # honours `$TMPDIR`, so a same-command `TMPDIR=<protected path>`
-    # assignment (or an ambient `TMPDIR` already pointing into the
-    # protected area) silently relocates the "self-cleaning scratch dir"
-    # inside the guarded tree and makes that assumption unsound. Neither
-    # is statically resolvable here, so fail closed on both: refuse the
-    # exemption entirely and keep the pre-#64 deny.
-    if printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
-         grep -qE '(^|[;&|(`]|[[:space:]])TMPDIR='; then
-        return 0
-    fi
-    local _wt_ambient_tmpdir
-    if [[ "${TMPDIR:-}" == /* ]]; then
-        _wt_ambient_tmpdir=$(normalize_abs_path "$TMPDIR")
-        if _wt_in_protected_area "$_wt_ambient_tmpdir"; then
-            return 0
-        fi
-    fi
-
-    # Gate (2a): every `NAME=$(mktemp ... -d ...)` assignment name in the
-    # command. Requires the LITERAL `$(mktemp ...)` command-substitution
-    # form (per the issue's own proposed refinement) with a `-d`/
-    # `--directory` flag inside the parens — not `-different`/`-dt` or
-    # similar.
-    #
-    # PR #65 review: the accepted argument set is a strict ALLOWLIST
-    # (`-d`/`-q`/`-u` short clusters, `--directory`/`--quiet`/`--dry-run`)
-    # with NO positional argument permitted, because every other mktemp
-    # argument shape can choose the scratch dir's parent and therefore
-    # place it inside the protected area:
-    #   `mktemp -d -p <main-root>` / `-dp <main-root>`
-    #   `mktemp -d --tmpdir=<main-root>`
-    #   `mktemp -d <main-root>/scratch.XXXXXX`   (positional TEMPLATE)
-    #   `$(TMPDIR=<main-root> mktemp -d)`        (assignment prefix)
-    # Only a bare `mktemp -d` (the spelling sim/lib/run_corner_sweep.sh
-    # and sim/README.md actually document) still qualifies.
-    local _wt_names _wt_name
-    _wt_names=$(printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
-        grep -oE '[A-Za-z_][A-Za-z0-9_]*=\$\([^()]*\)' | \
-        while IFS= read -r _asn; do
-            _rhs="${_asn#*=}"
-            case "$_rhs" in
-                '$('*mktemp*')')
-                    _inner="${_rhs#\$(}"
-                    _inner="${_inner%)}"
-                    _ok=1
-                    _sawcmd=""
-                    _sawd=""
-                    set -f   # no globbing while word-splitting the args
-                    for _tok in $_inner; do
-                        if [[ -z "$_sawcmd" ]]; then
-                            # The very first word must be mktemp itself —
-                            # an env-assignment prefix (`TMPDIR=… mktemp`)
-                            # or any wrapper disqualifies the assignment.
-                            if [[ "${_tok##*/}" == "mktemp" ]]; then
-                                _sawcmd=1
-                                continue
-                            fi
-                            _ok=""
-                            break
-                        fi
-                        case "$_tok" in
-                            --directory) _sawd=1 ;;
-                            --quiet|--dry-run) ;;
-                            --*) _ok=""; break ;;
-                            -*)
-                                _flags="${_tok#-}"
-                                case "$_flags" in
-                                    ''|*[!dqu]*) _ok=""; break ;;
-                                esac
-                                case "$_flags" in
-                                    *d*) _sawd=1 ;;
-                                esac
-                                ;;
-                            *) _ok=""; break ;;   # positional TEMPLATE
-                        esac
-                    done
-                    set +f
-                    if [[ -n "$_ok" && -n "$_sawcmd" && -n "$_sawd" ]]; then
-                        printf '%s\n' "${_asn%%=*}"
-                    fi
-                    ;;
-            esac
-        done | sort -u)
-    [[ -n "$_wt_names" ]] || return 0
-
-    # Gate (2b): a later `rm -r.../-f...` (has_rf, per extract_rm_targets)
-    # on that EXACT variable, alone (optionally with a trailing `/`) —
-    # `rm -rf "$scratch"` / `rm -rf $scratch/` qualify; `rm -rf
-    # "$scratch/sub"` (a subpath, not the whole scratch dir) does not.
-    local _wt_rmtargets _wt_rmt _wt_rmvar
-    _wt_rmtargets=$(extract_rm_targets "$COMMAND_NO_LITERAL_TEXT")
-    while IFS= read -r _wt_name; do
-        [[ -z "$_wt_name" ]] && continue
-        while IFS= read -r _wt_rmt; do
-            [[ -z "$_wt_rmt" ]] && continue
-            mark_expandable_dollars "$_wt_rmt"
-            _wt_rmvar="${_MARKED_TOKEN%/}"
-            if [[ "$_wt_rmvar" == $'\001'"$_wt_name" ]]; then
-                _WT_PDK_SCRATCH_VARS_CACHE="$_WT_PDK_SCRATCH_VARS_CACHE $_wt_name"
-                break
-            fi
-        done <<<"$_wt_rmtargets"
-    done <<<"$_wt_names"
-
-    printf '%s' "$_WT_PDK_SCRATCH_VARS_CACHE"
-}
-
-# True if $1 (a bare variable name) passed BOTH gates above for this
-# command — i.e. is exempt from the unresolved-`$`-var catastrophic deny.
-_wt_is_pdk_scratch_var() {
-    local _wt_name="$1" _wt_list
-    [[ -n "$_wt_name" ]] || return 1
-    _wt_list=$(_wt_pdk_scratch_exempt_varnames)
-    case " $_wt_list " in
-        *" $_wt_name "*) return 0 ;;
-    esac
-    return 1
-}
-
-# Extract the identifier immediately following the FIRST SOH (marked
-# expandable `$`) in a mark_expandable_dollars()-produced string, handling
-# both `$NAME...` (-> SOH + NAME) and `${NAME}...` (-> SOH + {NAME}...)
-# shapes. Empty if $1 carries no SOH or the character(s) right after it
-# are not a valid identifier start.
-_wt_first_marked_varname() {
-    local _wt_s="$1" _wt_rest
-    [[ "$_wt_s" == *$'\001'* ]] || return 1
-    _wt_rest="${_wt_s#*$'\001'}"
-    if [[ "$_wt_rest" == '{'* ]]; then
-        _wt_rest="${_wt_rest#\{}"
-        printf '%s' "${_wt_rest%%\}*}"
-    elif [[ "$_wt_rest" =~ ^([A-Za-z_][A-Za-z0-9_]*) ]]; then
-        printf '%s' "${BASH_REMATCH[1]}"
-    fi
-}
-
-# Synthetic stand-in for an exempted scratch variable's runtime value: an
-# absolute path that cannot collide with anything real and (given gates 1b
-# and 2a above, which force the scratch dir into $TMPDIR//tmp and refuse
-# the exemption when TMPDIR itself is inside the guarded tree) stands for a
-# location outside the protected area. Substituting it for the exempted
-# variable turns an otherwise-unresolvable target into a CONCRETE path the
-# ordinary confinement machinery can judge.
-_WT_PDK_SCRATCH_PLACEHOLDER="/tmp/.loom-pdk-scratch-placeholder-4f1ad2"
-
-# PR #65 review — the exemption must skip only the "unresolved variable"
-# deny REASON, never path confinement itself.
-#
-# Matching the exempted variable at a target's root says nothing about the
-# REST of the target text: `"$scratch/../../../../../..$MAIN/README.md"`
-# is a genuine mktemp -d + pdk_env.sh + rm -rf command whose write lands in
-# the main checkout via ordinary `..` segments. Before #65 the exemption
-# `continue`d unconditionally at that point, skipping normalize_abs_path,
-# _wt_in_protected_area and the main-root comparison for the whole string —
-# a full write-confinement bypass needing no adversarial cleverness.
-#
-# So resolve the effective path first: substitute the marked variable with
-# the synthetic placeholder above, normalize, and require the result to
-# still be INSIDE the placeholder scratch dir AND outside the protected
-# area. A `..` that stays within the scratch dir (`$scratch/a/../b`) still
-# qualifies — this is a confinement check, not a blanket `..` ban.
-#
-# $1: a mark_expandable_dollars()-produced path whose FIRST marked `$` is
-#     the exempted variable (the write target, or the joined cwd+target).
-# Returns 0 only when the write provably stays inside the scratch dir.
-# Anything this cannot resolve exactly — a non-trivial prefix before the
-# variable, a second unexpanded `$` further along, a suffix that is not a
-# `/`-rooted subpath (`$scratch-sibling.log`) — fails closed.
-_wt_pdk_scratch_target_confined() {
-    local _wt_s="$1" _wt_pre _wt_rest _wt_resolved
-    [[ "$_wt_s" == *$'\001'* ]] || return 1
-    # The variable must be at the path ROOT: nothing before it but an
-    # optional bare `/` (the `/$X/...` shape site (1) also accepts).
-    _wt_pre="${_wt_s%%$'\001'*}"
-    case "$_wt_pre" in
-        ""|"/") ;;
-        *) return 1 ;;
-    esac
-    _wt_rest="${_wt_s#*$'\001'}"
-    if [[ "$_wt_rest" == '{'* ]]; then
-        [[ "$_wt_rest" == *'}'* ]] || return 1
-        _wt_rest="${_wt_rest#*\}}"
-    elif [[ "$_wt_rest" =~ ^[A-Za-z_][A-Za-z0-9_]* ]]; then
-        _wt_rest="${_wt_rest#"${BASH_REMATCH[0]}"}"
-    else
-        return 1
-    fi
-    # Any further unexpanded variable (marked or literal `$`) leaves the
-    # destination unknowable again — fail closed, exactly as pre-#64.
-    case "$_wt_rest" in
-        *$'\001'*|*'$'*) return 1 ;;
-    esac
-    # Only a subpath OF the scratch dir (or the dir itself) qualifies.
-    [[ -z "$_wt_rest" || "$_wt_rest" == /* ]] || return 1
-    _wt_resolved=$(normalize_abs_path "${_WT_PDK_SCRATCH_PLACEHOLDER}${_wt_rest}")
-    case "$_wt_resolved" in
-        "$_WT_PDK_SCRATCH_PLACEHOLDER"|"$_WT_PDK_SCRATCH_PLACEHOLDER"/*) ;;
-        *) return 1 ;;   # `..` escaped the scratch dir
-    esac
-    # Belt-and-braces: re-run the ordinary protected-area test on the
-    # resolved path, so the exemption can never allow a write the normal
-    # confinement logic would deny.
-    _wt_in_protected_area "$_wt_resolved" && return 1
-    return 0
-}
-
-
 # SCANS COMMAND_NO_LITERAL_TEXT, NOT RAW $COMMAND (#5216). extract_rm_targets()
 # segments with qsplit(), which — like every quote-tracking scan in this file —
 # is driven one PHYSICAL LINE at a time and has no memory of a `"` opened on an
@@ -6186,39 +5342,6 @@ if echo "$COMMAND_NO_LITERAL_TEXT" | grep -qE 'rm[[:space:]]+-[a-zA-Z]*[rf]'; th
                 mark_expandable_dollars "$target"
                 _rm_marked="$_MARKED_TOKEN"
                 if [[ "$_rm_marked" == $'\001'* || "$_rm_marked" == /$'\001'* ]]; then
-                    # #82: the SAME narrow pdk_env.sh mktemp-scratch exemption
-                    # the write-confinement site applies (#64, hardened by the
-                    # #65 review), reusing the very same helpers — not a
-                    # parallel reimplementation. Without it this deny fires
-                    # FIRST (the rm scan runs earlier in this file, and deny()
-                    # exits immediately) on the trailing `rm -rf "$scratch"`
-                    # that every real invocation of this repo's documented
-                    # cold-start ngspice idiom (sim/README.md) ends with, so
-                    # the write-confinement exemption below was unreachable
-                    # under the DEFAULT guard config (guards.rmScope=repo).
-                    #
-                    # All three gates are enforced by
-                    # _wt_pdk_scratch_exempt_varnames() exactly as at the
-                    # other site: (1) a same-command `source`/`.` of this
-                    # repo's sim/lib/pdk_env.sh, with no same-command
-                    # `TMPDIR=` and no protected-area ambient $TMPDIR;
-                    # (2) a literal `NAME=$(mktemp -d …)` assignment whose
-                    # argument set is on the strict allowlist (no positional
-                    # TEMPLATE, no -p/--tmpdir, no assignment prefix); and
-                    # (3) a same-command `rm -rf "$NAME"` removing that EXACT
-                    # whole name. _wt_pdk_scratch_target_confined() then adds
-                    # the PR #65 Judge-required path-confinement re-validation:
-                    # substitute a synthetic placeholder for the variable and
-                    # require the resolved path to stay inside that scratch
-                    # dir AND outside the protected area — so a target like
-                    # `"$scratch/../../<main checkout>"` still DENIES here.
-                    # Anything failing any gate keeps the pre-#82 fail-closed
-                    # deny verbatim.
-                    _rm_scratchvar=$(_wt_first_marked_varname "$_rm_marked")
-                    if [[ -n "$_rm_scratchvar" ]] && _wt_is_pdk_scratch_var "$_rm_scratchvar" \
-                       && _wt_pdk_scratch_target_confined "$_rm_marked"; then
-                        continue
-                    fi
                     deny "BLOCKED: rm target '${target}' is an unexpanded shell variable from the path root down, so this guard cannot tell where it resolves at runtime (guards.rmScope=repo). Unresolvable rm targets fail closed (mirrors rjwalters/repo#244, fixing #239). Use an explicit literal path." "rm-scope-unresolved-var"
                 fi
 
@@ -6342,7 +5465,6 @@ _wt_readonly_role_active() {
 # `dist/` scratch directory at the main-checkout root (either root spelling).
 _wt_dist_scratch_path() {
     local _p="$1"
-    _wt_resolve_main_root
     [[ -n "$_p" ]] || return 1
     if [[ -n "$_WT_MAIN_ROOT" ]]; then
         case "$_p" in
@@ -6361,12 +5483,82 @@ if worktree_isolation_guard_enabled && \
    { [[ "$COMMAND_ASK_SCAN" == *">"* ]] || [[ "$COMMAND_ASK_SCAN" == *"tee"* ]] || \
      [[ "$COMMAND_ASK_SCAN" == *"sed"* ]] || [[ "$COMMAND_ASK_SCAN" == *"cp "* ]] || \
      [[ "$COMMAND_ASK_SCAN" == *"mv "* ]]; }; then
-    # Main-checkout root resolution and the confinement / pdk_env.sh
-    # scratch-var helpers this block uses are defined at FILE SCOPE now
-    # (hoisted for #82, so the earlier rm-scope check can reuse them). Resolve
-    # the root here, unconditionally, exactly where it was computed before the
-    # hoist — every deny message below still interpolates $_WT_MAIN_ROOT.
-    _wt_resolve_main_root
+    _WT_WRITE_BASE=""
+    _WT_WRITE_BASE_DONE=""
+
+    # Derive the TRUE main-checkout root — NOT REPO_ROOT. REPO_ROOT is resolved
+    # via `git rev-parse --show-toplevel`, which returns the *worktree* root when
+    # CWD is a linked worktree (the canonical builder setup: `cd
+    # .loom/worktrees/issue-N`). Keying the "resolves inside the main checkout"
+    # test below on REPO_ROOT would therefore miss an absolute-path (or
+    # `cd $MAIN && …`) Bash write into the main checkout issued from a builder's
+    # own worktree — the exact "denied on Edit/Write → retry via Bash" escape
+    # this block exists to close (#4178). Mirror the sibling guard
+    # guard-worktree-paths.sh: `--git-common-dir/..` is always the main checkout,
+    # from a worktree or not. `pwd -P` resolves symlinks so it matches the
+    # git-resolved forms consistently (and sidesteps the macOS
+    # /tmp -> /private/tmp mismatch vs. normalize_abs_path's lexical-only form).
+    # Fail open to REPO_ROOT if the git resolution is unavailable.
+    _WT_MAIN_ROOT=""
+    _WT_MAIN_ROOT_LOGICAL=""
+    if [[ -n "$CWD" && -d "$CWD" ]]; then
+        _wt_common=$(cd "$CWD" 2>/dev/null && git rev-parse --git-common-dir 2>/dev/null) || _wt_common=""
+        if [[ -n "$_wt_common" ]]; then
+            _WT_MAIN_ROOT=$(cd "$CWD" 2>/dev/null && cd "$_wt_common/.." 2>/dev/null && pwd -P) || _WT_MAIN_ROOT=""
+            # ...and the LOGICAL spelling of the same root (symlinks intact).
+            # `pwd -P` alone was NOT sufficient (#4495): the write targets this
+            # block compares against are produced by normalize_abs_path(), which
+            # is lexical-only and therefore keeps a symlinked ancestor intact. A
+            # repo reached through a symlinked path (a `/tmp` checkout on macOS,
+            # a symlinked home, a bind-mounted workspace) produced targets that
+            # never string-matched the physical root, so EVERY Bash write into
+            # the main checkout was silently allowed there — the exact #4178
+            # escape this block exists to close. Both spellings are checked.
+            _WT_MAIN_ROOT_LOGICAL=$(cd "$CWD" 2>/dev/null && cd "$_wt_common/.." 2>/dev/null && pwd) || _WT_MAIN_ROOT_LOGICAL=""
+        fi
+    fi
+    [[ -n "$_WT_MAIN_ROOT" ]] || _WT_MAIN_ROOT="$REPO_ROOT"
+    [[ -n "$_WT_MAIN_ROOT_LOGICAL" ]] || _WT_MAIN_ROOT_LOGICAL="$_WT_MAIN_ROOT"
+
+    # "Worktree isolation is actually in play for this repo/session" — a
+    # managed worktree exists somewhere under the worktree base derived from
+    # the SAME main-checkout root the containment tests use. Resolved lazily
+    # and cached, so a command with no confinement-relevant target never pays
+    # for the find(1). Defined here (inside the block) because it reads the
+    # block-local _WT_MAIN_ROOT / _WT_WRITE_BASE* state.
+    _wt_isolation_in_play() {
+        if [[ -z "$_WT_WRITE_BASE_DONE" ]]; then
+            _WT_WRITE_BASE=$(resolve_worktree_root "$_WT_MAIN_ROOT")
+            _WT_WRITE_BASE_DONE=1
+        fi
+        _any_managed_worktree_exists "$_WT_WRITE_BASE"
+    }
+
+    # True if $1 (an absolute, normalized path) sits anywhere in the area this
+    # guard protects: inside a managed worktree, inside the main checkout
+    # (either spelling), or under the configured worktree base (which may live
+    # on an external volume, outside the main checkout entirely).
+    _wt_in_protected_area() {
+        local _p="$1"
+        [[ -n "$_p" ]] || return 1
+        _in_any_managed_worktree "$_p" && return 0
+        if [[ -n "$_WT_MAIN_ROOT" ]]; then
+            case "$_p" in
+                "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) return 0 ;;
+                "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) return 0 ;;
+            esac
+        fi
+        if [[ -z "$_WT_WRITE_BASE_DONE" ]]; then
+            _WT_WRITE_BASE=$(resolve_worktree_root "$_WT_MAIN_ROOT")
+            _WT_WRITE_BASE_DONE=1
+        fi
+        if [[ -n "$_WT_WRITE_BASE" ]]; then
+            case "$_p" in
+                "$_WT_WRITE_BASE"|"$_WT_WRITE_BASE"/*) return 0 ;;
+            esac
+        fi
+        return 1
+    }
 
     WRITE_TARGETS=$(extract_write_targets "$COMMAND_ASK_SCAN" "$CWD" | head -20)
     while IFS=$'\037' read -r _wcwd _wtarget; do
@@ -6470,18 +5662,6 @@ if worktree_isolation_guard_enabled && \
                 # (`/$X`, `/$X/evil`, whose runtime value picks the top-level
                 # directory — the main checkout's own included).
                 if [[ "$_wmarked" == $'\001'* || "$_wmarked" == /$'\001'* ]]; then
-                    # #64: pdk_env.sh-sourced, mktemp -d, same-command
-                    # rm -rf scratch var — narrow exemption, see the helper
-                    # functions' doc comment above for the required gates.
-                    # #65 review: the gates alone are NOT sufficient — the
-                    # resolved path must also still be confined to the scratch
-                    # dir, or `..` after the variable walks the write straight
-                    # back into the main checkout.
-                    _wscratchvar=$(_wt_first_marked_varname "$_wmarked")
-                    if [[ -n "$_wscratchvar" ]] && _wt_is_pdk_scratch_var "$_wscratchvar" \
-                       && _wt_pdk_scratch_target_confined "$_wmarked"; then
-                        continue
-                    fi
                     if _wt_isolation_in_play; then
                         deny "BLOCKED: Bash-tool write target '${_wtarget}' is an unexpanded shell variable from the path root down, so this guard cannot tell where the write lands — it may resolve to an absolute path inside the main repository checkout ('${_WT_MAIN_ROOT}'), and a Loom-managed worktree exists in this repository. Unresolvable write targets fail closed (#4921). Need this variable resolved instead? Declare it literally in the SAME command, before the write: VAR=/literal/path; <write> -- the guard's same-command resolver (record_assign()/resolve_var(), #4881) substitutes it before this check runs, so the write is judged on the real resolved path. A false or self-serving declaration gains nothing: the resolved path is still checked against this same containment rule, so it can never grant an allow beyond what writing that literal path outright would already grant (#6172). Otherwise, write to an explicit literal path — inside your issue worktree (.loom/worktrees/issue-<N>) for repo files, or a spelled-out /tmp path for scratch. Not a Builder and need to write here directly? Set guards.worktreeIsolation:false in .loom/config.json for the session -- an inline 'LOOM_GUARD_WORKTREE_ISOLATION=0 <command>' prefix does NOT work (this hook runs as a separate process). (#4178)" "worktree-write-confinement-unresolved-var"
                     fi
@@ -6513,18 +5693,7 @@ if worktree_isolation_guard_enabled && \
                         # (`> /$A/evil`, `> /tmp/../$A/evil`), whose runtime
                         # value picks a top-level directory, the main
                         # checkout's own included. Same verdict as (1).
-                        #
-                        # #64: same narrow scratch-var exemption as (1) above,
-                        # tested against the joined effective path (_weff) so
-                        # it still fires when the variable reaches this branch
-                        # via a `cd "$scratch"`-derived cwd rather than as the
-                        # write target's own literal first character. #65
-                        # review: same mandatory confinement re-check as (1).
-                        _wscratchvar=$(_wt_first_marked_varname "$_weff")
-                        if [[ -n "$_wscratchvar" ]] && _wt_is_pdk_scratch_var "$_wscratchvar" \
-                           && _wt_pdk_scratch_target_confined "$_weff"; then
-                            :
-                        elif _wt_isolation_in_play; then
+                        if _wt_isolation_in_play; then
                             deny "BLOCKED: Bash-tool write target '${_wtarget}' has an unexpanded shell variable as its first real path component, so this guard cannot tell where the write lands — it may resolve inside the main repository checkout ('${_WT_MAIN_ROOT}'), and a Loom-managed worktree exists in this repository. Unresolvable write targets fail closed (#4921). Need this variable resolved instead? Declare it literally in the SAME command, before the write: VAR=/literal/path; <write> -- the guard's same-command resolver (record_assign()/resolve_var(), #4881) substitutes it before this check runs, so the write is judged on the real resolved path. A false or self-serving declaration gains nothing: the resolved path is still checked against this same containment rule, so it can never grant an allow beyond what writing that literal path outright would already grant (#6172). Otherwise, write to an explicit literal path — inside your issue worktree (.loom/worktrees/issue-<N>) for repo files, or a spelled-out /tmp path for scratch. Not a Builder and need to write here directly? Set guards.worktreeIsolation:false in .loom/config.json for the session -- an inline 'LOOM_GUARD_WORKTREE_ISOLATION=0 <command>' prefix does NOT work (this hook runs as a separate process). (#4178)" "worktree-write-confinement-unresolved-var"
                         fi
                     elif _wt_in_protected_area "$_wknown"; then
@@ -6586,13 +5755,12 @@ if worktree_isolation_guard_enabled && \
 
         # Not under any worktree. If it's also not under the main checkout,
         # there is nothing this guard protects (e.g. /tmp scratch) -> allow.
-        # _wt_path_in_main_checkout() tries the raw string against both root
-        # spellings AND the target's own physical resolution against the
-        # (always-physical) _WT_MAIN_ROOT, so a target reached through a
-        # symlinked ancestor (macOS TMPDIR, a symlinked $HOME, ...) still
-        # matches instead of silently falling through to allow (#69).
         [[ -z "$_WT_MAIN_ROOT" ]] && continue
-        _wt_path_in_main_checkout "$_wabs" || continue
+        case "$_wabs" in
+            "$_WT_MAIN_ROOT"|"$_WT_MAIN_ROOT"/*) : ;;
+            "$_WT_MAIN_ROOT_LOGICAL"|"$_WT_MAIN_ROOT_LOGICAL"/*) : ;;
+            *) continue ;;
+        esac
 
         # CARVE-OUT (#6021): a read-only-by-role session (no Write/Edit tool
         # at all, see _WT_READONLY_ROLES doc comment above) staging a
@@ -7211,10 +6379,18 @@ fi
 # shell-separator set the pre-check's own trailing class already accepted.
 # =============================================================================
 _stash_is_recover=false
+_stash_is_pop=false
 _stash_is_create=false
 if echo "$COMMAND_ASK_SCAN" | grep -qE '(^|[;&|(`]|[[:space:]])git[[:space:]]+stash([[:space:]]|[;&|)`]|$)'; then
     if echo "$COMMAND_ASK_SCAN" | grep -qE '(^|[;&|(`]|[[:space:]])git[[:space:]]+stash[[:space:]]+(pop|drop|clear)([[:space:]]|[;&|)`]|$)'; then
         _stash_is_recover=true
+    fi
+    # `pop` alone has a scriptable safe equivalent (safe-stash-pop.sh, #6501);
+    # `drop`/`clear` do not — they destroy an entry outright with nothing to
+    # verify afterwards. Track it separately so the main-checkout ask only
+    # names the wrapper when the wrapper actually applies.
+    if echo "$COMMAND_ASK_SCAN" | grep -qE '(^|[;&|(`]|[[:space:]])git[[:space:]]+stash[[:space:]]+pop([[:space:]]|[;&|)`]|$)'; then
+        _stash_is_pop=true
     fi
     if stash_create_invoked "$COMMAND_ASK_SCAN"; then
         _stash_is_create=true
@@ -7264,7 +6440,23 @@ if [[ "$_stash_is_recover" == true || "$_stash_is_create" == true ]] \
         # create has nothing to be redirected to and stays allowed exactly as
         # before — the create-side deny (#5754) is worktree-only by design.
         if [[ "$_stash_is_recover" == true ]]; then
-            ask "Command requires confirmation: $COMMAND (git stash pop/drop/clear in the MAIN checkout can destroy operator-preserved state — the main checkout's stash stack is operator-owned, not scratch space for an integration check. Run test-merges in an isolated worktree instead; set guards.stashScope:false in .loom/config.json, or export LOOM_GUARD_STASH_SCOPE=0 in the agent's OWN environment before the session — an inline 'LOOM_GUARD_STASH_SCOPE=0 git stash pop' prefix does not reach this hook, which runs as a separate process)" "stash-scope:main-checkout"
+            # RECOMMENDED-PATH HINT (#6501). A raw main-checkout `git stash pop`
+            # is not just a stack-ownership hazard — it is also the mechanism
+            # behind #6499/#6502, where a conflicting pop left live
+            # `<<<<<<<`/`=======`/`>>>>>>>` markers in a tracked
+            # `.loom/config.json` that were then committed, silently breaking
+            # the daemon's config parse fleet-wide. `safe-stash-pop.sh` is the
+            # verified replacement. Named only when it PROVABLY exists and
+            # actually applies (pop, not drop/clear) — the same discipline the
+            # create-side redirect below uses before printing a literal
+            # replacement command. This stays an ASK, not a deny: `refs/stash`
+            # has no sanctioned reader other than a pop, so denying would
+            # strand work rather than protect it.
+            _stash_pop_hint=""
+            if [[ "$_stash_is_pop" == true && -f "$_stash_common_parent/.loom/scripts/safe-stash-pop.sh" ]]; then
+                _stash_pop_hint=" If you do need this entry back, use the verified wrapper instead of a raw pop: './.loom/scripts/safe-stash-pop.sh' — it snapshots the pre-pop tree, pops, verifies no conflict markers or unmerged index entries were left behind, and rolls the tree back (keeping the stash entry) when the pop conflicts, so it can never leave a tracked file carrying unresolved conflict markers for someone to commit (#6501; add --no-restore to keep a conflicted tree for manual resolution)."
+            fi
+            ask "Command requires confirmation: $COMMAND (git stash pop/drop/clear in the MAIN checkout can destroy operator-preserved state — the main checkout's stash stack is operator-owned, not scratch space for an integration check. Run test-merges in an isolated worktree instead; set guards.stashScope:false in .loom/config.json, or export LOOM_GUARD_STASH_SCOPE=0 in the agent's OWN environment before the session — an inline 'LOOM_GUARD_STASH_SCOPE=0 git stash pop' prefix does not reach this hook, which runs as a separate process)${_stash_pop_hint}" "stash-scope:main-checkout"
         fi
     elif [[ -n "$_stash_toplevel" && -n "$_stash_common_parent" ]]; then
         # cwd is a linked worktree, not the main checkout. Count OTHER
