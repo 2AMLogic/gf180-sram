@@ -1,0 +1,82 @@
+* By-hand PEX write-margin testbench, EXTRACTED leg (issue #95).
+*
+* Byte-identical to ./tb_write_margin_schematic.spice except for the DUT
+* `.include` target -- see that file's header for the full rationale
+* shared by both. This is the extracted-side sibling: `.include`s a
+* `klt extract --deck gf180mcu --pdk gf180mcuD --parasitics`-produced,
+* PDK-model-bound netlist (../dut/generate.sh; --pdk binding is required
+* for the extracted `X` cards to resolve real `nfet_03v3`/`pfet_03v3`
+* subcircuits rather than klt extract's bare, unbindable `nfet`/`pfet`
+* class labels -- see docs/cli/extract.md "SPICE model binding") instead
+* of the schematic-side `.SUBCKT` wrapper. Both declare
+* `.SUBCKT sram_bitcell_6t BL BLB Q QB VDD VSS WL`, so this file's
+* X-instantiation and `.control` bisection block are reused
+* byte-identical.
+.include './corner.inc'
+
+VVDD VDD 0 DC VDDC
+
+* See ./tb_write_margin_schematic.spice's header for why this is needed on
+* the extracted leg (an internal, un-pinned `vsubs` substrate-coupling
+* node with no DC path to any reference).
+.options rshunt=1e12
+
+.include '@@REPO_ROOT@@/sim/pex/write-margin/dut/extracted-netlist.spice'
+XDUT BL BLB Q QB VDD VSS WL sram_bitcell_6t
+
+.param VWRITE=0
+VBL BL 0 PWL(0 VDDC 4n VDDC 4.1n VWRITE 5.9n VWRITE 6n VDDC 8n VDDC)
+VBLB BLB 0 PWL(0 0 4n 0 4.1n VDDC 8n VDDC)
+VWL WL 0 PWL(0 0 0.1n VDDC 1.9n VDDC 2n 0 4n 0 4.1n VDDC 5.9n VDDC 6n 0 8n 0)
+
+.control
+let vddc_ctl = @vvdd[dc]
+
+let vw_lo = 0
+let vw_hi = vddc_ctl
+let vw_mid = 0
+let q_lo = 0
+let q_hi = 0
+let q_mid = 0
+let iter = 0
+let wtv_bits = 14
+let wtv_resolution = vddc_ctl/16384
+let wtv_fail = 0 - wtv_resolution
+
+alterparam VWRITE = 0
+reset
+tran 0.02n 8n
+let q_lo = v(Q)[length(v(Q))-1]
+
+alterparam VWRITE = $&vddc_ctl
+reset
+tran 0.02n 8n
+let q_hi = v(Q)[length(v(Q))-1]
+
+dowhile iter < wtv_bits
+  let vw_mid = (vw_lo + vw_hi)/2
+  alterparam VWRITE = $&vw_mid
+  reset
+  tran 0.02n 8n
+  let q_mid = v(Q)[length(v(Q))-1]
+  if q_mid <= (vddc_ctl/2)
+    let vw_lo = vw_mid
+  else
+    let vw_hi = vw_mid
+  end
+  let iter = iter + 1
+end
+
+if q_lo > (vddc_ctl/2)
+  echo RESULT: write_trip_voltage_v = $&wtv_fail
+  echo RESULT: write_vdd_v = $&vddc_ctl
+else
+  if q_hi <= (vddc_ctl/2)
+    echo RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD); fixture or corner did not produce a valid trip point
+  else
+    echo RESULT: write_trip_voltage_v = $&vw_lo
+    echo RESULT: write_vdd_v = $&vddc_ctl
+  end
+end
+.endc
+.end

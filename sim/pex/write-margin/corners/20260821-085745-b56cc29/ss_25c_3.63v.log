@@ -1,0 +1,843 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, extracted leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       3.63
+xdut.q__t3                                3.63
+xdut.wl__t0                                  0
+xdut.bl__t0                               3.63
+xdut.vss__t0                          0.433608
+xdut.blb__t0                       1.16132e-11
+xdut.wl__t1                                  0
+xdut.qb__t3                           0.433608
+xdut.vss__t1                          0.433608
+xdut.vss__t4                          0.433608
+xdut.qb__t0                           0.433608
+xdut.q__t4                                3.63
+xdut.vss__t2                          0.433608
+xdut.qb__t4                           0.433608
+xdut.q__t0                                3.63
+xdut.vss__t5                          0.433608
+xdut.vss__t3                          0.433608
+xdut.vdd__t2                              3.63
+xdut.qb__t1                           0.433608
+xdut.q__t1                                3.63
+xdut.vdd__t0                              3.63
+xdut.qb__t2                           0.433608
+xdut.q__t2                                3.63
+xdut.vdd__t3                              3.63
+xdut.vdd__t1                              3.63
+bl                                        3.63
+xdut.vsubs                                   0
+blb                                          0
+q                                         3.63
+qb                                    0.433608
+vss                                   0.433608
+wl                                           0
+vwl#branch                                   0
+vblb#branch                        7.18197e-12
+vbl#branch                        -1.04561e-11
+vvdd#branch                       -4.95515e-11
+
+
+No. of Data Rows : 429
+RESULT: write_trip_voltage_v = 2.0935
+RESULT: write_vdd_v = 3.63
+Note: Simulation executed from .control section 
+=== corner: ss_25c_3.63v (process=ss temp=25C vdd=3.63V) ===
+=== ngspice exit status: 0 ===

@@ -9,9 +9,13 @@ __pycache__/
 # (append-only record trail), so they escape the *.log rule. Same for the
 # per-sample Monte Carlo logs under mc/raw-logs/ -- they carry the seed and
 # recorded value of every individual MC draw, which is what makes a yield
-# report auditable rather than a summary to be taken on trust.
-!sim/*/corners/**/*.log
-!sim/*/mc/raw-logs/**/*.log
+# report auditable rather than a summary to be taken on trust. `**` (not `*`)
+# between `sim/` and `corners/`/`mc/raw-logs/` so this also covers a nested
+# experiment directory such as sim/pex/write-margin/corners/ (issue #95's
+# by-hand PEX workflow), not just the one-level sim/<experiment>/corners/
+# layout every other experiment directory uses.
+!sim/**/corners/**/*.log
+!sim/**/mc/raw-logs/**/*.log
 sim/build/
 # synthesis / P&R scratch
 flow/build/

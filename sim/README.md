@@ -236,11 +236,15 @@ carries:
   this script's 4th argument).
 - **Netlist provenance** -- `schematic` for every record here. `layout/`
   now exists (issue #22) and a bitcell parasitic extraction has been
-  produced (`sim/pex/`, issue #23), but a post-layout re-run of *these*
-  corner records could not be produced yet -- see `sim/pex/README.md` for
-  why and #95 for the follow-up. A future post-layout re-run of one of
-  these claims would record `extracted` here instead and reference the
-  record it supersedes via **Supersedes**.
+  produced (`sim/pex/`, issue #23); issue #95 closed T1 item 7 (post-layout
+  PEX) with new, *parallel* schematic-vs-extracted delta artifacts under
+  `sim/pex/access-time/` and `sim/pex/write-margin/` (see `sim/pex/README.md`)
+  for write/read access time and write margin, and documented (with
+  evidence) that no PEX-compatible path exists for read/hold SNM. None of
+  that re-runs *these* ratified corner records themselves, which stay
+  `schematic` -- a future post-layout re-run of one of these specific
+  claims would record `extracted` here instead and reference the record it
+  supersedes via **Supersedes**.
 - **Corner matrix run** -- always the full 9-point matrix (see above); a
   record that ever runs a subset must say why, per this convention.
 - **Statistical convention** -- `N/A` for every record under `corners/` (a

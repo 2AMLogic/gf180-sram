@@ -133,12 +133,18 @@ captures.
   checked. Running the PDK's own KLayout DRC deck (`klt drc --engine
   klayout`, which needs a standalone `klayout` binary this host still does
   not have as of issue #23) remains open.
-* **Electrical behaviour.** No post-layout simulation, no parasitics. The
-  `sim/` PVT results characterize the *schematic*; issue #23 produced one
+* **Electrical behaviour.** The ratified `sim/` PVT results (`sim/<experiment>/records/`)
+  still characterize the *schematic* only -- issue #23 produced one
   real PEX-adjacent artifact (a parasitic-annotated bitcell extraction,
   `sim/pex/`) but could not produce a per-corner schematic-vs-extracted
-  delta against the ratified testbenches -- see `sim/pex/README.md` for
-  exactly why, and #95 for the follow-up.
+  delta against the ratified testbenches themselves. Issue #95 closed
+  that for write/read access time (`klt pex`-native, `sim/pex/access-time/`)
+  and write margin (a by-hand extraction workflow, `sim/pex/write-margin/`)
+  as new, parallel evidence alongside (not replacing) the ratified
+  schematic records, and documented -- with evidence -- that no
+  PEX-compatible path exists for read/hold SNM given this layout's
+  monolithic (non-partitionable) bitcell geometry. See `sim/pex/README.md`
+  for the full per-measurement breakdown.
 * **A routed macro.** There is no periphery, no pin/obstruction abstract, no
   LEF/Liberty view (issue #24's scope).
 * **Array-level LVS.** See "Known tool gaps" — `klt extract` is flat-only, so
@@ -371,8 +377,10 @@ re-layout work.
   this layout draws from and the same core-vs-periphery scope boundary.
 - Issue #23 — DRC/LVS/PEX sign-off, which consumes this layout: closed the
   DRC/LVS legs with committed reports in `layout/reports/`; the PEX leg
-  produced one real artifact (`sim/pex/`) but not a full signoff, continued
-  in #95.
+  produced one real artifact (`sim/pex/`) but not a full signoff. Issue #95
+  closed the PEX leg per-measurement (write/read access time via `klt
+  pex`, write margin via a by-hand extraction workflow; no PEX-compatible
+  path for read/hold SNM) -- see `sim/pex/README.md`.
 - `2AMLogic/gf180-bandgap`, `layout/bandgap_top/generate.py` — the sibling
   canary whose construction pattern (bespoke `klayout.db` generator,
   deterministic GDSII writer options, `uv run --with klayout` invocation)

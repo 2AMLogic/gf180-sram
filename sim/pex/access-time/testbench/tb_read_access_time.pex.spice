@@ -1,0 +1,71 @@
+* klt-pex-native read-access-time testbench BODY (issue #95) -- a circuit
+* body only, no `.control`/`.end`/analysis card of its own, per klt sim's
+* own "netlist convention" (docs/cli/sim.md). See
+* tb_write_access_time.pex.spice's header for the full rationale shared by
+* both files in this directory (parallel artifact, not a substitute for the
+* ratified #24 testbench; DUT `.include` swap convention; `rshunt`
+* workaround; behavioral-source corner-VDD tracking).
+*
+* Proxy metric: same "bit-line sensing differential" proxy as the ratified
+* sim/access-time/testbench/tb_read_access_time.spice (see that file's own
+* header and sim/README.md "Read access time is a proxy metric" for why --
+* no sense amp exists yet to measure a true clock-to-Q delay against).
+* Path is relative to THIS file's own directory -- see
+* tb_write_access_time.pex.spice's header for why (klt pex's own
+* reference_netlist resolution vs. ngspice's nested-`.include` resolution
+* disagree about the base directory; both only agree when cwd == this
+* file's directory, which ../generate.sh arranges before invoking klt pex).
+.include '../dut/bitcell_6t_subckt.spice'
+XDUT BL BLB Q QB VDD VSS WL sram_bitcell_6t
+
+* See tb_write_access_time.pex.spice's header for why these six `.param`
+* defaults (normally supplied by design.ngspice via corner.inc) are
+* inlined here instead of `.include`d.
+.param sw_stat_global=0
+.param sw_stat_mismatch=0
+.param mc_skew=3
+.param res_mc_skew=3
+.param cap_mc_skew=3
+.param fnoicor=0
+
+.options rshunt=1e12
+
+VVDD VDD 0 DC 3.3
+VVSS VSS 0 DC 0
+
+* Bit-line switch model: fixed Vt=1.65V/Vh=0.1V (nominal-VDD-relative)
+* rather than the ratified testbench's own per-corner `Vt='VDDC/2'
+* Vh='VDDC*0.03'` -- this file's netlist body is corner-invariant text (see
+* tb_write_access_time.pex.spice's header), so the switch threshold cannot
+* itself track the swept VDD. This is a documented simplification, not a
+* claim of equivalence to the ratified testbench's own threshold: PRE
+* still swings rail-to-rail (0 to the corner's actual VDD, via the
+* behavioral source below) at every point in the ratified 2.97-3.63V
+* matrix, comfortably on either side of a fixed 1.65V/0.1V threshold
+* either way, so the switch still behaves as a clean digital gate at every
+* corner even though the threshold itself doesn't scale with it.
+.model swmod SW(Ron=10 Roff=1e12 Vt=1.65 Vh=0.1)
+
+* Bit-line capacitance: same single-bitcell-column placeholder as the
+* ratified testbench (see that file's own header for why 20fF).
+CBL BL 0 20f
+CBLB BLB 0 20f
+
+* Precharge: BL/BLB pulled to VDD until t=1n, then released (PRE falls) to
+* float for the read -- same structure and timing as the ratified
+* testbench, driven through VDD directly (this file has no separate
+* PCHRAIL node since VDD is already the same real, alter'd circuit node).
+VPRE_U PRE_U 0 PWL(0 1 1n 1 1.02n 0 5n 0)
+BPRE PRE 0 V='V(PRE_U)*V(VDD)'
+SBL BL VDD PRE 0 swmod
+SBLB BLB VDD PRE 0 swmod
+
+* WL asserted at t=1.1n, immediately after precharge release -- the read
+* access under test, same timing as the ratified testbench.
+VWL_U WL_U 0 PWL(0 0 1n 0 1.1n 1 5n 1)
+BWL WL 0 V='V(WL_U)*V(VDD)'
+
+* Preset to '0' -- see tb_write_access_time.pex.spice's header for why
+* v(QB)=2.8V (a corner-invariant literal below the matrix's lowest
+* supply) replaces the ratified testbench's own per-corner `.ic`.
+.ic v(Q)=0 v(QB)=2.8
