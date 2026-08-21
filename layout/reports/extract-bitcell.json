@@ -1,0 +1,201 @@
+{
+  "schema_version": 2,
+  "file": "layout/bitcell/sram_bitcell_6t.gds",
+  "deck": "gf180mcu",
+  "top": "sram_bitcell_6t",
+  "dbu_um": 0.001,
+  "netlist_path": "/var/folders/cz/6r9_2ff50l960nqx9zcppsqr0000gn/T/tmp.fr63Z1w8ne/bitcell.spice",
+  "netlist_sha256": "c599bfcb62ac5911c94c7934717e2c5c9794a2bbade85786c4f477b4467e4894",
+  "status": "extracted",
+  "device_count": 6,
+  "net_count": 7,
+  "pin_count": 7,
+  "device_counts": {
+    "nfet": 4,
+    "pfet": 2
+  },
+  "dummy_devices_dropped": 0,
+  "ignored_layers": [],
+  "device_recognition_only_layers": [],
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "devices": [
+    {
+      "name": "$1",
+      "class": "nfet",
+      "nets": {
+        "s": "BL",
+        "g": "WL",
+        "d": "Q",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.24,
+        "as_um2": 0.1684,
+        "ad_um2": 0.1022,
+        "ps_um": 1.72,
+        "pd_um": 0.96
+      }
+    },
+    {
+      "name": "$2",
+      "class": "nfet",
+      "nets": {
+        "s": "QB",
+        "g": "WL",
+        "d": "BLB",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.24,
+        "as_um2": 0.1022,
+        "ad_um2": 0.1684,
+        "ps_um": 0.96,
+        "pd_um": 1.72
+      }
+    },
+    {
+      "name": "$3",
+      "class": "nfet",
+      "nets": {
+        "s": "Q",
+        "g": "QB",
+        "d": "VSS",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.36,
+        "as_um2": 0.1022,
+        "ad_um2": 0.169,
+        "ps_um": 0.96,
+        "pd_um": 1.28
+      }
+    },
+    {
+      "name": "$4",
+      "class": "nfet",
+      "nets": {
+        "s": "VSS",
+        "g": "Q",
+        "d": "QB",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.36,
+        "as_um2": 0.169,
+        "ad_um2": 0.1022,
+        "ps_um": 1.28,
+        "pd_um": 0.96
+      }
+    },
+    {
+      "name": "$5",
+      "class": "pfet",
+      "nets": {
+        "s": "Q",
+        "g": "QB",
+        "d": "VDD",
+        "b": "VDD"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.22,
+        "as_um2": 0.1664,
+        "ad_um2": 0.155,
+        "ps_um": 1.72,
+        "pd_um": 1.28
+      }
+    },
+    {
+      "name": "$6",
+      "class": "pfet",
+      "nets": {
+        "s": "VDD",
+        "g": "Q",
+        "d": "QB",
+        "b": "VDD"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.22,
+        "as_um2": 0.155,
+        "ad_um2": 0.1664,
+        "ps_um": 1.28,
+        "pd_um": 1.72
+      }
+    }
+  ],
+  "nets": [
+    {
+      "name": "BL",
+      "pin": true,
+      "device_count": 1
+    },
+    {
+      "name": "BLB",
+      "pin": true,
+      "device_count": 1
+    },
+    {
+      "name": "Q",
+      "pin": true,
+      "device_count": 5
+    },
+    {
+      "name": "QB",
+      "pin": true,
+      "device_count": 5
+    },
+    {
+      "name": "VDD",
+      "pin": true,
+      "device_count": 4
+    },
+    {
+      "name": "VSS",
+      "pin": true,
+      "device_count": 6
+    },
+    {
+      "name": "WL",
+      "pin": true,
+      "device_count": 2
+    }
+  ],
+  "warnings": [],
+  "black_box_regions": [],
+  "abstracted_cells": [],
+  "unmodelled_poly": [],
+  "merged_net_labels": [],
+  "voltage_domain_warnings": [],
+  "unbiased_pmos_body_nets": [],
+  "single_terminal_nets": [],
+  "dead_metal": [],
+  "matched_device_groups": [],
+  "pdk": null,
+  "provenance": {
+    "klt_version": "0.2.0",
+    "klayout_version": "0.30.10",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:6a323622d93c1b4716a7874c37ee3d825bd08398c3c030c85175e44e2cc229a3"
+    },
+    "input": {
+      "content_hash": "sha256:6b90b7d615bb2528eef026ab1ab4778855d2d91b056351ac6872e89323179b3a"
+    }
+  },
+  "parasitics": null,
+  "spef_path": null
+}

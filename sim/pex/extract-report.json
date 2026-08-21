@@ -1,0 +1,551 @@
+{
+  "schema_version": 2,
+  "file": "layout/bitcell/sram_bitcell_6t.gds",
+  "deck": "gf180mcu",
+  "top": "sram_bitcell_6t",
+  "dbu_um": 0.001,
+  "netlist_path": "sim/pex/extracted-netlist/sram_bitcell_6t.spice",
+  "netlist_sha256": "82dd8f14bb4e11a25d242d586eddb14254afe60f65b7f29eb538b52d1dd210d9",
+  "status": "extracted",
+  "device_count": 6,
+  "net_count": 7,
+  "pin_count": 7,
+  "device_counts": {
+    "nfet": 4,
+    "pfet": 2
+  },
+  "dummy_devices_dropped": 0,
+  "ignored_layers": [],
+  "device_recognition_only_layers": [],
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "devices": [
+    {
+      "name": "$1",
+      "class": "nfet",
+      "nets": {
+        "s": "BL",
+        "g": "WL",
+        "d": "Q",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.24,
+        "as_um2": 0.1684,
+        "ad_um2": 0.1022,
+        "ps_um": 1.72,
+        "pd_um": 0.96
+      }
+    },
+    {
+      "name": "$2",
+      "class": "nfet",
+      "nets": {
+        "s": "QB",
+        "g": "WL",
+        "d": "BLB",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.24,
+        "as_um2": 0.1022,
+        "ad_um2": 0.1684,
+        "ps_um": 0.96,
+        "pd_um": 1.72
+      }
+    },
+    {
+      "name": "$3",
+      "class": "nfet",
+      "nets": {
+        "s": "Q",
+        "g": "QB",
+        "d": "VSS",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.36,
+        "as_um2": 0.1022,
+        "ad_um2": 0.169,
+        "ps_um": 0.96,
+        "pd_um": 1.28
+      }
+    },
+    {
+      "name": "$4",
+      "class": "nfet",
+      "nets": {
+        "s": "VSS",
+        "g": "Q",
+        "d": "QB",
+        "b": "VSS"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.36,
+        "as_um2": 0.169,
+        "ad_um2": 0.1022,
+        "ps_um": 1.28,
+        "pd_um": 0.96
+      }
+    },
+    {
+      "name": "$5",
+      "class": "pfet",
+      "nets": {
+        "s": "Q",
+        "g": "QB",
+        "d": "VDD",
+        "b": "VDD"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.22,
+        "as_um2": 0.1664,
+        "ad_um2": 0.155,
+        "ps_um": 1.72,
+        "pd_um": 1.28
+      }
+    },
+    {
+      "name": "$6",
+      "class": "pfet",
+      "nets": {
+        "s": "VDD",
+        "g": "Q",
+        "d": "QB",
+        "b": "VDD"
+      },
+      "params": {
+        "l_um": 0.28,
+        "w_um": 0.22,
+        "as_um2": 0.155,
+        "ad_um2": 0.1664,
+        "ps_um": 1.28,
+        "pd_um": 1.72
+      }
+    }
+  ],
+  "nets": [
+    {
+      "name": "BL",
+      "pin": true,
+      "device_count": 1
+    },
+    {
+      "name": "BLB",
+      "pin": true,
+      "device_count": 1
+    },
+    {
+      "name": "Q",
+      "pin": true,
+      "device_count": 5
+    },
+    {
+      "name": "QB",
+      "pin": true,
+      "device_count": 5
+    },
+    {
+      "name": "VDD",
+      "pin": true,
+      "device_count": 4
+    },
+    {
+      "name": "VSS",
+      "pin": true,
+      "device_count": 6
+    },
+    {
+      "name": "WL",
+      "pin": true,
+      "device_count": 2
+    }
+  ],
+  "warnings": [],
+  "black_box_regions": [],
+  "abstracted_cells": [],
+  "unmodelled_poly": [],
+  "merged_net_labels": [],
+  "voltage_domain_warnings": [],
+  "unbiased_pmos_body_nets": [],
+  "single_terminal_nets": [],
+  "dead_metal": [],
+  "matched_device_groups": [],
+  "pdk": null,
+  "provenance": {
+    "klt_version": "0.2.0",
+    "klayout_version": "0.30.10",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:6a323622d93c1b4716a7874c37ee3d825bd08398c3c030c85175e44e2cc229a3"
+    },
+    "input": {
+      "content_hash": "sha256:6b90b7d615bb2528eef026ab1ab4778855d2d91b056351ac6872e89323179b3a"
+    }
+  },
+  "parasitics": {
+    "r_count": 24,
+    "c_count": 7,
+    "cc_count": 4,
+    "l_count": 0,
+    "total_resistance_ohm": 415.3695,
+    "total_capacitance_ff": 4.956704,
+    "total_coupling_capacitance_ff": 0.051672,
+    "total_inductance_nh": 0.0,
+    "nets": [
+      {
+        "net": "BL",
+        "net_id": 1,
+        "resistance_ohm": 1.617,
+        "capacitance_ff": 0.497235,
+        "inductance_nh": 0.0,
+        "hub_net": "BL",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$1",
+            "terminal": "S",
+            "leg_net": "BL__t0",
+            "resistance_ohm": 1.617
+          }
+        ],
+        "segments": [],
+        "coupled": []
+      },
+      {
+        "net": "BLB",
+        "net_id": 3,
+        "resistance_ohm": 1.617,
+        "capacitance_ff": 0.497235,
+        "inductance_nh": 0.0,
+        "hub_net": "BLB",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$2",
+            "terminal": "D",
+            "leg_net": "BLB__t0",
+            "resistance_ohm": 1.617
+          }
+        ],
+        "segments": [],
+        "coupled": []
+      },
+      {
+        "net": "Q",
+        "net_id": 5,
+        "resistance_ohm": 101.7267,
+        "capacitance_ff": 0.764576,
+        "inductance_nh": 0.0,
+        "hub_net": "Q",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$4",
+            "terminal": "G",
+            "leg_net": "Q__t0",
+            "resistance_ohm": 19.5711
+          },
+          {
+            "device": "$5",
+            "terminal": "S",
+            "leg_net": "Q__t1",
+            "resistance_ohm": 20.0652
+          },
+          {
+            "device": "$6",
+            "terminal": "G",
+            "leg_net": "Q__t2",
+            "resistance_ohm": 24.5134
+          },
+          {
+            "device": "$1",
+            "terminal": "D",
+            "leg_net": "Q__t3",
+            "resistance_ohm": 23.9853
+          },
+          {
+            "device": "$3",
+            "terminal": "S",
+            "leg_net": "Q__t4",
+            "resistance_ohm": 13.5917
+          }
+        ],
+        "segments": [],
+        "coupled": [
+          {
+            "net": "VDD",
+            "capacitance_ff": 0.01053,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          },
+          {
+            "net": "VSS",
+            "capacitance_ff": 0.005454,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          }
+        ]
+      },
+      {
+        "net": "QB",
+        "net_id": 2,
+        "resistance_ohm": 101.7267,
+        "capacitance_ff": 0.769928,
+        "inductance_nh": 0.0,
+        "hub_net": "QB",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$3",
+            "terminal": "G",
+            "leg_net": "QB__t0",
+            "resistance_ohm": 19.5711
+          },
+          {
+            "device": "$5",
+            "terminal": "G",
+            "leg_net": "QB__t1",
+            "resistance_ohm": 24.5134
+          },
+          {
+            "device": "$6",
+            "terminal": "D",
+            "leg_net": "QB__t2",
+            "resistance_ohm": 20.0652
+          },
+          {
+            "device": "$2",
+            "terminal": "S",
+            "leg_net": "QB__t3",
+            "resistance_ohm": 23.9853
+          },
+          {
+            "device": "$4",
+            "terminal": "D",
+            "leg_net": "QB__t4",
+            "resistance_ohm": 13.5917
+          }
+        ],
+        "segments": [],
+        "coupled": [
+          {
+            "net": "VSS",
+            "capacitance_ff": 0.005454,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          }
+        ]
+      },
+      {
+        "net": "VDD",
+        "net_id": 6,
+        "resistance_ohm": 2.0676,
+        "capacitance_ff": 0.751071,
+        "inductance_nh": 0.0,
+        "hub_net": "VDD",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$5",
+            "terminal": "B",
+            "leg_net": "VDD__t0",
+            "resistance_ohm": 0.5169
+          },
+          {
+            "device": "$6",
+            "terminal": "B",
+            "leg_net": "VDD__t1",
+            "resistance_ohm": 0.5169
+          },
+          {
+            "device": "$5",
+            "terminal": "D",
+            "leg_net": "VDD__t2",
+            "resistance_ohm": 0.5169
+          },
+          {
+            "device": "$6",
+            "terminal": "S",
+            "leg_net": "VDD__t3",
+            "resistance_ohm": 0.5169
+          }
+        ],
+        "segments": [],
+        "coupled": [
+          {
+            "net": "Q",
+            "capacitance_ff": 0.01053,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          },
+          {
+            "net": "VSS",
+            "capacitance_ff": 0.030234,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          }
+        ]
+      },
+      {
+        "net": "VSS",
+        "net_id": 8,
+        "resistance_ohm": 2.0188,
+        "capacitance_ff": 0.787168,
+        "inductance_nh": 0.0,
+        "hub_net": "VSS",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$1",
+            "terminal": "B",
+            "leg_net": "VSS__t0",
+            "resistance_ohm": 0.5565
+          },
+          {
+            "device": "$2",
+            "terminal": "B",
+            "leg_net": "VSS__t1",
+            "resistance_ohm": 0.5565
+          },
+          {
+            "device": "$3",
+            "terminal": "B",
+            "leg_net": "VSS__t2",
+            "resistance_ohm": 0.2265
+          },
+          {
+            "device": "$4",
+            "terminal": "B",
+            "leg_net": "VSS__t3",
+            "resistance_ohm": 0.2265
+          },
+          {
+            "device": "$3",
+            "terminal": "D",
+            "leg_net": "VSS__t4",
+            "resistance_ohm": 0.2265
+          },
+          {
+            "device": "$4",
+            "terminal": "S",
+            "leg_net": "VSS__t5",
+            "resistance_ohm": 0.2265
+          }
+        ],
+        "segments": [],
+        "coupled": [
+          {
+            "net": "Q",
+            "capacitance_ff": 0.005454,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          },
+          {
+            "net": "QB",
+            "capacitance_ff": 0.005454,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          },
+          {
+            "net": "VDD",
+            "capacitance_ff": 0.030234,
+            "levels": [
+              [
+                0,
+                1
+              ]
+            ],
+            "lateral_levels": []
+          }
+        ]
+      },
+      {
+        "net": "WL",
+        "net_id": 4,
+        "resistance_ohm": 204.5957,
+        "capacitance_ff": 0.889491,
+        "inductance_nh": 0.0,
+        "hub_net": "WL",
+        "rc_model": "lumped",
+        "terminals": [
+          {
+            "device": "$1",
+            "terminal": "G",
+            "leg_net": "WL__t0",
+            "resistance_ohm": 102.2978
+          },
+          {
+            "device": "$2",
+            "terminal": "G",
+            "leg_net": "WL__t1",
+            "resistance_ohm": 102.2978
+          }
+        ],
+        "segments": [],
+        "coupled": []
+      }
+    ],
+    "metals_without_coefficient": [],
+    "overlap_pairs_without_coefficient": [],
+    "critical_nets": [],
+    "distributed_rc": false,
+    "model": {
+      "capacitance": "net-to-ground for every net's own (non-coupled) area/perimeter, plus net-to-net for the vertical-overlap coupling `coupling` describes below -- a coupled net pair gets a direct capacitor between their two hub nodes, not just capacitors to the deck's ground/substrate net",
+      "coupling": "vertical overlap (crossover) unconditionally -- where one net's conductor on an adjacent metal level sits directly over another *distinct* net's conductor, that overlap area is charged between the two nets instead of to ground (issue #760) -- plus lateral (same-layer, sidewall) coupling, but only for a net pair naming one of the caller's declared `--critical-net` nets (issue #976): facing-edge length within that layer's own minimum-spacing lookback is charged between the two nets, *additively* (not deducted from either net's substrate fringe term, unlike the vertical case -- a known simplification). Any same-layer pair with neither side named `--critical-net`, and fringe shielding in general, are still not modelled",
+      "resistance": "single lumped series resistance per net, distributed as a star across that net's device terminals (issue #592) -- not a per-segment, distributed RC ladder, *unless* `--distributed-rc` names this net via `--critical-net` (issue #977, Epic #709 Phase 2b): then the net's terminals are ordered along their approximate physical spread and its total R/C is broken into a chain of per-segment resistors (segment length proportional to inter-terminal distance) with a ground capacitor at each terminal node (proportional to its adjacent segment length/2), instead of one star hub -- still an approximation (terminal position is a device-placement proxy, not true per-segment routing geometry), but a strictly finer-grained one than the single-hub star",
+      "frequency": "quasi-static -- one frequency-independent R and C per net; no skin effect, no distributed transmission-line behavior"
+    },
+    "mom_crosscheck": null,
+    "mom_rlc_override": null
+  },
+  "spef_path": null
+}
