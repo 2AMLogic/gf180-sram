@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "layout": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/layout/bitcell/sram_bitcell_6t.gds",
+  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice",
+  "reference_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
+  "extraction": {
+    "deck": "gf180mcu",
+    "device_count": 6,
+    "net_count": 7,
+    "netlist_sha256": "dd9916d56017d955cc032e589b55f5809fcc9694fde306b732df57f27c6042f6",
+    "model": {
+      "capacitance": "net-to-ground for every net's own (non-coupled) area/perimeter, plus net-to-net for the vertical-overlap coupling `coupling` describes below -- a coupled net pair gets a direct capacitor between their two hub nodes, not just capacitors to the deck's ground/substrate net",
+      "coupling": "vertical overlap (crossover) unconditionally -- where one net's conductor on an adjacent metal level sits directly over another *distinct* net's conductor, that overlap area is charged between the two nets instead of to ground (issue #760) -- plus lateral (same-layer, sidewall) coupling, but only for a net pair naming one of the caller's declared `--critical-net` nets (issue #976): facing-edge length within that layer's own minimum-spacing lookback is charged between the two nets, *additively* (not deducted from either net's substrate fringe term, unlike the vertical case -- a known simplification). Any same-layer pair with neither side named `--critical-net`, and fringe shielding in general, are still not modelled",
+      "resistance": "single lumped series resistance per net, distributed as a star across that net's device terminals (issue #592) -- not a per-segment, distributed RC ladder, *unless* `--distributed-rc` names this net via `--critical-net` (issue #977, Epic #709 Phase 2b): then the net's terminals are ordered along their approximate physical spread and its total R/C is broken into a chain of per-segment resistors (segment length proportional to inter-terminal distance) with a ground capacitor at each terminal node (proportional to its adjacent segment length/2), instead of one star hub -- still an approximation (terminal position is a device-placement proxy, not true per-segment routing geometry), but a strictly finer-grained one than the single-hub star",
+      "frequency": "quasi-static -- one frequency-independent R and C per net; no skin effect, no distributed transmission-line behavior"
+    },
+    "critical_nets": [],
+    "distributed_rc": false,
+    "mom_rlc_override": null
+  },
+  "testbenches": [
+    {
+      "request": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/requests/read-access-time.request.json",
+      "schematic_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
+      "corner_count": 27,
+      "measurement_names": [
+        "read_access_time"
+      ]
+    }
+  ],
+  "corner_count": 27,
+  "delta": [
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/2.970V/-40C",
+      "schematic_value": 1.649e-11,
+      "extracted_value": 1.73796e-11,
+      "delta_pct": 5.395,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/2.970V/25C",
+      "schematic_value": 1.89722e-11,
+      "extracted_value": 1.99046e-11,
+      "delta_pct": 4.915,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/2.970V/125C",
+      "schematic_value": 2.28664e-11,
+      "extracted_value": 2.38624e-11,
+      "delta_pct": 4.356,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/3.300V/-40C",
+      "schematic_value": 1.64678e-11,
+      "extracted_value": 1.73655e-11,
+      "delta_pct": 5.451,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/3.300V/25C",
+      "schematic_value": 1.88203e-11,
+      "extracted_value": 1.9713e-11,
+      "delta_pct": 4.743,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/3.300V/125C",
+      "schematic_value": 2.25003e-11,
+      "extracted_value": 2.34514e-11,
+      "delta_pct": 4.227,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/3.630V/-40C",
+      "schematic_value": 1.62651e-11,
+      "extracted_value": 1.71316e-11,
+      "delta_pct": 5.327,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/3.630V/25C",
+      "schematic_value": 1.84893e-11,
+      "extracted_value": 1.93583e-11,
+      "delta_pct": 4.7,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ff/3.630V/125C",
+      "schematic_value": 2.19956e-11,
+      "extracted_value": 2.29217e-11,
+      "delta_pct": 4.21,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/2.970V/-40C",
+      "schematic_value": 2.36998e-11,
+      "extracted_value": 2.46492e-11,
+      "delta_pct": 4.006,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/2.970V/25C",
+      "schematic_value": 2.66312e-11,
+      "extracted_value": 2.76207e-11,
+      "delta_pct": 3.716,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/2.970V/125C",
+      "schematic_value": 3.10867e-11,
+      "extracted_value": 3.21987e-11,
+      "delta_pct": 3.577,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/3.300V/-40C",
+      "schematic_value": 2.31671e-11,
+      "extracted_value": 2.4072e-11,
+      "delta_pct": 3.906,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/3.300V/25C",
+      "schematic_value": 2.58375e-11,
+      "extracted_value": 2.68423e-11,
+      "delta_pct": 3.889,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/3.300V/125C",
+      "schematic_value": 3.00154e-11,
+      "extracted_value": 3.10961e-11,
+      "delta_pct": 3.6,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/3.630V/-40C",
+      "schematic_value": 2.2516e-11,
+      "extracted_value": 2.33908e-11,
+      "delta_pct": 3.885,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/3.630V/25C",
+      "schematic_value": 2.50309e-11,
+      "extracted_value": 2.60048e-11,
+      "delta_pct": 3.891,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "tt/3.630V/125C",
+      "schematic_value": 2.89906e-11,
+      "extracted_value": 3.0036e-11,
+      "delta_pct": 3.606,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/2.970V/-40C",
+      "schematic_value": 3.15505e-11,
+      "extracted_value": 3.25805e-11,
+      "delta_pct": 3.265,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/2.970V/25C",
+      "schematic_value": 3.47913e-11,
+      "extracted_value": 3.59004e-11,
+      "delta_pct": 3.188,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/2.970V/125C",
+      "schematic_value": 3.99177e-11,
+      "extracted_value": 4.11195e-11,
+      "delta_pct": 3.011,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/3.300V/-40C",
+      "schematic_value": 3.03565e-11,
+      "extracted_value": 3.13879e-11,
+      "delta_pct": 3.398,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/3.300V/25C",
+      "schematic_value": 3.34233e-11,
+      "extracted_value": 3.44766e-11,
+      "delta_pct": 3.151,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/3.300V/125C",
+      "schematic_value": 3.81835e-11,
+      "extracted_value": 3.93362e-11,
+      "delta_pct": 3.019,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/3.630V/-40C",
+      "schematic_value": 2.92134e-11,
+      "extracted_value": 3.02068e-11,
+      "delta_pct": 3.4,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/3.630V/25C",
+      "schematic_value": 3.21427e-11,
+      "extracted_value": 3.31557e-11,
+      "delta_pct": 3.152,
+      "status": "pass"
+    },
+    {
+      "spec_row": "read_access_time",
+      "corner_id": "ss/3.630V/125C",
+      "schematic_value": 3.66159e-11,
+      "extracted_value": 3.77585e-11,
+      "delta_pct": 3.121,
+      "status": "pass"
+    }
+  ],
+  "passed": 27,
+  "failed": 0,
+  "errored": 0,
+  "pin_count_mismatch": null,
+  "provenance": {
+    "klt_version": "0.2.0",
+    "klayout_version": "0.30.10",
+    "pdk": {
+      "name": "gf180mcuD",
+      "source": "--pdk-root flag",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0"
+    },
+    "input": {
+      "content_hash": "sha256:6b90b7d615bb2528eef026ab1ab4778855d2d91b056351ac6872e89323179b3a"
+    }
+  }
+}

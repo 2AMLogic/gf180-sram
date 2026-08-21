@@ -1,0 +1,443 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+Reset re-loads circuit * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Circuit: * by-hand pex write-margin testbench, schematic leg (issue #95).
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       2.97
+q                                         2.97
+qb                                    0.440109
+vss                                   0.440109
+bl                                        2.97
+wl                                           0
+blb                                          0
+vwl#branch                                   0
+vblb#branch                         7.2719e-12
+vbl#branch                        -8.46978e-12
+vvdd#branch                       -2.86128e-11
+
+
+No. of Data Rows : 429
+RESULT: write_trip_voltage_v = 1.71105
+RESULT: write_vdd_v = 2.97
+Note: Simulation executed from .control section 
+=== corner: tt_25c_2.97v (process=tt temp=25C vdd=2.97V) ===
+=== ngspice exit status: 0 ===

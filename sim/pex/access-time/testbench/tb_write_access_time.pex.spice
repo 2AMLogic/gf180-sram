@@ -1,0 +1,103 @@
+* klt-pex-native write-access-time testbench BODY (issue #95) -- a circuit
+* body only, no `.control`/`.end`/analysis card of its own, per klt sim's
+* own "netlist convention" (docs/cli/sim.md): the PVT axis, `.meas` cards,
+* and `.control` wrapper are all supplied by the request document
+* (../requests/write-access-time.request.json), not by this file.
+*
+* This is a NEW, PARALLEL artifact -- it does not modify, and is not a
+* substitute for, the ratified #24 signoff testbench
+* (sim/access-time/testbench/tb_write_access_time.spice). That file remains
+* the T1-item-9 evidence; this one exists solely so `klt pex` can produce a
+* schematic-vs-extracted delta for write access time. See sim/pex/README.md.
+*
+* DUT: exactly one `.include` line (klt pex requires exactly one -- see
+* docs/cli/pex.md "Exactly one `.include`/`.inc` line is required"),
+* swapped by `klt pex` between this file (the schematic-side SUBCKT
+* wrapper, ../dut/bitcell_6t_subckt.spice) and its own extracted-netlist
+* output. Both declare `.SUBCKT sram_bitcell_6t BL BLB Q QB VDD VSS WL`,
+* so the X-instantiation below is reused byte-identical on both legs
+* (docs/cli/pex.md "The DUT .include swap").
+*
+* Path is relative to THIS file's own directory, not the invoking shell's
+* cwd -- deliberately, to satisfy two different resolvers that disagree
+* about the base directory for a relative `.include`: klt pex's own
+* Python-side `_find_dut_include` resolves it against the testbench body
+* file's directory (so `reference_netlist` in the JSON report comes out
+* correct), while ngspice itself resolves a nested `.include` (one found
+* inside an already-`.include`d file) against its OWN process cwd. Both
+* agree only when cwd == this file's directory at invocation time --
+* ../generate.sh `cd`s here before invoking `klt pex` for exactly this
+* reason; do not run `klt pex` against this file from any other cwd.
+.include '../dut/bitcell_6t_subckt.spice'
+XDUT BL BLB Q QB VDD VSS WL sram_bitcell_6t
+
+* gf180mcu's model file (sm141064.ngspice) references
+* `sw_stat_global`/`sw_stat_mismatch`/`mc_skew`/`res_mc_skew`/
+* `cap_mc_skew`/`fnoicor` unconditionally (every `.LIB typical`/`ff`/`ss`
+* section pulls in `.LIB noise_corner`, whose flicker-noise coefficients
+* are themselves expressions in `fnoicor`) -- normally supplied by
+* `$PDK_ROOT/$PDK/libs.tech/ngspice/design.ngspice`, which every ratified
+* #24 testbench `.include`s via corner.inc. This file cannot also
+* `.include` that file (klt pex's one-`.include` rule above), so these are
+* the same six defaults inlined as literal `.param` cards instead --
+* verified order-independent relative to klt sim's generated `.lib` line
+* (ngspice resolves `.param` through a whole-deck symbol table, not
+* sequential text order).
+.param sw_stat_global=0
+.param sw_stat_mismatch=0
+.param mc_skew=3
+.param res_mc_skew=3
+.param cap_mc_skew=3
+.param fnoicor=0
+
+* klt extract --parasitics lands every net's substrate-coupling
+* capacitance on an internal, un-pinned `vsubs` node inside the extracted
+* SUBCKT (not exposed as a pin -- see sim/pex/README.md's "New finding:
+* extracted netlist needs `.options rshunt`" section). With no DC path to
+* any reference, the extracted leg's DC/transient solve hits a singular
+* matrix on that node at every corner without this option. `rshunt` is
+* ngspice's own documented remedy for a floating-node singularity (a very
+* large resistor from every node to ground) -- confirmed byte-identical
+* measured values with/without it on the schematic leg (no floating nodes
+* there), so this is safe to declare unconditionally for both legs of the
+* delta rather than only the extracted one.
+.options rshunt=1e12
+
+* Supply: alter'd per corner by the request's `corners.supply_v.vvdd` axis
+* (matches this repo's sim/README.md convention of naming the supply
+* source VVDD).
+VVDD VDD 0 DC 3.3
+VVSS VSS 0 DC 0
+
+* Write driver, full-strength (matches the ratified testbench's own
+* rationale -- this measures access time at rated drive strength, not
+* write-margin's minimum-drive boundary). Its differential is scaled to
+* the corner's own actual VDD via a behavioral B-source referencing
+* V(VDD) -- a real circuit node the request's supply axis alters -- since
+* a klt-sim request's netlist body is corner-invariant text and cannot run
+* the ratified testbench's own per-corner `.param VDDC` substitution (see
+* docs/cli/sim.md "Netlist convention: a circuit body, not a full deck").
+VBL_U BL_U 0 PWL(0 1 5n 1)
+BBL BL 0 V='V(BL_U)*V(VDD)'
+VBLB_U BLB_U 0 PWL(0 0 5n 0)
+BBLB BLB 0 V='V(BLB_U)*V(VDD)'
+
+* WL asserted at t=1.1n, writing '1' into a cell preset to '0' via `.ic`
+* below (matching the ratified testbench's own timing).
+VWL_U WL_U 0 PWL(0 0 1n 0 1.1n 1 5n 1)
+BWL WL 0 V='V(WL_U)*V(VDD)'
+
+* Preset to '0': v(QB)=2.8V is a corner-invariant literal deliberately
+* chosen BELOW the ratified 27-corner matrix's lowest supply (2.97V) --
+* unlike the ratified testbench's own `.ic v(Q)=0 v(QB)='VDDC'` (exact
+* per-corner value, available there via `.param VDDC` from corner.inc),
+* this file's netlist body is corner-invariant text and cannot reference
+* the swept VDD directly in a `.ic` card. Starting comfortably inside the
+* regenerative region (~85% of the lowest corner's rail, far from the
+* Q=QB metastable point) lets the cross-coupled pair's own feedback settle
+* onto whichever corner's real VDD is actually altered in, well before
+* t=1.1n's write event -- see sim/pex/access-time/README.md for the
+* committed per-corner results this produces across the full 2.97-3.63V
+* range (no corner shows a convergence anomaly attributable to this
+* choice).
+.ic v(Q)=0 v(QB)=2.8

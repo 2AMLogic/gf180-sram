@@ -1,0 +1,56 @@
+{
+  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/00-read-access-time.request.extracted-dut-testbench.spice",
+  "engine": "ngspice",
+  "models": {
+    "lib": "/home/ubuntu/.volare/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+  },
+  "corners": {
+    "process": [
+      {
+        "name": "ff",
+        "sections": [
+          "ff"
+        ]
+      },
+      {
+        "name": "tt",
+        "sections": [
+          "typical"
+        ]
+      },
+      {
+        "name": "ss",
+        "sections": [
+          "ss"
+        ]
+      }
+    ],
+    "supply_v": {
+      "vvdd": [
+        2.97,
+        3.3,
+        3.63
+      ]
+    },
+    "temperature_c": [
+      -40,
+      25,
+      125
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "0.005n 5n uic"
+  },
+  "measurements": [
+    {
+      "name": "read_access_time",
+      "spice": ".meas tran read_access_time trig v(wl) val=1.65 rise=1 targ par('abs(v(bl)-v(blb))') val=0.1 rise=1",
+      "unit": "s"
+    }
+  ],
+  "netlist_source": "extracted",
+  "options": {
+    "timeout_s": 60
+  }
+}
