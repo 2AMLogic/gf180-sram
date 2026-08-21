@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "engine": "klayout",
+  "layout": "/var/folders/cz/6r9_2ff50l960nqx9zcppsqr0000gn/T/tmp.fr63Z1w8ne/array.spice",
+  "reference": "/Users/rwalters/GitHub/gf180-sram/.loom/worktrees/issue-23/design/netlist/sram_256x32_array.spice",
+  "top": "SRAM_256X32_ARRAY",
+  "parameter_tolerance": null,
+  "status": "mismatch",
+  "mismatch_count": 2,
+  "category_counts": {
+    "topology": 2
+  },
+  "counts": {
+    "nets": {
+      "layout": 16706,
+      "reference": 322,
+      "matched": 0
+    },
+    "devices": {
+      "layout": 49152,
+      "reference": 0,
+      "matched": 0
+    },
+    "pins": {
+      "layout": 322,
+      "reference": 0,
+      "matched": 0
+    }
+  },
+  "device_classes": null,
+  "environment": {
+    "engine": "klayout",
+    "engine_version": "0.30.10",
+    "layout_sha256": "c9dee4f3ee8b7da33630f61e7046bc36273eb2a08405b6cca4d26316a8d5dfe0",
+    "reference_sha256": "552a097641dbe9aba0010a96d57cb601a0c9b9212a4b0e22bf0b877fcb27ba12",
+    "extracted_netlist": null
+  },
+  "provenance": {
+    "klt_version": "0.2.0",
+    "klayout_version": "0.30.10",
+    "pdk": null,
+    "deck": null,
+    "input": null
+  },
+  "mismatches": [
+    {
+      "category": "topology",
+      "severity": "error",
+      "description": "circuit could not be matched to a counterpart",
+      "side": "both",
+      "net": null,
+      "device": null,
+      "property": null,
+      "details": null
+    },
+    {
+      "category": "topology",
+      "severity": "error",
+      "description": "circuit could not be matched to a counterpart",
+      "side": "reference",
+      "net": null,
+      "device": null,
+      "property": null,
+      "details": null
+    }
+  ],
+  "net_correspondence": []
+}

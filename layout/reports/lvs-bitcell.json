@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "engine": "klayout",
+  "layout": "/var/folders/cz/6r9_2ff50l960nqx9zcppsqr0000gn/T/tmp.fr63Z1w8ne/bitcell.spice",
+  "reference": "/var/folders/cz/6r9_2ff50l960nqx9zcppsqr0000gn/T/tmp.fr63Z1w8ne/bitcell_ref.spice",
+  "top": "SRAM_BITCELL_6T",
+  "parameter_tolerance": null,
+  "status": "match",
+  "mismatch_count": 0,
+  "category_counts": {},
+  "counts": {
+    "nets": {
+      "layout": 7,
+      "reference": 7,
+      "matched": 7
+    },
+    "devices": {
+      "layout": 6,
+      "reference": 6,
+      "matched": 6
+    },
+    "pins": {
+      "layout": 7,
+      "reference": 0,
+      "matched": 7
+    }
+  },
+  "device_classes": null,
+  "environment": {
+    "engine": "klayout",
+    "engine_version": "0.30.10",
+    "layout_sha256": "c599bfcb62ac5911c94c7934717e2c5c9794a2bbade85786c4f477b4467e4894",
+    "reference_sha256": "0aacf0fabbf45867a1add8ff520e44d941375e817262096bbced81fa92a4948c",
+    "extracted_netlist": null
+  },
+  "provenance": {
+    "klt_version": "0.2.0",
+    "klayout_version": "0.30.10",
+    "pdk": null,
+    "deck": null,
+    "input": null
+  },
+  "mismatches": [],
+  "net_correspondence": [
+    {
+      "layout": "BL",
+      "reference": "BL",
+      "pin": true
+    },
+    {
+      "layout": "BLB",
+      "reference": "BLB",
+      "pin": true
+    },
+    {
+      "layout": "Q",
+      "reference": "Q",
+      "pin": true
+    },
+    {
+      "layout": "QB",
+      "reference": "QB",
+      "pin": true
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
+      "pin": true
+    },
+    {
+      "layout": "VSS",
+      "reference": "VSS",
+      "pin": true
+    },
+    {
+      "layout": "WL",
+      "reference": "WL",
+      "pin": true
+    }
+  ]
+}

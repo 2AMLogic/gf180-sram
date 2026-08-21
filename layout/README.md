@@ -122,22 +122,29 @@ captures.
 
 **Does not prove**:
 
-* **Sign-off DRC.** `klt`'s gf180mcu deck is explicitly a curated subset. It
-  does not model implant (`Nplus`/`Pplus`) rules, poly-to-COMP and
+* **Sign-off DRC against the foundry's own deck.** `klt`'s gf180mcu deck
+  (`klt drc --deck gf180mcu`, run and committed as evidence in
+  `layout/reports/` by issue #23) is explicitly a curated subset. It does
+  not model implant (`Nplus`/`Pplus`) rules, poly-to-COMP and
   contact-to-poly spacing, density, antenna, latch-up, or the DRM's
   `SramCore` (108/5) marker-scoped SRAM rules. Those rules are satisfied
   *by construction* here (every constant in `bitcell/generate.py` cites the
   DRM rule it targets, with margin), which is **not** the same as being
   checked. Running the PDK's own KLayout DRC deck (`klt drc --engine
-  klayout`, which needs a standalone `klayout` binary this host does not
-  have) is part of issue #23.
+  klayout`, which needs a standalone `klayout` binary this host still does
+  not have as of issue #23) remains open.
 * **Electrical behaviour.** No post-layout simulation, no parasitics. The
-  `sim/` PVT results characterize the *schematic*; PEX and post-layout
-  re-simulation are issue #23.
+  `sim/` PVT results characterize the *schematic*; issue #23 produced one
+  real PEX-adjacent artifact (a parasitic-annotated bitcell extraction,
+  `sim/pex/`) but could not produce a per-corner schematic-vs-extracted
+  delta against the ratified testbenches -- see `sim/pex/README.md` for
+  exactly why, and #95 for the follow-up.
 * **A routed macro.** There is no periphery, no pin/obstruction abstract, no
   LEF/Liberty view (issue #24's scope).
 * **Array-level LVS.** See "Known tool gaps" — `klt extract` is flat-only, so
-  the hierarchical array netlist cannot be compared as-is today.
+  the hierarchical array netlist cannot be compared as-is today; fresh
+  evidence of this specific failure is committed in
+  `layout/reports/lvs-array.json` (issue #23).
 
 ## Area: measured against the foundry's own bitcell
 
@@ -362,9 +369,10 @@ re-layout work.
   depend on the C-vs-D Metal5 delta.
 - `design/README.md` — the schematic side, including the device sizing table
   this layout draws from and the same core-vs-periphery scope boundary.
-- Issue #23 — DRC/LVS/PEX sign-off, which consumes this layout: the PDK-native
-  DRC deck, post-layout extraction with parasitics, and the append-only
-  evidence trail.
+- Issue #23 — DRC/LVS/PEX sign-off, which consumes this layout: closed the
+  DRC/LVS legs with committed reports in `layout/reports/`; the PEX leg
+  produced one real artifact (`sim/pex/`) but not a full signoff, continued
+  in #95.
 - `2AMLogic/gf180-bandgap`, `layout/bandgap_top/generate.py` — the sibling
   canary whose construction pattern (bespoke `klayout.db` generator,
   deterministic GDSII writer options, `uv run --with klayout` invocation)

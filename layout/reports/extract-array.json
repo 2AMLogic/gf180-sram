@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "file": "layout/sram_256x32/sram_256x32_array.gds",
+  "deck": "gf180mcu",
+  "top": "sram_256x32_array",
+  "dbu_um": 0.001,
+  "netlist_path": "/tmp/pex_work/array.spice",
+  "netlist_sha256": "c9dee4f3ee8b7da33630f61e7046bc36273eb2a08405b6cca4d26316a8d5dfe0",
+  "status": "extracted",
+  "device_count": 49152,
+  "net_count": 16706,
+  "pin_count": 322,
+  "device_counts": {
+    "nfet": 32768,
+    "pfet": 16384
+  },
+  "dummy_devices_dropped": 0,
+  "ignored_layers": [],
+  "device_recognition_only_layers": [],
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "warnings": [],
+  "black_box_regions": [],
+  "abstracted_cells": [],
+  "unmodelled_poly": [],
+  "merged_net_labels": [],
+  "voltage_domain_warnings": [],
+  "unbiased_pmos_body_nets": [],
+  "single_terminal_nets": [],
+  "dead_metal": [],
+  "matched_device_groups": [],
+  "pdk": null,
+  "provenance": {
+    "klt_version": "0.2.0",
+    "klayout_version": "0.30.10",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:6a323622d93c1b4716a7874c37ee3d825bd08398c3c030c85175e44e2cc229a3"
+    },
+    "input": {
+      "content_hash": "sha256:8da811cccfcadcb711f58b790e272fa22e1c130957f46292fc48443c24f54826"
+    }
+  },
+  "parasitics": null,
+  "spef_path": null,
+  "_note": "devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh"
+}
