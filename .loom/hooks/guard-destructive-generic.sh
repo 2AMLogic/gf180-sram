@@ -4525,6 +4525,10 @@ extract_rm_targets() {
 # would still start with `$` and stay unresolved even if this path called it.
 #
 # rm_scope_mktemp_same_command_safe() returns success (0) ONLY when:
+#   0. (repo-local, #97) NEITHER a same-command `TMPDIR=` assignment NOR an
+#      ambient `$TMPDIR` resolving inside the protected area is present — see
+#      the TMPDIR SAFETY GATE comment in the function body for why the whole
+#      /tmp-rooting proof is unsound otherwise.
 #   1. The rm target, after stripping at most one layer of surrounding quotes,
 #      is a BARE `$NAME` or `${NAME}` reference — nothing else in the token
 #      (a suffix like `$NAME/sub` is deliberately excluded; fail closed).
@@ -4587,9 +4591,38 @@ _rm_scope_bare_var_name() {
 }
 
 rm_scope_mktemp_same_command_safe() {
-    local target="$1" cmdtext="$2" varname verdict
+    local target="$1" cmdtext="$2" varname verdict _rm_ambient_tmpdir
     varname=$(_rm_scope_bare_var_name "$target") || return 1
     [[ -n "$varname" ]] || return 1
+
+    # TMPDIR SAFETY GATE (repo-local, issue #97). The whole proof above rests
+    # on `mktemp`/`mktemp -d` rooting its output under $TMPDIR (or /tmp) and
+    # therefore OUTSIDE the area this guard protects. `mktemp` honours
+    # `$TMPDIR`, so either
+    #   (a) a same-command `TMPDIR=<protected path>` assignment
+    #       (`TMPDIR=<main checkout> && s=$(mktemp -d) && rm -rf "$s"`), or
+    #   (b) an ambient `$TMPDIR` already pointing inside the protected area
+    # silently relocates the "provably /tmp-rooted" scratch dir INSIDE the
+    # guarded tree, and the exemption approves an `rm -rf` of a path in the
+    # main checkout / a managed worktree. Neither is statically resolvable
+    # here, so fail closed on both and keep the unresolved-var deny.
+    #
+    # This is the identical hazard, and the identical gate, that the sibling
+    # repo-local pdk_env.sh scratch exemption already applies as its gate (1b)
+    # (see _wt_pdk_scratch_exempt_varnames() below, PR #65 review) — #6520
+    # vendored in a second, newer code path to the same allow decision with no
+    # such gate, reopening it.
+    if printf '%s' "$cmdtext" | \
+         grep -qE '(^|[;&|(`]|[[:space:]])TMPDIR='; then
+        return 1
+    fi
+    if [[ "${TMPDIR:-}" == /* ]]; then
+        _rm_ambient_tmpdir=$(normalize_abs_path "$TMPDIR")
+        if _wt_in_protected_area "$_rm_ambient_tmpdir"; then
+            return 1
+        fi
+    fi
+
     verdict=$(printf '%s' "$cmdtext" | awk -v varname="$varname" "$_QSPLIT_AWK"'
     {
         $0 = qsplit($0)
@@ -5972,6 +6005,17 @@ _wt_in_protected_area() {
 # out-of-worktree write via an unrelated unresolved var, or a mktemp
 # scratch write with no pdk_env.sh source, still denies).
 # =========================================================================
+
+# Gate (1) as a reusable predicate: does the command under judgement source
+# this repo's own sim/lib/pdk_env.sh (any relative/absolute spelling, `source`
+# or `.`)? Factored out of _wt_pdk_scratch_exempt_varnames() so the rm-scope
+# site's #6520 narrowing (#97) tests the SAME provenance condition rather than
+# a second, drifting copy of this regex.
+_wt_pdk_env_sourced_same_command() {
+    printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
+        grep -qE '(^|[;&|(`]|[[:space:]])(source|\.)[[:space:]]+[^;&|]*pdk_env\.sh'
+}
+
 _WT_PDK_SCRATCH_VARS_DONE=""
 _WT_PDK_SCRATCH_VARS_CACHE=""
 _wt_pdk_scratch_exempt_varnames() {
@@ -5986,8 +6030,7 @@ _wt_pdk_scratch_exempt_varnames() {
     # -flag-value text already excluded, mirroring the rm-target scan
     # just below; a bare substring match is deliberately loose — a miss
     # here only costs the (fail-closed) exemption, never widens a deny).
-    if ! printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
-         grep -qE '(^|[;&|(`]|[[:space:]])(source|\.)[[:space:]]+[^;&|]*pdk_env\.sh'; then
+    if ! _wt_pdk_env_sourced_same_command; then
         return 0
     fi
 
@@ -6386,7 +6429,25 @@ if echo "$COMMAND_ASK_SCAN" | grep -qE 'rm[[:space:]]+-[a-zA-Z]*[rf]'; then
                             END { printf "%s", mask_heredoc_bodies(buf) }')
                         fi
                     fi
-                    if rm_scope_mktemp_same_command_safe "$target" "$COMMAND_RM_MKTEMP_SCAN"; then
+                    #
+                    # REPO-LOCAL NARROWING (#97, decision recorded on PR #98):
+                    # #6520's fast path is additionally gated on the SAME
+                    # pdk_env.sh provenance condition the repo-local exemption
+                    # below requires (gate 1). Upstream #6520 allows ANY
+                    # `NAME=$(mktemp -d)` + `rm -rf "$NAME"` pair; this repo's
+                    # own human-reviewed carve-out (#64/#65/#82) was
+                    # deliberately scoped to this repo's documented cold-start
+                    # ngspice idiom and its test suite asserts, as a ratified
+                    # property, that "mktemp -d + rm -rf with NO pdk_env.sh
+                    # source still DENIES". Rather than relax that assertion to
+                    # make the newer vendored path's behaviour pass, the newer
+                    # path is narrowed back to the ratified intent. The two
+                    # residual differences that keep this call worth making at
+                    # all: #6520 also proves the bare `NAME=$(mktemp)` (no -d)
+                    # form, and its single-assignment/poisoning check is
+                    # stricter than gate 2a's.
+                    if _wt_pdk_env_sourced_same_command \
+                       && rm_scope_mktemp_same_command_safe "$target" "$COMMAND_RM_MKTEMP_SCAN"; then
                         continue
                     fi
                     # #82: the SAME narrow pdk_env.sh mktemp-scratch exemption

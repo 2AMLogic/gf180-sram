@@ -36,7 +36,8 @@
 #     still DENIES
 #   - the mktemp-argument allowlist holds here too: `-p <protected>`,
 #     `--tmpdir=<protected>`, a positional TEMPLATE under the protected
-#     area, and a same-command `TMPDIR=<protected>` all still DENY
+#     area, a same-command `TMPDIR=<protected>`, and an AMBIENT
+#     `$TMPDIR=<protected>` inherited from the session (#97) all still DENY
 #   - the exemption is PER-VARIABLE: a second, untracked unresolved var in
 #     the same command still DENIES
 #   - the PR #65 path-confinement re-validation applies at THIS site: a
@@ -118,6 +119,18 @@ run_hook() {
     output=$(jq -n --rawfile cmd "$cmdfile" --arg cwd "$cwd" \
         '{tool_name:"Bash", tool_input:{command:$cmd}, cwd:$cwd}' \
         | bash "$HOOK" 2>/dev/null) || exit_code=$?
+    printf '%s|%s' "$exit_code" "$output"
+}
+
+# As run_hook, but with an AMBIENT $TMPDIR ($3) in the hook's environment --
+# the second half of the TMPDIR safety gate (a relocated temp root inherited
+# from the session, with no `TMPDIR=` text in the command itself).
+run_hook_tmpdir() {
+    local cmdfile="$1" cwd="$2" ambient_tmpdir="$3"
+    local exit_code=0 output
+    output=$(jq -n --rawfile cmd "$cmdfile" --arg cwd "$cwd" \
+        '{tool_name:"Bash", tool_input:{command:$cmd}, cwd:$cwd}' \
+        | TMPDIR="$ambient_tmpdir" bash "$HOOK" 2>/dev/null) || exit_code=$?
     printf '%s|%s' "$exit_code" "$output"
 }
 
@@ -219,6 +232,16 @@ cd $WT && TMPDIR=$TMPROOT && scratch=\$(mktemp -d) && source sim/lib/pdk_env.sh 
 EOF
 result=$(run_hook "$CMDDIR/G.txt" "$WT")
 assert_deny_because "(G) same-command TMPDIR=<protected area> -> still deny" "$result" "$RMSCOPE"
+
+# (G2) The same hazard via an AMBIENT $TMPDIR inherited from the session --
+# no `TMPDIR=` text in the command at all, so only the ambient half of the
+# TMPDIR safety gate can catch it (#97). Command text is byte-identical to
+# (A), the otherwise-allowed cold-start idiom.
+cat > "$CMDDIR/G2.txt" <<EOF
+cd $WT && scratch=\$(mktemp -d) && source sim/lib/pdk_env.sh && ngspice -b -o out.log sim/read-snm/testbench/tb_read_snm.spice ; rm -rf "\$scratch"
+EOF
+result=$(run_hook_tmpdir "$CMDDIR/G2.txt" "$WT" "$TMPROOT")
+assert_deny_because "(G2) ambient TMPDIR=<protected area> -> still deny" "$result" "$RMSCOPE"
 
 # (H) mktemp argument allowlist, checked at this site too: `-p <protected>`.
 cat > "$CMDDIR/H.txt" <<EOF
