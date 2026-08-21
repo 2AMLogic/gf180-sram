@@ -151,8 +151,10 @@ as statistical by this record. See `spec/statistical-treatment-decision.md`
 for the ratification record (resolves #20) and `sim/README.md` § "Monte
 Carlo / yield evidence records" for the harness and record-tree convention
 this requirement is checked against. No numeric `target_yield` bar is
-ratified for these rows; that is an explicitly deferred follow-up (see
-`spec/statistical-treatment-decision.md` § "Deferred: `target_yield`").
+ratified for these rows, and none is planned absent new evidence:
+`spec/target-yield-decision.md` ratifies Cpk / sigma-to-spec / the exact
+empirical-yield lower bound, each with its own confidence interval, as the
+standing requirement instead of a pass/fail number.
 
 ### Corner set
 
