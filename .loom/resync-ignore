@@ -1,0 +1,31 @@
+# Paths listed here (one per line, relative to .loom/, matching the
+# per-file report label e.g. "hooks/guard-destructive-generic.sh") are
+# pinned local customizations that `resync-installed.sh` must never
+# overwrite on a "chore: resync installed Loom surfaces" run. Blank lines
+# and `#` comments are ignored. See resync-installed.sh's own header
+# comment ("Local-override convention") for the full contract, and
+# `.loom/docs/repo-owned-files.md` for the shared repo-ownership meaning
+# this list also carries for the installer's clean-sweep path.
+#
+# hooks/guard-destructive-generic.sh (gf180-sram#94): this repo carries a
+# hand-patched local fork of the vendored generic write-confinement guard
+# with several gf180-sram-specific fixes that were never accepted upstream
+# into Repo Skills (symlink-ancestor-resolution #69/#70, for-loop
+# loop-variable binding #63/#66, BSD `sed -i ''` script/target
+# disambiguation #49/#77/#79, leading-keyword strip #67/#71, `cd`/redirect
+# same-command var resolution #68/#72, and the sim/lib/pdk_env.sh
+# mktemp-scratch exemption #64/#65/#82). `resync-installed.sh`'s
+# `CANONICAL_GUARD_PRESENT` probe (5 marker greps against
+# .claude/skills/repo/hooks/guard-destructive.sh) never evaluates to 1 for
+# this repo's installed canonical guard version (it is missing the
+# `gh-comment-body-literal-at` marker), so every resync run considered the
+# vendored copy eligible for wholesale replacement and silently reverted
+# every one of the fixes above -- four times over (#78, #80/#81/#83/#84/#85,
+# #88, #92), each restored once and wiped again by the very next resync
+# commit. Pinning this path here is the structural fix: the file is a
+# deliberate, permanent local divergence from the vendored default (Repo
+# Skills' documented posture (a), keep a git-tracked local copy), so any
+# genuine future upstream improvement to the vendored guard must be
+# reviewed and merged into this file by hand rather than arriving silently
+# via resync.
+hooks/guard-destructive-generic.sh
