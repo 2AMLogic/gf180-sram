@@ -46,3 +46,13 @@ Ratified spec and decision records for this block.
   `klt` curated DRC/LVS deck) that none of this repo's read/write margin,
   access-time, or Monte Carlo yield figures are sensitive to the C-vs-D
   metal-stack delta, so no `sim/` or `layout/` evidence is re-run.
+- [`target-yield-decision.md`](target-yield-decision.md) — resolves #90:
+  ratifies **no** numeric `target_yield` bar for read SNM, hold SNM, and
+  write margin — the sub-question `statistical-treatment-decision.md`
+  explicitly deferred. Cpk / sigma-to-spec / the exact Clopper-Pearson
+  empirical-yield lower bound (each with its own confidence interval) remain
+  the standing requirement instead of a pass/fail number, because the
+  existing 200-sample-per-corner campaigns cannot resolve an 8192-bit
+  array's per-bit yield to the confidence a numeric bar would imply, and no
+  citable external precedent exists to ground one. Additive only to
+  `sram.md`'s Characterization section; no `sim/` evidence is re-run.
