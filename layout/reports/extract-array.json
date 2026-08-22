@@ -4,7 +4,7 @@
   "deck": "gf180mcu",
   "top": "sram_256x32_array",
   "dbu_um": 0.001,
-  "netlist_path": "/tmp/tmp.sWKIbWQ9WF/array.spice",
+  "netlist_path": "/tmp/tmp.7hvE8odO6w/array.spice",
   "netlist_sha256": "118e2b7bcc1aed0a2b3e4f47cf6326e45998aaf41d92492775a470c0e798de74",
   "status": "extracted",
   "device_count": 49152,

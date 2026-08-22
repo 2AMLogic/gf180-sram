@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "engine": "klayout",
-  "layout": "/tmp/tmp.sWKIbWQ9WF/bitcell.spice",
-  "reference": "/tmp/tmp.sWKIbWQ9WF/bitcell_ref.spice",
+  "layout": "/tmp/tmp.7hvE8odO6w/bitcell.spice",
+  "reference": "/tmp/tmp.7hvE8odO6w/bitcell_ref.spice",
   "top": "SRAM_BITCELL_6T",
   "parameter_tolerance": null,
   "status": "match",

@@ -46,7 +46,7 @@ EOF
 klt lvs "$WORK/lvs-bitcell-request.json" --format json | tee "$OUT/lvs-bitcell.json" >/dev/null
 python3 -c "import json,sys; d=json.load(open('$OUT/lvs-bitcell.json')); print('status:', d['status'], '| mismatches:', d['mismatch_count'])"
 
-hr "4. Extract + LVS: full array vs $ARRAY_REF (expected mismatch -- known tool gap, see README)"
+hr "4. Extract + LVS: full array vs $ARRAY_REF (flatten_reference -- klayout-tools#1085)"
 klt extract --deck gf180mcu --format json "$ARRAY_GDS" -o "$WORK/array.spice" > "$WORK/extract-array-full.json"
 # The full per-device/per-net report is ~18 MB (49,152 devices) -- not
 # useful to commit verbatim. Keep every field except the two bulk arrays;
@@ -62,9 +62,10 @@ print('status:', d['status'], '| devices:', d['device_count'], '| nets:', d['net
 "
 cat > "$WORK/lvs-array-request.json" <<EOF
 {"layout":{"netlist":"$WORK/array.spice","top":"sram_256x32_array"},
- "reference":{"netlist":"$ROOT/$ARRAY_REF","form":"subckt-call"}}
+ "reference":{"netlist":"$ROOT/$ARRAY_REF","form":"subckt-call"},
+ "options":{"flatten_reference":true}}
 EOF
 klt lvs "$WORK/lvs-array-request.json" --format json | tee "$OUT/lvs-array.json" >/dev/null
-python3 -c "import json,sys; d=json.load(open('$OUT/lvs-array.json')); print('status:', d['status'], '(expected: mismatch -- klt extract is flat-only, klayout-tools#1085)')"
+python3 -c "import json,sys; d=json.load(open('$OUT/lvs-array.json')); print('status:', d['status'], '| mismatches:', d['mismatch_count'])"
 
 hr "done -- reports written under $OUT/"
