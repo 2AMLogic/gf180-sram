@@ -4,8 +4,8 @@
   "deck": "gf180mcu",
   "top": "sram_256x32_array",
   "dbu_um": 0.001,
-  "netlist_path": "/tmp/pex_work/array.spice",
-  "netlist_sha256": "c9dee4f3ee8b7da33630f61e7046bc36273eb2a08405b6cca4d26316a8d5dfe0",
+  "netlist_path": "/tmp/tmp.sWKIbWQ9WF/array.spice",
+  "netlist_sha256": "118e2b7bcc1aed0a2b3e4f47cf6326e45998aaf41d92492775a470c0e798de74",
   "status": "extracted",
   "device_count": 49152,
   "net_count": 16706,
@@ -43,10 +43,10 @@
     "pdk": null,
     "deck": {
       "name": "gf180mcu",
-      "content_hash": "sha256:6a323622d93c1b4716a7874c37ee3d825bd08398c3c030c85175e44e2cc229a3"
+      "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0"
     },
     "input": {
-      "content_hash": "sha256:8da811cccfcadcb711f58b790e272fa22e1c130957f46292fc48443c24f54826"
+      "content_hash": "sha256:7ef564c1a6cdb2645af056fd002d95fad2ebf4270099ae4a454d62b0f6d54a0a"
     }
   },
   "parasitics": null,

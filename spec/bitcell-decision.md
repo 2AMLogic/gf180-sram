@@ -229,6 +229,20 @@ tooling, not a competing deliverable.
   thresholds throughout, by both engines. Whether it could legally go
   tighter under the marker is recorded as an open, un-acted-on finding
   (re-layout is explicitly out of scope for issue #8).
+  **Updated by issue #103**: the survey's own native-deck run against the
+  custom bitcell found 21 violations in five generic rule families
+  (`NP.5a`, `PP.5a`, `CO.6a`, `CO.6b`, `DF.4c_LV`) that `klt`'s curated
+  deck cannot see. All five were confirmed real (mis-cited rule thresholds
+  in `layout/bitcell/generate.py`, not artifacts of the manual invocation)
+  and fixed; the committed cell is now 0-violation against the full 547-rule
+  native deck as well as the curated deck, on the bitcell and on a 3x3
+  abutment tile. The one spec-visible margin this moved is **cell pitch**:
+  4.46 x 5.39µm -> 4.46 x **5.40**µm (row pitch +0.01µm), i.e. 24.1µm²/bit
+  and a 142.72 x 1382.40µm array. That is still ~1.35x the foundry
+  `018SRAM_cell1` reference, so no conclusion in this record changes.
+  The remaining gap is repeatability, not compliance — the native-deck run
+  is a manual invocation with no committed report schema
+  ([klayout-tools#1302](https://github.com/2AMLogic/klayout-tools/issues/1302)).
 - Port target: 1RW first (matching `gf180mcu_fd_ip_sram`'s interface),
   1RW1R as a stretch goal — consistent with the existing draft spec table
   in `README.md`.

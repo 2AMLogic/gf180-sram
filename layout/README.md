@@ -15,9 +15,9 @@ existed) is gone.
 
 | | |
 |---|---|
-| Bitcell | `bitcell/sram_bitcell_6t.gds` — 6 transistors, 4.46 x 5.39 um |
-| Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 142.72 x 1379.84 um (0.1969 mm²) |
-| DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array |
+| Bitcell | `bitcell/sram_bitcell_6t.gds` — 6 transistors, 4.46 x 5.40 um |
+| Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 142.72 x 1382.40 um (0.1973 mm²) |
+| DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on the bitcell and on the 3x3 abutment tile |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
 | LVS | `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior) |
 
@@ -122,15 +122,21 @@ captures.
 
 **Does not prove**:
 
-* **Sign-off DRC against the foundry's own deck.** `klt`'s gf180mcu deck
+* **Sign-off DRC as a repeatable, committed check.** `klt`'s gf180mcu deck
   (`klt drc --deck gf180mcu`, run and committed as evidence in
   `layout/reports/` by issue #23) is explicitly a curated subset. It does
   not model implant (`Nplus`/`Pplus`) rules, poly-to-COMP and
   contact-to-poly spacing, density, antenna, latch-up, or the DRM's
-  `SramCore` (108/5) marker-scoped SRAM rules. Those rules are satisfied
-  *by construction* here (every constant in `bitcell/generate.py` cites the
-  DRM rule it targets, with margin), which is **not** the same as being
-  checked. Issue #8's
+  `SramCore` (108/5) marker-scoped SRAM rules. The PDK's *own* native deck
+  **has** now been run against this cell (issue #103, `reports/sram-rule-
+  survey.md` "B.4": 547 rules, 21 violations found and fixed, now 0 on both
+  the bitcell and the 3x3 abutment tile) — so "satisfied by construction"
+  is no longer the only claim. What is still missing is a *committed,
+  schema-carrying, CI-runnable* form of that run: it is a manual
+  `klayout -b -r` invocation because `klt drc --engine klayout` cannot
+  drive this PDK's deck ([klayout-tools#1302](https://github.com/2AMLogic/klayout-tools/issues/1302)),
+  so nothing in `layout/reports/` re-checks it automatically and a future
+  geometry change can silently regress it again. Issue #8's
   [`layout/reports/sram-rule-survey.md`](reports/sram-rule-survey.md)
   surveys exactly which rule families the `SramCore` marker relaxes (poly/
   contact overlap and several Nwell/LVPWELL/COMP spacing rules -- **not**
@@ -155,7 +161,10 @@ captures.
   schematic records, and documented -- with evidence -- that no
   PEX-compatible path exists for read/hold SNM given this layout's
   monolithic (non-partitionable) bitcell geometry. See `sim/pex/README.md`
-  for the full per-measurement breakdown.
+  for the full per-measurement breakdown. Note that all of `sim/pex/` was
+  extracted from the **pre-issue-#103** bitcell geometry and has not been
+  re-run against the revision committed here — disclosed in
+  `sim/pex/README.md` "Freshness", tracked as issue #106.
 * **A routed macro.** There is no periphery, no pin/obstruction abstract, no
   LEF/Liberty view (issue #24's scope).
 * **Array-level LVS.** See "Known tool gaps" — `klt extract` is flat-only, so
@@ -173,7 +182,7 @@ directly measurable — done here with `klt cells` on
 | | Column pitch | Row pitch | Area/bit |
 |---|---|---|---|
 | Foundry `018SRAM_cell1` | <= 3.68 um | 4.84 um | <= 17.8 um² |
-| This repo's `sram_bitcell_6t` | 4.46 um | 5.39 um | 24.0 um² |
+| This repo's `sram_bitcell_6t` | 4.46 um | 5.40 um | 24.1 um² |
 
 (The foundry cell's own drawn extent is 3.68 x 5.18 um; its mirrored-pair
 container `018SRAM_cell1_2x` is 3.68 x 9.68 um for two cells, i.e. a 4.84 um
@@ -334,8 +343,8 @@ Expected results, as committed (2026-08-16):
 | `klt extract` (bitcell) | 6 devices (4 nfet + 2 pfet), 7 nets, W/L per `design/netlist/bitcell_6t.spice` |
 | `klt extract` (full array) | 49,152 devices, 16,706 nets, 322 pins (~94 s) |
 | `klt lvs` (bitcell vs. rewritten reference) | `status: match`, 0 mismatches |
-| `klt stats` (bitcell) | `bbox_um: (0.0, 0.0) - (4.46, 5.39)`, 38 polygons |
-| `klt stats` (array) | `bbox_um: (0.0, 0.0) - (142.72, 1379.84)` |
+| `klt stats` (bitcell) | `bbox_um: (0.0, 0.0) - (4.46, 5.4)`, 38 polygons |
+| `klt stats` (array) | `bbox_um: (0.0, 0.0) - (142.72, 1382.4)` |
 
 ## Tool / PDK versions
 
