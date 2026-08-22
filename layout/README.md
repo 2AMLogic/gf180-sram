@@ -19,7 +19,7 @@ existed) is gone.
 | Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 142.72 x 1382.40 um (0.1973 mm²) |
 | DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on all three |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
-| LVS | `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior) |
+| LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior). Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
 
 Everything above is reproduced end-to-end by `./layout/verify.sh` (see
 "Reproducing and re-checking"). What is *not* claimed is in "What this does
@@ -168,10 +168,15 @@ captures.
   `sim/pex/README.md` "Freshness", tracked as issue #106.
 * **A routed macro.** There is no periphery, no pin/obstruction abstract, no
   LEF/Liberty view (issue #24's scope).
-* **Array-level LVS.** See "Known tool gaps" — `klt extract` is flat-only, so
-  the hierarchical array netlist cannot be compared as-is today; fresh
-  evidence of this specific failure is committed in
-  `layout/reports/lvs-array.json` (issue #23).
+* **Array-level LVS.** Achieved — see "Known tool gaps" #2. `klt extract`
+  itself stays flat-only (the layout side is always a single flat circuit),
+  but `klt lvs`'s `options.flatten_reference` (klayout-tools#1085, closed
+  2026-08-17) flattens the *hierarchical reference* netlist before comparing,
+  so the two sides pair up: `layout/reports/lvs-array.json` reports
+  `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins
+  matched. The remaining `mismatch_count: 1` entry is a `severity: warning`
+  `topology.flattened` disclosure of that flatten, not a real mismatch
+  (issue #108).
 
 ## Area: measured against the foundry's own bitcell
 
@@ -245,14 +250,36 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
    match — a no-op today, and still correct if a future extraction deck (or
    a bitcell without ties drawn inside it) reintroduces a synthesized net.
 2. **`klt extract` is flat-only**, by design ("Flat (not hierarchical)
-   extraction, deliberately"). The committed array GDS *is* hierarchical (one
-   bitcell cell, one `CellInstArray`) and the committed reference netlist is
-   too (one `.subckt bitcell_6t` + 8,192 calls), but extraction flattens to
-   49,152 top-level devices, so `klt lvs` cannot pair the two sides at all
-   (`topology: circuit could not be matched to a counterpart`). Array/macro
-   LVS therefore needs either hierarchy-preserving extraction or a reference
-   flattening path. Filed as
-   [klayout-tools#1085](https://github.com/2AMLogic/klayout-tools/issues/1085).
+   extraction, deliberately") — still true today, and not what closed this
+   gap. The committed array GDS *is* hierarchical (one bitcell cell, one
+   `CellInstArray`) and the committed reference netlist is too (one
+   `.subckt bitcell_6t` + 8,192 calls); extraction alone flattens only the
+   layout side to 49,152 top-level devices, leaving the reference
+   hierarchical, so `klt lvs` used to be unable to pair the two sides at all
+   (`topology: circuit could not be matched to a counterpart`, both sides).
+   Filed as
+   [klayout-tools#1085](https://github.com/2AMLogic/klayout-tools/issues/1085);
+   **closed 2026-08-17**, landing `options.flatten_reference` /
+   `options.flatten_layout` on `klt lvs`. The fix is on the *compare* side,
+   not the extraction side: `klt extract` still only ever produces a flat
+   layout-side netlist, but `options.flatten_reference: true` now flattens
+   the *reference*'s hierarchy in-process (collapsing every subcircuit-call
+   instance in place) before comparing, so the already-flat layout side gets
+   a directly comparable counterpart. Re-run against this repo's committed
+   array GDS/netlist (`layout/reports/generate.sh`, issue #108):
+   `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins
+   matched — `layout/reports/lvs-array.json`'s only remaining `mismatches[]`
+   entry is the expected `severity: warning`, `category: topology.flattened`
+   disclosure of that flatten, not a real defect. Array/macro LVS is
+   therefore achievable today via `options.flatten_reference`; it was a
+   missing compare-side option, not a fundamentally unsolvable
+   flat-vs-hierarchical mismatch. (One caveat: the `klt 0.2.0` build used
+   here predates klayout-tools#1205's `options` echo in the response JSON,
+   so `layout/reports/lvs-array.json` does not literally carry an
+   `options.flatten_reference: true` field — the flatten is instead visible
+   via the `topology.flattened` disclosure entry described above and the
+   fully-matched device/net/pin counts, which are only possible with the
+   reference flattened.)
 3. **No bitcell/array generator, and no grid placement in `gen-compose`** (the
    finding PR #36 recorded): `klt gen`'s generators are generic matched-device
    analog primitives, and `gen-compose`'s placement strategies are `row` and
