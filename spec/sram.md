@@ -122,9 +122,10 @@ impractical) — each as a **recorded margin**, not a bare pass/fail:
   nodes during read is exactly what read SNM is testing for).
 - **Write margin** — the minimum bit-line / write-driver drive (e.g. write
   trip voltage, or the N-curve-based write margin) that successfully flips
-  the cell's stored value within the write pulse width the macro's timing
-  target assumes. Must show successful flip with positive margin at every
-  corner.
+  the cell's stored value within a fixed **2 ns** write-pulse width (no
+  independent macro timing target is ratified; see
+  `spec/write-pulse-width-decision.md`). Must show successful flip with
+  positive margin at every corner.
 - **Read/write access time** — the delay from clock edge (or address/enable
   valid, for the applicable timing arc) to valid `Q` output or completed
   write, at each corner. This is the data that populates the Liberty timing
@@ -211,6 +212,11 @@ to make a failing corner disappear.
   (mismatch-driven, Monte-Carlo-requiring) rows. Additive only: it adds the
   "Statistical treatment" paragraph above and changes no corner, axis, or
   Signoff threshold.
+- `spec/write-pulse-width-decision.md` — resolves #7, the decision record
+  ratifying that write margin is measured against a fixed, stated 2 ns
+  write-pulse width with no independent macro timing target. Amends only
+  the write-margin bullet above; no re-run of any committed write-margin
+  evidence was required.
 - `README.md`, "Target specification (DRAFT...)" section — the pre-existing
   draft table this record ratifies and supersedes.
 - `libs.ref/gf180mcu_fd_ip_sram/` under `~/.volare/gf180mcu{A,B,C,D}`

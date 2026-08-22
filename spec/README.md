@@ -56,3 +56,13 @@ Ratified spec and decision records for this block.
   array's per-bit yield to the confidence a numeric bar would imply, and no
   citable external precedent exists to ground one. Additive only to
   `sram.md`'s Characterization section; no `sim/` evidence is re-run.
+- [`write-pulse-width-decision.md`](write-pulse-width-decision.md) —
+  resolves #7: ratifies that write margin is measured against a fixed,
+  stated **2 ns** write-pulse width, with **no** independent macro timing
+  target — this repo ratifies no clock period/cycle-time/frequency target
+  anywhere else for that phrase to reference. The existing testbench
+  (`sim/write-margin/testbench/tb_write_margin.spice`) already trials over
+  exactly that 2 ns window, ~23x the worst measured write access time
+  (85 ps at `ss_125c_2.97v`), so no re-run of any committed write-margin
+  evidence is required. Amends only the write-margin bullet in `sram.md`'s
+  Characterization section.
