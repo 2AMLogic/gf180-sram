@@ -4,7 +4,12 @@ An SRAM macro on the [gf180mcu](https://github.com/google/gf180mcu-pdk) open
 PDK, built and verified by AI agents driving
 [klayout-tools](https://github.com/2AMLogic/klayout-tools).
 
-**Status: spec ratified, bitcell/array design and layout underway.**
+**Status: spec ratified; bitcell and 256 x 32 array are DRC-clean and
+LVS-clean (`status: match` for both — see `layout/README.md`'s "Status
+(2026-08-16)" section), and 27-corner PVT signoff has passed (read SNM +
+hold SNM + write margin, all 27 corner points — see
+`sim/signoff-summary.md`'s Overall signoff line). Abstract (LEF) and Liberty
+timing views have not been generated yet (`views/` is still empty).**
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
@@ -53,11 +58,14 @@ integrating that hardened macro.
 Maturity ladder: bitcell question answered → spec ratified → bitcell
 characterized → array assembled → DRC/LVS-clean → abstract and Liberty views
 generated and checked → shuttle seat → measured silicon. **Current position:
-spec ratified, bitcell characterization underway (27-corner PVT testbenches
-shipped with read SNM / hold SNM / write margin / access-time results
-recorded across all 27 corners; the formal per-corner pass/fail synthesis
-against spec/sram.md's positive-margin signoff requirement is still
-outstanding).**
+spec ratified; bitcell characterized (27-corner PVT testbenches recorded
+read SNM / hold SNM / write margin / access-time results across all 27
+corners, with the per-corner pass/fail synthesis against `spec/sram.md`'s
+positive-margin signoff requirement complete — overall verdict PASS, see
+`sim/signoff-summary.md`); array assembled and DRC/LVS-clean (256 x 32
+array, `status: match` LVS, see `layout/README.md`'s "Status (2026-08-16)"
+section). Abstract and Liberty views have not been generated yet (`views/`
+is still empty); shuttle seat and measured silicon remain future steps.**
 
 ## Macro ceiling, and where this block sits relative to it
 
