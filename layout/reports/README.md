@@ -24,6 +24,16 @@ overwrites the files below in place.
 | `lvs-bitcell.json` | `klt lvs` vs. `design/netlist/bitcell_6t.spice` (via `layout/lvs_reference.py`) | `status: match`, 0 mismatches, 6/6 devices, 7/7 nets |
 | `extract-array.json` | `klt extract --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins -- `devices[]`/`nets[]` omitted from the committed file (~18 MB unabridged; every other field, including counts and provenance, is kept in full) |
 | `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` | `status: mismatch` -- **expected**, see "Known gap: array-level LVS" below |
+| `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
+
+`drc-foundry-bitcell.json` is generated and maintained separately from the
+five reports above -- it checks the *foundry's* macro, not this repo's own
+layout, so it is not part of `generate.sh`'s regeneration loop (nothing in
+`design/`/`layout/` changing would ever change it). See
+[`sram-rule-survey.md`](sram-rule-survey.md) (issue #8) for the full survey
+of gf180mcu's `SramCore` (108/5) marker-scoped rule allowances this result
+is evidence for, and the separate native-engine (`klt drc --engine klayout`)
+investigation.
 
 Every report's own `provenance` block records `klt_version`, the deck's
 `content_hash`, and (for DRC/extract) the input GDS's `content_hash` --
