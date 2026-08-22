@@ -26,68 +26,68 @@ X$3 VSS__t4 QB__t0 Q__t4 VSS__t2 nfet_03v3 L=0.28U W=0.36U AS=0.1022P AD=0.169P
 * device instance $4 r0 *1 2.82,1.83 nfet
 X$4 QB__t4 Q__t0 VSS__t5 VSS__t3 nfet_03v3 L=0.28U W=0.36U AS=0.169P AD=0.1022P
 + PS=1.28U PD=0.96U
-* device instance $5 r0 *1 1.64,3.71 pfet
+* device instance $5 r0 *1 1.64,3.72 pfet
 X$5 VDD__t2 QB__t1 Q__t1 VDD__t0 pfet_03v3 L=0.28U W=0.22U AS=0.1664P AD=0.155P
 + PS=1.72U PD=1.28U
-* device instance $6 r0 *1 2.82,3.71 pfet
+* device instance $6 r0 *1 2.82,3.72 pfet
 X$6 QB__t2 Q__t2 VDD__t3 VDD__t1 pfet_03v3 L=0.28U W=0.22U AS=0.155P AD=0.1664P
 + PS=1.28U PD=1.72U
 * device instance BL_t0 r0 *1 0,0 
-RBL_t0 BL__t0 BL 1.617
+RBL_t0 BL__t0 BL 1.62
 * device instance BL r0 *1 0,0 
-CBL BL vsubs 4.97235e-16
+CBL BL vsubs 4.98113e-16
 * device instance BLB_t0 r0 *1 0,0 
-RBLB_t0 BLB__t0 BLB 1.617
+RBLB_t0 BLB__t0 BLB 1.62
 * device instance BLB r0 *1 0,0 
-CBLB BLB vsubs 4.97235e-16
+CBLB BLB vsubs 4.98113e-16
 * device instance Q_t0 r0 *1 0,0 
-RQ_t0 Q__t0 Q 19.5710864303
+RQ_t0 Q__t0 Q 19.5605550824
 * device instance Q_t1 r0 *1 0,0 
-RQ_t1 Q__t1 Q 20.0652285115
+RQ_t1 Q__t1 Q 20.1080678035
 * device instance Q_t2 r0 *1 0,0 
-RQ_t2 Q__t2 Q 24.5134017732
+RQ_t2 Q__t2 Q 24.5260897033
 * device instance Q_t3 r0 *1 0,0 
-RQ_t3 Q__t3 Q 23.985296385
+RQ_t3 Q__t3 Q 23.9573630229
 * device instance Q_t4 r0 *1 0,0 
-RQ_t4 Q__t4 Q 13.5916868999
+RQ_t4 Q__t4 Q 13.616924388
 * device instance Q r0 *1 0,0 
-CQ Q vsubs 7.64576e-16
+CQ Q vsubs 7.83841e-16
 * device instance QB_t0 r0 *1 0,0 
-RQB_t0 QB__t0 QB 19.5710864303
+RQB_t0 QB__t0 QB 19.5605550824
 * device instance QB_t1 r0 *1 0,0 
-RQB_t1 QB__t1 QB 24.5134017732
+RQB_t1 QB__t1 QB 24.5260897033
 * device instance QB_t2 r0 *1 0,0 
-RQB_t2 QB__t2 QB 20.0652285115
+RQB_t2 QB__t2 QB 20.1080678035
 * device instance QB_t3 r0 *1 0,0 
-RQB_t3 QB__t3 QB 23.985296385
+RQB_t3 QB__t3 QB 23.9573630229
 * device instance QB_t4 r0 *1 0,0 
-RQB_t4 QB__t4 QB 13.5916868999
+RQB_t4 QB__t4 QB 13.616924388
 * device instance QB r0 *1 0,0 
-CQB QB vsubs 7.69928e-16
+CQB QB vsubs 7.92193e-16
 * device instance VDD_t0 r0 *1 0,0 
-RVDD_t0 VDD__t0 VDD 0.5169
+RVDD_t0 VDD__t0 VDD 0.49595
 * device instance VDD_t1 r0 *1 0,0 
-RVDD_t1 VDD__t1 VDD 0.5169
+RVDD_t1 VDD__t1 VDD 0.49595
 * device instance VDD_t2 r0 *1 0,0 
-RVDD_t2 VDD__t2 VDD 0.5169
+RVDD_t2 VDD__t2 VDD 0.49595
 * device instance VDD_t3 r0 *1 0,0 
-RVDD_t3 VDD__t3 VDD 0.5169
+RVDD_t3 VDD__t3 VDD 0.49595
 * device instance VDD r0 *1 0,0 
-CVDD VDD vsubs 7.51071e-16
+CVDD VDD vsubs 7.65372e-16
 * device instance VSS_t0 r0 *1 0,0 
-RVSS_t0 VSS__t0 VSS 0.556464901779
+RVSS_t0 VSS__t0 VSS 0.544336679231
 * device instance VSS_t1 r0 *1 0,0 
-RVSS_t1 VSS__t1 VSS 0.556464901779
+RVSS_t1 VSS__t1 VSS 0.544336679231
 * device instance VSS_t2 r0 *1 0,0 
-RVSS_t2 VSS__t2 VSS 0.226467549111
+RVSS_t2 VSS__t2 VSS 0.221531660384
 * device instance VSS_t3 r0 *1 0,0 
-RVSS_t3 VSS__t3 VSS 0.226467549111
+RVSS_t3 VSS__t3 VSS 0.221531660384
 * device instance VSS_t4 r0 *1 0,0 
-RVSS_t4 VSS__t4 VSS 0.226467549111
+RVSS_t4 VSS__t4 VSS 0.221531660384
 * device instance VSS_t5 r0 *1 0,0 
-RVSS_t5 VSS__t5 VSS 0.226467549111
+RVSS_t5 VSS__t5 VSS 0.221531660384
 * device instance VSS r0 *1 0,0 
-CVSS VSS vsubs 7.87168e-16
+CVSS VSS vsubs 8.04827e-16
 * device instance WL_t0 r0 *1 0,0 
 RWL_t0 WL__t0 WL 102.29785
 * device instance WL_t1 r0 *1 0,0 
@@ -95,11 +95,11 @@ RWL_t1 WL__t1 WL 102.29785
 * device instance WL r0 *1 0,0 
 CWL WL vsubs 8.89491e-16
 * device instance cc_Q_VDD r0 *1 0,0 
-Ccc_Q_VDD Q VDD 1.053e-17
+Ccc_Q_VDD Q VDD 1.6433e-17
 * device instance cc_Q_VSS r0 *1 0,0 
-Ccc_Q_VSS Q VSS 5.454e-18
+Ccc_Q_VSS Q VSS 7.862e-18
 * device instance cc_QB_VSS r0 *1 0,0 
-Ccc_QB_VSS QB VSS 5.454e-18
+Ccc_QB_VSS QB VSS 7.862e-18
 * device instance cc_VDD_VSS r0 *1 0,0 
-Ccc_VDD_VSS VDD VSS 3.0234e-17
+Ccc_VDD_VSS VDD VSS 3.3634e-17
 .ENDS sram_bitcell_6t

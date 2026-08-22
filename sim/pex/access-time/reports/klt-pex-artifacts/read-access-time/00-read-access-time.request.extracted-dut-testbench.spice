@@ -15,7 +15,7 @@
 * reference_netlist resolution vs. ngspice's nested-`.include` resolution
 * disagree about the base directory; both only agree when cwd == this
 * file's directory, which ../generate.sh arranges before invoking klt pex).
-.include "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice"
+.include "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice"
 XDUT BL BLB Q QB VDD VSS WL sram_bitcell_6t
 
 * See tb_write_access_time.pex.spice's header for why these six `.param`

@@ -5,7 +5,7 @@
   "top": "sram_bitcell_6t",
   "dbu_um": 0.001,
   "netlist_path": "sim/pex/write-margin/dut/extracted-netlist.spice",
-  "netlist_sha256": "dd9916d56017d955cc032e589b55f5809fcc9694fde306b732df57f27c6042f6",
+  "netlist_sha256": "80133e9b2845ee8bc173ec852535eb5030b52548a504afef8ecdc234fcd84dad",
   "status": "extracted",
   "device_count": 6,
   "net_count": 7,
@@ -201,7 +201,7 @@
       "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0"
     },
     "input": {
-      "content_hash": "sha256:6b90b7d615bb2528eef026ab1ab4778855d2d91b056351ac6872e89323179b3a"
+      "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae"
     }
   },
   "parasitics": {
@@ -209,16 +209,16 @@
     "c_count": 7,
     "cc_count": 4,
     "l_count": 0,
-    "total_resistance_ohm": 415.3695,
-    "total_capacitance_ff": 4.956704,
-    "total_coupling_capacitance_ff": 0.051672,
+    "total_resistance_ohm": 415.3323,
+    "total_capacitance_ff": 5.03195,
+    "total_coupling_capacitance_ff": 0.065791,
     "total_inductance_nh": 0.0,
     "nets": [
       {
         "net": "BL",
         "net_id": 1,
-        "resistance_ohm": 1.617,
-        "capacitance_ff": 0.497235,
+        "resistance_ohm": 1.62,
+        "capacitance_ff": 0.498113,
         "inductance_nh": 0.0,
         "hub_net": "BL",
         "rc_model": "lumped",
@@ -227,7 +227,7 @@
             "device": "$1",
             "terminal": "S",
             "leg_net": "BL__t0",
-            "resistance_ohm": 1.617
+            "resistance_ohm": 1.62
           }
         ],
         "segments": [],
@@ -235,9 +235,9 @@
       },
       {
         "net": "BLB",
-        "net_id": 3,
-        "resistance_ohm": 1.617,
-        "capacitance_ff": 0.497235,
+        "net_id": 2,
+        "resistance_ohm": 1.62,
+        "capacitance_ff": 0.498113,
         "inductance_nh": 0.0,
         "hub_net": "BLB",
         "rc_model": "lumped",
@@ -246,7 +246,7 @@
             "device": "$2",
             "terminal": "D",
             "leg_net": "BLB__t0",
-            "resistance_ohm": 1.617
+            "resistance_ohm": 1.62
           }
         ],
         "segments": [],
@@ -255,8 +255,8 @@
       {
         "net": "Q",
         "net_id": 5,
-        "resistance_ohm": 101.7267,
-        "capacitance_ff": 0.764576,
+        "resistance_ohm": 101.769,
+        "capacitance_ff": 0.783841,
         "inductance_nh": 0.0,
         "hub_net": "Q",
         "rc_model": "lumped",
@@ -265,38 +265,38 @@
             "device": "$4",
             "terminal": "G",
             "leg_net": "Q__t0",
-            "resistance_ohm": 19.5711
+            "resistance_ohm": 19.5606
           },
           {
             "device": "$5",
             "terminal": "S",
             "leg_net": "Q__t1",
-            "resistance_ohm": 20.0652
+            "resistance_ohm": 20.1081
           },
           {
             "device": "$6",
             "terminal": "G",
             "leg_net": "Q__t2",
-            "resistance_ohm": 24.5134
+            "resistance_ohm": 24.5261
           },
           {
             "device": "$1",
             "terminal": "D",
             "leg_net": "Q__t3",
-            "resistance_ohm": 23.9853
+            "resistance_ohm": 23.9574
           },
           {
             "device": "$3",
             "terminal": "S",
             "leg_net": "Q__t4",
-            "resistance_ohm": 13.5917
+            "resistance_ohm": 13.6169
           }
         ],
         "segments": [],
         "coupled": [
           {
             "net": "VDD",
-            "capacitance_ff": 0.01053,
+            "capacitance_ff": 0.016433,
             "levels": [
               [
                 0,
@@ -307,7 +307,7 @@
           },
           {
             "net": "VSS",
-            "capacitance_ff": 0.005454,
+            "capacitance_ff": 0.007862,
             "levels": [
               [
                 0,
@@ -320,9 +320,9 @@
       },
       {
         "net": "QB",
-        "net_id": 2,
-        "resistance_ohm": 101.7267,
-        "capacitance_ff": 0.769928,
+        "net_id": 4,
+        "resistance_ohm": 101.769,
+        "capacitance_ff": 0.792193,
         "inductance_nh": 0.0,
         "hub_net": "QB",
         "rc_model": "lumped",
@@ -331,38 +331,38 @@
             "device": "$3",
             "terminal": "G",
             "leg_net": "QB__t0",
-            "resistance_ohm": 19.5711
+            "resistance_ohm": 19.5606
           },
           {
             "device": "$5",
             "terminal": "G",
             "leg_net": "QB__t1",
-            "resistance_ohm": 24.5134
+            "resistance_ohm": 24.5261
           },
           {
             "device": "$6",
             "terminal": "D",
             "leg_net": "QB__t2",
-            "resistance_ohm": 20.0652
+            "resistance_ohm": 20.1081
           },
           {
             "device": "$2",
             "terminal": "S",
             "leg_net": "QB__t3",
-            "resistance_ohm": 23.9853
+            "resistance_ohm": 23.9574
           },
           {
             "device": "$4",
             "terminal": "D",
             "leg_net": "QB__t4",
-            "resistance_ohm": 13.5917
+            "resistance_ohm": 13.6169
           }
         ],
         "segments": [],
         "coupled": [
           {
             "net": "VSS",
-            "capacitance_ff": 0.005454,
+            "capacitance_ff": 0.007862,
             "levels": [
               [
                 0,
@@ -376,8 +376,8 @@
       {
         "net": "VDD",
         "net_id": 6,
-        "resistance_ohm": 2.0676,
-        "capacitance_ff": 0.751071,
+        "resistance_ohm": 1.9838,
+        "capacitance_ff": 0.765372,
         "inductance_nh": 0.0,
         "hub_net": "VDD",
         "rc_model": "lumped",
@@ -386,32 +386,32 @@
             "device": "$5",
             "terminal": "B",
             "leg_net": "VDD__t0",
-            "resistance_ohm": 0.5169
+            "resistance_ohm": 0.496
           },
           {
             "device": "$6",
             "terminal": "B",
             "leg_net": "VDD__t1",
-            "resistance_ohm": 0.5169
+            "resistance_ohm": 0.4959
           },
           {
             "device": "$5",
             "terminal": "D",
             "leg_net": "VDD__t2",
-            "resistance_ohm": 0.5169
+            "resistance_ohm": 0.496
           },
           {
             "device": "$6",
             "terminal": "S",
             "leg_net": "VDD__t3",
-            "resistance_ohm": 0.5169
+            "resistance_ohm": 0.4959
           }
         ],
         "segments": [],
         "coupled": [
           {
             "net": "Q",
-            "capacitance_ff": 0.01053,
+            "capacitance_ff": 0.016433,
             "levels": [
               [
                 0,
@@ -422,7 +422,7 @@
           },
           {
             "net": "VSS",
-            "capacitance_ff": 0.030234,
+            "capacitance_ff": 0.033634,
             "levels": [
               [
                 0,
@@ -436,8 +436,8 @@
       {
         "net": "VSS",
         "net_id": 8,
-        "resistance_ohm": 2.0188,
-        "capacitance_ff": 0.787168,
+        "resistance_ohm": 1.9748,
+        "capacitance_ff": 0.804827,
         "inductance_nh": 0.0,
         "hub_net": "VSS",
         "rc_model": "lumped",
@@ -446,44 +446,44 @@
             "device": "$1",
             "terminal": "B",
             "leg_net": "VSS__t0",
-            "resistance_ohm": 0.5565
+            "resistance_ohm": 0.5443
           },
           {
             "device": "$2",
             "terminal": "B",
             "leg_net": "VSS__t1",
-            "resistance_ohm": 0.5565
+            "resistance_ohm": 0.5443
           },
           {
             "device": "$3",
             "terminal": "B",
             "leg_net": "VSS__t2",
-            "resistance_ohm": 0.2265
+            "resistance_ohm": 0.2215
           },
           {
             "device": "$4",
             "terminal": "B",
             "leg_net": "VSS__t3",
-            "resistance_ohm": 0.2265
+            "resistance_ohm": 0.2215
           },
           {
             "device": "$3",
             "terminal": "D",
             "leg_net": "VSS__t4",
-            "resistance_ohm": 0.2265
+            "resistance_ohm": 0.2215
           },
           {
             "device": "$4",
             "terminal": "S",
             "leg_net": "VSS__t5",
-            "resistance_ohm": 0.2265
+            "resistance_ohm": 0.2215
           }
         ],
         "segments": [],
         "coupled": [
           {
             "net": "Q",
-            "capacitance_ff": 0.005454,
+            "capacitance_ff": 0.007862,
             "levels": [
               [
                 0,
@@ -494,7 +494,7 @@
           },
           {
             "net": "QB",
-            "capacitance_ff": 0.005454,
+            "capacitance_ff": 0.007862,
             "levels": [
               [
                 0,
@@ -505,7 +505,7 @@
           },
           {
             "net": "VDD",
-            "capacitance_ff": 0.030234,
+            "capacitance_ff": 0.033634,
             "levels": [
               [
                 0,
@@ -518,7 +518,7 @@
       },
       {
         "net": "WL",
-        "net_id": 4,
+        "net_id": 3,
         "resistance_ohm": 204.5957,
         "capacitance_ff": 0.889491,
         "inductance_nh": 0.0,
