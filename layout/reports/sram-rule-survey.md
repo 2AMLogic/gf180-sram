@@ -284,18 +284,24 @@ Issue #103 re-ran exactly the B.2 recipe above (same materialized
 `main.drc`, same `-rd` set, same 547 executed rules — verified by
 `grep -c 'Executing rule'` on both run logs) against the pre-fix and
 post-fix `layout/bitcell/sram_bitcell_6t.gds`, and additionally against a
-3x3 abutment tile (`layout/sram_256x32/generate.py --rows 3 --cols 3`),
-which the standalone-cell run cannot exercise.
+3x3 abutment tile (`layout/sram_256x32/generate.py --rows 3 --cols 3`) and
+the full committed 256x32 array (8,192 cells, ~40s), neither of which the
+standalone-cell run can exercise.
 
-| Rule | What it actually checks | Bitcell before | Bitcell after | 3x3 tile before | 3x3 tile after |
-|---|---|---|---|---|---|
-| `NP.5a` | `ngate.enclosed(nplus, 0.23µm)` — Nplus overlap of the **N-channel gate** | 6 | **0** | 54 | **0** |
-| `PP.5a` | `pplus.enclosing(pgate, 0.23µm)` — Pplus overlap of the **P-channel gate** | 2 | **0** | 18 | **0** |
-| `CO.6a` | Metal1 (<0.34µm) **end-of-line** overlap of contact, 0.06µm | 6 | **0** | 54 | **0** |
-| `CO.6b` | Metal1 overlaps contact by <0.04µm on one side ⇒ adjacent edges ≥0.06µm | 6 | **0** | 54 | **0** |
-| `DF.4c_LV` | Nwell overlap of **PCOMP** outside DNWELL, 0.43µm | 1 | **0** | 9 | **0** |
-| *(any other rule)* | — | 0 | **0** | 0 | **0** |
-| **Total** | | **21** | **0** | **189** | **0** |
+| Rule | What it actually checks | Bitcell before | after | 3x3 tile before | after | 256x32 array before | after |
+|---|---|---|---|---|---|---|---|
+| `NP.5a` | `ngate.enclosed(nplus, 0.23µm)` — Nplus overlap of the **N-channel gate** | 6 | **0** | 54 | **0** | 49,152 | **0** |
+| `PP.5a` | `pplus.enclosing(pgate, 0.23µm)` — Pplus overlap of the **P-channel gate** | 2 | **0** | 18 | **0** | 16,384 | **0** |
+| `CO.6a` | Metal1 (<0.34µm) **end-of-line** overlap of contact, 0.06µm | 6 | **0** | 54 | **0** | 49,152 | **0** |
+| `CO.6b` | Metal1 overlaps contact by <0.04µm on one side ⇒ adjacent edges ≥0.06µm | 6 | **0** | 54 | **0** | 49,152 | **0** |
+| `DF.4c_LV` | Nwell overlap of **PCOMP** outside DNWELL, 0.43µm | 1 | **0** | 9 | **0** | 8,192 | **0** |
+| *(any other rule)* | — | 0 | **0** | 0 | **0** | 0 | **0** |
+| **Total** | | **21** | **0** | **189** | **0** | **172,032** | **0** |
+
+The per-cell counts scale exactly (6 x 8,192 = 49,152 and so on), i.e. every
+flag was a per-instance repeat of the same six bitcell defects — abutment
+neither introduced nor masked any additional native-deck violation, before
+or after.
 
 Note the `NP.5a`/`PP.5a` split: gf180-sram#103's issue body quoted 6 and 6
 (which sums to 25, not the 21 the same body states). The measured split is

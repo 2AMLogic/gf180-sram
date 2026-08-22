@@ -235,8 +235,9 @@ tooling, not a competing deliverable.
   deck cannot see. All five were confirmed real (mis-cited rule thresholds
   in `layout/bitcell/generate.py`, not artifacts of the manual invocation)
   and fixed; the committed cell is now 0-violation against the full 547-rule
-  native deck as well as the curated deck, on the bitcell and on a 3x3
-  abutment tile. The one spec-visible margin this moved is **cell pitch**:
+  native deck as well as the curated deck, on the bitcell, a 3x3 abutment
+  tile and the full 8,192-cell 256x32 array (172,032 -> 0 on the array).
+  The one spec-visible margin this moved is **cell pitch**:
   4.46 x 5.39µm -> 4.46 x **5.40**µm (row pitch +0.01µm), i.e. 24.1µm²/bit
   and a 142.72 x 1382.40µm array. That is still ~1.35x the foundry
   `018SRAM_cell1` reference, so no conclusion in this record changes.

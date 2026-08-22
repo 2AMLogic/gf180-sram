@@ -17,7 +17,7 @@ existed) is gone.
 |---|---|
 | Bitcell | `bitcell/sram_bitcell_6t.gds` — 6 transistors, 4.46 x 5.40 um |
 | Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 142.72 x 1382.40 um (0.1973 mm²) |
-| DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on the bitcell and on the 3x3 abutment tile |
+| DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on all three |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
 | LVS | `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior) |
 
@@ -129,8 +129,9 @@ captures.
   contact-to-poly spacing, density, antenna, latch-up, or the DRM's
   `SramCore` (108/5) marker-scoped SRAM rules. The PDK's *own* native deck
   **has** now been run against this cell (issue #103, `reports/sram-rule-
-  survey.md` "B.4": 547 rules, 21 violations found and fixed, now 0 on both
-  the bitcell and the 3x3 abutment tile) — so "satisfied by construction"
+  survey.md` "B.4": 547 rules, 21 violations found and fixed, now 0 on the
+  bitcell, the 3x3 abutment tile and the full 8,192-cell array) — so
+  "satisfied by construction"
   is no longer the only claim. What is still missing is a *committed,
   schema-carrying, CI-runnable* form of that run: it is a manual
   `klayout -b -r` invocation because `klt drc --engine klayout` cannot
