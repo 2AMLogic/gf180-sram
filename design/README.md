@@ -190,7 +190,9 @@ schematic — regenerate and re-commit both together.
   above, and shows why none of this design's netlists needed to be
   regenerated as a result.
 - `layout/README.md` — the parallel GDS-side array-tiling generator (issue
-  #22, PR #36), built against an explicitly-labeled placeholder bitcell
-  because this issue had not landed yet; that placeholder should be
-  replaced with a real bitcell layout derived from `bitcell_6t.sch`'s sizing
-  as a follow-up now that this issue has landed.
+  #22, PR #36) was originally built against an explicitly-labeled
+  placeholder bitcell because this issue had not yet landed. PR #55
+  (`ce56f59`) replaced that placeholder with a real, device-level 6T
+  bitcell layout derived from `bitcell_6t.sch`'s sizing, tiled into the
+  256 x 32 array; see `layout/README.md`'s "Status (2026-08-16)" section
+  for DRC/LVS results.
