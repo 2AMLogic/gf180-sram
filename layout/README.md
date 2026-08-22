@@ -130,9 +130,20 @@ captures.
   `SramCore` (108/5) marker-scoped SRAM rules. Those rules are satisfied
   *by construction* here (every constant in `bitcell/generate.py` cites the
   DRM rule it targets, with margin), which is **not** the same as being
-  checked. Running the PDK's own KLayout DRC deck (`klt drc --engine
-  klayout`, which needs a standalone `klayout` binary this host still does
-  not have as of issue #23) remains open.
+  checked. Issue #8's
+  [`layout/reports/sram-rule-survey.md`](reports/sram-rule-survey.md)
+  surveys exactly which rule families the `SramCore` marker relaxes (poly/
+  contact overlap and several Nwell/LVPWELL/COMP spacing rules -- **not**
+  implant, density, antenna, or latch-up, contrary to what this bullet's
+  wording might suggest), and runs both the curated deck and (directly,
+  bypassing a `klt` gap it found and filed --
+  [klayout-tools#1302](https://github.com/2AMLogic/klayout-tools/issues/1302))
+  the PDK's real native deck against the foundry's own hardened bitcell
+  macro for comparison. A standalone `klayout` binary is now present on
+  this host (unlike when this bullet was first written for issue #23), but
+  `klt drc --engine klayout` still cannot resolve or correctly drive
+  gf180mcu's native deck end-to-end -- see the survey's "B.2" for the full
+  chain of attempts and why.
 * **Electrical behaviour.** The ratified `sim/` PVT results (`sim/<experiment>/records/`)
   still characterize the *schematic* only -- issue #23 produced one
   real PEX-adjacent artifact (a parasitic-annotated bitcell extraction,
@@ -244,6 +255,19 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
    here (the pattern the sibling `gf180-bandgap`'s
    `layout/bandgap_top/generate.py` establishes) remains the working approach
    in the meantime.
+4. **`klt drc --engine klayout` silently runs zero rules against a PDK-native
+   deck that needs `-rd` variables beyond `input`/`report`** (found running
+   issue #8's foundry-bitcell native-DRC comparison). gf180mcu's native deck
+   is assembled from Ruby fragments that gate every rule behind `$feol`/
+   `$beol`/`$metal_top`/`$metal_level`/`$mim_option` globals; `klt`'s
+   `--engine klayout` subprocess only ever sets `-rd input=`/`-rd report=`,
+   so those globals default to false/unset and the deck completes
+   "successfully" having checked nothing -- `status: clean, violation_count:
+   0`, indistinguishable from a real clean pass. Filed as
+   [klayout-tools#1302](https://github.com/2AMLogic/klayout-tools/issues/1302).
+   `layout/reports/sram-rule-survey.md` "B.2" got a real answer by invoking
+   `klayout -b -r` directly with the full variable set, bypassing `klt` for
+   that one step.
 
 ## Install `klt`
 

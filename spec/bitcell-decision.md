@@ -214,11 +214,21 @@ tooling, not a competing deliverable.
   SPICE netlists are the reference/comparison dataset for this repo's own
   characterization — cite it, do not reimplement its exact topology
   verbatim, and record where this repo's results agree or diverge.
-- The custom bitcell's own DRC waiver / special-rule status is **not yet
-  established** — gf180mcu's general design rules were not surveyed for
-  bitcell-specific waivers as part of this decision (that survey is
-  bitcell-design work, in scope for whichever issue does the actual
-  bitcell layout, not this scoping decision).
+- The custom bitcell's own DRC waiver / special-rule status **is now
+  established** — issue #8's
+  [`layout/reports/sram-rule-survey.md`](../layout/reports/sram-rule-survey.md)
+  surveys gf180mcu's `SramCore` (108/5) marker-scoped allowances (12 relaxed
+  numeric thresholds across poly/contact overlap and Nwell/LVPWELL/COMP
+  spacing rules; implant, density, antenna and latch-up rules are **not**
+  affected by the marker) and runs `klt drc --deck gf180mcu` plus (via a
+  direct invocation working around a `klt` engine gap the survey found and
+  filed, [klayout-tools#1302](https://github.com/2AMLogic/klayout-tools/issues/1302))
+  the PDK's real native deck against a shipped `gf180mcu_fd_ip_sram` macro
+  GDS for comparison. This repo's custom bitcell draws no `SramCore` marker
+  and claims none of those relaxations — it is checked at generic
+  thresholds throughout, by both engines. Whether it could legally go
+  tighter under the marker is recorded as an open, un-acted-on finding
+  (re-layout is explicitly out of scope for issue #8).
 - Port target: 1RW first (matching `gf180mcu_fd_ip_sram`'s interface),
   1RW1R as a stretch goal — consistent with the existing draft spec table
   in `README.md`.
