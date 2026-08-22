@@ -296,6 +296,25 @@ is the honest path for this pair" is itself not available either, for the
 structural reason above -- narrower than write-margin's own "by-hand
 extraction, then diff" resolution.
 
+## Freshness: this directory's parasitics predate the issue #103 bitcell fix
+
+Every parasitic number under `sim/pex/` was extracted from the bitcell GDS
+**as it stood before issue #103**, whose `provenance.input.content_hash` is
+recorded in `extract-report.json` (and in each subdirectory's own report).
+Issue #103 fixed 21 real native-deck DRC violations in
+`layout/bitcell/generate.py`, which changed the drawn geometry — most
+relevantly the Metal1 cross-couple strap width (0.28µm -> 0.36µm, from
+`CO_ENC_M1` 0.03 -> 0.07) and the row pitch (5.39µm -> 5.40µm). The
+recorded R/C values and the schematic-vs-extracted deltas built on them are
+therefore evidence about the *pre-fix* cell, not the committed one.
+
+Per `CLAUDE.md`, `sim/` is append-only evidence — nothing here was
+overwritten or back-dated. Re-extracting and re-running the 27-corner
+access-time and write-margin deltas against the revised cell is tracked as
+its own follow-up issue (gf180-sram#106); the expected shift is
+small (a few tenths of a fF on `Q`/`QB`) but has not been measured, and is
+not claimed here.
+
 ## `generate.sh` / `extracted-netlist/` / `extract-report.json` (unchanged, PR #96)
 
 The top-level `./generate.sh`, `./extract-report.json`, and
@@ -411,3 +430,5 @@ upstream, independent of this repo-side conclusion.
   during #23, still open.
 - **klayout-tools#1263** -- the `.options rshunt` / floating `vsubs`
   substrate-coupling-node finding above, filed during #95.
+- **gf180-sram#106** -- re-extract and re-run everything in this directory
+  against the issue #103 bitcell revision (see "Freshness" above).

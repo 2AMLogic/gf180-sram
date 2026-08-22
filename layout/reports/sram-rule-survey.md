@@ -274,12 +274,77 @@ issue's scope to act on** (`generate.py`'s drawn geometry is explicitly not
 touched here) — filed as a separate, non-blocking follow-up:
 [gf180-sram#103](https://github.com/2AMLogic/gf180-sram/issues/103) (see "Follow-up" below).
 
+> **Superseded for the custom bitcell by B.4 below.** All 21 were real
+> geometry bugs and were fixed under issue #103; the row above records what
+> the *pre-fix* geometry measured, not the committed cell's current state.
+
+### B.4 — native-deck re-run after the issue #103 fix
+
+Issue #103 re-ran exactly the B.2 recipe above (same materialized
+`main.drc`, same `-rd` set, same 547 executed rules — verified by
+`grep -c 'Executing rule'` on both run logs) against the pre-fix and
+post-fix `layout/bitcell/sram_bitcell_6t.gds`, and additionally against a
+3x3 abutment tile (`layout/sram_256x32/generate.py --rows 3 --cols 3`) and
+the full committed 256x32 array (8,192 cells, ~40s), neither of which the
+standalone-cell run can exercise.
+
+| Rule | What it actually checks | Bitcell before | after | 3x3 tile before | after | 256x32 array before | after |
+|---|---|---|---|---|---|---|---|
+| `NP.5a` | `ngate.enclosed(nplus, 0.23µm)` — Nplus overlap of the **N-channel gate** | 6 | **0** | 54 | **0** | 49,152 | **0** |
+| `PP.5a` | `pplus.enclosing(pgate, 0.23µm)` — Pplus overlap of the **P-channel gate** | 2 | **0** | 18 | **0** | 16,384 | **0** |
+| `CO.6a` | Metal1 (<0.34µm) **end-of-line** overlap of contact, 0.06µm | 6 | **0** | 54 | **0** | 49,152 | **0** |
+| `CO.6b` | Metal1 overlaps contact by <0.04µm on one side ⇒ adjacent edges ≥0.06µm | 6 | **0** | 54 | **0** | 49,152 | **0** |
+| `DF.4c_LV` | Nwell overlap of **PCOMP** outside DNWELL, 0.43µm | 1 | **0** | 9 | **0** | 8,192 | **0** |
+| *(any other rule)* | — | 0 | **0** | 0 | **0** | 0 | **0** |
+| **Total** | | **21** | **0** | **189** | **0** | **172,032** | **0** |
+
+The per-cell counts scale exactly (6 x 8,192 = 49,152 and so on), i.e. every
+flag was a per-instance repeat of the same six bitcell defects — abutment
+neither introduced nor masked any additional native-deck violation, before
+or after.
+
+Note the `NP.5a`/`PP.5a` split: gf180-sram#103's issue body quoted 6 and 6
+(which sums to 25, not the 21 the same body states). The measured split is
+6 and **2** — `NP.5a` fires once at the bottom edge of each of the four
+NMOS gates plus once at the top edge of each of the two `W = 0.36µm`
+pull-downs, while `PP.5a` fires only at the bottom edge of the two
+`W = 0.22µm` pull-ups (their top edge already had 0.32µm of Pplus over it).
+
+All five were **real geometry bugs**, not artifacts of the manual
+invocation — each traced to a constant in `layout/bitcell/generate.py` that
+cited a rule id whose threshold does not govern the geometry the constant
+was applied to:
+
+| Constant (before) | Cited | Rule that actually governs | Fix |
+|---|---|---|---|
+| `CO_ENC_M1 = 0.03` | `CO.6` (0.005µm) | `CO.6a`/`CO.6b` (0.06µm) — `CO.6`'s 0.005µm is the *unconditional* floor, the 0.06µm end-of-line/adjacent-edge refinements are separate rules | `CO_ENC_M1 = 0.07` |
+| `IMP_ENC_COMP = 0.16` labelled "`NP.5a`/`PP.5a` class: implant overlap of COMP" | `NP.5a`/`PP.5a` | `NP.5b`/`PP.5b` (0.16µm, implant beyond **COMP**). `NP.5a`/`PP.5a` check implant over the **gate** (0.23µm), a different edge | split into `IMP_ENC_COMP = 0.16` + `IMP_ENC_GATE = 0.23` |
+| `NW_ENC_COMP = 0.20` | `NW.5` (0.12µm) | `NW.5` is *DNWELL encloses Nwell*, unrelated. Nwell-over-PCOMP is `DF.4c_LV` (0.43µm); Nwell-over-the-NCOMP-tap is `DF.4d_LV` (0.12µm) | split into `NW_ENC_PCOMP = 0.45` + `NW_ENC_NCOMP = 0.20` |
+| `NW_TO_COMP = 0.43` | `NW.3` (Nwell-to-DNWELL) | `DF.16_LV` (0.43µm) — value was right, citation was not | citation corrected only |
+
+Cost of the fix: cell **pitch grew from 4.46 x 5.39µm to 4.46 x 5.40µm**
+(row pitch +0.01µm, +0.2%; column pitch unchanged), so the 256x32 array
+grew from 142.72 x 1379.84µm to 142.72 x 1382.40µm. The +0.01µm is not from
+any of the four constants directly — it comes from a `M1.2a` spacing
+constraint between the QB cross-couple strap and the VDD riser that only
+binds once `CO_ENC_M1` is 0.07 rather than 0.03, and which
+`layout/bitcell/generate.py` now derives explicitly instead of leaving to a
+hand-tuned offset.
+
+`klt drc --deck gf180mcu` reported `status: clean, 0 violations` both before
+and after this fix, on the bitcell, the 3x3 tile and the full array — which
+is precisely the point: **the curated deck's verdict was identical on
+geometry that had 21 native-deck violations and on geometry that has none.**
+Its own `coverage.layers_in_stream_without_rules` still lists `31/0` and
+`32/0` (Nplus/Pplus), so it structurally cannot distinguish the two.
+
 ### B.3 — summary
 
 | | Curated deck (`klt drc --deck gf180mcu`) | Native deck (direct `klayout -b -r`, full FEOL+BEOL+SramCore config) |
 |---|---|---|
 | Foundry macro | 2010 violations, all `comp.enclosing.contact.1` inside the bitcell array | 3 violations, all `NW.2b_MV`, unrelated to the bitcell array |
-| This repo's custom bitcell | 0 violations (`layout/reports/drc-bitcell.json`) | 21 violations across 5 generic (non-SramCore) rule families |
+| This repo's custom bitcell, as of issue #8 | 0 violations (`layout/reports/drc-bitcell.json`) | 21 violations across 5 generic (non-SramCore) rule families |
+| This repo's custom bitcell, as committed today | 0 violations (`layout/reports/drc-bitcell.json`) | **0** violations — see B.4 |
 
 ## Conclusion for `spec/bitcell-decision.md`
 
@@ -295,12 +360,21 @@ found 21 real (non-SramCore-related) native-deck violations against the
 custom bitcell that neither `klt`'s curated deck nor this repo's prior DRC
 evidence could see — tracked as a follow-up, not fixed here.
 
+**Updated by issue #103**: all 21 were confirmed real and fixed; the
+committed bitcell is now clean against the full native deck as well as the
+curated one (B.4). What remains un-established is not the cell's rule
+compliance but the *repeatability* of the check: the native-deck run is
+still a manual `klayout -b -r` invocation with no committed report schema,
+so no automated surface in this repo re-checks it.
+
 ## Follow-up
 
-Filed: a non-blocking issue tracking the 21 native-deck violations found
-against this repo's custom bitcell in B.2 (`NP.5a`, `PP.5a`, `DF.4c_LV`,
-`CO.6a`, `CO.6b`) — investigate and, if real, fix in a future layout
-revision; out of scope for this survey-and-comparison issue.
+Filed and **resolved**: a non-blocking issue tracking the 21 native-deck
+violations found against this repo's custom bitcell in B.2 (`NP.5a`,
+`PP.5a`, `DF.4c_LV`, `CO.6a`, `CO.6b`) — out of scope for this
+survey-and-comparison issue, investigated and fixed under
+[gf180-sram#103](https://github.com/2AMLogic/gf180-sram/issues/103); see
+B.4 for the before/after counts and the root cause of each.
 
 ## Reproducing
 

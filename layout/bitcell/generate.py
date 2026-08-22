@@ -75,8 +75,13 @@ than relying on periphery tap rows.
   (108/5) marker-scoped SRAM rules, which is how a foundry-grade bitcell
   reaches its published density. ``layout/README.md`` records the measured
   area penalty against the foundry reference.
-* DRC evidence is limited to the deck ``klt drc --deck gf180mcu`` actually
-  implements (a curated subset of the DRM). See ``layout/README.md``.
+* Committed, re-runnable DRC evidence is limited to the deck ``klt drc
+  --deck gf180mcu`` actually implements (a curated subset of the DRM). The
+  cell *has* also been checked against the PDK's own full native deck (547
+  rules) under issue #103 — 0 violations on the cell and on a 3x3 abutment
+  tile — but that run is a manual ``klayout -b -r`` invocation with no
+  committed report schema, so it is a point-in-time result, not a guard.
+  See ``layout/README.md`` and ``layout/reports/sram-rule-survey.md`` "B.4".
 
 ## Determinism
 
@@ -136,11 +141,22 @@ _LAYER_NAMES = {
 # gf180mcu deck implements a *subset* of the DRM, so rules it does not check
 # must be satisfied by construction, and (b) a first-cut bitcell that fails
 # sign-off DRC later is worth less than one that is a little larger.
+#
+# Six of these values were re-derived against the PDK's *own* native KLayout
+# DRC deck (issue #103): CO_ENC_M1, NW_ENC_PCOMP/NW_ENC_NCOMP (formerly one
+# NW_ENC_COMP), NW_TO_COMP's citation, and the split of IMP_ENC_COMP into
+# IMP_ENC_COMP + IMP_ENC_GATE. Each of those had cited a rule id whose
+# threshold does not actually govern the geometry it was applied to, and klt's
+# curated deck models none of the five rule families involved
+# (`NP.5a`/`PP.5a`/`CO.6a`/`CO.6b`/`DF.4c_LV`), so nothing in this repo's
+# committed DRC evidence could catch it. See
+# layout/reports/sram-rule-survey.md "B.4" for the before/after counts and
+# "Reproducing" for the native-deck invocation that produced them.
 # ---------------------------------------------------------------------------
 CO_SIZE = 0.22  # CO.1: contacts are a fixed 0.22 x 0.22 square
 CO_ENC_COMP = 0.08  # CO.4 (0.07) + 0.01
 CO_ENC_POLY = 0.08  # CO.3 (0.07) + 0.01
-CO_ENC_M1 = 0.03  # CO.6 (0.005), widened so the M1 pad still meets M1.1
+CO_ENC_M1 = 0.07  # CO.6a / CO.6b (0.06) + 0.01 -- NOT CO.6 (0.005), see below
 CO_TO_POLY = 0.18  # gate-to-contact clearance (CO.5 class; not in klt's subset)
 COMP_SPACE = 0.30  # DF.3a (0.28) + 0.02
 POLY_SPACE = 0.26  # PL.3a (0.24) + 0.02
@@ -154,10 +170,12 @@ V1_SIZE = 0.26  # V1.1
 V1_ENC_M1 = 0.06  # V1.2a is 0.00 in the curated deck; real decks want margin
 V1_ENC_M2 = 0.06  # V1.3a (0.01) + 0.05
 M2_STRIPE_W = V1_SIZE + 2 * V1_ENC_M2  # 0.38, >= M2.1 (0.28)
-NW_ENC_COMP = 0.20  # NW.5 (0.12) + 0.08
+NW_ENC_PCOMP = 0.45  # DF.4c_LV (0.43) + 0.02: Nwell overlap of PCOMP
+NW_ENC_NCOMP = 0.20  # DF.4d_LV (0.12) + 0.08: Nwell overlap of the NCOMP tap
 NW_SPACE = 0.60  # NW.2a
-NW_TO_COMP = 0.43  # NW.3 class: COMP outside the well to Nwell
-IMP_ENC_COMP = 0.16  # NP.5a / PP.5a class: implant overlap of COMP
+NW_TO_COMP = 0.43  # DF.16_LV: (Nwell outside DNWELL) to NCOMP outside it
+IMP_ENC_COMP = 0.16  # NP.5b / PP.5b: implant extension beyond COMP
+IMP_ENC_GATE = 0.23  # NP.5a / PP.5a: implant overlap of the channel (gate)
 IMP_SPACE = 0.25  # Nplus-to-Pplus separation (not in klt's curated subset)
 
 # ---------------------------------------------------------------------------
@@ -247,10 +265,30 @@ Y_JOG_Q_TOP = Y_JOG_Q_BOT + JOG_H
 Y_JOG_QB_BOT = round(Y_JOG_Q_TOP + POLY_SPACE, 3)
 Y_JOG_QB_TOP = Y_JOG_QB_BOT + JOG_H
 
-# 5. PMOS row
-Y_P = round(Y_JOG_QB_TOP + POLY_TO_COMP + 0.11, 3)
+# 5. PMOS row. Two constraints bind: field-poly clearance above the QB jog,
+#    and M1.2a spacing between the QB cross-couple strap (which ends on the QB
+#    landing-pad contact) and the VDD riser that lands on this row's source
+#    contact — the latter only binds because CO_ENC_M1 is 0.07, not 0.03.
+Y_P = round(
+    max(
+        Y_JOG_QB_TOP + POLY_TO_COMP + 0.11,
+        Y_JOG_QB_BOT + CO_ENC_POLY + CO_SIZE + 2 * CO_ENC_M1 - CO_ENC_COMP + M1_SPACE,
+    ),
+    3,
+)
 Y_P_TOP = Y_P + PAD_W
 Y_POLY_P_TOP = Y_P_TOP + POLY_EXT_COMP
+
+# 5b. Implant extents. An implant box has to enclose COMP by IMP_ENC_COMP
+#     (NP.5b / PP.5b) *and* the channel (Poly2-over-COMP gate) region by the
+#     larger IMP_ENC_GATE (NP.5a / PP.5a). Those bind on different edges: the
+#     COMP pads are PAD_W tall, while each gate is only its own device W tall
+#     and starts at the row's straight bottom edge, so the bottom edge is
+#     always gate-limited and the top edge is whichever of the two is larger.
+Y_NPLUS_BOT = round(min(Y_N - IMP_ENC_COMP, Y_N - IMP_ENC_GATE), 3)
+Y_NPLUS_TOP = round(max(Y_N_TOP + IMP_ENC_COMP, Y_N + W_PD + IMP_ENC_GATE), 3)
+Y_PPLUS_BOT = round(min(Y_P - IMP_ENC_COMP, Y_P - IMP_ENC_GATE), 3)
+Y_PPLUS_TOP = round(max(Y_P_TOP + IMP_ENC_COMP, Y_P + W_PU + IMP_ENC_GATE), 3)
 
 # 6. n-well tie strip (VDD) — placed so its Nplus stays IMP_SPACE clear of the
 #    PMOS row's Pplus.
@@ -258,15 +296,18 @@ Y_NTIE_BOT = round(
     max(
         Y_P_TOP + COMP_SPACE,
         Y_POLY_P_TOP + POLY_TO_COMP,
-        (Y_P_TOP + IMP_ENC_COMP) + IMP_SPACE + IMP_ENC_COMP,
+        Y_PPLUS_TOP + IMP_SPACE + IMP_ENC_COMP,
     ),
     3,
 )
 Y_NTIE_TOP = Y_NTIE_BOT + TIE_H
 
-# 7. Nwell
-Y_NW_BOT = round(Y_P - NW_ENC_COMP, 3)
-Y_NW_TOP = round(Y_NTIE_TOP + NW_ENC_COMP, 3)
+# 7. Nwell. The bottom edge is set by DF.4c_LV (Nwell overlap of PCOMP, the
+#    PMOS row); the top edge only has to clear the NCOMP well tap (DF.4d_LV),
+#    which is a much smaller number — keeping them separate is what stops the
+#    0.43µm PCOMP rule from adding 0.23µm to the cell height for nothing.
+Y_NW_BOT = round(Y_P - NW_ENC_PCOMP, 3)
+Y_NW_TOP = round(Y_NTIE_TOP + NW_ENC_NCOMP, 3)
 
 # 8. cell height: the tightest of the vertical abutment constraints, rounded up
 H_CELL = round(
@@ -360,7 +401,7 @@ def shapes() -> dict[tuple[int, int], list[kdb.DBox]]:
     out[L_COMP].append(_b(X_TIE[0], Y_NTIE_BOT, X_TIE[1], Y_NTIE_TOP))
 
     # -- implants --
-    out[L_NPLUS].append(_b(0.0, Y_N - IMP_ENC_COMP, W_CELL, Y_N_TOP + IMP_ENC_COMP))
+    out[L_NPLUS].append(_b(0.0, Y_NPLUS_BOT, W_CELL, Y_NPLUS_TOP))
     out[L_NPLUS].append(
         _b(
             X_TIE[0] - IMP_ENC_COMP,
@@ -372,9 +413,9 @@ def shapes() -> dict[tuple[int, int], list[kdb.DBox]]:
     out[L_PPLUS].append(
         _b(
             X_PMOS[0] - IMP_ENC_COMP,
-            Y_P - IMP_ENC_COMP,
+            Y_PPLUS_BOT,
             X_PMOS[1] + IMP_ENC_COMP,
-            Y_P_TOP + IMP_ENC_COMP,
+            Y_PPLUS_TOP,
         )
     )
     out[L_PPLUS].append(
