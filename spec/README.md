@@ -66,3 +66,12 @@ Ratified spec and decision records for this block.
   (85 ps at `ss_125c_2.97v`), so no re-run of any committed write-margin
   evidence is required. Amends only the write-margin bullet in `sram.md`'s
   Characterization section.
+- [`t1-checklist-reread-2026-08-22.md`](t1-checklist-reread-2026-08-22.md) —
+  resolves #100: the second T1/bronze checklist re-read (after #13), all ten
+  items PASS (three with a disclosed, tracked hole; one with a fully
+  investigated structural limitation) — a large swing from #13's 0/10 now
+  that design, layout, and sim evidence all exist. Live-re-verifies item 4
+  (array-level LVS) against an upstream `klt lvs` fix that landed after this
+  repo's evidence was last recorded, and decomposes the still-open holes
+  into issues #108–#110 (item 3's hole was already tracked as #103).
+  Informational only — no ratified spec value changes.
