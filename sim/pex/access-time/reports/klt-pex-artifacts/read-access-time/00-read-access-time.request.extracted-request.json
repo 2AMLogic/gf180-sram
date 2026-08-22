@@ -1,5 +1,5 @@
 {
-  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/00-read-access-time.request.extracted-dut-testbench.spice",
+  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/00-read-access-time.request.extracted-dut-testbench.spice",
   "engine": "ngspice",
   "models": {
     "lib": "/home/ubuntu/.volare/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"

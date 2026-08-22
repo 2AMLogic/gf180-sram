@@ -162,10 +162,12 @@ captures.
   schematic records, and documented -- with evidence -- that no
   PEX-compatible path exists for read/hold SNM given this layout's
   monolithic (non-partitionable) bitcell geometry. See `sim/pex/README.md`
-  for the full per-measurement breakdown. Note that all of `sim/pex/` was
-  extracted from the **pre-issue-#103** bitcell geometry and has not been
-  re-run against the revision committed here — disclosed in
-  `sim/pex/README.md` "Freshness", tracked as issue #106.
+  for the full per-measurement breakdown. `sim/pex/` was re-extracted
+  against the current (post-issue-#103) bitcell geometry by issue #106 —
+  `provenance.input.content_hash` now matches this committed GDS's
+  sha256, and no PASS/FAIL verdict moved from the pre-#103 records
+  (preserved, unedited, under `sim/pex/pre-issue-103/`); see
+  `sim/pex/README.md` "Freshness" for the full re-run record.
 * **A routed macro.** There is no periphery, no pin/obstruction abstract, no
   LEF/Liberty view (issue #24's scope).
 * **Array-level LVS.** Achieved — see "Known tool gaps" #2. `klt extract`

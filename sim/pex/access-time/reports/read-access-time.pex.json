@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "status": "pass",
-  "layout": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/layout/bitcell/sram_bitcell_6t.gds",
-  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice",
-  "reference_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
+  "layout": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/layout/bitcell/sram_bitcell_6t.gds",
+  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice",
+  "reference_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
   "extraction": {
     "deck": "gf180mcu",
     "device_count": 6,
     "net_count": 7,
-    "netlist_sha256": "dd9916d56017d955cc032e589b55f5809fcc9694fde306b732df57f27c6042f6",
+    "netlist_sha256": "80133e9b2845ee8bc173ec852535eb5030b52548a504afef8ecdc234fcd84dad",
     "model": {
       "capacitance": "net-to-ground for every net's own (non-coupled) area/perimeter, plus net-to-net for the vertical-overlap coupling `coupling` describes below -- a coupled net pair gets a direct capacitor between their two hub nodes, not just capacitors to the deck's ground/substrate net",
       "coupling": "vertical overlap (crossover) unconditionally -- where one net's conductor on an adjacent metal level sits directly over another *distinct* net's conductor, that overlap area is charged between the two nets instead of to ground (issue #760) -- plus lateral (same-layer, sidewall) coupling, but only for a net pair naming one of the caller's declared `--critical-net` nets (issue #976): facing-edge length within that layer's own minimum-spacing lookback is charged between the two nets, *additively* (not deducted from either net's substrate fringe term, unlike the vertical case -- a known simplification). Any same-layer pair with neither side named `--critical-net`, and fringe shielding in general, are still not modelled",
@@ -21,8 +21,8 @@
   },
   "testbenches": [
     {
-      "request": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/requests/read-access-time.request.json",
-      "schematic_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
+      "request": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/requests/read-access-time.request.json",
+      "schematic_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
       "corner_count": 27,
       "measurement_names": [
         "read_access_time"
@@ -35,216 +35,216 @@
       "spec_row": "read_access_time",
       "corner_id": "ff/2.970V/-40C",
       "schematic_value": 1.649e-11,
-      "extracted_value": 1.73796e-11,
-      "delta_pct": 5.395,
+      "extracted_value": 1.73739e-11,
+      "delta_pct": 5.36,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/2.970V/25C",
       "schematic_value": 1.89722e-11,
-      "extracted_value": 1.99046e-11,
-      "delta_pct": 4.915,
+      "extracted_value": 1.98974e-11,
+      "delta_pct": 4.877,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/2.970V/125C",
       "schematic_value": 2.28664e-11,
-      "extracted_value": 2.38624e-11,
-      "delta_pct": 4.356,
+      "extracted_value": 2.38533e-11,
+      "delta_pct": 4.316,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/3.300V/-40C",
       "schematic_value": 1.64678e-11,
-      "extracted_value": 1.73655e-11,
-      "delta_pct": 5.451,
+      "extracted_value": 1.73601e-11,
+      "delta_pct": 5.418,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/3.300V/25C",
       "schematic_value": 1.88203e-11,
-      "extracted_value": 1.9713e-11,
-      "delta_pct": 4.743,
+      "extracted_value": 1.97069e-11,
+      "delta_pct": 4.711,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/3.300V/125C",
       "schematic_value": 2.25003e-11,
-      "extracted_value": 2.34514e-11,
-      "delta_pct": 4.227,
+      "extracted_value": 2.34438e-11,
+      "delta_pct": 4.193,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/3.630V/-40C",
       "schematic_value": 1.62651e-11,
-      "extracted_value": 1.71316e-11,
-      "delta_pct": 5.327,
+      "extracted_value": 1.71273e-11,
+      "delta_pct": 5.301,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/3.630V/25C",
       "schematic_value": 1.84893e-11,
-      "extracted_value": 1.93583e-11,
-      "delta_pct": 4.7,
+      "extracted_value": 1.93529e-11,
+      "delta_pct": 4.671,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ff/3.630V/125C",
       "schematic_value": 2.19956e-11,
-      "extracted_value": 2.29217e-11,
-      "delta_pct": 4.21,
+      "extracted_value": 2.29151e-11,
+      "delta_pct": 4.18,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/2.970V/-40C",
       "schematic_value": 2.36998e-11,
-      "extracted_value": 2.46492e-11,
-      "delta_pct": 4.006,
+      "extracted_value": 2.4643e-11,
+      "delta_pct": 3.98,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/2.970V/25C",
       "schematic_value": 2.66312e-11,
-      "extracted_value": 2.76207e-11,
-      "delta_pct": 3.716,
+      "extracted_value": 2.76132e-11,
+      "delta_pct": 3.687,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/2.970V/125C",
       "schematic_value": 3.10867e-11,
-      "extracted_value": 3.21987e-11,
-      "delta_pct": 3.577,
+      "extracted_value": 3.2189e-11,
+      "delta_pct": 3.546,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/3.300V/-40C",
       "schematic_value": 2.31671e-11,
-      "extracted_value": 2.4072e-11,
-      "delta_pct": 3.906,
+      "extracted_value": 2.40669e-11,
+      "delta_pct": 3.884,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/3.300V/25C",
       "schematic_value": 2.58375e-11,
-      "extracted_value": 2.68423e-11,
-      "delta_pct": 3.889,
+      "extracted_value": 2.68356e-11,
+      "delta_pct": 3.863,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/3.300V/125C",
       "schematic_value": 3.00154e-11,
-      "extracted_value": 3.10961e-11,
-      "delta_pct": 3.6,
+      "extracted_value": 3.10875e-11,
+      "delta_pct": 3.572,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/3.630V/-40C",
       "schematic_value": 2.2516e-11,
-      "extracted_value": 2.33908e-11,
-      "delta_pct": 3.885,
+      "extracted_value": 2.33864e-11,
+      "delta_pct": 3.866,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/3.630V/25C",
       "schematic_value": 2.50309e-11,
-      "extracted_value": 2.60048e-11,
-      "delta_pct": 3.891,
+      "extracted_value": 2.59991e-11,
+      "delta_pct": 3.868,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "tt/3.630V/125C",
       "schematic_value": 2.89906e-11,
-      "extracted_value": 3.0036e-11,
-      "delta_pct": 3.606,
+      "extracted_value": 3.00286e-11,
+      "delta_pct": 3.58,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/2.970V/-40C",
       "schematic_value": 3.15505e-11,
-      "extracted_value": 3.25805e-11,
-      "delta_pct": 3.265,
+      "extracted_value": 3.25743e-11,
+      "delta_pct": 3.245,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/2.970V/25C",
       "schematic_value": 3.47913e-11,
-      "extracted_value": 3.59004e-11,
-      "delta_pct": 3.188,
+      "extracted_value": 3.5892e-11,
+      "delta_pct": 3.164,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/2.970V/125C",
       "schematic_value": 3.99177e-11,
-      "extracted_value": 4.11195e-11,
-      "delta_pct": 3.011,
+      "extracted_value": 4.11088e-11,
+      "delta_pct": 2.984,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/3.300V/-40C",
       "schematic_value": 3.03565e-11,
-      "extracted_value": 3.13879e-11,
-      "delta_pct": 3.398,
+      "extracted_value": 3.13825e-11,
+      "delta_pct": 3.38,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/3.300V/25C",
       "schematic_value": 3.34233e-11,
-      "extracted_value": 3.44766e-11,
-      "delta_pct": 3.151,
+      "extracted_value": 3.44699e-11,
+      "delta_pct": 3.131,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/3.300V/125C",
       "schematic_value": 3.81835e-11,
-      "extracted_value": 3.93362e-11,
-      "delta_pct": 3.019,
+      "extracted_value": 3.93273e-11,
+      "delta_pct": 2.996,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/3.630V/-40C",
       "schematic_value": 2.92134e-11,
-      "extracted_value": 3.02068e-11,
-      "delta_pct": 3.4,
+      "extracted_value": 3.02023e-11,
+      "delta_pct": 3.385,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/3.630V/25C",
       "schematic_value": 3.21427e-11,
-      "extracted_value": 3.31557e-11,
-      "delta_pct": 3.152,
+      "extracted_value": 3.31502e-11,
+      "delta_pct": 3.134,
       "status": "pass"
     },
     {
       "spec_row": "read_access_time",
       "corner_id": "ss/3.630V/125C",
       "schematic_value": 3.66159e-11,
-      "extracted_value": 3.77585e-11,
-      "delta_pct": 3.121,
+      "extracted_value": 3.77512e-11,
+      "delta_pct": 3.101,
       "status": "pass"
     }
   ],
@@ -265,7 +265,7 @@
       "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0"
     },
     "input": {
-      "content_hash": "sha256:6b90b7d615bb2528eef026ab1ab4778855d2d91b056351ac6872e89323179b3a"
+      "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae"
     }
   }
 }

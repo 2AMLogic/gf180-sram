@@ -22,6 +22,10 @@ artifacts -- none of the ratified #24 testbench sources were modified:
 | Write margin (write trip voltage) | By-hand extraction workflow (`write-margin/`) | **Closed** -- `klt pex` itself cannot run this testbench's bisection search (no `.meas`-only equivalent), so this replicates its intent by hand: `klt extract --parasitics` + `sim/lib/run_corner_sweep.sh` run twice (schematic SUBCKT vs extracted netlist), diffed per corner. 27/27 corners, genuine non-vacuous delta. |
 | Read SNM / hold SNM | N/A | **No PEX-compatible path exists** -- structural, not a tooling gap; see "read-snm/hold-snm: no PEX-compatible path" below. |
 
+Issue #106 re-ran every measurement above against the post-issue-#103
+bitcell revision (see "Freshness" below); the pre-#103 records that first
+closed item 7 remain committed, unedited, under `pre-issue-103/`.
+
 Per `CLAUDE.md`'s "no claim without a testbench": every delta below is a
 real `ngspice` run, not an interpolation or an assumption, and none of it
 relaxes `spec/sram.md`'s ratified corner set or measurement definitions --
@@ -141,20 +145,29 @@ row and no diagnostic naming a convergence anomaly -- inspect any
 
 ### Results
 
-`write-access-time`: extracted access time is consistently **~35-42%
+**Current (post-issue-#103 bitcell, re-run by issue #106):**
+
+`write-access-time`: extracted access time is consistently **~32-46%
 slower** than schematic across the matrix (e.g. `tt/3.300V/25C`: schematic
-70.9ps, extracted 97.7ps, `delta_pct: +37.9`) -- expected, since the write
+70.9ps, extracted 98.4ps, `delta_pct: +38.8`) -- expected, since the write
 path routes current through the extracted netlist's series-R/ground-C on
-`BL`/`BLB`/`Q`/`QB` that the schematic leg has none of.
+`BL`/`BLB`/`Q`/`QB` that the schematic leg has none of. 27/27 corners
+`status: pass`.
 
 `read-access-time`: extracted is **~3-5% slower** (e.g. `tt/3.300V/25C`:
-schematic 18.8ps, extracted 19.7ps) -- a smaller relative delta than write
+schematic 25.8ps, extracted 26.8ps) -- a smaller relative delta than write
 access time because the read proxy metric (bit-line sensing differential)
 is dominated by the 20fF bit-line capacitance placeholder both legs share,
-not by the bitcell's own extracted parasitics.
+not by the bitcell's own extracted parasitics. 27/27 corners `status: pass`.
 
 Full per-corner data: `access-time/reports/write-access-time.pex.json`,
 `access-time/reports/read-access-time.pex.json`.
+
+No corner's `pass`/`fail` verdict moved relative to the pre-issue-#103
+baseline preserved at `pre-issue-103/access-time/reports/*.pex.json`
+(both directions were `27/27 pass` before and after the bitcell fix) -- the
+shift is confined to the `delta_pct` magnitudes above, from the wider
+`CO_ENC_M1` M1 straps.
 
 ## `write-margin/` -- by-hand extraction workflow (closed)
 
@@ -223,14 +236,21 @@ both pass `--pdk`/`--pdk-root` for exactly this reason.
 
 ### Results
 
-Extracted write trip voltage is consistently **~0.2-2.8% lower** than
-schematic across all 27 corners (e.g. `tt/3.300V/25C`: schematic 1.910V,
-extracted 1.878V, `delta_pct: -1.655`) -- physically sensible: bit-line and
+**Current (post-issue-#103 bitcell, re-run by issue #106):**
+
+Extracted write trip voltage is consistently **~0.2-2.9% lower** than
+schematic across all 27 corners (e.g. `tt_25c_3.30v`: schematic 1.910V,
+extracted 1.878V, `delta_pct: -1.687`) -- physically sensible: bit-line and
 internal-node parasitic loading from the extracted layout makes the write
 path slightly weaker, so the weakest '0' the driver can still successfully
 write is slightly closer to 0V (a smaller trip voltage) than the ideal
-schematic case. Full per-corner table:
-`write-margin/delta/20260821-085734-b56cc29_vs_20260821-085745-b56cc29.md`.
+schematic case. 27/27 corners `status: pass`. Full per-corner table:
+`write-margin/delta/20260822-093425-fc6ce30_vs_20260822-093435-fc6ce30.md`.
+
+No corner's `pass`/`fail` verdict moved relative to the pre-issue-#103
+baseline (`write-margin/delta/20260821-085734-b56cc29_vs_20260821-085745-b56cc29.md`,
+also `27/27 pass`) -- the shift is confined to the `delta_pct` magnitudes,
+from the wider `CO_ENC_M1` M1 straps.
 
 ## `read-snm`/`hold-snm`: no PEX-compatible path
 
@@ -296,33 +316,55 @@ is the honest path for this pair" is itself not available either, for the
 structural reason above -- narrower than write-margin's own "by-hand
 extraction, then diff" resolution.
 
-## Freshness: this directory's parasitics predate the issue #103 bitcell fix
+## Freshness: re-extracted against the issue #103 bitcell revision (issue #106)
 
-Every parasitic number under `sim/pex/` was extracted from the bitcell GDS
-**as it stood before issue #103**, whose `provenance.input.content_hash` is
-recorded in `extract-report.json` (and in each subdirectory's own report).
-Issue #103 fixed 21 real native-deck DRC violations in
+Every parasitic number under `sim/pex/` was originally extracted from the
+bitcell GDS **as it stood before issue #103** (`provenance.input.content_hash`
+`sha256:6b90b7d6...`). Issue #103 fixed 21 real native-deck DRC violations in
 `layout/bitcell/generate.py`, which changed the drawn geometry — most
 relevantly the Metal1 cross-couple strap width (0.28µm -> 0.36µm, from
-`CO_ENC_M1` 0.03 -> 0.07) and the row pitch (5.39µm -> 5.40µm). The
-recorded R/C values and the schematic-vs-extracted deltas built on them are
-therefore evidence about the *pre-fix* cell, not the committed one.
+`CO_ENC_M1` 0.03 -> 0.07) and the row pitch (5.39µm -> 5.40µm). Issue #106
+re-ran every `generate.sh` in this directory against the post-#103 GDS
+(`sha256:53d2b7aa...`, matching the currently-committed
+`layout/bitcell/sram_bitcell_6t.gds`):
 
-Per `CLAUDE.md`, `sim/` is append-only evidence — nothing here was
-overwritten or back-dated. Re-extracting and re-running the 27-corner
-access-time and write-margin deltas against the revised cell is tracked as
-its own follow-up issue (gf180-sram#106); the expected shift is
-small (a few tenths of a fF on `Q`/`QB`) but has not been measured, and is
-not claimed here.
+- `extract-report.json` / `extracted-netlist/sram_bitcell_6t.spice` --
+  re-extracted; `provenance.input.content_hash` now equals
+  `sha256sum layout/bitcell/sram_bitcell_6t.gds`.
+- `access-time/reports/{read,write}-access-time.pex.json` -- re-run,
+  `27/27 pass` both directions, same as pre-#103 (see "Results" above).
+- `write-margin/` -- new record pair
+  `20260822-093425-fc6ce30` (schematic) /`20260822-093435-fc6ce30`
+  (extracted), new delta `write-margin/delta/20260822-093425-fc6ce30_vs_20260822-093435-fc6ce30.md`,
+  `27/27 pass`, same as pre-#103.
 
-## `generate.sh` / `extracted-netlist/` / `extract-report.json` (unchanged, PR #96)
+**No PASS/FAIL verdict moved** in either the access-time or write-margin
+27-corner deltas -- the wider M1 straps shifted `delta_pct` magnitudes by a
+small amount (see each subdirectory's "Results" section above) but did not
+flip any corner. `sim/signoff-summary.md` and
+`measurements/characterization-report.md` were therefore left unchanged
+(neither file cites `sim/pex/`'s PEX-native deltas at all -- both roll up
+the ratified `sim/{read-snm,hold-snm,write-margin,access-time}/` schematic
+records directly, which this issue did not touch).
 
-The top-level `./generate.sh`, `./extract-report.json`, and
-`./extracted-netlist/sram_bitcell_6t.spice` are unchanged from PR #96: a
+Per `CLAUDE.md`, `sim/` is append-only evidence — the pre-#103 records were
+never overwritten or back-dated. Because `sim/pex/generate.sh` and
+`access-time/generate.sh` (unlike `write-margin/`'s own
+`sim/lib/run_corner_sweep.sh`-based records) write to a single fixed path
+rather than minting a per-run record ID, issue #106 first snapshotted their
+pre-#103 output byte-for-byte into `pre-issue-103/` (see that directory's
+own `README.md`) before re-running them -- so the pre-fix evidence stays
+directly readable in the tree, not just recoverable via `git log`.
+
+## `generate.sh` / `extracted-netlist/` / `extract-report.json`
+
+`./generate.sh`, `./extract-report.json`, and
+`./extracted-netlist/sram_bitcell_6t.spice` were introduced by PR #96 and
+re-run against the post-#103 GDS by issue #106: a
 `klt extract --deck gf180mcu --parasitics` run (no `--pdk` binding -- see
 "Why `--pdk` binding matters" above for why that specific invocation is not
-directly simulatable, and is retained here only as the original R/C-summary
-evidence, superseded for simulation purposes by
+directly simulatable, and is retained here only as R/C-summary evidence,
+superseded for simulation purposes by
 `access-time/dut/bitcell_6t_subckt.spice`'s klt-pex-native extraction and
 `write-margin/dut/extracted-netlist.spice`'s `--pdk`-bound one).
 
@@ -330,7 +372,7 @@ evidence, superseded for simulation purposes by
 ./sim/pex/generate.sh                 # regenerates extract-report.json + extracted-netlist/ (unbound, R/C-summary only)
 ./sim/pex/access-time/dut/generate.sh # regenerates the schematic SUBCKT DUT wrapper
 ./sim/pex/access-time/generate.sh     # regenerates read/write access-time klt pex reports
-./sim/pex/write-margin/generate.sh    # regenerates the by-hand write-margin schematic-vs-extracted delta
+./sim/pex/write-margin/generate.sh    # regenerates the by-hand write-margin schematic-vs-extracted delta (mints new append-only records)
 ```
 
 ## What was tried against the #24 testbenches themselves (original #23 findings, preserved)
@@ -431,4 +473,5 @@ upstream, independent of this repo-side conclusion.
 - **klayout-tools#1263** -- the `.options rshunt` / floating `vsubs`
   substrate-coupling-node finding above, filed during #95.
 - **gf180-sram#106** -- re-extract and re-run everything in this directory
-  against the issue #103 bitcell revision (see "Freshness" above).
+  against the issue #103 bitcell revision. **Done** -- see "Freshness"
+  above.

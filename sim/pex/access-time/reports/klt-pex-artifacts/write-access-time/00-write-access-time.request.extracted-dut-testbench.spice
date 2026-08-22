@@ -28,7 +28,7 @@
 * agree only when cwd == this file's directory at invocation time --
 * ../generate.sh `cd`s here before invoking `klt pex` for exactly this
 * reason; do not run `klt pex` against this file from any other cwd.
-.include "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-95/sim/pex/access-time/reports/klt-pex-artifacts/write-access-time/extracted-netlist.spice"
+.include "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/reports/klt-pex-artifacts/write-access-time/extracted-netlist.spice"
 XDUT BL BLB Q QB VDD VSS WL sram_bitcell_6t
 
 * gf180mcu's model file (sm141064.ngspice) references
