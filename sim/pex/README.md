@@ -472,6 +472,22 @@ upstream, independent of this repo-side conclusion.
   during #23, still open.
 - **klayout-tools#1263** -- the `.options rshunt` / floating `vsubs`
   substrate-coupling-node finding above, filed during #95.
+- **klayout-tools#1376** -- `klt extract --pdk-root ...`'s JSON report
+  carries a top-level `pdk.root` field that echoes the (necessarily
+  absolute) `--pdk-root` argument verbatim, redundant with -- and leakier
+  than -- the same report's own `provenance.pdk` block, which already
+  carries the PDK's identity with no path. Filed during #109;
+  `write-margin/dut/generate.sh` nulls the field itself before committing
+  the report in the meantime (see that script's own comment).
+- **klayout-tools#1378** -- two `klt pex` findings from #109: (1) a
+  relative `--outdir` containing a `../` segment corrupts `klt pex`'s own
+  internal intermediate-artifact path join and the run fails outright, so
+  `access-time/generate.sh` keeps `--outdir` absolute as a workaround; (2)
+  `reference_netlist`/`testbenches[].schematic_netlist` are always echoed
+  absolute regardless of whether every other path argument was passed
+  relative, so `access-time/generate.sh` rewrites that one known value back
+  to its repo-relative equivalent after the fact (see that script's own
+  comments for both).
 - **gf180-sram#106** -- re-extract and re-run everything in this directory
   against the issue #103 bitcell revision. **Done** -- see "Freshness"
   above.

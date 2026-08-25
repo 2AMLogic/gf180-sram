@@ -134,6 +134,9 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
+sys.path.insert(0, str(SCRIPT_DIR))
+import env_provenance  # noqa: E402  (path-injected import, sibling module)
+
 # gf180mcu process-corner label -> the model file's own bare `.LIB` section
 # name (same mapping sim/lib/run_corner_sweep.sh uses -- "tt" is this
 # repo's/spec's label for gf180mcu's "typical" section).
@@ -471,7 +474,7 @@ def render_record(summary: dict, sample_doc: dict, json_report_text: str, text_r
         "(that is exactly the open operator decision tracked as issue #20), and this harness does not "
         "invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, "
         "with Cpk / sigma-to-spec as the quantitative margin statement.",
-        f"- **PDK**: `{prov['pdk_variant_dir']}` -- **`klt`**: `{prov['klt_version']}` -- "
+        f"- **PDK**: `{prov['pdk']['variant']}`, open_pdks `{prov['pdk']['version']}` -- **`klt`**: `{prov['klt_version']}` -- "
         f"**git**: `{summary['git_sha']}`",
         f"- **`klt yield` overall status**: `{overall}` (exit code {summary['klt_yield_exit_code']})",
         f"- **Timestamp / author**: {summary['timestamp']} / {summary['author']}",
@@ -788,7 +791,16 @@ def main() -> int:
 
     mismatch_provenance = {
         "switch": "sw_stat_mismatch",
-        "model_file": pdk["GF180_MODEL_FILE"],
+        # Issue #109: was the absolute GF180_MODEL_FILE path (e.g.
+        # `/Users/<name>/.volare/gf180mcuD/libs.tech/ngspice/sm141064.ngspice`).
+        # The model file's location *within* a gf180mcu variant install is
+        # fixed by the PDK's own directory layout (portable across hosts);
+        # only the variant root is host-specific, and that root is never
+        # recorded at all -- see the `pdk` field above (identity, not
+        # location).
+        "model_file": str(
+            Path(pdk["GF180_MODEL_FILE"]).relative_to(Path(pdk["GF180_VARIANT_DIR"]))
+        ),
         "mechanism": "delvto='mis_vth*sw_stat_mismatch' / mulu0='1-mis_k*sw_stat_mismatch' per nfet_03v3/pfet_03v3 instance",
         "seeding": ".options seed=<derived>, one independent ngspice invocation per sample",
         "seed_derivation": "sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer",
@@ -812,7 +824,18 @@ def main() -> int:
                 "source": "spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner",
             },
             "mismatch": mismatch_provenance,
-            "pdk_variant_dir": pdk["GF180_VARIANT_DIR"],
+            # Issue #109: never embed the PDK install's absolute host path
+            # (e.g. `/Users/<name>/.volare/gf180mcuD`) in a committed
+            # evidence record. A PDK install is inherently external to this
+            # repo, so per `klt env-provenance`'s documented model (this
+            # host's installed `klt` does not yet ship that subcommand --
+            # see sim/lib/env_provenance.py's module docstring) it is pinned
+            # by identity (variant + open_pdks version), never by location.
+            "pdk": env_provenance.pdk_identity(
+                pdk["GF180_VARIANT_DIR"],
+                pdk.get("GF180_PDK_VERSION"),
+                "sim/lib/pdk_env.sh resolution (GF180_PDK_PATH / PDK_ROOT+PDK / standard install prefix)",
+            ),
             "klt_version": klt_version,
             "git_sha": git_sha,
         },
@@ -822,13 +845,21 @@ def main() -> int:
 
     json_report_path = reports_dir / f"{record_id}.json"
     text_report_path = reports_dir / f"{record_id}.txt"
+    # Issue #109: `klt yield` echoes its input path argument verbatim into
+    # both its JSON (`samples`) and text (`samples: ...`) report output.
+    # `samples_path` above is always absolute (derived from REPO_ROOT); pass
+    # a repo-relative path instead (with cwd=REPO_ROOT so `klt` can still
+    # resolve it) so that echoed field is repo-relative in the committed
+    # report too, rather than embedding this host's absolute checkout path
+    # (previously e.g. `.loom/worktrees/issue-26/...`).
+    samples_rel = samples_path.relative_to(REPO_ROOT)
     json_proc = subprocess.run(
-        [klt, "yield", str(samples_path), "--format", "json"],
-        capture_output=True, text=True, check=False,
+        [klt, "yield", str(samples_rel), "--format", "json"],
+        cwd=REPO_ROOT, capture_output=True, text=True, check=False,
     )
     text_proc = subprocess.run(
-        [klt, "yield", str(samples_path), "--format", "text"],
-        capture_output=True, text=True, check=False,
+        [klt, "yield", str(samples_rel), "--format", "text"],
+        cwd=REPO_ROOT, capture_output=True, text=True, check=False,
     )
     json_report_path.write_text(json_proc.stdout, encoding="utf-8")
     text_report_path.write_text(text_proc.stdout + ("\n" + text_proc.stderr if text_proc.returncode != 0 else ""), encoding="utf-8")

@@ -106,7 +106,12 @@ OVERALL_OPEN=0
 
 echo "record-id: $RECORD_ID"
 echo "testbench: $TESTBENCH_FILE"
-echo "pdk: $GF180_VARIANT_DIR (open_pdks ${GF180_PDK_VERSION:-unknown})"
+# Issue #109: report the PDK by identity (variant name + open_pdks
+# version), never by its absolute host install location -- this line is
+# terminal output only (never written into the committed record file below),
+# but a caller may still redirect/log it, so it gets the same treatment as
+# every other PDK field in this repo's evidence going forward.
+echo "pdk: $(basename "$GF180_VARIANT_DIR") (open_pdks ${GF180_PDK_VERSION:-unknown})"
 
 for process in "${PROCESSES[@]}"; do
   for temp in "${TEMPS[@]}"; do

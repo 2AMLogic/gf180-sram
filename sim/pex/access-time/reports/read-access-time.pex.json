@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "status": "pass",
-  "layout": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/layout/bitcell/sram_bitcell_6t.gds",
-  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice",
-  "reference_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
+  "layout": "../../../../layout/bitcell/sram_bitcell_6t.gds",
+  "netlist": "../reports/klt-pex-artifacts/read-access-time/extracted-netlist.spice",
+  "reference_netlist": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
   "extraction": {
     "deck": "gf180mcu",
     "device_count": 6,
@@ -21,8 +21,8 @@
   },
   "testbenches": [
     {
-      "request": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/requests/read-access-time.request.json",
-      "schematic_netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/requests/../testbench/../dut/bitcell_6t_subckt.spice",
+      "request": "../requests/read-access-time.request.json",
+      "schematic_netlist": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
       "corner_count": 27,
       "measurement_names": [
         "read_access_time"
@@ -262,7 +262,7 @@
     },
     "deck": {
       "name": "gf180mcu",
-      "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0"
+      "content_hash": "sha256:6a323622d93c1b4716a7874c37ee3d825bd08398c3c030c85175e44e2cc229a3"
     },
     "input": {
       "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae"

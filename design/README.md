@@ -148,6 +148,20 @@ this org's gf180mcu canary blocks), sources the PDK's own xschemrc so the
 child schematic when the referencing symbol sits at the same relative path
 as the same-named `.sch`).
 
+**Absolute-path exception (issue #109)**: xschem's own batch netlister writes
+a `** sch_path: <absolute path>` / `** sym_path: <absolute path>` header
+comment into every `.spice` file it generates -- this is xschem's own
+netlist-writer behavior, not something `design/xschemrc` (or any other file
+in this repo) controls or has a lever over. Every committed
+`design/netlist/*.spice` therefore carries whatever checkout path produced
+it (e.g. a `.loom/worktrees/issue-N/...` path on an agent host). This is a
+documented, accepted exception to this repo's otherwise-absolute-path-free
+evidence convention, not a bug to fix here: the header comment is inert
+(ngspice ignores `**`-prefixed lines), it never feeds any recorded
+measurement, and a re-netlist from a different checkout reproduces the same
+device-level netlist body byte-for-byte modulo that one header line (see
+"Freshness" below).
+
 **Freshness (issue #21's reproducibility acceptance criterion)**: verified
 directly, twice, on the versions below — `design/generate_array.py` run
 twice produces a byte-identical `sram_256x32_array.sch`; `xschem`'s batch
