@@ -275,6 +275,44 @@ in `sim/`, not silently dropped from the corner set"). A fix (to the
 testbench, the bitcell sizing, or the corner itself) gets verified by a
 **new** record, referencing the one it supersedes.
 
+## Provenance hygiene in evidence records (issue #109)
+
+Because every record here is committed, published, and append-only, whatever
+a harness writes into one is permanent -- so `run_corner_sweep.sh` and
+`run_mc_campaign.py` never embed this host's absolute filesystem paths (e.g.
+`/Users/<name>/...`, or an agent's `.loom/worktrees/issue-N/...` checkout
+path) into a newly-generated record. This follows the model
+`klt env-provenance` (2AMLogic/klayout-tools,
+`docs/cli/env-provenance.md`) documents -- repo-relative paths for anything
+inside this repo, and *identity, never location* (name + version, no path
+at all) for anything genuinely external, like a PDK install:
+
+- **This host's installed `klt` does not yet ship `env-provenance`**
+  (verified 2026-08-25: `klt --version` reports `0.2.0`; neither
+  `klt env-provenance --help` nor `klayout_tools.env_provenance` resolve).
+  `sim/lib/env_provenance.py` reimplements just the piece these scripts
+  need by hand, matching the documented `{path, scope}` shape, so a record
+  written today reads the same way a record written once
+  `klt env-provenance` is available would. Prefer the real subcommand/module
+  directly once it is available on the host running these scripts, and
+  retire that file.
+- **PDK identity, not location**: every `**PDK**:`/`pdk` field records the
+  PDK variant name and its resolved `open_pdks` version (e.g. `gf180mcuD`,
+  `c6d73a3...`), never the absolute install path (`~/.volare/gf180mcuD` on
+  one host, something else on another) -- the same `{name, source, version}`
+  shape `klt extract`/`klt pex`'s own `provenance.pdk` block already uses.
+- **`klt yield`'s echoed `samples` field**: `run_mc_campaign.py` invokes
+  `klt yield` with a repo-relative sample-set path (and `cwd=REPO_ROOT`, so
+  `klt` can still resolve it), not the absolute one it constructs
+  internally, so the `samples: ...` line `klt yield` echoes into its own
+  JSON/text report is repo-relative too.
+- **Documented exceptions** (absolute by necessity, never committed as a
+  recorded value): the `@@REPO_ROOT@@` substitution above (used only inside
+  a `mktemp -d` scratch directory outside the repo, never written into a
+  committed file -- see "Netlist provenance and the `@@REPO_ROOT@@`
+  substitution"); xschem's own `** sch_path:`/`** sym_path:` netlist header
+  comments (`design/README.md`, "Absolute-path exception").
+
 ## Monte Carlo / yield evidence records
 
 The corner records above answer "does this sizing have margin at every

@@ -31,11 +31,26 @@ LAYOUT="layout/bitcell/sram_bitcell_6t.gds"
 klt extract --deck gf180mcu --pdk "$PDK_VARIANT" --pdk-root "$PDK_ROOT_RESOLVED" \
   --parasitics --format json \
   "$LAYOUT" -o "$OUT/extracted-netlist.spice" \
-  | tee "$OUT/extract-report.json" >/dev/null
+  > "$OUT/extract-report.json"
 
+# Issue #109: `klt extract --pdk-root ...`'s JSON report carries a
+# top-level `pdk.root` field that echoes the (necessarily absolute, since a
+# PDK install is outside this repo) `--pdk-root` argument verbatim --
+# redundant with, and leakier than, the same report's own
+# `provenance.pdk` block, which already carries this PDK's identity
+# ({name, source, version}) with no path at all. Null the redundant field
+# before committing rather than leak this host's install location; nothing
+# else in this report depends on it. Filed as klayout-tools#1376 (this
+# field should follow the no-location model `provenance.pdk` already
+# establishes in the same report) -- see sim/pex/README.md "Follow-up".
 python3 -c "
 import json
-d = json.load(open('$OUT/extract-report.json'))
+path = '$OUT/extract-report.json'
+d = json.load(open(path))
+if isinstance(d.get('pdk'), dict) and 'root' in d['pdk']:
+    d['pdk']['root'] = None
+json.dump(d, open(path, 'w'), indent=2)
+open(path, 'a').write('\n')
 print('status:', d['status'], '| devices:', d['device_count'], '| nets:', d['net_count'])
 print('provenance:', d.get('provenance'))
 "

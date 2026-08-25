@@ -60,12 +60,33 @@ d['_note'] = 'devices[]/nets[] omitted from this committed report (49152 devices
 json.dump(d, open('$OUT/extract-array.json', 'w'), indent=2)
 print('status:', d['status'], '| devices:', d['device_count'], '| nets:', d['net_count'], '| pins:', d['pin_count'])
 "
+# `klt lvs` resolves a request document's "reference.netlist" relative to
+# the *request document's own directory* (verified empirically -- a
+# repo-cwd-relative path here fails with "reference netlist not found",
+# resolved against `$WORK`, not `$ROOT`), so this has to stay `$ROOT/
+# $ARRAY_REF` (absolute) for the run to work at all; `klt lvs` then echoes
+# that argument back verbatim into the "reference" field of the JSON report
+# below (klayout-tools#1205's response-echo behavior). Issue #109: rewrite
+# just that one echoed field to the known repo-relative equivalent
+# ($ARRAY_REF) before committing the report, rather than leak this host's
+# absolute checkout path (previously e.g. a `.loom/worktrees/issue-N/...`
+# path) -- the same "strip what shouldn't be committed" treatment this
+# script's own extract-array.json step already applies to the bulk
+# devices[]/nets[] arrays below.
 cat > "$WORK/lvs-array-request.json" <<EOF
 {"layout":{"netlist":"$WORK/array.spice","top":"sram_256x32_array"},
  "reference":{"netlist":"$ROOT/$ARRAY_REF","form":"subckt-call"},
  "options":{"flatten_reference":true}}
 EOF
-klt lvs "$WORK/lvs-array-request.json" --format json | tee "$OUT/lvs-array.json" >/dev/null
-python3 -c "import json,sys; d=json.load(open('$OUT/lvs-array.json')); print('status:', d['status'], '| mismatches:', d['mismatch_count'])"
+klt lvs "$WORK/lvs-array-request.json" --format json > "$WORK/lvs-array-raw.json"
+python3 -c "
+import json
+d = json.load(open('$WORK/lvs-array-raw.json'))
+if d.get('reference') == '$ROOT/$ARRAY_REF':
+    d['reference'] = '$ARRAY_REF'
+json.dump(d, open('$OUT/lvs-array.json', 'w'), indent=2)
+open('$OUT/lvs-array.json', 'a').write('\n')
+print('status:', d['status'], '| mismatches:', d['mismatch_count'])
+"
 
 hr "done -- reports written under $OUT/"
