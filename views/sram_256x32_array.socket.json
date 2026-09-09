@@ -1,0 +1,3554 @@
+{
+  "schema": "klt.socket/1",
+  "name": "sram_256x32_array",
+  "outline": {
+    "x0": 0.0,
+    "y0": 0.0,
+    "x1": 142.72,
+    "y1": 1382.4
+  },
+  "pins": [
+    {
+      "name": "BL0",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 0.35,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL1",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 4.81,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL10",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 44.95,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL11",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 49.41,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL12",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 53.87,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL13",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 58.33,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL14",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 62.79,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL15",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 67.25,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL16",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 71.71,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL17",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 76.17,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL18",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 80.63,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL19",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 85.09,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL2",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 9.27,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL20",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 89.55,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL21",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 94.01,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL22",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 98.47,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL23",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 102.93,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL24",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 107.39,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL25",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 111.85,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL26",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 116.31,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL27",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 120.77,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL28",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 125.23,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL29",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 129.69,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL3",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 13.73,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL30",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 134.15,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL31",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 138.61,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL4",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 18.19,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL5",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 22.65,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL6",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 27.11,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL7",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 31.57,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL8",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 36.03,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BL9",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 40.49,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB0",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 4.11,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB1",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 8.57,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB10",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 48.71,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB11",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 53.17,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB12",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 57.63,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB13",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 62.09,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB14",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 66.55,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB15",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 71.01,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB16",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 75.47,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB17",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 79.93,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB18",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 84.39,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB19",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 88.85,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB2",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 13.03,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB20",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 93.31,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB21",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 97.77,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB22",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 102.23,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB23",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 106.69,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB24",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 111.15,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB25",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 115.61,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB26",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 120.07,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB27",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 124.53,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB28",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 128.99,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB29",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 133.45,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB3",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 17.49,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB30",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 137.91,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB31",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 142.37,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB4",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 21.95,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB5",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 26.41,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB6",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 30.87,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB7",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 35.33,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB8",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 39.79,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "BLB9",
+      "layer": [
+        34,
+        10
+      ],
+      "x": 44.25,
+      "y": 2.7,
+      "direction": "INOUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "VDD",
+      "layer": [
+        42,
+        10
+      ],
+      "x": 71.36,
+      "y": 1378.07,
+      "direction": "INOUT",
+      "use": "POWER"
+    },
+    {
+      "name": "VSS",
+      "layer": [
+        42,
+        10
+      ],
+      "x": 71.36,
+      "y": 1377.39,
+      "direction": "INOUT",
+      "use": "GROUND"
+    },
+    {
+      "name": "WL0",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL1",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 6.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL10",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 55.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL100",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 541.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL101",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 546.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL102",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 551.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL103",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 557.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL104",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 562.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL105",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 568.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL106",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 573.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL107",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 578.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL108",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 584.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL109",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 589.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL11",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 60.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL110",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 595.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL111",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 600.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL112",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 605.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL113",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 611.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL114",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 616.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL115",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 622.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL116",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 627.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL117",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 632.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL118",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 638.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL119",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 643.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL12",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 65.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL120",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 649.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL121",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 654.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL122",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 659.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL123",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 665.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL124",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 670.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL125",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 676.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL126",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 681.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL127",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 686.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL128",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 692.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL129",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 697.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL13",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 71.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL130",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 703.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL131",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 708.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL132",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 713.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL133",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 719.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL134",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 724.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL135",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 730.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL136",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 735.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL137",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 740.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL138",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 746.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL139",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 751.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL14",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 76.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL140",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 757.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL141",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 762.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL142",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 767.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL143",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 773.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL144",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 778.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL145",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 784.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL146",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 789.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL147",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 794.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL148",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 800.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL149",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 805.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL15",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 82.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL150",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 811.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL151",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 816.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL152",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 821.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL153",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 827.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL154",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 832.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL155",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 838.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL156",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 843.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL157",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 848.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL158",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 854.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL159",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 859.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL16",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 87.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL160",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 865.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL161",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 870.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL162",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 875.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL163",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 881.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL164",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 886.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL165",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 892.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL166",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 897.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL167",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 902.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL168",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 908.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL169",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 913.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL17",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 92.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL170",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 919.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL171",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 924.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL172",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 929.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL173",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 935.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL174",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 940.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL175",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 946.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL176",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 951.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL177",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 956.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL178",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 962.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL179",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 967.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL18",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 98.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL180",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 973.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL181",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 978.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL182",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 983.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL183",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 989.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL184",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 994.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL185",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1000.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL186",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1005.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL187",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1010.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL188",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1016.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL189",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1021.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL19",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 103.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL190",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1027.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL191",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1032.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL192",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1037.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL193",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1043.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL194",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1048.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL195",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1054.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL196",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1059.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL197",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1064.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL198",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1070.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL199",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1075.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL2",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 11.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL20",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 109.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL200",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1081.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL201",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1086.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL202",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1091.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL203",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1097.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL204",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1102.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL205",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1108.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL206",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1113.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL207",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1118.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL208",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1124.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL209",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1129.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL21",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 114.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL210",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1135.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL211",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1140.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL212",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1145.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL213",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1151.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL214",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1156.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL215",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1162.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL216",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1167.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL217",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1172.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL218",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1178.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL219",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1183.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL22",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 119.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL220",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1189.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL221",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1194.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL222",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1199.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL223",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1205.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL224",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1210.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL225",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1216.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL226",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1221.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL227",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1226.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL228",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1232.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL229",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1237.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL23",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 125.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL230",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1243.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL231",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1248.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL232",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1253.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL233",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1259.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL234",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1264.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL235",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1270.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL236",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1275.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL237",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1280.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL238",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1286.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL239",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1291.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL24",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 130.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL240",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1297.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL241",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1302.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL242",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1307.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL243",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1313.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL244",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1318.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL245",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1324.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL246",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1329.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL247",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1334.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL248",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1340.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL249",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1345.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL25",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 136.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL250",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1351.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL251",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1356.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL252",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1361.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL253",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1367.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL254",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1372.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL255",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 1378.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL26",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 141.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL27",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 146.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL28",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 152.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL29",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 157.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL3",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 17.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL30",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 163.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL31",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 168.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL32",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 173.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL33",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 179.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL34",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 184.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL35",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 190.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL36",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 195.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL37",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 200.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL38",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 206.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL39",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 211.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL4",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 22.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL40",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 217.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL41",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 222.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL42",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 227.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL43",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 233.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL44",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 238.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL45",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 244.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL46",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 249.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL47",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 254.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL48",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 260.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL49",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 265.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL5",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 28.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL50",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 271.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL51",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 276.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL52",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 281.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL53",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 287.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL54",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 292.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL55",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 298.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL56",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 303.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL57",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 308.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL58",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 314.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL59",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 319.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL6",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 33.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL60",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 325.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL61",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 330.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL62",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 335.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL63",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 341.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL64",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 346.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL65",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 352.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL66",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 357.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL67",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 362.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL68",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 368.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL69",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 373.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL7",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 38.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL70",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 379.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL71",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 384.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL72",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 389.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL73",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 395.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL74",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 400.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL75",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 406.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL76",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 411.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL77",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 416.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL78",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 422.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL79",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 427.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL8",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 44.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL80",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 433.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL81",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 438.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL82",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 443.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL83",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 449.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL84",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 454.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL85",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 460.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL86",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 465.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL87",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 470.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL88",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 476.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL89",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 481.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL9",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 49.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL90",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 487.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL91",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 492.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL92",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 497.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL93",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 503.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL94",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 508.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL95",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 514.01,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL96",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 519.41,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL97",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 524.81,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL98",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 530.21,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    },
+    {
+      "name": "WL99",
+      "layer": [
+        30,
+        10
+      ],
+      "x": 0.08,
+      "y": 535.61,
+      "direction": "INPUT",
+      "use": "SIGNAL"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "file": "layout/sram_256x32/sram_256x32_array.gds",
+  "socket": "views/sram_256x32_array.socket.json",
+  "socket_name": "sram_256x32_array",
+  "dbu_um": 0.001,
+  "status": "pass",
+  "check_count": 3,
+  "checks": [
+    {
+      "name": "pins",
+      "status": "pass",
+      "violation_count": 0,
+      "violations": [],
+      "skip_reason": null
+    },
+    {
+      "name": "outline",
+      "status": "pass",
+      "violation_count": 0,
+      "violations": [],
+      "skip_reason": null
+    },
+    {
+      "name": "reserved_layers",
+      "status": "skipped",
+      "violation_count": 0,
+      "violations": [],
+      "skip_reason": "socket descriptor declares no reserved layers"
+    }
+  ],
+  "budgets": []
+}

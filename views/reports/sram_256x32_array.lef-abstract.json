@@ -1,0 +1,5207 @@
+{
+  "schema_version": 1,
+  "file": "layout/sram_256x32/sram_256x32_array.gds",
+  "socket": "views/sram_256x32_array.socket.json",
+  "output": "views/sram_256x32_array.lef",
+  "macro_name": "sram_256x32_array",
+  "class": "BLOCK",
+  "site": null,
+  "symmetry": [],
+  "size_um": {
+    "width": 142.72,
+    "height": 1382.4
+  },
+  "cell_library": "gf180mcu_fd_sc_mcu9t5v0",
+  "tech_lef": "~/.volare/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu9t5v0/techlef/gf180mcu_fd_sc_mcu9t5v0__nom.tlef",
+  "pins": [
+    {
+      "name": "BL0",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          0.235,
+          2.585,
+          0.465,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL1",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          4.695,
+          2.585,
+          4.925,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL10",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          44.835,
+          2.585,
+          45.065,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL11",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          49.295,
+          2.585,
+          49.525,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL12",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          53.755,
+          2.585,
+          53.985,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL13",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          58.215,
+          2.585,
+          58.445,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL14",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          62.675,
+          2.585,
+          62.905,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL15",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          67.135,
+          2.585,
+          67.365,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL16",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          71.595,
+          2.585,
+          71.825,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL17",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          76.055,
+          2.585,
+          76.285,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL18",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          80.515,
+          2.585,
+          80.745,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL19",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          84.975,
+          2.585,
+          85.205,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL2",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          9.155,
+          2.585,
+          9.385,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL20",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          89.435,
+          2.585,
+          89.665,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL21",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          93.895,
+          2.585,
+          94.125,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL22",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          98.355,
+          2.585,
+          98.585,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL23",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          102.815,
+          2.585,
+          103.045,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL24",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          107.275,
+          2.585,
+          107.505,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL25",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          111.735,
+          2.585,
+          111.965,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL26",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          116.195,
+          2.585,
+          116.425,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL27",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          120.655,
+          2.585,
+          120.885,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL28",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          125.115,
+          2.585,
+          125.345,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL29",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          129.575,
+          2.585,
+          129.805,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL3",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          13.615,
+          2.585,
+          13.845,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL30",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          134.035,
+          2.585,
+          134.265,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL31",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          138.495,
+          2.585,
+          138.725,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL4",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          18.075,
+          2.585,
+          18.305,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL5",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          22.535,
+          2.585,
+          22.765,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL6",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          26.995,
+          2.585,
+          27.225,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL7",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          31.455,
+          2.585,
+          31.685,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL8",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          35.915,
+          2.585,
+          36.145,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BL9",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          40.375,
+          2.585,
+          40.605,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB0",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          3.995,
+          2.585,
+          4.225,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB1",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          8.455,
+          2.585,
+          8.685,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB10",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          48.595,
+          2.585,
+          48.825,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB11",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          53.055,
+          2.585,
+          53.285,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB12",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          57.515,
+          2.585,
+          57.745,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB13",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          61.975,
+          2.585,
+          62.205,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB14",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          66.435,
+          2.585,
+          66.665,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB15",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          70.895,
+          2.585,
+          71.125,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB16",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          75.355,
+          2.585,
+          75.585,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB17",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          79.815,
+          2.585,
+          80.045,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB18",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          84.275,
+          2.585,
+          84.505,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB19",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          88.735,
+          2.585,
+          88.965,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB2",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          12.915,
+          2.585,
+          13.145,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB20",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          93.195,
+          2.585,
+          93.425,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB21",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          97.655,
+          2.585,
+          97.885,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB22",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          102.115,
+          2.585,
+          102.345,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB23",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          106.575,
+          2.585,
+          106.805,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB24",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          111.035,
+          2.585,
+          111.265,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB25",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          115.495,
+          2.585,
+          115.725,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB26",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          119.955,
+          2.585,
+          120.185,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB27",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          124.415,
+          2.585,
+          124.645,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB28",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          128.875,
+          2.585,
+          129.105,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB29",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          133.335,
+          2.585,
+          133.565,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB3",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          17.375,
+          2.585,
+          17.605,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB30",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          137.795,
+          2.585,
+          138.025,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB31",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          142.255,
+          2.585,
+          142.485,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB4",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          21.835,
+          2.585,
+          22.065,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB5",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          26.295,
+          2.585,
+          26.525,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB6",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          30.755,
+          2.585,
+          30.985,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB7",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          35.215,
+          2.585,
+          35.445,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB8",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          39.675,
+          2.585,
+          39.905,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "BLB9",
+      "direction": "INOUT",
+      "use": "SIGNAL",
+      "layer": "Metal1",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          44.135,
+          2.585,
+          44.365,
+          2.815
+        ]
+      ]
+    },
+    {
+      "name": "VDD",
+      "direction": "INOUT",
+      "use": "POWER",
+      "layer": "Metal3",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          71.22,
+          1377.93,
+          71.5,
+          1378.21
+        ]
+      ]
+    },
+    {
+      "name": "VSS",
+      "direction": "INOUT",
+      "use": "GROUND",
+      "layer": "Metal3",
+      "geometry_source": "synthesized",
+      "rects_um": [
+        [
+          71.22,
+          1377.25,
+          71.5,
+          1377.53
+        ]
+      ]
+    },
+    {
+      "name": "WL0",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL1",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL10",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL100",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL101",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL102",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL103",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL104",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL105",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL106",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL107",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL108",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL109",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL11",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL110",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL111",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL112",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL113",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL114",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL115",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL116",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL117",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL118",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL119",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL12",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL120",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL121",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL122",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL123",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL124",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL125",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL126",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL127",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL128",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL129",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL13",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL130",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL131",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL132",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL133",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL134",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL135",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL136",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL137",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL138",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL139",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL14",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL140",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL141",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL142",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL143",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL144",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL145",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL146",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL147",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL148",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL149",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL15",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL150",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL151",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL152",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL153",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL154",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL155",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL156",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL157",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL158",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL159",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL16",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL160",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL161",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL162",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL163",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL164",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL165",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL166",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL167",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL168",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL169",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL17",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL170",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL171",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL172",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL173",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL174",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL175",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL176",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL177",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL178",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL179",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL18",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL180",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL181",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL182",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL183",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL184",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL185",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL186",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL187",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL188",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL189",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL19",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL190",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL191",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL192",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL193",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL194",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL195",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL196",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL197",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL198",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL199",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL2",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL20",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL200",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL201",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL202",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL203",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL204",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL205",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL206",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL207",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL208",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL209",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL21",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL210",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL211",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL212",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL213",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL214",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL215",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL216",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL217",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL218",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL219",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL22",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL220",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL221",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL222",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL223",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL224",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL225",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL226",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL227",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL228",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL229",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL23",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL230",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL231",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL232",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL233",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL234",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL235",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL236",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL237",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL238",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL239",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL24",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL240",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL241",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL242",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL243",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL244",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL245",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL246",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL247",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL248",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL249",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL25",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL250",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL251",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL252",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL253",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL254",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL255",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL26",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL27",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL28",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL29",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL3",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL30",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL31",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL32",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL33",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL34",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL35",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL36",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL37",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL38",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL39",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL4",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL40",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL41",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL42",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL43",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL44",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL45",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL46",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL47",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL48",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL49",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL5",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL50",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL51",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL52",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL53",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL54",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL55",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL56",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL57",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL58",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL59",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL6",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL60",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL61",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL62",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL63",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL64",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL65",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL66",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL67",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL68",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL69",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL7",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL70",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL71",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL72",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL73",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL74",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL75",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL76",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL77",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL78",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL79",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL8",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL80",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL81",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL82",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL83",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL84",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL85",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL86",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL87",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL88",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL89",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL9",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL90",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL91",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL92",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL93",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL94",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL95",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL96",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL97",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL98",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    },
+    {
+      "name": "WL99",
+      "direction": "INPUT",
+      "use": "SIGNAL",
+      "layer": null,
+      "geometry_source": "none",
+      "rects_um": []
+    }
+  ],
+  "pin_count": 322,
+  "unroutable_pins": [
+    {
+      "name": "WL0",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL1",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL10",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL100",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL101",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL102",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL103",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL104",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL105",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL106",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL107",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL108",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL109",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL11",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL110",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL111",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL112",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL113",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL114",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL115",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL116",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL117",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL118",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL119",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL12",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL120",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL121",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL122",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL123",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL124",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL125",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL126",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL127",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL128",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL129",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL13",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL130",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL131",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL132",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL133",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL134",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL135",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL136",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL137",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL138",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL139",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL14",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL140",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL141",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL142",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL143",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL144",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL145",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL146",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL147",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL148",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL149",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL15",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL150",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL151",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL152",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL153",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL154",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL155",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL156",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL157",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL158",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL159",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL16",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL160",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL161",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL162",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL163",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL164",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL165",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL166",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL167",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL168",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL169",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL17",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL170",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL171",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL172",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL173",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL174",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL175",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL176",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL177",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL178",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL179",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL18",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL180",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL181",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL182",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL183",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL184",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL185",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL186",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL187",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL188",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL189",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL19",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL190",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL191",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL192",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL193",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL194",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL195",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL196",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL197",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL198",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL199",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL2",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL20",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL200",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL201",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL202",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL203",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL204",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL205",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL206",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL207",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL208",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL209",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL21",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL210",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL211",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL212",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL213",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL214",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL215",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL216",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL217",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL218",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL219",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL22",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL220",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL221",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL222",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL223",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL224",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL225",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL226",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL227",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL228",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL229",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL23",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL230",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL231",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL232",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL233",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL234",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL235",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL236",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL237",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL238",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL239",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL24",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL240",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL241",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL242",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL243",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL244",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL245",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL246",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL247",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL248",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL249",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL25",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL250",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL251",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL252",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL253",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL254",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL255",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL26",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL27",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL28",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL29",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL3",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL30",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL31",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL32",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL33",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL34",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL35",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL36",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL37",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL38",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL39",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL4",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL40",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL41",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL42",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL43",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL44",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL45",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL46",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL47",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL48",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL49",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL5",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL50",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL51",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL52",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL53",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL54",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL55",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL56",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL57",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL58",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL59",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL6",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL60",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL61",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL62",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL63",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL64",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL65",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL66",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL67",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL68",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL69",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL7",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL70",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL71",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL72",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL73",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL74",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL75",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL76",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL77",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL78",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL79",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL8",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL80",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL81",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL82",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL83",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL84",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL85",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL86",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL87",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL88",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL89",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL9",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL90",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL91",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL92",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL93",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL94",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL95",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL96",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL97",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL98",
+      "layer": [
+        30,
+        10
+      ]
+    },
+    {
+      "name": "WL99",
+      "layer": [
+        30,
+        10
+      ]
+    }
+  ],
+  "obs": [
+    {
+      "layer": "Metal1",
+      "shape_count": 32832
+    },
+    {
+      "layer": "Metal2",
+      "shape_count": 64
+    },
+    {
+      "layer": "Metal3",
+      "shape_count": 2
+    }
+  ],
+  "obs_shape_count": 32898,
+  "warnings": [
+    "pin 'BL0': no drawn geometry found on layer 34/10 at (0.35, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL1': no drawn geometry found on layer 34/10 at (4.81, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL10': no drawn geometry found on layer 34/10 at (44.95, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL11': no drawn geometry found on layer 34/10 at (49.41, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL12': no drawn geometry found on layer 34/10 at (53.87, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL13': no drawn geometry found on layer 34/10 at (58.33, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL14': no drawn geometry found on layer 34/10 at (62.79, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL15': no drawn geometry found on layer 34/10 at (67.25, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL16': no drawn geometry found on layer 34/10 at (71.71, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL17': no drawn geometry found on layer 34/10 at (76.17, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL18': no drawn geometry found on layer 34/10 at (80.63, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL19': no drawn geometry found on layer 34/10 at (85.09, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL2': no drawn geometry found on layer 34/10 at (9.27, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL20': no drawn geometry found on layer 34/10 at (89.55, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL21': no drawn geometry found on layer 34/10 at (94.01, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL22': no drawn geometry found on layer 34/10 at (98.47, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL23': no drawn geometry found on layer 34/10 at (102.93, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL24': no drawn geometry found on layer 34/10 at (107.39, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL25': no drawn geometry found on layer 34/10 at (111.85, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL26': no drawn geometry found on layer 34/10 at (116.31, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL27': no drawn geometry found on layer 34/10 at (120.77, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL28': no drawn geometry found on layer 34/10 at (125.23, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL29': no drawn geometry found on layer 34/10 at (129.69, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL3': no drawn geometry found on layer 34/10 at (13.73, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL30': no drawn geometry found on layer 34/10 at (134.15, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL31': no drawn geometry found on layer 34/10 at (138.61, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL4': no drawn geometry found on layer 34/10 at (18.19, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL5': no drawn geometry found on layer 34/10 at (22.65, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL6': no drawn geometry found on layer 34/10 at (27.11, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL7': no drawn geometry found on layer 34/10 at (31.57, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL8': no drawn geometry found on layer 34/10 at (36.03, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BL9': no drawn geometry found on layer 34/10 at (40.49, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB0': no drawn geometry found on layer 34/10 at (4.11, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB1': no drawn geometry found on layer 34/10 at (8.57, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB10': no drawn geometry found on layer 34/10 at (48.71, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB11': no drawn geometry found on layer 34/10 at (53.17, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB12': no drawn geometry found on layer 34/10 at (57.63, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB13': no drawn geometry found on layer 34/10 at (62.09, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB14': no drawn geometry found on layer 34/10 at (66.55, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB15': no drawn geometry found on layer 34/10 at (71.01, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB16': no drawn geometry found on layer 34/10 at (75.47, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB17': no drawn geometry found on layer 34/10 at (79.93, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB18': no drawn geometry found on layer 34/10 at (84.39, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB19': no drawn geometry found on layer 34/10 at (88.85, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB2': no drawn geometry found on layer 34/10 at (13.03, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB20': no drawn geometry found on layer 34/10 at (93.31, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB21': no drawn geometry found on layer 34/10 at (97.77, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB22': no drawn geometry found on layer 34/10 at (102.23, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB23': no drawn geometry found on layer 34/10 at (106.69, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB24': no drawn geometry found on layer 34/10 at (111.15, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB25': no drawn geometry found on layer 34/10 at (115.61, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB26': no drawn geometry found on layer 34/10 at (120.07, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB27': no drawn geometry found on layer 34/10 at (124.53, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB28': no drawn geometry found on layer 34/10 at (128.99, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB29': no drawn geometry found on layer 34/10 at (133.45, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB3': no drawn geometry found on layer 34/10 at (17.49, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB30': no drawn geometry found on layer 34/10 at (137.91, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB31': no drawn geometry found on layer 34/10 at (142.37, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB4': no drawn geometry found on layer 34/10 at (21.95, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB5': no drawn geometry found on layer 34/10 at (26.41, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB6': no drawn geometry found on layer 34/10 at (30.87, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB7': no drawn geometry found on layer 34/10 at (35.33, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB8': no drawn geometry found on layer 34/10 at (39.79, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'BLB9': no drawn geometry found on layer 34/10 at (44.25, 2.7) um -- synthesized a placeholder PORT rectangle",
+    "pin 'VDD': no drawn geometry found on layer 42/10 at (71.36, 1378.07) um -- synthesized a placeholder PORT rectangle",
+    "pin 'VSS': no drawn geometry found on layer 42/10 at (71.36, 1377.39) um -- synthesized a placeholder PORT rectangle",
+    "pin 'WL0': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL1': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL10': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL100': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL101': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL102': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL103': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL104': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL105': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL106': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL107': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL108': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL109': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL11': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL110': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL111': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL112': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL113': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL114': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL115': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL116': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL117': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL118': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL119': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL12': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL120': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL121': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL122': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL123': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL124': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL125': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL126': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL127': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL128': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL129': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL13': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL130': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL131': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL132': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL133': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL134': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL135': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL136': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL137': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL138': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL139': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL14': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL140': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL141': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL142': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL143': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL144': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL145': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL146': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL147': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL148': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL149': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL15': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL150': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL151': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL152': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL153': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL154': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL155': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL156': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL157': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL158': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL159': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL16': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL160': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL161': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL162': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL163': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL164': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL165': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL166': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL167': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL168': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL169': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL17': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL170': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL171': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL172': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL173': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL174': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL175': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL176': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL177': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL178': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL179': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL18': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL180': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL181': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL182': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL183': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL184': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL185': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL186': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL187': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL188': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL189': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL19': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL190': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL191': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL192': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL193': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL194': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL195': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL196': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL197': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL198': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL199': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL2': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL20': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL200': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL201': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL202': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL203': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL204': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL205': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL206': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL207': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL208': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL209': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL21': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL210': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL211': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL212': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL213': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL214': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL215': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL216': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL217': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL218': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL219': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL22': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL220': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL221': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL222': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL223': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL224': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL225': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL226': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL227': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL228': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL229': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL23': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL230': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL231': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL232': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL233': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL234': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL235': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL236': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL237': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL238': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL239': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL24': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL240': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL241': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL242': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL243': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL244': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL245': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL246': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL247': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL248': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL249': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL25': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL250': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL251': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL252': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL253': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL254': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL255': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL26': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL27': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL28': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL29': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL3': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL30': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL31': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL32': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL33': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL34': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL35': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL36': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL37': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL38': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL39': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL4': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL40': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL41': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL42': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL43': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL44': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL45': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL46': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL47': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL48': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL49': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL5': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL50': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL51': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL52': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL53': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL54': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL55': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL56': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL57': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL58': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL59': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL6': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL60': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL61': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL62': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL63': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL64': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL65': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL66': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL67': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL68': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL69': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL7': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL70': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL71': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL72': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL73': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL74': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL75': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL76': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL77': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL78': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL79': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL8': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL80': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL81': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL82': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL83': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL84': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL85': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL86': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL87': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL88': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL89': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL9': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL90': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL91': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL92': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL93': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL94': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL95': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL96': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL97': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL98': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry",
+    "pin 'WL99': layer 30/10 does not resolve to a known routing LEF layer -- emitted with no PORT geometry"
+  ],
+  "provenance": {
+    "klt_version": "0.4.0",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "gf180mcuD",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "gf180mcu_fd_sc_mcu9t5v0",
+      "content_hash": "sha256:332ae93d61ac55f793da97a6391703f78bc415653cb60e76dd8eb0092124485a",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:7ef564c1a6cdb2645af056fd002d95fad2ebf4270099ae4a454d62b0f6d54a0a"
+    }
+  }
+}

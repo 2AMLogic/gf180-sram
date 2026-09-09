@@ -8,8 +8,11 @@ PDK, built and verified by AI agents driving
 LVS-clean (`status: match` for both — see `layout/README.md`'s "Status
 (2026-08-16)" section), and 27-corner PVT signoff has passed (read SNM +
 hold SNM + write margin, all 27 corner points — see
-`sim/signoff-summary.md`'s Overall signoff line). Abstract (LEF) and Liberty
-timing views have not been generated yet (`views/` is still empty).**
+`sim/signoff-summary.md`'s Overall signoff line). A generated LEF abstract
+of the array core now exists (`views/sram_256x32_array.lef`, `klt
+socket-check` clean on outline + all 322 pins) — see `views/README.md` for
+its coverage and the two tool/design gaps it surfaced. Liberty timing views
+have not been generated yet.**
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
@@ -64,8 +67,11 @@ corners, with the per-corner pass/fail synthesis against `spec/sram.md`'s
 positive-margin signoff requirement complete — overall verdict PASS, see
 `sim/signoff-summary.md`); array assembled and DRC/LVS-clean (256 x 32
 array, `status: match` LVS, see `layout/README.md`'s "Status (2026-08-16)"
-section). Abstract and Liberty views have not been generated yet (`views/`
-is still empty); shuttle seat and measured silicon remain future steps.**
+section); LEF abstract generated for the array core (`views/README.md`'s
+"Status (2026-09-09)" section — `klt socket-check` clean, a real `.lef`
+committed, and two tool/design gaps filed from pointing `klt lef-abstract`
+at a real block for the first time). Liberty timing views have not been
+generated yet; shuttle seat and measured silicon remain future steps.**
 
 ## Macro ceiling, and where this block sits relative to it
 

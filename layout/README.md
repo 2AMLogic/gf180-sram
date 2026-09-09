@@ -168,8 +168,15 @@ captures.
   sha256, and no PASS/FAIL verdict moved from the pre-#103 records
   (preserved, unedited, under `sim/pex/pre-issue-103/`); see
   `sim/pex/README.md` "Freshness" for the full re-run record.
-* **A routed macro.** There is no periphery, no pin/obstruction abstract, no
-  LEF/Liberty view (issue #24's scope).
+* **A routed macro.** There is still no periphery, and the LEF abstract that
+  now exists (`views/sram_256x32_array.lef`, issue #120) is not a *routable*
+  one: every pin's `PORT` is either absent (the 256 wordlines, labelled on
+  non-routing Poly2) or a synthesized placeholder disconnected from the real
+  drawn metal it sits on (the remaining 66 bitline/supply pins — a
+  klayout-tools gap, klayout-tools#1614). `klt place-and-route` would not
+  accept this LEF today. No Liberty view exists yet either. See
+  `views/README.md`'s "Pin geometry" and "What this does and does not
+  prove" for the full breakdown.
 * **Array-level LVS.** Achieved — see "Known tool gaps" #2. `klt extract`
   itself stays flat-only (the layout side is always a single flat circuit),
   but `klt lvs`'s `options.flatten_reference` (klayout-tools#1085, closed
