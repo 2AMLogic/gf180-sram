@@ -1,10 +1,18 @@
 {
   "schema_version": 1,
   "engine": "klayout",
-  "layout": "/tmp/tmp.7hvE8odO6w/array.spice",
-  "reference": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-108/design/netlist/sram_256x32_array.spice",
+  "layout": "/tmp/tmp.Oa30Qtj1XC/array.spice",
+  "reference": "design/netlist/sram_256x32_array.spice",
   "top": "SRAM_256X32_ARRAY",
+  "reference_top": ".TOP",
   "parameter_tolerance": null,
+  "options": {
+    "combine_devices": false,
+    "flatten_layout": false,
+    "flatten_reference": true,
+    "netgen_setup": null,
+    "parameter_tolerance": null
+  },
   "status": "match",
   "mismatch_count": 1,
   "error_count": 0,
@@ -32,14 +40,14 @@
   "device_classes": null,
   "environment": {
     "engine": "klayout",
-    "engine_version": "0.30.10",
-    "layout_sha256": "118e2b7bcc1aed0a2b3e4f47cf6326e45998aaf41d92492775a470c0e798de74",
+    "engine_version": "0.30.12",
+    "layout_sha256": "aa3b06c33e7c872326fa25b428a475e9467d1c4b70ca398dffb5fb432709bfd5",
     "reference_sha256": "552a097641dbe9aba0010a96d57cb601a0c9b9212a4b0e22bf0b877fcb27ba12",
     "extracted_netlist": null
   },
   "provenance": {
-    "klt_version": "0.2.0",
-    "klayout_version": "0.30.10",
+    "klt_version": "0.4.0",
+    "klayout_version": "0.30.12",
     "pdk": null,
     "deck": null,
     "input": null

@@ -1,10 +1,18 @@
 {
   "schema_version": 1,
   "engine": "klayout",
-  "layout": "/tmp/tmp.7hvE8odO6w/bitcell.spice",
-  "reference": "/tmp/tmp.7hvE8odO6w/bitcell_ref.spice",
+  "layout": "/tmp/tmp.Oa30Qtj1XC/bitcell.spice",
+  "reference": "/tmp/tmp.Oa30Qtj1XC/bitcell_ref.spice",
   "top": "SRAM_BITCELL_6T",
+  "reference_top": ".TOP",
   "parameter_tolerance": null,
+  "options": {
+    "combine_devices": false,
+    "flatten_layout": false,
+    "flatten_reference": false,
+    "netgen_setup": null,
+    "parameter_tolerance": null
+  },
   "status": "match",
   "mismatch_count": 0,
   "error_count": 0,
@@ -30,14 +38,14 @@
   "device_classes": null,
   "environment": {
     "engine": "klayout",
-    "engine_version": "0.30.10",
+    "engine_version": "0.30.12",
     "layout_sha256": "28472aef6de62270059971dfecc41f74272f567ee9dcfea2701f3cdcaa7cf070",
     "reference_sha256": "0aacf0fabbf45867a1add8ff520e44d941375e817262096bbced81fa92a4948c",
     "extracted_netlist": null
   },
   "provenance": {
-    "klt_version": "0.2.0",
-    "klayout_version": "0.30.10",
+    "klt_version": "0.4.0",
+    "klayout_version": "0.30.12",
     "pdk": null,
     "deck": null,
     "input": null
