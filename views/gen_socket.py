@@ -7,8 +7,9 @@
 
 ``layout/sram_256x32/generate.py`` already computes every port's exact
 position once, when it draws that port's text label (``BL<col>``/
-``BLB<col>`` on Metal1, ``WL<row>`` on Poly2, ``VDD``/``VSS`` on Metal3 --
-see that module's docstring and its ``build()`` function). Re-implementing
+``BLB<col>`` on Metal1, ``WL<row>`` on its Metal1 landing pad, ``VDD``/
+``VSS`` on Metal3 -- see that module's docstring and its ``build()``
+function; the wordline landing pads are issue #121). Re-implementing
 those 322 coordinate formulas here, by hand, a second time would be exactly
 the "hand-typed 322 entries" issue #120 says not to do -- and worse, it
 would silently drift from the generator the moment either changes without
@@ -30,16 +31,23 @@ pin's declared ``(layer, datatype)`` at its declared position (see
 ``klayout_tools.socket_check`` module docstring: "every declared pin has a
 text label, on its declared layer"). ``layout/bitcell/generate.py`` and
 ``layout/sram_256x32/generate.py`` draw every port label on a dedicated
-``_LBL`` datatype -- ``Metal1_Label`` (34, 10), ``Poly2_Label`` (30, 10),
-``Metal3_Label`` (42, 10) -- separate from the drawn conductor's own
-datatype (``*_0``), matching gf180mcu's own ``libs.tech/klayout/tech/
-gf180mcu.map`` convention (that file's ``PIN`` purpose lines resolve those
-same ``_LBL`` datatypes to the same LEF layer name as the drawing datatype).
-So each pin's socket ``layer`` here is deliberately the *label* datatype --
-the only choice ``klt socket-check`` can actually find a match against for
-this committed GDS. See ``views/README.md`` ("Pin geometry: why every
-metal-backed pin comes back `synthesized`, not `drawn`") for what this
-choice means downstream, in `klt lef-abstract`.
+``_LBL`` datatype -- ``Metal1_Label`` (34, 10), ``Metal3_Label`` (42, 10) --
+separate from the drawn conductor's own datatype (``*_0``), matching
+gf180mcu's own ``libs.tech/klayout/tech/gf180mcu.map`` convention (that
+file's ``PIN`` purpose lines resolve those same ``_LBL`` datatypes to the
+same LEF layer name as the drawing datatype). So each pin's socket ``layer``
+here is deliberately the *label* datatype -- the only choice ``klt
+socket-check`` can actually find a match against for this committed GDS. See
+``views/README.md`` ("Pin geometry: why every pin comes back `synthesized`,
+never `drawn`") for what this choice means downstream, in `klt lef-abstract`.
+
+Since issue #121 the array draws a Poly2-to-Metal1 landing pad per wordline
+and labels ``WL<row>`` on that pad, so **every** pin in this descriptor now
+sits on a ``Metal1_Label``/``Metal3_Label`` layer that resolves to a `TYPE
+ROUTING` LEF layer. ``Poly2_Label`` (30, 10) is deliberately no longer read:
+nothing is labelled there any more, and Poly2 never resolved to a routing
+layer, which is exactly why all 256 ``WL<row>`` pins used to come back
+``geometry_source: "none"``.
 
 ## Direction / use classification
 
@@ -129,8 +137,7 @@ def build_descriptor(array_gen, rows: int, cols: int) -> dict:
     }
 
     label_layers = (
-        bitcell.L_METAL1_LBL,  # BL<col> / BLB<col>
-        bitcell.L_POLY2_LBL,  # WL<row>
+        bitcell.L_METAL1_LBL,  # BL<col> / BLB<col> / WL<row> (issue #121)
         array_gen.L_METAL3_LBL,  # VDD / VSS
     )
 

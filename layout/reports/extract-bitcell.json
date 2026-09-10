@@ -1,10 +1,10 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "file": "layout/bitcell/sram_bitcell_6t.gds",
   "deck": "gf180mcu",
   "top": "sram_bitcell_6t",
   "dbu_um": 0.001,
-  "netlist_path": "/tmp/tmp.7hvE8odO6w/bitcell.spice",
+  "netlist_path": "/tmp/tmp.Oa30Qtj1XC/bitcell.spice",
   "netlist_sha256": "28472aef6de62270059971dfecc41f74272f567ee9dcfea2701f3cdcaa7cf070",
   "status": "extracted",
   "device_count": 6,
@@ -185,12 +185,13 @@
   "matched_device_groups": [],
   "pdk": null,
   "provenance": {
-    "klt_version": "0.2.0",
-    "klayout_version": "0.30.10",
+    "klt_version": "0.4.0",
+    "klayout_version": "0.30.12",
     "pdk": null,
     "deck": {
       "name": "gf180mcu",
-      "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0"
+      "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0",
+      "released": true
     },
     "input": {
       "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae"

@@ -37,8 +37,26 @@ The one thing abutment alone does *not* finish is joining the 32 per-column
 supply stripes to each other. Two Metal3 straps (one ``VDD``, one ``VSS``)
 run across the array and drop a Via2 onto every column's corresponding Metal2
 stripe, which is what makes ``VDD``/``VSS`` single nets across the whole array
-rather than 32 isolated column rails. They are the array's only non-bitcell
-geometry.
+rather than 32 isolated column rails.
+
+## The wordline landing-pad strip (issue #121)
+
+Abutment leaves each ``WL<row>`` as bare Poly2. Poly2 is not a ``TYPE
+ROUTING`` layer in gf180mcu's tech LEF, so a wordline that carries nothing but
+Poly2 has no pin geometry a router — or ``klt lef-abstract``, or a physical
+row decoder — could ever land on: the array's first LEF abstract (issue #120,
+``views/README.md``) reported all 256 ``WL<row>`` pins as
+``geometry_source: "none"``, in ``unroutable_pins[]``.
+
+So the array reserves a narrow strip of periphery, :data:`WL_PAD_BAND` wide,
+to the **left** of the tiled cells (where a row decoder would sit) and draws,
+per row, a Poly2 landing pad that abuts that row's wordline stripe, one
+Poly2-to-Metal1 contact on it, and a Metal1 pad — and labels ``WL<row>`` on
+the *Metal1* pad rather than on the Poly2 stripe. The tiled cells are placed
+at ``x = WL_PAD_BAND`` so the strip, not negative space, holds the array's
+left boundary.
+
+The strip and the two Metal3 straps are the array's only non-bitcell geometry.
 
 ## Determinism
 
@@ -90,6 +108,49 @@ M3_SPACE = 0.30  # M3.2a (0.28) + 0.02
 STRAP_VSS_OFFSET = 0.20  # from the top row's own origin
 STRAP_VDD_OFFSET = STRAP_VSS_OFFSET + M3_STRAP_W + M3_SPACE
 
+# ---------------------------------------------------------------------------
+# Wordline landing pads (see the module docstring's own section).
+#
+# Every dimension here is derived from layout/bitcell/generate.py's own
+# DRM-cited contact/enclosure constants — the same ones the bitcell's *own*
+# Poly2 landing pads (``Y_CO_JOG_Q`` / ``Y_CO_JOG_QB``) are built from — so
+# this periphery is drawn to exactly the rule margins of the cell it abuts,
+# with no new hand-picked numbers.
+# ---------------------------------------------------------------------------
+# Poly2 pad: a wordline stripe is only POLY_WIDTH (0.26) tall, which cannot
+# hold a 0.22 contact with CO.3 enclosure on both edges, so the pad is the
+# locally-widened Poly2 the contact needs (0.38), exactly like the bitcell's
+# cross-couple jogs.
+WL_PAD_POLY_H = bitcell.CO_SIZE + 2 * bitcell.CO_ENC_POLY  # 0.38 (CO.3)
+# Contact column. Poly2's enclosure (CO.3, 0.08 here) is the wider of the two
+# enclosures, so it — not Metal1's (CO.6a/CO.6b, 0.07) — sets how far in from
+# the array's left boundary the cut sits.
+WL_PAD_CO_CX = round(bitcell.CO_ENC_POLY + 0.5 * bitcell.CO_SIZE, 3)  # 0.19
+# Metal1 pad: starts flush with the array's left boundary (so the pin is
+# reachable from outside the macro) and ends one CO.6a/CO.6b enclosure past
+# the cut.
+WL_PAD_M1_W = round(WL_PAD_CO_CX + 0.5 * bitcell.CO_SIZE + bitcell.CO_ENC_M1, 3)
+# M1.3 (minimum Metal1 area, 0.1444 um^2) and CO.6a (the 0.34 um narrow-metal
+# end-of-line overlap it would otherwise take) are both *outside* klt's
+# curated gf180mcu deck, so — like the bitcell's own margins — they are
+# satisfied by construction rather than by a check: the pad is made tall
+# enough that neither can bind, and :data:`_WL_PAD_M1_AREA_OK` asserts it.
+M1_MIN_AREA = 0.1444  # M1.3
+M1_NARROW = 0.34  # CO.6a applies only to Metal1 narrower than this
+WL_PAD_M1_H = 0.42
+# Band width: the pad's Metal1 has to clear column 0's BL stripe by M1.2a.
+WL_PAD_BAND = round(
+    WL_PAD_M1_W
+    + bitcell.M1_SPACE
+    - (bitcell.X_BL_C - 0.5 * bitcell.M1_STRIPE_W),
+    3,
+)
+
+_WL_PAD_M1_AREA_OK = WL_PAD_M1_W * WL_PAD_M1_H
+assert _WL_PAD_M1_AREA_OK >= M1_MIN_AREA, "WL landing pad violates M1.3"
+assert min(WL_PAD_M1_W, WL_PAD_M1_H) >= M1_NARROW, "WL landing pad invites CO.6a"
+assert WL_PAD_BAND >= WL_PAD_M1_W, "WL landing pad overruns its own band"
+
 
 def _layer(layout: kdb.Layout, lp: tuple[int, int]) -> int:
     index = layout.layer(*lp)
@@ -132,10 +193,13 @@ def build(rows: int = ROWS, cols: int = COLS) -> kdb.Layout:
 
     pitch_x = int(round(bitcell.W_CELL / layout.dbu))
     pitch_y = int(round(bitcell.H_CELL / layout.dbu))
+    # The tiled cells sit one wordline-landing-pad band in from x = 0, so the
+    # pad strip — not empty space — holds the array's left boundary.
+    x_off = WL_PAD_BAND
     top.insert(
         kdb.CellInstArray(
             cell.cell_index(),
-            kdb.Trans(0, 0),
+            kdb.Trans(int(round(x_off / layout.dbu)), 0),
             kdb.Vector(pitch_x, 0),  # column step
             kdb.Vector(0, pitch_y),  # row step
             cols,
@@ -153,30 +217,53 @@ def build(rows: int = ROWS, cols: int = COLS) -> kdb.Layout:
     )
     for name, y0, stripe_cx in straps:
         y1 = y0 + M3_STRAP_W
-        _insert_box(layout, top, L_METAL3, 0.0, y0, array_w, y1)
+        _insert_box(layout, top, L_METAL3, x_off, y0, x_off + array_w, y1)
         cy = 0.5 * (y0 + y1)
         for col in range(cols):
-            cx = col * bitcell.W_CELL + stripe_cx
+            cx = x_off + col * bitcell.W_CELL + stripe_cx
             _insert_box(
                 layout, top, L_VIA2,
                 cx - 0.5 * V2_SIZE, cy - 0.5 * V2_SIZE,
                 cx + 0.5 * V2_SIZE, cy + 0.5 * V2_SIZE,
             )
-        _insert_text(layout, top, L_METAL3_LBL, name, 0.5 * array_w, cy)
+        _insert_text(layout, top, L_METAL3_LBL, name, x_off + 0.5 * array_w, cy)
+
+    # -- Wordline landing pads: one Poly2 pad + contact + Metal1 pad per row --
+    #
+    # The Poly2 pad abuts (does not overlap) the row's own wordline stripe at
+    # x = x_off, the same edge-to-edge contract every other connection in this
+    # array already relies on — bitline stripes join cell-to-cell the same way.
+    wl_y = 0.5 * (bitcell.Y_WL_BOT + bitcell.Y_WL_TOP)
+    for row in range(rows):
+        cy = row * bitcell.H_CELL + wl_y
+        _insert_box(
+            layout, top, bitcell.L_POLY2,
+            0.0, cy - 0.5 * WL_PAD_POLY_H, x_off, cy + 0.5 * WL_PAD_POLY_H,
+        )
+        _insert_box(
+            layout, top, bitcell.L_CONTACT,
+            WL_PAD_CO_CX - 0.5 * bitcell.CO_SIZE, cy - 0.5 * bitcell.CO_SIZE,
+            WL_PAD_CO_CX + 0.5 * bitcell.CO_SIZE, cy + 0.5 * bitcell.CO_SIZE,
+        )
+        _insert_box(
+            layout, top, bitcell.L_METAL1,
+            0.0, cy - 0.5 * WL_PAD_M1_H, WL_PAD_M1_W, cy + 0.5 * WL_PAD_M1_H,
+        )
 
     # -- Port labels: one per physical net, on the net's own drawn shape --
     for col in range(cols):
-        x0 = col * bitcell.W_CELL
+        x0 = x_off + col * bitcell.W_CELL
         y = 0.5 * bitcell.H_CELL
         _insert_text(layout, top, bitcell.L_METAL1_LBL, f"BL{col}",
                      x0 + bitcell.X_BL_C, y)
         _insert_text(layout, top, bitcell.L_METAL1_LBL, f"BLB{col}",
                      x0 + bitcell.X_BLB_C, y)
-    wl_y = 0.5 * (bitcell.Y_WL_BOT + bitcell.Y_WL_TOP)
-    wl_x = 0.5 * bitcell.MARGIN_X
+    # WL<row> is labelled on its Metal1 landing pad, not on the Poly2 stripe:
+    # Poly2 is not a routing-type layer, so a Poly2-labelled wordline has no
+    # pin geometry any abstract or router can use (issue #121).
     for row in range(rows):
-        _insert_text(layout, top, bitcell.L_POLY2_LBL, f"WL{row}",
-                     wl_x, row * bitcell.H_CELL + wl_y)
+        _insert_text(layout, top, bitcell.L_METAL1_LBL, f"WL{row}",
+                     0.5 * WL_PAD_M1_W, row * bitcell.H_CELL + wl_y)
 
     return layout
 
@@ -197,12 +284,18 @@ def main() -> None:
     out_path = args.out or os.path.join(
         os.path.dirname(os.path.abspath(__file__)), f"{TOP_CELL}.gds"
     )
-    build(args.rows, args.cols).write(out_path, save_options())
+    layout = build(args.rows, args.cols)
+    layout.write(out_path, save_options())
+    bbox = layout.cell(TOP_CELL).bbox()
+    dbu = layout.dbu
+    width = bbox.width() * dbu
+    height = bbox.height() * dbu
     print(f"wrote {out_path}")
     print(
         f"{args.rows} rows x {args.cols} cols = {args.rows * args.cols} cells, "
-        f"{bitcell.W_CELL * args.cols:.3f} x {bitcell.H_CELL * args.rows:.3f} um "
-        f"({bitcell.W_CELL * args.cols * bitcell.H_CELL * args.rows / 1e6:.6f} mm^2)"
+        f"{width:.3f} x {height:.3f} um ({width * height / 1e6:.6f} mm^2) "
+        f"-- {bitcell.W_CELL * args.cols:.3f} um of tiled cells plus a "
+        f"{WL_PAD_BAND:.3f} um wordline landing-pad band"
     )
 
 

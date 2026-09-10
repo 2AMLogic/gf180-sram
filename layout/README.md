@@ -16,7 +16,7 @@ existed) is gone.
 | | |
 |---|---|
 | Bitcell | `bitcell/sram_bitcell_6t.gds` — 6 transistors, 4.46 x 5.40 um |
-| Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 142.72 x 1382.40 um (0.1973 mm²) |
+| Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 143.15 x 1382.40 um (0.1979 mm²): 142.72 um of tiled cells plus a 0.43 um wordline landing-pad strip at the left edge (issue #121) |
 | DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on all three |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
 | LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior). Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
@@ -82,13 +82,31 @@ The placements are a single `kdb.CellInstArray` (one hierarchical instance
 covering all 8,192 sites), so the committed array GDS is 20 KB, not 8,192
 copies of the cell.
 
-The only array-level geometry is two `Metal3` straps (one `VDD`, one `VSS`)
-that drop a `Via2` onto each column's corresponding `Metal2` stripe — that is
-what makes `VDD`/`VSS` *single* nets across the array instead of 32 isolated
-column rails. Extraction confirms it: the full array extracts to 16,706 nets
-= 256 wordlines + 64 bitlines + 2 supplies + 16,384 storage nodes (every
-cell's well/substrate tie is folded directly into those 2 supply nets — see
-"Known tool gaps" #1).
+There are two pieces of array-level geometry. The first is two `Metal3`
+straps (one `VDD`, one `VSS`) that drop a `Via2` onto each column's
+corresponding `Metal2` stripe — that is what makes `VDD`/`VSS` *single* nets
+across the array instead of 32 isolated column rails. Extraction confirms it:
+the full array extracts to 16,706 nets = 256 wordlines + 64 bitlines + 2
+supplies + 16,384 storage nodes (every cell's well/substrate tie is folded
+directly into those 2 supply nets — see "Known tool gaps" #1).
+
+The second is the **wordline landing-pad strip** (issue #121). Abutment
+leaves each `WL<row>` as bare `Poly2`, which is not a `TYPE ROUTING` layer in
+gf180mcu's tech LEF — so a wordline carrying nothing but `Poly2` has no pin
+geometry a router, an abstract, or a physical row decoder could land on (all
+256 `WL<row>` pins came back `geometry_source: "none"` in the array's first
+LEF abstract, issue #120). The array therefore reserves a 0.43 um strip of
+periphery to the *left* of the tiled cells — where a row decoder would sit —
+and draws, per row, a `Poly2` landing pad abutting that row's wordline
+stripe, one `Poly2`-to-`Metal1` contact on it, and a `Metal1` pad flush with
+the macro's left boundary. `WL<row>` is labelled on that `Metal1` pad rather
+than on the `Poly2` stripe. Every dimension is derived from
+`layout/bitcell/generate.py`'s own DRM-cited contact/enclosure constants
+(`CO_SIZE`, `CO_ENC_POLY`, `CO_ENC_M1`, `M1_SPACE`), the same ones the
+bitcell's own `Poly2` cross-couple landing pads use, so the strip is drawn to
+the identical rule margins as the cell it abuts. It adds no devices and no
+nets — LVS still matches the unchanged
+`design/netlist/sram_256x32_array.spice` port-for-port.
 
 ### Scope: the storage-array core, matching `design/`
 
@@ -170,11 +188,14 @@ captures.
   `sim/pex/README.md` "Freshness" for the full re-run record.
 * **A routed macro.** There is still no periphery, and the LEF abstract that
   now exists (`views/sram_256x32_array.lef`, issue #120) is not a *routable*
-  one: every pin's `PORT` is either absent (the 256 wordlines, labelled on
-  non-routing Poly2) or a synthesized placeholder disconnected from the real
-  drawn metal it sits on (the remaining 66 bitline/supply pins — a
-  klayout-tools gap, klayout-tools#1614). `klt place-and-route` would not
-  accept this LEF today. No Liberty view exists yet either. See
+  one: every pin's `PORT` is a synthesized placeholder disconnected from the
+  real drawn metal it sits on — a klayout-tools gap, klayout-tools#1614.
+  `klt place-and-route` would not accept this LEF today. What *is* fixed as
+  of issue #121 is the design half of that gap: all 322 pins (including the
+  256 wordlines, which used to be labelled on non-routing Poly2 and reported
+  in `unroutable_pins[]`) now have routing-layer metal on their net, so
+  klayout-tools#1614 is the only thing left between this abstract and real
+  drawn `PORT` geometry. No Liberty view exists yet either. See
   `views/README.md`'s "Pin geometry" and "What this does and does not
   prove" for the full breakdown.
 * **Array-level LVS.** Achieved — see "Known tool gaps" #2. `klt extract`
@@ -381,7 +402,7 @@ Expected results, as committed (2026-08-16):
 | `klt extract` (full array) | 49,152 devices, 16,706 nets, 322 pins (~94 s) |
 | `klt lvs` (bitcell vs. rewritten reference) | `status: match`, 0 mismatches |
 | `klt stats` (bitcell) | `bbox_um: (0.0, 0.0) - (4.46, 5.4)`, 38 polygons |
-| `klt stats` (array) | `bbox_um: (0.0, 0.0) - (142.72, 1382.4)` |
+| `klt stats` (array) | `bbox_um: (0.0, 0.0) - (143.15, 1382.4)` |
 
 ## Tool / PDK versions
 
