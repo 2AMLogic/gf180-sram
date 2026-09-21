@@ -4769,8 +4769,18 @@ rm_scope_mktemp_same_command_safe() {
 # this: when the SAME command text contains a `NAME=value` assignment (no
 # embedded whitespace in `value`, optionally single/double-quoted) earlier in
 # the stream, later `$NAME`/`${NAME}` leading a write target is substituted
-# with that value. Threaded via the awk global `varmap`, exactly like `curcwd`
-# above. The assignment scan recognizes every ordinary shell assignment
+# with that value. Since #130 the same substitution covers the DOUBLE-quoted
+# spellings of a leading reference -- "$NAME/...", "$NAME"/..., "$NAME", a
+# quoted cp/tee/>/2> destination -- via the write-target-entry-only
+# strip_wtarget_dq() (see resolve_wtarget() in the program below): the
+# stripped form is only a resolution input, and a token whose quotes survive
+# the strip unbalanced, or whose stripped form does not lead with `$`, or
+# that resolve_var() cannot prove a value for, is emitted RAW so every
+# unresolvable quote shape keeps today's fail-closed verdict. SINGLE-quoted
+# targets are never resolved from inside their quotes (a literal `$`-named
+# filename to the shell). Threaded via the awk global `varmap`, exactly like
+# `curcwd` above. The assignment scan recognizes every ordinary shell
+# assignment
 # position, not just a segment that is exactly one bare `NAME=value`:
 #   NAME=value                       (bare)
 #   export/readonly/declare/typeset/local [-flags] NAME=value [NAME2=value2]
@@ -4854,7 +4864,11 @@ extract_write_targets() {
     # resolve_var()/record_assign() (same-command $VAR resolution, #4881) and
     # the DQ/SQ/AMBIG constants they use now come from the shared
     # _VARRESOLVE_AWK snippet above (#6152) — see its header comment for the
-    # full contract. Unresolvable cases all return tok UNCHANGED, which is
+    # full contract. Since #130, resolve_wtarget() below additionally strips
+    # balanced double quotes from the RESOLUTION INPUT of a quoted write-target
+    # token whose stripped form leads with `$NAME`/`${NAME}` (single quotes
+    # stay literal); an unproven quote shape is emitted RAW, keeping the
+    # verdict it gets today. Unresolvable cases all return tok UNCHANGED, which is
     # exactly the pre-#4881 treatment (literal, cwd-prefixed => still denied
     # when it lands in the main checkout). Fail-closed by construction: this
     # function can only ever REPLACE a token with a value it actually proved,
@@ -5036,12 +5050,103 @@ extract_write_targets() {
         if (loopmap[vname] == "") return tok
         return loopmap[vname]
     }
-    # Single entry point every write-target print site uses: same-command
-    # assignment resolution first (#4881), then the loop-variable binding.
-    # Both return the token UNCHANGED when they cannot prove a value, so an
-    # unresolvable target still reaches the shell layer raw and still fails
-    # closed.
-    function resolve_wtarget(tok) {
+    # Single entry point every write-target print site uses: quoted-token
+    # resolution-input strip first (#130), then same-command assignment
+    # resolution (#4881), then the loop-variable binding. Every step returns
+    # its token UNCHANGED when it cannot prove a value, so an unresolvable
+    # target still reaches the shell layer raw and still fails closed.
+    #
+    # #130 motivation: the deny message at all three
+    # worktree-write-confinement-unresolved-var sites teaches the remedy
+    # "Declare it literally in the SAME command, before the write:
+    # VAR=/literal/path; <write>", but resolve_var() requires its token to
+    # START with "$" -- a write target carrying its quotes verbatim starts
+    # with a quote character, so every double-quoted spelling ("$W/f",
+    # "$W"/f, "$W", quoted cp/tee/>/2> destinations) denied even though the
+    # assigner did exactly what the message said. The strip below drops
+    # DOUBLE-quote characters only (shell-accurately, nesting aware) so a
+    # quoted reference meets resolve_var() in the same unquoted form its
+    # unquoted twin always did, making the recorded remedy true for the
+    # spelling agents actually write. SINGLE quotes are never stripped:
+    # a single-quoted $X/... spelling is a literal-`$` filename to the real
+    # shell, and the quote characters must survive so
+    # mark_expandable_dollars() in the shell layer keeps judging that
+    # interior `$` literal (the literal-vs-expandable distinction
+    # resolve_loop() itself applies, and rows E/E2 of the #130 suite).
+    #
+    # The stripped form is only a RESOLUTION INPUT, never an unconditional
+    # rewrite: when it does not lead with `$`, or resolve_var() cannot
+    # PROVE a substitution on it (no matching assignment, AMBIG poison, a
+    # `$`-leading value), the RAW quoted token is emitted -- every
+    # unprovable shape (a lone opening quote, a quoted ~user/ or /prefix
+    # or mid-`$` form) keeps the verdict it gets today, byte-for-byte. A PROVED
+    # substitution replaces the token with the resolved literal path,
+    # which then flows into the UNCHANGED downstream absolute/relative
+    # classification, sentinel walk, and containment test the unquoted
+    # spelling already feeds (#6172: a resolved path can never grant an
+    # allow beyond writing that literal path outright -- the CONT row of the
+    # #130 suite pins this with a reason-text discriminator: the quoted twin
+    # of WORK=<main-root> still denies via containment).
+    function strip_wtarget_dq(tok,   out, n, i, c, in_s, in_d) {
+        out = ""
+        n = length(tok)
+        in_s = 0
+        in_d = 0
+        for (i = 1; i <= n; i++) {
+            c = substr(tok, i, 1)
+            if (in_s) {
+                # Inside a single-quoted span every character is literal,
+                # including the closing quote and any double-quote data
+                # characters: copy the whole span verbatim and resolve
+                # nothing from inside it, ever.
+                out = out c
+                if (c == SQ) in_s = 0
+                continue
+            }
+            if (c == SQ) {
+                # Single-quote characters are LOAD-BEARING downstream (they
+                # make the real shell treat an interior `$` as literal data)
+                # and the shell layer re-reads them, so copy them verbatim,
+                # never strip. An SQ opened while inside a double-quoted
+                # span is literal data to the real shell too -- still copied
+                # -- but does not open a literal span here; only the closing
+                # DQ ends the enclosing span (handled in the in_d branch).
+                out = out c
+                if (!in_d) in_s = 1
+                continue
+            }
+            if (in_d) {
+                if (c == DQ) { in_d = 0 } else { out = out c }
+                continue
+            }
+            if (c == DQ) {
+                in_d = 1
+                continue
+            }
+            out = out c
+        }
+        # An unterminated double-quote span is unprovable: return the token
+        # UNCHANGED so an unbalanced quote keeps the verdict it gets today
+        # (the same fail-closed-when-unprovable fallback strip_cd_quoting()
+        # and resolve_var() already honor -- the U row of the #130 suite).
+        if (in_d) return tok
+        return out
+    }
+    function resolve_wtarget(tok,   stripped, resolved) {
+        stripped = strip_wtarget_dq(tok)
+        if (stripped != tok && substr(stripped, 1, 1) == "$") {
+            resolved = resolve_var(stripped)
+            if (resolved != stripped) {
+                # PROVED substitution on the quoted spelling. A proved value
+                # is a literal (never `$`-leading -- the unresolved-chain
+                # refusal inside resolve_var()), so the loop-variable binding
+                # passes it through, exactly like the resolution of the
+                # unquoted spelling always did.
+                return resolve_loop(resolved)
+            }
+        }
+        # No proof on the quoted spelling, or the token never carried
+        # double quotes in the first place: the pre-#130 path, byte-for-byte.
         return resolve_loop(resolve_var(tok))
     }
     BEGIN {

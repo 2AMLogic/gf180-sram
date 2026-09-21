@@ -14,8 +14,9 @@
 # loop-variable binding #63/#66, BSD `sed -i ''` script/target
 # disambiguation #49/#77/#79, leading-keyword strip #67/#71, `cd`/redirect
 # same-command var resolution #68/#72, the sim/lib/pdk_env.sh
-# mktemp-scratch exemption #64/#65/#82, and that exemption's klt/KLayout
-# layout cold-start extension #127). `resync-installed.sh`'s
+# mktemp-scratch exemption #64/#65/#82, that exemption's klt/KLayout
+# layout cold-start extension #127, and the quoted-spelling widening of
+# the same-command var resolution to write targets #130). `resync-installed.sh`'s
 # `CANONICAL_GUARD_PRESENT` probe (5 marker greps against
 # .claude/skills/repo/hooks/guard-destructive.sh) never evaluates to 1 for
 # this repo's installed canonical guard version (it is missing the
@@ -43,3 +44,17 @@ hooks/guard-destructive-generic.sh
 # regression shape #81/#82 hit twice and #127 requires tests to catch).
 hooks/tests/test-guard-worktree-unresolved-var-layout-klt.sh
 hooks/tests/test-guard-rm-scope-unresolved-var-layout-klt.sh
+#
+# hooks/tests/test-guard-worktree-unresolved-var-quoted.sh (gf180-sram#130):
+# pinning test for the #130 quoted same-command write-target resolution
+# fix in the guard fork above -- the quoted spellings ("$W/f.log",
+# "$W"/f.log, "$W", cp/tee/2> destinations) of the #4881 resolver the
+# deny message's own recorded remedy teaches, which resolve_var()'s
+# bare-$-prefix gate previously rejected, so the remedy's natural quoted
+# spelling denied even after following it. Same #131-style rationale as
+# the klt pair above: Loom's defaults/ ships no file at this path, so
+# resync itself would never overwrite it, but declaring it here marks it
+# repo-owned for the #7995 installed-file write guard and keeps a future
+# resync that reverts the fork's quoted-resolution hunk turning
+# `test:guards` red rather than silently re-manufacturing the friction.
+hooks/tests/test-guard-worktree-unresolved-var-quoted.sh
