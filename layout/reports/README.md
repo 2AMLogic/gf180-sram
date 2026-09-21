@@ -24,7 +24,7 @@ out and overwrites the files below in place.
 | `extract-bitcell.json` | `klt extract --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds` | 6 devices (4 nfet + 2 pfet), 7 nets |
 | `lvs-bitcell.json` | `klt lvs` vs. `design/netlist/bitcell_6t.spice` (via `layout/lvs_reference.py`) | `status: match`, 0 mismatches, 6/6 devices, 7/7 nets |
 | `extract-array.json` | `klt extract --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins -- `devices[]`/`nets[]` omitted from the committed file (~18 MB unabridged; every other field, including counts and provenance, is kept in full) |
-| `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` | `status: mismatch` -- **expected**, see "Known gap: array-level LVS" below |
+| `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` (`options.flatten_reference: true`, see below) | `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins matched -- the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known gap: array-level LVS" below) |
 | `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
 | `erc-array-supply.json` | `klt erc layout/sram_256x32/sram_256x32_array.gds layout/sram_256x32/erc-supply-spec.json --format json` | `erc_finding_count: 0` -- declared supplies VDD/VSS each resolve to exactly one electrical island; `status: not_checked` is the antenna half's rollup, not the supply verdict (see "Item 11" below) |
 
@@ -148,29 +148,59 @@ filed as
 extracting the hierarchical 256x32 array GDS (one bitcell cell + one
 `CellInstArray`) flattens to 49,152 top-level devices, while the
 hierarchical reference netlist (`design/netlist/sram_256x32_array.spice`,
-one `.subckt bitcell_6t` + 8,192 calls) stays hierarchical. `klt lvs`
-cannot pair the two circuit tops at all:
+one `.subckt bitcell_6t` + 8,192 calls) stays hierarchical. Until the
+compare side learned to handle that asymmetry, `klt lvs` could not pair
+the two circuit tops at all -- an earlier revision of this section quoted
+a `"status": "mismatch"` result whose `circuit could not be matched to a
+counterpart` topology mismatches were described as the expected outcome.
+
+That compare-side failure is resolved. `klt lvs` grew a
+`flatten_reference` option (klayout-tools#1085, **closed 2026-08-17**
+upstream), and #112 adopted it here: `generate.sh` regenerates this report
+with `options.flatten_reference: true`, which flattens the *reference*'s
+hierarchy in-process -- collapsing every subcircuit-call instance in place
+-- so the already-flat extracted layout side gets a directly comparable
+counterpart. The committed report now reads:
 
 ```json
-"status": "mismatch",
+"status": "match",
+"mismatch_count": 1,
 "mismatches": [
-  { "category": "topology", "description": "circuit could not be matched to a counterpart", "side": "both" },
-  { "category": "topology", "description": "circuit could not be matched to a counterpart", "side": "reference" }
-]
+  {
+    "category": "topology.flattened",
+    "severity": "warning",
+    "description": "options.flatten_reference flattened the reference netlist before comparing: 2 circuit(s) were collapsed into 1 top-level circuit(s), substituting every subcircuit-call instance in place -- this compare verified topology only after removing the original hierarchy boundaries on this side (see docs/cli/lvs.md, \"topology.flattened\")",
+    "side": "reference"
+  }
+],
+"counts": {
+  "nets": { "layout": 16706, "reference": 16706, "matched": 16706 },
+  "devices": { "layout": 49152, "reference": 49152, "matched": 49152 },
+  "pins": { "layout": 322, "reference": 0, "matched": 322 }
+}
 ```
 
-This is the same failure `layout/README.md` already documented from
-`verify.sh`'s own bitcell-only checks; `lvs-array.json` is fresh,
-reproducible evidence of it at the array level specifically, run as part of
-this issue. Closing this gap needs either hierarchy-preserving extraction or
-a reference-flattening path upstream in `klt` -- tracked by
-klayout-tools#1085, not by this repo. Array-level connectivity is instead
-argued structurally in `layout/README.md` ("The array, and why it needs
-almost no array-level routing": one continuous wordline per row, one
-continuous bitline pair per column, two `Metal3` supply straps) and spot-
-checked by the extracted net/device counts matching the expected
-`6 x 8192 = 49152` devices and `256 + 64 + 2 + 16384 = 16706` nets exactly --
-not by a passing `klt lvs` run.
+with `options.flatten_reference: true` echoed in the report's `options`
+block, and 49,152/49,152 devices, 16,706/16,706 nets, and 322/322 pins
+matched. The single `mismatches[]` entry is the expected
+`severity: warning` `topology.flattened` **disclosure of the flatten
+itself**, not a defect -- `mismatch_count` counts every `mismatches[]`
+entry, warnings included, which is why a matched compare still carries a
+`1`.
+
+The *known gap* that remains is extraction-side: `klt extract` still only
+ever produces a flat layout-side netlist, and the hierarchy reconciliation
+happens inside `klt lvs`'s compare, not in extraction. That limitation is
+still real and is what makes the reference-side flatten necessary at all,
+but it no longer blocks a passing array-level compare: array/macro-level
+LVS is achievable today via `options.flatten_reference`, exactly as
+`layout/README.md` "Known tool gaps" #2 states for these same reports
+(its structural array-connectivity narrative now backs a *passing*
+`klt lvs` run instead of standing in for the missing one).
+
+Not resolved here: item 4's LVS provenance/freshness for the array report
+(the `stale_evidence` grading reason, issue #128) is a separate, still-open
+gap and stays tracked there.
 
 ## Freshness note: snapshot, not append-only
 
