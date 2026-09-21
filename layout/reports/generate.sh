@@ -12,6 +12,14 @@
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
 #
+# Steps 3-4 (klt lvs, T1 item 4) additionally need a klt that records LVS
+# `provenance.input.content_hash` -- klayout-tools#1969-era or later; the
+# released 0.5.0 predates it and would mint LVS reports whose input pin is
+# `null`, silently regressing the signoff manifest's item-4 citation back
+# to `stale_evidence` (issue #128 minted the committed reports with a
+# post-#1969 checkout klt). Re-minting the LVS pair alone, ERC-style, is:
+# bump PATH to a post-#1969 klt and re-run the step 3-4 blocks below.
+#
 # Step 5 (klt erc, issue #124 / T1 item 11) additionally needs a klt whose
 # erc envelope carries the #1968 status+provenance block -- klayout-tools at
 # d5893304 or later (this report was minted with klt 0.5.0+gd5893304afc2);

@@ -1,0 +1,1488 @@
+{
+  "schema_version": 3,
+  "status": "pass",
+  "corner_count": 27,
+  "passed": 27,
+  "failed": 0,
+  "errored": 0,
+  "metrics": {
+    "sim__corner__count": 27,
+    "sim__corner__passed_count": 27,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0
+  },
+  "mint": {
+    "minted_by": "sim/lib/mint_sim_envelope.py",
+    "disclosure": "Minted from the committed append-only corner records below, NOT produced by a live `klt sim` ngspice sweep. This block's three binding methodologies are not expressible as ngspice .meas cards over a bare circuit body (read/hold SNM is a butterfly-square fit over two independently swept VTC curves, sim/lib/snm_extract.py --pair; write margin is a write-trip bisection inside the testbench's own .control block), so the ratified sweep runner sim/lib/run_corner_sweep.sh cannot be hosted by the verb. Every value below is transcribed verbatim from the named records; re-run those methodologies under a future `klt sim` able to host them and retire this mint.",
+    "verdict_rule": "spec/sram.md '### Signoff definition' -- the same rule sim/lib/render_signoff_table.py applies: read SNM, hold SNM, and write margin PASS iff strictly > 0 V at all 27 corners; read/write access time are recorded only, never bounded.",
+    "recorded_from": [
+      {
+        "file": "sim/read-snm/records/20260817-011523-4448966.md",
+        "sha256": "10037c0c670f765d16ee2050b2af297908639c3e2027fe0ea719f688f41196e8"
+      },
+      {
+        "file": "sim/hold-snm/records/20260817-011558-4448966.md",
+        "sha256": "562637bff10fa37e8043ccadc74b66ec4bf7ac07b5eabd7dfe75c26db659bb3f"
+      },
+      {
+        "file": "sim/write-margin/records/20260817-105029-ce56f59.md",
+        "sha256": "6745a77ee2438863ca8c72ec99da1ff5fbbdda9bce61eec545373d7b269d1b28"
+      },
+      {
+        "file": "sim/access-time/records/20260817-011948-4448966.md",
+        "sha256": "b26ba55f2154fb3f96084a95bc646111fc9f406aefd1ffb9b8e20909e7803964"
+      },
+      {
+        "file": "sim/access-time/records/20260817-012005-4448966.md",
+        "sha256": "0d4de0d52ace75cebb1fbf0bb3eb7f8d649a49021a8c14d416260a6e4fc655b5"
+      }
+    ]
+  },
+  "provenance": {
+    "input": {
+      "content_hash": "sha256:cd76812bf96c97ab6151a0dbf6a7d344fb0aeb2cb2c6ff3e356075945da8d597",
+      "role": "corner-records"
+    },
+    "note": "no klt_version here on purpose: no klt invocation produced this envelope (see the mint block); the input pin is the sha256 of the five record files' bytes concatenated in mint.recorded_from order"
+  },
+  "measurements": [
+    {
+      "name": "read_snm_v",
+      "unit": "V",
+      "limits": {
+        "min": 0.0
+      },
+      "worst_case": {
+        "corner_id": "ff_125c_2.97v",
+        "value": 0.214599,
+        "margin": 0.214599
+      },
+      "status": "pass"
+    },
+    {
+      "name": "hold_snm_v",
+      "unit": "V",
+      "limits": {
+        "min": 0.0
+      },
+      "worst_case": {
+        "corner_id": "ff_125c_2.97v",
+        "value": 0.930461,
+        "margin": 0.930461
+      },
+      "status": "pass"
+    },
+    {
+      "name": "write_trip_voltage_v",
+      "unit": "V",
+      "limits": {
+        "min": 0.0
+      },
+      "worst_case": {
+        "corner_id": "ff_125c_2.97v",
+        "value": 1.64053,
+        "margin": 1.64053
+      },
+      "status": "pass"
+    },
+    {
+      "name": "read_access_time_s",
+      "unit": "s",
+      "status": "reported",
+      "slowest_case": {
+        "corner_id": "ss_-40c_2.97v",
+        "value": 3.57176e-10
+      },
+      "note": "spec/sram.md requires this row be recorded, not bounded -- no pass/fail verdict applies; the slowest corner is recorded as the binding case"
+    },
+    {
+      "name": "write_access_time_s",
+      "unit": "s",
+      "status": "reported",
+      "slowest_case": {
+        "corner_id": "ss_125c_2.97v",
+        "value": 8.49307e-11
+      },
+      "note": "spec/sram.md requires this row be recorded, not bounded -- no pass/fail verdict applies; the slowest corner is recorded as the binding case"
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "ff_-40c_2.97v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.346745,
+          "status": "pass",
+          "margin": 0.346745
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 0.999014,
+          "status": "pass",
+          "margin": 0.999014
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.69546,
+          "status": "pass",
+          "margin": 1.69546
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.40945e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 4.7116e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_-40c_3.30v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.348079,
+          "status": "pass",
+          "margin": 0.348079
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.075028,
+          "status": "pass",
+          "margin": 1.075028
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.8915,
+          "status": "pass",
+          "margin": 1.8915
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.17907e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 4.46049e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_-40c_3.63v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.378868,
+          "status": "pass",
+          "margin": 0.378868
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.150509,
+          "status": "pass",
+          "margin": 1.150509
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.08796,
+          "status": "pass",
+          "margin": 2.08796
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.03569e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 4.24594e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_25c_2.97v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.279259,
+          "status": "pass",
+          "margin": 0.279259
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 0.972353,
+          "status": "pass",
+          "margin": 0.972353
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.67298,
+          "status": "pass",
+          "margin": 1.67298
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.47853e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.05193e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_25c_3.30v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.29104,
+          "status": "pass",
+          "margin": 0.29104
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.048587,
+          "status": "pass",
+          "margin": 1.048587
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.87075,
+          "status": "pass",
+          "margin": 1.87075
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.26101e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 4.78495e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_25c_3.63v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.322552,
+          "status": "pass",
+          "margin": 0.322552
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.124406,
+          "status": "pass",
+          "margin": 1.124406
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.06891,
+          "status": "pass",
+          "margin": 2.06891
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.11953e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 4.56126e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_125c_2.97v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.214599,
+          "status": "pass",
+          "margin": 0.214599
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 0.930461,
+          "status": "pass",
+          "margin": 0.930461
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.64053,
+          "status": "pass",
+          "margin": 1.64053
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.5703e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.72457e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_125c_3.30v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.237829,
+          "status": "pass",
+          "margin": 0.237829
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.008552,
+          "status": "pass",
+          "margin": 1.008552
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.83812,
+          "status": "pass",
+          "margin": 1.83812
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.37607e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.39284e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ff_125c_3.63v",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.265005,
+          "status": "pass",
+          "margin": 0.265005
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.087062,
+          "status": "pass",
+          "margin": 1.087062
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.03611,
+          "status": "pass",
+          "margin": 2.03611
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.23889e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.15212e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_-40c_2.97v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.443117,
+          "status": "pass",
+          "margin": 0.443117
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.055088,
+          "status": "pass",
+          "margin": 1.055088
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.73824,
+          "status": "pass",
+          "margin": 1.73824
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.08985e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.57706e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_-40c_3.30v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.450044,
+          "status": "pass",
+          "margin": 0.450044
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.134683,
+          "status": "pass",
+          "margin": 1.134683
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.93581,
+          "status": "pass",
+          "margin": 1.93581
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.61165e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.21982e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_-40c_3.63v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.45802,
+          "status": "pass",
+          "margin": 0.45802
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.213568,
+          "status": "pass",
+          "margin": 1.213568
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.13271,
+          "status": "pass",
+          "margin": 2.13271
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.34291e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 4.94228e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_25c_2.97v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.377941,
+          "status": "pass",
+          "margin": 0.377941
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.031028,
+          "status": "pass",
+          "margin": 1.031028
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.71105,
+          "status": "pass",
+          "margin": 1.71105
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.12295e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.07379e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_25c_3.30v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.381267,
+          "status": "pass",
+          "margin": 0.381267
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.110807,
+          "status": "pass",
+          "margin": 1.110807
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.91003,
+          "status": "pass",
+          "margin": 1.91003
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.70142e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.67636e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_25c_3.63v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.385058,
+          "status": "pass",
+          "margin": 0.385058
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.189934,
+          "status": "pass",
+          "margin": 1.189934
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.10923,
+          "status": "pass",
+          "margin": 2.10923
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.44853e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.35678e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_125c_2.97v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.295443,
+          "status": "pass",
+          "margin": 0.295443
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 0.993408,
+          "status": "pass",
+          "margin": 0.993408
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.67751,
+          "status": "pass",
+          "margin": 1.67751
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.18195e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.93536e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_125c_3.30v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.296711,
+          "status": "pass",
+          "margin": 0.296711
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.074566,
+          "status": "pass",
+          "margin": 1.074566
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.8774,
+          "status": "pass",
+          "margin": 1.8774
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.82935e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.47822e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "tt_125c_3.63v",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.318427,
+          "status": "pass",
+          "margin": 0.318427
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.155746,
+          "status": "pass",
+          "margin": 1.155746
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.07777,
+          "status": "pass",
+          "margin": 2.07777
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.59475e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.12799e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_-40c_2.97v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.540536,
+          "status": "pass",
+          "margin": 0.540536
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.105024,
+          "status": "pass",
+          "margin": 1.105024
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.76978,
+          "status": "pass",
+          "margin": 1.76978
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 3.57176e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.71457e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_-40c_3.30v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.55084,
+          "status": "pass",
+          "margin": 0.55084
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.187215,
+          "status": "pass",
+          "margin": 1.187215
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.97247,
+          "status": "pass",
+          "margin": 1.97247
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.40389e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.25045e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_-40c_3.63v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.56375,
+          "status": "pass",
+          "margin": 0.56375
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.268808,
+          "status": "pass",
+          "margin": 1.268808
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.17259,
+          "status": "pass",
+          "margin": 2.17259
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.85324e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 5.88804e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_25c_2.97v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.475538,
+          "status": "pass",
+          "margin": 0.475538
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.082379,
+          "status": "pass",
+          "margin": 1.082379
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.74241,
+          "status": "pass",
+          "margin": 1.74241
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 3.35812e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 7.36367e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_25c_3.30v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.483481,
+          "status": "pass",
+          "margin": 0.483481
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.165266,
+          "status": "pass",
+          "margin": 1.165266
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.94366,
+          "status": "pass",
+          "margin": 1.94366
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.45853e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.83046e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_25c_3.63v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": 25.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.493503,
+          "status": "pass",
+          "margin": 0.493503
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.247287,
+          "status": "pass",
+          "margin": 1.247287
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.14423,
+          "status": "pass",
+          "margin": 2.14423
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 1.97169e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 6.42155e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_125c_2.97v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 2.97
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.394239,
+          "status": "pass",
+          "margin": 0.394239
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.048438,
+          "status": "pass",
+          "margin": 1.048438
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.70634,
+          "status": "pass",
+          "margin": 1.70634
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 3.2326e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 8.49307e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_125c_3.30v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 3.3
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.40076,
+          "status": "pass",
+          "margin": 0.40076
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.132542,
+          "status": "pass",
+          "margin": 1.132542
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 1.90822,
+          "status": "pass",
+          "margin": 1.90822
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.55254e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 7.8579e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    },
+    {
+      "corner_id": "ss_125c_3.63v",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 3.63
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "measurements": [
+        {
+          "name": "read_snm_v",
+          "unit": "V",
+          "value": 0.40862,
+          "status": "pass",
+          "margin": 0.40862
+        },
+        {
+          "name": "hold_snm_v",
+          "unit": "V",
+          "value": 1.216449,
+          "status": "pass",
+          "margin": 1.216449
+        },
+        {
+          "name": "write_trip_voltage_v",
+          "unit": "V",
+          "value": 2.10967,
+          "status": "pass",
+          "margin": 2.10967
+        },
+        {
+          "name": "read_access_time_s",
+          "unit": "s",
+          "value": 2.13463e-10,
+          "status": "reported"
+        },
+        {
+          "name": "write_access_time_s",
+          "unit": "s",
+          "value": 7.37515e-11,
+          "status": "reported"
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      }
+    }
+  ]
+}

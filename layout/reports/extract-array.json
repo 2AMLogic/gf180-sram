@@ -1,10 +1,10 @@
 {
   "schema_version": 3,
-  "file": "layout/sram_256x32/sram_256x32_array.gds",
+  "file": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-128/layout/sram_256x32/sram_256x32_array.gds",
   "deck": "gf180mcu",
   "top": "sram_256x32_array",
   "dbu_um": 0.001,
-  "netlist_path": "/tmp/tmp.Oa30Qtj1XC/array.spice",
+  "netlist_path": "/tmp/tmp.iYEgIo7yFv/array.spice",
   "netlist_sha256": "aa3b06c33e7c872326fa25b428a475e9467d1c4b70ca398dffb5fb432709bfd5",
   "status": "extracted",
   "device_count": 49152,
@@ -38,13 +38,13 @@
   "matched_device_groups": [],
   "pdk": null,
   "provenance": {
-    "klt_version": "0.4.0",
-    "klayout_version": "0.30.12",
+    "klt_version": "0.5.0",
+    "klayout_version": "0.30.10",
     "pdk": null,
     "deck": {
       "name": "gf180mcu",
-      "content_hash": "sha256:79e71a1e7d84be3cfc82e4c70afbdf7b743ac1f361fb8e981f57831014d2e8b0",
-      "released": true
+      "content_hash": "sha256:95c2eb9148b29ded02182aeca4222287ff57f813691d5e2f9f8d7a675f6cb637",
+      "released": false
     },
     "input": {
       "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
@@ -52,5 +52,10 @@
   },
   "parasitics": null,
   "spef_path": null,
+  "metrics": {
+    "extract__device__count": 49152,
+    "extract__net__count": 16706,
+    "extract__pin__count": 322
+  },
   "_note": "devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh"
 }

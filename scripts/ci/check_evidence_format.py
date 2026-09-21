@@ -33,6 +33,17 @@ exists today:
      is byte-identical to what `measurements/generate_report.py` renders
      today, the same freshness enforcement as check 4 above, applied to the
      report that depends on both the corner records and the MC/yield records.
+   6. `sim/signoff-sim-envelope.json` -- the minted `klt sim`-shaped evidence
+      envelope for T1 item 5 (issue #128), transcribed by
+      `sim/lib/mint_sim_envelope.py` from the same five corner records
+      check 4 rolls up and pinned by the signoff manifest's item-5
+      content hash -- is byte-identical to what that minter renders today,
+      the same freshness enforcement as checks 4/5 above. A new
+      corner-sweep record that supersedes one of the envelope's five
+      sources changes the envelope's `provenance.input.content_hash` with
+      it, so this check turns a stale item-5 citation into a CI failure
+      naming the regeneration command rather than silently pinning
+      transcribed values that no longer match the committed records.
 
 As the harness and evidence-record grammar land (#21, #24), this script is
 the place to grow real per-record field validation -- it does not invent
@@ -99,6 +110,12 @@ SIGNOFF_RENDERER = "sim/lib/render_signoff_table.py"
 # (see check 5 above).
 CHARACTERIZATION_REPORT = "measurements/characterization-report.md"
 CHARACTERIZATION_RENDERER = "measurements/generate_report.py"
+
+# The minted klt-sim-shaped evidence envelope for T1 item 5 and the script
+# that mints it from the same five corner records sim/signoff-summary.md
+# rolls up (see check 6 above, issue #128).
+SIM_ENVELOPE = "sim/signoff-sim-envelope.json"
+SIM_ENVELOPE_MINTER = "sim/lib/mint_sim_envelope.py"
 
 
 def tracked_files() -> list[str]:
@@ -248,6 +265,41 @@ def check_characterization_report_fresh(tracked: set[str], errors: list[str]) ->
         )
 
 
+def check_sim_envelope_fresh(tracked: set[str], errors: list[str]) -> None:
+    """Assert sim/signoff-sim-envelope.json still matches its minter's
+    output (see check 6 in the module docstring)."""
+    if SIM_ENVELOPE not in tracked or SIM_ENVELOPE_MINTER not in tracked:
+        # Neither file exists yet in this checkout -- nothing to derive from.
+        return
+
+    try:
+        rendered = subprocess.run(
+            [sys.executable, str(REPO_ROOT / SIM_ENVELOPE_MINTER), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    except subprocess.CalledProcessError as exc:
+        errors.append(
+            f"{SIM_ENVELOPE_MINTER} failed (exit {exc.returncode}); it must "
+            f"be able to re-derive {SIM_ENVELOPE} from the committed records "
+            f"under sim/*/records/. stderr:\n{exc.stderr.strip()}"
+        )
+        return
+
+    committed = (REPO_ROOT / SIM_ENVELOPE).read_text(encoding="utf-8")
+    if committed != rendered:
+        errors.append(
+            f"{SIM_ENVELOPE} is stale: it does not match what "
+            f"{SIM_ENVELOPE_MINTER} mints from the records currently under "
+            f"sim/*/records/ (a newer record probably superseded one of its "
+            f"sources, which changes its provenance.input.content_hash and "
+            f"with it the signoff manifest's item-5 pin). Regenerate and "
+            f"commit it, then re-run ./signoff/regenerate.sh:\n"
+            f"      python3 {SIM_ENVELOPE_MINTER} > {SIM_ENVELOPE}"
+        )
+
+
 def main() -> int:
     tracked = set(tracked_files())
     errors: list[str] = []
@@ -257,6 +309,7 @@ def main() -> int:
     check_markdown_links(tracked, errors)
     check_signoff_summary_fresh(tracked, errors)
     check_characterization_report_fresh(tracked, errors)
+    check_sim_envelope_fresh(tracked, errors)
 
     if errors:
         print("evidence-format check FAILED:\n", file=sys.stderr)
@@ -270,7 +323,8 @@ def main() -> int:
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
         "raw artifacts, no broken relative doc links, "
         f"{SIGNOFF_SUMMARY} in sync with {SIGNOFF_RENDERER}, "
-        f"{CHARACTERIZATION_REPORT} in sync with {CHARACTERIZATION_RENDERER}."
+        f"{CHARACTERIZATION_REPORT} in sync with {CHARACTERIZATION_RENDERER}, "
+        f"{SIM_ENVELOPE} in sync with {SIM_ENVELOPE_MINTER}."
     )
     return 0
 
