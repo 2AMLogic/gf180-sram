@@ -1,20 +1,21 @@
-# layout/reports -- DRC and LVS signoff evidence (issue #23, T1 items 3/4)
+# layout/reports -- DRC, LVS, and ERC supply signoff evidence (issues #23, #124)
 
 Machine-readable `klt drc`/`klt lvs`/`klt extract` reports for the layout
 committed in `layout/` (issue #22), checked against the schematic sources
-committed in `design/` (issue #21). `layout/README.md` already quoted these
-numbers in prose; this directory is the committed, provenance-carrying
-artifact those numbers cite, per issue #23's acceptance criteria ("All
-three reports committed under `layout/` ... each carrying provenance
-(klt version, deck/PDK content hash, design revision) sufficient to detect
-staleness").
+committed in `design/` (issue #21), plus the `klt erc` supply read that
+klayout-tools' T1 item 11 grades (issue #124). `layout/README.md` already
+quoted these numbers in prose; this directory is the committed,
+provenance-carrying artifact those numbers cite, per issue #23's
+acceptance criteria ("All three reports committed under `layout/` ... each
+carrying provenance (klt version, deck/PDK content hash, design revision)
+sufficient to detect staleness").
 
 Regenerate everything here with `./layout/reports/generate.sh` (from the
-repo root). It re-runs `klt drc`/`klt extract`/`klt lvs` against whatever
-`layout/*.gds` and `design/netlist/*.spice` are currently checked out and
-overwrites the files below in place.
+repo root). It re-runs `klt drc`/`klt extract`/`klt lvs`/`klt erc` against
+whatever `layout/*.gds` and `design/netlist/*.spice` are currently checked
+out and overwrites the files below in place.
 
-## Results (as of `db3fa5c`, 2026-08-21)
+## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124)
 
 | Report | Command | Result |
 |---|---|---|
@@ -25,6 +26,7 @@ overwrites the files below in place.
 | `extract-array.json` | `klt extract --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins -- `devices[]`/`nets[]` omitted from the committed file (~18 MB unabridged; every other field, including counts and provenance, is kept in full) |
 | `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` | `status: mismatch` -- **expected**, see "Known gap: array-level LVS" below |
 | `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
+| `erc-array-supply.json` | `klt erc layout/sram_256x32/sram_256x32_array.gds layout/sram_256x32/erc-supply-spec.json --format json` | `erc_finding_count: 0` -- declared supplies VDD/VSS each resolve to exactly one electrical island; `status: not_checked` is the antenna half's rollup, not the supply verdict (see "Item 11" below) |
 
 `drc-foundry-bitcell.json` is generated and maintained separately from the
 five reports above -- it checks the *foundry's* macro, not this repo's own
@@ -70,6 +72,73 @@ mismatches, against the actual schematic-derived reference netlist (with
 `layout/lvs_reference.py`'s bulk-terminal rewrite applied -- see
 `layout/README.md` "Known tool gaps" #1 for why that rewrite exists and why
 it is currently a no-op).
+
+## Item 11 (power delivery, structural): the array supply read
+
+`erc-array-supply.json` is the machine-readable artifact klayout-tools'
+T1 item 11 ("Power delivery (structural)", added 2026-09-17,
+klayout-tools#2025) grades for this block: a `klt erc` supply-spec run
+against the full array GDS, produced by `generate.sh` step 5 from the
+committed spec `layout/sram_256x32/erc-supply-spec.json` (whose inline
+`_comment` block justifies every stackup entry, via layer, label layer, and
+deliberate omission from three verified sources: the block's own GDS, the
+PDK's own `gf180mcu.lyp` at the pinned open_pdks revision, and klt's
+curated gf180mcu deck layer table).
+
+This block is ratified `analog` (`spec/block-kind-decision.md`), so item
+11's *Analog* column applies: the `klt erc` supply evidence, plus item 4's
+own LVS report having actually carried the supply nets in its compare.
+Both halves are committed here:
+
+- the ERC report itself: `erc_finding_count: 0` -- zero
+  `erc.unconnected_net` and zero `erc.supply_short` name VDD or VSS,
+  which is exactly "each declared supply resolves to one electrical
+  island" (the rule fires on **zero** matches, and on **more than one**, a
+  split rail -- so zero findings is a positive one-island verdict, not an
+  absence; the two `Metal3` straps are the array feature that makes each
+  supply one island, and a run without them would show 32 per-column
+  islands).
+- `lvs-array.json`: `net_correspondence` pairs layout `VDD` -> reference
+  `VDD` and layout `VSS` -> reference `VSS`, both `pin: true` -- a SPICE
+  reference carries the supplies by construction, which is item 11's own
+  stated satisfaction for the analog column.
+
+What the other report fields do and do not mean:
+
+- `status: "not_checked"` is **not** a supply verdict and **not** a fail:
+  klt's status rollup (#2109/#2115) reports the antenna half, and klt has
+  no transcribed gf180mcu antenna-limit table, so every antenna level
+  reads `unchecked` and the rollup refuses to read `clean`. Item 11's pass
+  conditions are the ERC finding rules, not the overall status -- and an
+  antenna or floating-gate finding, were one to appear, is a real defect
+  that does not block item 11 (klayout-tools#1994).
+- `erc.missing_tie` is **not computed** by this run: the spec deliberately
+  omits `ties[]`, because declaring one on a real routed design collapses
+  the layout into one electrical island and reports a *false*
+  `erc.supply_short` (klayout-tools#2169, reproduced four ways as
+  gf180-drone-fc FRICTION F-034). Per `klt erc`'s own contract an omitted
+  `ties[]` means the rule is never computed -- the committed spec and this
+  section state that explicitly: it is an absence of evidence, not
+  evidence of absence. The well-tie evidence that stands in for it:
+  (1) `lvs-array.json`'s device-aware `match` with the supplies paired in
+  `net_correspondence` above; (2) `extract-array.json`'s 16,706 extracted
+  nets resolving the supplies to exactly one net each; (3) the bitcell's
+  drawn taps (`Pplus` substrate strip, `Nplus`-on-`Nwell` strip,
+  `layout/bitcell/generate.py`), DRC-clean in `drc-bitcell.json` /
+  `drc-array.json`.
+- The supply check demonstrably computes on this layout: declaring a net
+  with no label anywhere in the GDS (negative control, `VDX`) fires
+  `erc.unconnected_net` on the same spec/run shape -- the committed
+  zero-findings result is a passed check, not a skipped one.
+- `provenance.input.content_hash` matches the committed GDS
+  (`sha256:c566b015...`, the same hash `drc-array.json` and
+  `extract-array.json` grade), and `provenance.spec.content_hash` pins the
+  committed spec. The report was minted with klt `0.5.0+gd5893304afc2`
+  (klayout 0.30.12); `generate.sh`'s header documents the minimum tool
+  requirement (a klt whose erc envelope carries the #1968
+  status+provenance block -- released 0.5.0 predates it) and the ~26-minute
+  runtime this 16,640-gate array costs `klt erc`.
+
 
 ## Known gap: array-level LVS (`lvs-array.json`)
 

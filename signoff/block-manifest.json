@@ -21,6 +21,10 @@
     "8": {
       "file": "measurements/characterization.signoff.json",
       "content_hash": "sha256:232b3110c55e13bb76eeb21e409761e691dac0056a8f34517ab23d3172c954c9"
+    },
+    "11": {
+      "file": "layout/reports/erc-array-supply.json",
+      "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
     }
   }
 }

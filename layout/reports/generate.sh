@@ -11,6 +11,14 @@
 #
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
+#
+# Step 5 (klt erc, issue #124 / T1 item 11) additionally needs a klt whose
+# erc envelope carries the #1968 status+provenance block -- klayout-tools at
+# d5893304 or later (this report was minted with klt 0.5.0+gd5893304afc2);
+# the released 0.5.0 predates it and would omit provenance.input.
+# content_hash, the freshness pin the report exists to carry. It is also
+# slow on this design (~26 min on the fleet host): klt erc walks every
+# gate net x stackup level over the full array (16,640 gate nets).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -88,5 +96,60 @@ json.dump(d, open('$OUT/lvs-array.json', 'w'), indent=2)
 open('$OUT/lvs-array.json', 'a').write('\n')
 print('status:', d['status'], '| mismatches:', d['mismatch_count'])
 "
+
+hr "5. ERC: array supply read vs erc-supply-spec.json (klt erc, T1 item 11, ~26 min)"
+# T1 item 11 (power delivery, structural), issue #124. The declared supplies
+# (VDD/VSS) must each resolve to exactly ONE electrical island:
+# erc_finding_count counts erc.unconnected_net/erc.supply_short findings
+# naming them -- zero is the pass condition, not the report's top-level
+# status (which reads "not_checked" because klt has no transcribed gf180mcu
+# antenna-limit table; the antenna half of the report is informational).
+ERC_SPEC=layout/sram_256x32/erc-supply-spec.json
+klt erc "$ARRAY_GDS" "$ERC_SPEC" --format json > "$WORK/erc-array-full.json"
+# The full report is ~29.7 MB (16,640 gate nets x 4 stackup levels in
+# gates[], plus 66,560 coverage-row entries) -- the same bulk-omission
+# treatment extract-array.json applies to devices[]/nets[]. Every field the
+# item 11 supply read grades (status, erc_findings, erc_finding_count,
+# provenance) is kept in full.
+ERC_WORK="$WORK" ERC_OUT="$OUT" python3 - <<'PYEOF'
+import json, os
+
+d = json.load(open(os.path.join(os.environ['ERC_WORK'], 'erc-array-full.json')))
+gate_count = d['gate_count']
+verdicts = sorted({g['antenna_verdict'] for g in d['gates']})
+cov = d['coverage']
+n_checked = len(cov.get('checked', []))
+n_skipped = len(cov.get('skipped', []))
+n_inapplicable = len(cov.get('inapplicable', []))
+skip_reasons = sorted({e.get('reason') for e in cov.get('skipped', [])})
+inapp_reasons = sorted({e.get('reason') for e in cov.get('inapplicable', [])})
+for key in ('checked', 'skipped', 'inapplicable'):
+    n = {'checked': n_checked, 'skipped': n_skipped, 'inapplicable': n_inapplicable}[key]
+    cov[key] = ['<%d entries omitted as bulk -- see _note>' % n]
+d.pop('gates', None)
+d['_note'] = (
+    'gates[] and the bulk of coverage row arrays are omitted from this committed '
+    'report, exactly as extract-array.json omits devices[]/nets[] (~18 MB): gates[] '
+    'is %d gate nets x 4 stackup levels (~29.7 MB unabridged at this array size), '
+    'every antenna_verdict reading "%s"; coverage.checked/skipped/inapplicable '
+    'collapsed the same way (%d checked, %d skipped all reason %s, %d inapplicable '
+    'all reason %s) -- coverage\'s scalar summary (known, nothing_checked, '
+    'nothing_checked_reasons) is kept. Every field the T1 item 11 supply read '
+    'grades -- status, erc_findings, erc_finding_count, and provenance (input '
+    'content_hash matching the committed GDS; spec content_hash) -- is kept in '
+    'full. Full output reproducible via layout/reports/generate.sh step 5.'
+) % (gate_count, '", "'.join(verdicts), n_checked, n_skipped,
+     '/'.join(skip_reasons), n_inapplicable, '/'.join(inapp_reasons))
+ordered = {k: d[k] for k in ['schema_version', 'status', 'file', 'spec', 'pdk',
+                             'gate_role', 'gate_count', 'erc_finding_count',
+                             'erc_findings', 'coverage', 'provenance', '_note']
+           if k in d}
+out_path = os.path.join(os.environ['ERC_OUT'], 'erc-array-supply.json')
+with open(out_path, 'w') as f:
+    json.dump(ordered, f, indent=2)
+    f.write('\n')
+print('status:', d['status'], '| gates:', d['gate_count'],
+      '| erc_findings:', d['erc_finding_count'])
+PYEOF
 
 hr "done -- reports written under $OUT/"
