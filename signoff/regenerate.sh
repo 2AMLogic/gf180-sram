@@ -13,8 +13,11 @@
 # of the same version string are NOT the same code -- observed live for
 # 0.5.0: the git-tag snapshot predates the checklist's eleventh item
 # ("Power delivery (structural)") and its grading rules, while the PyPI
-# 0.5.0 wheel grades all 11 items and quotes DRC `coverage` in item 3's
-# citation. Grading with the same distribution CI grades with
+# 0.5.0 wheel *renders* all 11 item rows (item skeletons parsed from the
+# vendored `--tiers-doc`) though its own grading rules predate item 11 --
+# a cited item-11 envelope therefore renders `unrecognized_envelope` until
+# a released `klt` that grades item 11 ships -- and quotes DRC `coverage`
+# in item 3's citation. Grading with the same distribution CI grades with
 # (.github/workflows/ci.yml `signoff` job) is what makes the committed
 # report byte-reproducible; keep this pin and that pin in sync.
 set -euo pipefail

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "not_checked",
+  "file": "layout/sram_256x32/sram_256x32_array.gds",
+  "spec": "layout/sram_256x32/erc-supply-spec.json",
+  "pdk": null,
+  "gate_role": "poly2",
+  "gate_count": 16640,
+  "erc_finding_count": 0,
+  "erc_findings": [],
+  "coverage": {
+    "scope": "antenna",
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "<0 entries omitted as bulk -- see _note>"
+    ],
+    "skipped": [
+      "<49920 entries omitted as bulk -- see _note>"
+    ],
+    "inapplicable": [
+      "<16640 entries omitted as bulk -- see _note>"
+    ],
+    "unknown": [],
+    "nothing_checked": true,
+    "nothing_checked_reasons": [
+      "gate_reference_level",
+      "missing_antenna_pdk"
+    ]
+  },
+  "provenance": {
+    "klt_version": "0.5.0+gd5893304afc2",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": null,
+    "input": {
+      "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925",
+      "role": "layout"
+    },
+    "spec": {
+      "content_hash": "sha256:2dfbbb8d8e3d1c08cf0a22fc74d26861976164afcc6aa004ce0bf403f3fdff6e"
+    }
+  },
+  "_note": "gates[] and the bulk of coverage row arrays are omitted from this committed report, exactly as extract-array.json omits devices[]/nets[] (~18 MB): gates[] is 16640 gate nets x 4 stackup levels (~29.7 MB unabridged at this array size), every antenna_verdict reading \"unchecked\"; coverage.checked/skipped/inapplicable collapsed the same way (0 checked, 49920 skipped all reason missing_antenna_pdk, 16640 inapplicable all reason gate_reference_level) -- coverage's scalar summary (known, nothing_checked, nothing_checked_reasons) is kept. Every field the T1 item 11 supply read grades -- status, erc_findings, erc_finding_count, and provenance (input content_hash matching the committed GDS; spec content_hash) -- is kept in full. Full output reproducible via layout/reports/generate.sh step 5."
+}

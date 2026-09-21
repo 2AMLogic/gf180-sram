@@ -136,6 +136,16 @@ captures.
 * The array tiles into the ratified organization with the right connectivity:
   49,152 devices, wordlines shared per row, bitline pairs shared per column,
   single `VDD`/`VSS` nets.
+* Structural power delivery (T1 item 11, issue #124): `klt erc`'s supply read
+  (`layout/sram_256x32/erc-supply-spec.json` →
+  `layout/reports/erc-array-supply.json`) proves each declared supply
+  (`VDD`, `VSS`) resolves to exactly **one** electrical island on the pure
+  metal-connectivity graph — zero `erc.unconnected_net`, zero
+  `erc.supply_short` — with a negative control proving the check computes.
+  `erc.missing_tie` is not computed (the spec omits `ties[]` deliberately,
+  klayout-tools#2169); the well-tie evidence standing in for it is item 4's
+  own LVS `match` carrying the supplies in `net_correspondence`. Full
+  field-by-field reading: `layout/reports/README.md` § "Item 11".
 * Geometry is on a 5 nm grid and passes `klt precheck`'s hygiene battery.
 
 **Does not prove**:
