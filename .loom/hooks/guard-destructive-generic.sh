@@ -5961,12 +5961,15 @@ _wt_in_protected_area() {
 }
 
 # =========================================================================
-# pdk_env.sh-sourced, mktemp -d, same-command rm -rf scratch-var exemption
-# (issue #64 — repo-local, NOT upstreamed; see the file header).
+# pdk_env.sh-sourced / layout-tool-invoked, mktemp -d, same-command rm -rf
+# scratch-var exemption (issue #64, hardened by the #65 review, unmasked at
+# the rm-scope site by #82, layout-flow provenance arm added by #127 —
+# repo-local, NOT upstreamed; see the file header).
 #
 # Narrows the unresolved-`$`-var catastrophic-deny block immediately below
 # for exactly one shape: this repo's own documented "cold-start ngspice
-# invocation" (sim/README.md) —
+# invocation" (sim/README.md) and, since #127, its layout-flow sibling
+# (layout/verify.sh + layout/README.md) —
 #
 #   scratch=$(mktemp -d) && \
 #   source sim/lib/pdk_env.sh && \
@@ -5991,7 +5994,13 @@ _wt_in_protected_area() {
 #   (1) the SAME command sources this repo's own sim/lib/pdk_env.sh (any
 #       relative/absolute spelling, `source` or `.`) — ties the exemption
 #       to this repo's fixed, checked-in, small-and-enumerable PDK-env
-#       script, not an arbitrary mktemp+rm-rf command from anywhere.
+#       script, not an arbitrary mktemp+rm-rf command from anywhere. OR,
+#       since #127, the SAME command invokes this repo's own committed
+#       layout tools — the layout flow's own recipe (layout/verify.sh +
+#       layout/README.md), the klt/KLayout cold-start sibling of the sim
+#       idiom this block was written for: `layout/sram_256x32/generate.py`
+#       named, or a `klt drc|extract|lvs` subcommand word. See
+#       _wt_pdk_scratch_provenance_same_command() for the two arms.
 #   (2) for the SPECIFIC variable at the root of the write target, the
 #       SAME command contains BOTH a literal `NAME=$(mktemp -d ...)`
 #       assignment AND a later `rm -rf ... "$NAME"` (or `$NAME`/`"$NAME/"`)
@@ -5999,21 +6008,73 @@ _wt_in_protected_area() {
 #       lands in is created AND self-cleaned within the one command being
 #       judged, so it can never collide with or outlive worktree state.
 #
-# A command missing either gate — no pdk_env.sh source, or the var isn't a
-# tracked mktemp -d + same-command rm -rf name — is untouched by this
-# block and keeps the pre-#64 fail-closed deny (Safety Note: a genuine
+# A command missing either gate — no provenance anchor (no pdk_env.sh
+# source and no layout-tool invocation), or the var isn't a tracked
+# mktemp -d + same-command rm -rf name — is untouched by this block and
+# keeps the pre-#64 fail-closed deny (Safety Note: a genuine
 # out-of-worktree write via an unrelated unresolved var, or a mktemp
-# scratch write with no pdk_env.sh source, still denies).
+# scratch write with no provenance anchor, still denies).
 # =========================================================================
 
-# Gate (1) as a reusable predicate: does the command under judgement source
-# this repo's own sim/lib/pdk_env.sh (any relative/absolute spelling, `source`
-# or `.`)? Factored out of _wt_pdk_scratch_exempt_varnames() so the rm-scope
-# site's #6520 narrowing (#97) tests the SAME provenance condition rather than
-# a second, drifting copy of this regex.
+# Gate (1) -- the SIM arm of the scratch-var provenance, as a reusable
+# predicate: does the command under judgement source this repo's own
+# sim/lib/pdk_env.sh (any relative/absolute spelling, `source` or `.`)?
+# Factored out of _wt_pdk_scratch_exempt_varnames() so the rm-scope site's
+# #6520 narrowing (#97) tests the SAME provenance condition rather than a
+# second, drifting copy of this regex. #127 folds this arm and its new
+# layout-flow sibling into _wt_pdk_scratch_provenance_same_command() below,
+# keeping that single-source property intact for every consumer.
 _wt_pdk_env_sourced_same_command() {
     printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
         grep -qE '(^|[;&|(`]|[[:space:]])(source|\.)[[:space:]]+[^;&|]*pdk_env\.sh'
+}
+
+# Gate (1-alt) -- the LAYOUT arm of the same provenance (issue #127), the
+# layout-flow sibling of the sim arm above. The layout flow's own committed
+# recipe (layout/verify.sh: `WORK="$(mktemp -d)"` scratch + generator/`klt`
+# tool runs writing into "$WORK/..." + trailing whole-dir `rm -rf "$WORK"`,
+# the shape layout/README.md documents as reproduced end-to-end by that
+# script) has no reason to source a sim script, so #64/#65's gate (1) could
+# never pass for it and the guard denied the session's inline reproduction
+# of that recipe (guard-decisions.log 2026-08-22T06:37
+# rm-scope-unresolved-var, plus the related 06:59
+# worktree-write-confinement-unresolved-var from the same session -- issue
+# #127). The alternative anchor is this repo's own committed layout tools:
+#   (1-alt-a) the layout generator committed at
+#       layout/sram_256x32/generate.py is named anywhere in the command --
+#       any relative/absolute spelling matches (the `[^;&|]*` prefix
+#       consumes `./`, a worktree/absolute prefix, ...), because naming the
+#       committed file IS invoking it (`uv run --with klayout python3
+#       layout/sram_256x32/generate.py`, `python3 $WT/layout/...`, ...); OR
+#   (1-alt-b) a `klt drc`, `klt extract`, or `klt lvs` subcommand word --
+#       the klayout-tools subcommands that recipe runs (matched as a
+#       command word: start/`;&|()`/whitespace-preceded, so an identifier
+#       like `myklt` or prose cannot match, and terminated by a
+#       non-constituent character so a longer subcommand name cannot match
+#       either).
+# `klt precheck` and every other klt subcommand are deliberately OUT of
+# the allowlist: #127 anchors the carve-out on exactly the tool runs the
+# denied cold-start idiom and the committed recipe share. A miss here only
+# costs the (fail-closed) exemption, never widens a deny.
+_wt_klt_layout_invoked_same_command() {
+    if printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
+         grep -qE '[^;&|]*layout/sram_256x32/generate\.py'; then
+        return 0
+    fi
+    printf '%s' "$COMMAND_NO_LITERAL_TEXT" | \
+        grep -qE '(^|[;&|(`]|[[:space:]])klt[[:space:]]+(drc|extract|lvs)([^a-zA-Z0-9_-]|$)'
+}
+
+# Gate (1)/(1-alt) combined: the full provenance condition the #64/#65/#82
+# scratch-var exemption -- and, through it, the rm-scope site's #6520
+# narrowing (#97) -- requires. Satisfying EITHER arm carries the exemption
+# into the shape gates; the shape contract in
+# _wt_pdk_scratch_exempt_varnames() (gates 1b/2a/2b) and the PR #65
+# confinement re-validation are UNCHANGED for both arms (#127).
+_wt_pdk_scratch_provenance_same_command() {
+    _wt_pdk_env_sourced_same_command && return 0
+    _wt_klt_layout_invoked_same_command && return 0
+    return 1
 }
 
 _WT_PDK_SCRATCH_VARS_DONE=""
@@ -6025,12 +6086,15 @@ _wt_pdk_scratch_exempt_varnames() {
     fi
     _WT_PDK_SCRATCH_VARS_DONE=1
 
-    # Gate (1): this repo's own sim/lib/pdk_env.sh sourced somewhere in
-    # the same command (COMMAND_NO_LITERAL_TEXT — heredoc/comment/quoted
-    # -flag-value text already excluded, mirroring the rm-target scan
-    # just below; a bare substring match is deliberately loose — a miss
-    # here only costs the (fail-closed) exemption, never widens a deny).
-    if ! _wt_pdk_env_sourced_same_command; then
+    # Gate (1)/(1-alt): the provenance condition. Either this repo's own
+    # sim/lib/pdk_env.sh is sourced somewhere in the same command (the
+    # sim arm) OR this repo's own committed layout tools are invoked in
+    # the same command (the layout arm, #127). Both arms scan
+    # COMMAND_NO_LITERAL_TEXT — heredoc/comment/quoted-flag-value text
+    # already excluded, mirroring the rm-target scan just below; a bare
+    # substring match is deliberately loose on both arms — a miss only
+    # costs the (fail-closed) exemption, never widens a deny.
+    if ! _wt_pdk_scratch_provenance_same_command; then
         return 0
     fi
 
@@ -6430,23 +6494,27 @@ if echo "$COMMAND_ASK_SCAN" | grep -qE 'rm[[:space:]]+-[a-zA-Z]*[rf]'; then
                         fi
                     fi
                     #
-                    # REPO-LOCAL NARROWING (#97, decision recorded on PR #98):
+                    # REPO-LOCAL NARROWING (#97, decision recorded on PR #98;
+                    # provenance widened to the layout arm in #127):
                     # #6520's fast path is additionally gated on the SAME
-                    # pdk_env.sh provenance condition the repo-local exemption
-                    # below requires (gate 1). Upstream #6520 allows ANY
-                    # `NAME=$(mktemp -d)` + `rm -rf "$NAME"` pair; this repo's
-                    # own human-reviewed carve-out (#64/#65/#82) was
-                    # deliberately scoped to this repo's documented cold-start
-                    # ngspice idiom and its test suite asserts, as a ratified
-                    # property, that "mktemp -d + rm -rf with NO pdk_env.sh
-                    # source still DENIES". Rather than relax that assertion to
-                    # make the newer vendored path's behaviour pass, the newer
-                    # path is narrowed back to the ratified intent. The two
-                    # residual differences that keep this call worth making at
-                    # all: #6520 also proves the bare `NAME=$(mktemp)` (no -d)
+                    # provenance condition the repo-local exemption below
+                    # requires (gate 1: a pdk_env.sh source, or since #127 a
+                    # committed-layout-tool invocation —
+                    # _wt_pdk_scratch_provenance_same_command()). Upstream
+                    # #6520 allows ANY `NAME=$(mktemp -d)` + `rm -rf "$NAME"`
+                    # pair; this repo's own human-reviewed carve-out
+                    # (#64/#65/#82, extended #127) was deliberately scoped to
+                    # this repo's documented cold-start ngspice/layout idioms
+                    # and its test suites assert, as a ratified property, that
+                    # "mktemp -d + rm -rf with NO provenance anchor still
+                    # DENIES". Rather than relax that assertion to make the
+                    # newer vendored path's behaviour pass, the newer path is
+                    # narrowed back to the ratified intent. The two residual
+                    # differences that keep this call worth making at all:
+                    # #6520 also proves the bare `NAME=$(mktemp)` (no -d)
                     # form, and its single-assignment/poisoning check is
                     # stricter than gate 2a's.
-                    if _wt_pdk_env_sourced_same_command \
+                    if _wt_pdk_scratch_provenance_same_command \
                        && rm_scope_mktemp_same_command_safe "$target" "$COMMAND_RM_MKTEMP_SCAN"; then
                         continue
                     fi
@@ -6461,11 +6529,15 @@ if echo "$COMMAND_ASK_SCAN" | grep -qE 'rm[[:space:]]+-[a-zA-Z]*[rf]'; then
                     # the write-confinement exemption below was unreachable
                     # under the DEFAULT guard config (guards.rmScope=repo).
                     #
-                    # All three gates are enforced by
+                    # All the gates are enforced by
                     # _wt_pdk_scratch_exempt_varnames() exactly as at the
-                    # other site: (1) a same-command `source`/`.` of this
-                    # repo's sim/lib/pdk_env.sh, with no same-command
-                    # `TMPDIR=` and no protected-area ambient $TMPDIR;
+                    # other site: (1)/(1-alt) a same-command provenance
+                    # anchor — a `source`/`.` of this repo's
+                    # sim/lib/pdk_env.sh, or since #127 an invocation of
+                    # this repo's committed layout tools
+                    # (layout/sram_256x32/generate.py named or a
+                    # `klt drc|extract|lvs` subcommand word) — with no
+                    # same-command `TMPDIR=` and no protected-area ambient $TMPDIR;
                     # (2) a literal `NAME=$(mktemp -d …)` assignment whose
                     # argument set is on the strict allowlist (no positional
                     # TEMPLATE, no -p/--tmpdir, no assignment prefix); and
@@ -6734,9 +6806,11 @@ if worktree_isolation_guard_enabled && \
                 # (`/$X`, `/$X/evil`, whose runtime value picks the top-level
                 # directory — the main checkout's own included).
                 if [[ "$_wmarked" == $'\001'* || "$_wmarked" == /$'\001'* ]]; then
-                    # #64: pdk_env.sh-sourced, mktemp -d, same-command
-                    # rm -rf scratch var — narrow exemption, see the helper
-                    # functions' doc comment above for the required gates.
+                    # #64 (provenance widened to the layout arm in #127):
+                    # pdk_env.sh-sourced / committed-layout-tool-invoked,
+                    # mktemp -d, same-command rm -rf scratch var — narrow
+                    # exemption, see the helper functions' doc comment above
+                    # for the required gates.
                     # #65 review: the gates alone are NOT sufficient — the
                     # resolved path must also still be confined to the scratch
                     # dir, or `..` after the variable walks the write straight
@@ -6778,7 +6852,8 @@ if worktree_isolation_guard_enabled && \
                         # value picks a top-level directory, the main
                         # checkout's own included. Same verdict as (1).
                         #
-                        # #64: same narrow scratch-var exemption as (1) above,
+                        # #64: same narrow scratch-var exemption (same provenance
+                        # arms, sim or layout) as (1) above,
                         # tested against the joined effective path (_weff) so
                         # it still fires when the variable reaches this branch
                         # via a `cd "$scratch"`-derived cwd rather than as the

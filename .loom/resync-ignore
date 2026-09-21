@@ -13,8 +13,9 @@
 # into Repo Skills (symlink-ancestor-resolution #69/#70, for-loop
 # loop-variable binding #63/#66, BSD `sed -i ''` script/target
 # disambiguation #49/#77/#79, leading-keyword strip #67/#71, `cd`/redirect
-# same-command var resolution #68/#72, and the sim/lib/pdk_env.sh
-# mktemp-scratch exemption #64/#65/#82). `resync-installed.sh`'s
+# same-command var resolution #68/#72, the sim/lib/pdk_env.sh
+# mktemp-scratch exemption #64/#65/#82, and that exemption's klt/KLayout
+# layout cold-start extension #127). `resync-installed.sh`'s
 # `CANONICAL_GUARD_PRESENT` probe (5 marker greps against
 # .claude/skills/repo/hooks/guard-destructive.sh) never evaluates to 1 for
 # this repo's installed canonical guard version (it is missing the
@@ -29,3 +30,16 @@
 # reviewed and merged into this file by hand rather than arriving silently
 # via resync.
 hooks/guard-destructive-generic.sh
+#
+# hooks/tests/test-guard-*-unresolved-var-layout-klt.sh (gf180-sram#127):
+# pinning tests for the #127 klt/KLayout layout cold-start extension of the
+# #64/#65/#82 scratch-var exemption above, in the same style as the existing
+# (unpinned) test-guard-*-unresolved-var-pdk-env.sh siblings that pin the
+# sim exemption. Loom's defaults/ ships no file at either of these paths
+# (they are gf180-sram-local test files, never installed), so resync itself
+# would never overwrite them -- but declaring them here is what marks them
+# repo-owned for the #7995 installed-file write guard, and it keeps a future
+# resync that reverts the guard fork turning `test:guards` red (the exact
+# regression shape #81/#82 hit twice and #127 requires tests to catch).
+hooks/tests/test-guard-worktree-unresolved-var-layout-klt.sh
+hooks/tests/test-guard-rm-scope-unresolved-var-layout-klt.sh
