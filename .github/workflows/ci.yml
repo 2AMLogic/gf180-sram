@@ -46,3 +46,22 @@ jobs:
 
       - name: Validate sim/ layout/ measurements/ evidence-record format
         run: ./scripts/ci/check-evidence-format.sh
+
+  signoff:
+    name: klt signoff (T1 tier-verdict freshness)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # Keep this pin in sync with signoff/regenerate.sh's KLT_VERSION. The
+      # released registry wheel carries the git tag identity the freshness
+      # check asserts; same-version snapshots can grade differently.
+      - name: Install the pinned grading klt (klayout-tools)
+        run: pip install klayout-tools==0.5.0
+
+      - name: Re-grade the block manifest; require the committed report to match
+        run: ./scripts/ci/check-signoff-freshness.sh

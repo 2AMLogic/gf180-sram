@@ -74,4 +74,8 @@ Ratified spec and decision records for this block.
   (array-level LVS) against an upstream `klt lvs` fix that landed after this
   repo's evidence was last recorded, and decomposes the still-open holes
   into issues #108–#110 (item 3's hole was already tracked as #103).
+  Superseded as the verdict of record by the mechanical `klt signoff`
+  manifest in `signoff/` (this hand-read predates the checklist's eleventh
+  item and is retained as the dated audit snapshot only) — see
+  [`signoff/README.md`](../signoff/README.md).
   Informational only — no ratified spec value changes.
