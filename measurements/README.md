@@ -13,6 +13,21 @@ klayout-tools `docs/design-evidence-tiers.md` item 8.
 Every number in it cites the exact `sim/` evidence record it rests on; it
 invents nothing and runs no simulation itself.
 
+## The `characterization.signoff.json` companion
+
+**[`characterization.signoff.json`](characterization.signoff.json)** is the
+small hand-rolled `kind: generic` evidence envelope
+(`klayout-tools/docs/cli/signoff.md` → "Generic evidence") that makes this
+item mechanically gradeable: it asserts the report above and pins it by
+content hash, which is what the `klt signoff --manifest` tier report cites
+for T1 item 8 ("Characterization report" — the one checklist item its
+checklist text says may be satisfied by this generic wrapper). Its pin is a
+pure derivation from the report it wraps: `./signoff/regenerate.sh` (or
+hand-editing the hash after regenerating the report, same thing) refreshes
+it, and CI re-grades it against the manifest — so the envelope and the
+machinery around it fail rather than rot. See
+[`signoff/README.md`](../signoff/README.md).
+
 ## Regenerating it
 
 ```bash

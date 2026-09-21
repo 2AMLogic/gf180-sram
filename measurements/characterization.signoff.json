@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "kind": "generic",
+  "status": "pass",
+  "summary": "Aggregated characterization report: per-spec-row performance across conditions (27-corner deterministic PVT sweep plus Monte Carlo/yield summaries), refreshable via measurements/generate_report.py and freshness-enforced by CI (scripts/ci/check_evidence_format.py check 5 keeps measurements/characterization-report.md byte-identical to its generator).",
+  "source": "measurements/characterization-report.md",
+  "provenance": {
+    "input": {
+      "content_hash": "sha256:232b3110c55e13bb76eeb21e409761e691dac0056a8f34517ab23d3172c954c9"
+    }
+  }
+}

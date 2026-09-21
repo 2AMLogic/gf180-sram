@@ -6,6 +6,18 @@
 **Precedent**: #13 (2026-08-15), the previous re-read; #18 decomposed that
 pass's failing rows into #19–#28.
 
+**Superseded as the verdict of record (2026-09-21):** this hand-read is
+retained unchanged below as the dated 2026-08-22 audit snapshot it is. The
+block's checklist state is now graded mechanically — every item's
+`met`/`unmet` with a `reason` — from the committed `klt signoff` block
+manifest at [`signoff/block-manifest.json`](../signoff/block-manifest.json),
+re-graded on every PR; see [`signoff/README.md`](../signoff/README.md). Two
+events forced that hand-off: this re-read predates the checklist's eleventh
+item ("Power delivery (structural)", added 2026-09-17, klayout-tools#2025),
+which invalidated every hand-read in the fleet at a stroke, and a hand
+re-read cannot be re-verified without a human repeating it.
+
+
 Re-reads the T1 "sim-validated" checklist
 (`klayout-tools/docs/design-evidence-tiers.md` → "T1 checklist", ten items)
 row by row against evidence actually on `main` at

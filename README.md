@@ -12,7 +12,12 @@ hold SNM + write margin, all 27 corner points — see
 of the array core now exists (`views/sram_256x32_array.lef`, `klt
 socket-check` clean on outline + all 322 pins) — see `views/README.md` for
 its coverage and the two tool/design gaps it surfaced. Liberty timing views
-have not been generated yet.**
+have not been generated yet. The block's T1 checklist state is graded
+mechanically — the `klt signoff` block manifest at
+[`signoff/block-manifest.json`](signoff/block-manifest.json) is the verdict
+of record, re-graded on every PR (see
+[`signoff/README.md`](signoff/README.md)); the 2026-08-22 hand-read in
+`spec/` is retained as a dated audit snapshot only.**
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
@@ -112,6 +117,9 @@ layout/        GDS + DRC/LVS reports (klayout-tools driven)
 views/         generated LEF / Liberty abstracts
 measurements/  aggregated characterization report (schematic-level today;
                silicon measurements supersede it after tape-out)
+signoff/       block manifest + committed `klt signoff` tier report — the
+               graded gap-to-T1 verdict of record, with the vendored
+               checklist definition and its pinning/regeneration docs
 ```
 
 ## License

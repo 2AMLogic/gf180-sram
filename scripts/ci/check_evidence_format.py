@@ -50,7 +50,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Top-level directories that must always carry a README.md describing scope.
-DELIVERABLE_DIRS = ["design", "sim", "layout", "views", "measurements"]
+DELIVERABLE_DIRS = ["design", "sim", "layout", "views", "measurements", "signoff"]
 
 # Directories that hold evidence records (per CLAUDE.md: "sim/ results are
 # append-only evidence") and are therefore subject to the raw-artifact check.
@@ -81,6 +81,10 @@ LINK_CHECK_GLOBS = [
     "layout/**/*.md",
     "views/**/*.md",
     "measurements/**/*.md",
+    # The signoff README only (not the vendored upstream tiers doc inside
+    # signoff/, whose external cross-references are klayout-tools' to keep
+    # current, not this repo's CI to police).
+    "signoff/README.md",
 ]
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")

@@ -1,0 +1,26 @@
+{
+  "block": "gf180-sram",
+  "kind": "analog",
+  "evidence": {
+    "3": {
+      "file": "layout/reports/drc-array.json",
+      "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
+    },
+    "4": {
+      "file": "layout/reports/lvs-array.json",
+      "content_hash": "sha256:552a097641dbe9aba0010a96d57cb601a0c9b9212a4b0e22bf0b877fcb27ba12"
+    },
+    "6": {
+      "file": "sim/read-snm/mc/yield-reports/20260817-102455-ce56f59.json",
+      "content_hash": "sha256:ea9a1e0e2cafe30c6792290fc9279595129116285b93b36137b187a6516daf68"
+    },
+    "7": {
+      "file": "sim/pex/access-time/reports/read-access-time.pex.json",
+      "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae"
+    },
+    "8": {
+      "file": "measurements/characterization.signoff.json",
+      "content_hash": "sha256:232b3110c55e13bb76eeb21e409761e691dac0056a8f34517ab23d3172c954c9"
+    }
+  }
+}
