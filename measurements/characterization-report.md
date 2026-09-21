@@ -23,9 +23,9 @@ Every number in this report traces to exactly one of the source records below --
 | Write margin (WTV) | 27-corner PVT | `sim/write-margin/records/20260817-105029-ce56f59.md` | `20260817-105029-ce56f59` | `ce56f59` | 2026-08-17T10:50:50Z |
 | Read access time (slowest) | 27-corner PVT | `sim/access-time/records/20260817-011948-4448966.md` | `20260817-011948-4448966` | `4448966` | 2026-08-17T01:20:00Z |
 | Write access time (slowest) | 27-corner PVT | `sim/access-time/records/20260817-012005-4448966.md` | `20260817-012005-4448966` | `4448966` | 2026-08-17T01:20:17Z |
-| Read SNM | Monte Carlo / yield (9-corner subset) | `sim/read-snm/mc/records/20260817-102455-ce56f59.md` | `20260817-102455-ce56f59` | `ce56f59` | 2026-08-17T10:33:16Z |
-| Hold SNM | Monte Carlo / yield (9-corner subset) | `sim/hold-snm/mc/records/20260817-103316-ce56f59.md` | `20260817-103316-ce56f59` | `ce56f59` | 2026-08-17T10:41:15Z |
-| Write margin | Monte Carlo / yield (9-corner subset) | `sim/write-margin/mc/records/20260817-104116-ce56f59.md` | `20260817-104116-ce56f59` | `ce56f59` | 2026-08-17T10:48:52Z |
+| Read SNM | Monte Carlo / yield (9-corner subset) | `sim/read-snm/mc/records/20260921-124232-cf5e975.md` | `20260921-124232-cf5e975` | `cf5e975` | 2026-09-21T12:44:29Z |
+| Hold SNM | Monte Carlo / yield (9-corner subset) | `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` | `20260921-124534-cf5e975` | `cf5e975` | 2026-09-21T12:47:16Z |
+| Write margin | Monte Carlo / yield (9-corner subset) | `sim/write-margin/mc/records/20260921-124804-cf5e975.md` | `20260921-124804-cf5e975` | `cf5e975` | 2026-09-21T12:51:14Z |
 
 ## Per-spec-row summary (worst case across all 27 corners)
 
@@ -45,15 +45,15 @@ Device-mismatch statistical evidence (issue #26), combined with -- not instead o
 
 | Measurement | Corners sampled | Min Cpk | Min sigma-to-spec | Negative control | Source record |
 |---|---|---|---|---|---|
-| Read SNM | 9 | 2.5510 | 7.6531 | 9/9 detected | `sim/read-snm/mc/records/20260817-102455-ce56f59.md` |
-| Hold SNM | 9 | 18.2850 | 54.8550 | 9/9 detected | `sim/hold-snm/mc/records/20260817-103316-ce56f59.md` |
-| Write margin | 9 | 74.2069 | 222.6210 | 9/9 detected | `sim/write-margin/mc/records/20260817-104116-ce56f59.md` |
+| Read SNM | 9 | 2.5579 | 7.6739 | 9/9 detected | `sim/read-snm/mc/records/20260921-124232-cf5e975.md` |
+| Hold SNM | 9 | 16.3717 | 49.1151 | 9/9 detected | `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` |
+| Write margin | 9 | 77.8920 | 233.6760 | 9/9 detected | `sim/write-margin/mc/records/20260921-124804-cf5e975.md` |
 
 ### Read SNM -- Monte Carlo / yield detail
 
-Source: `sim/read-snm/mc/records/20260817-102455-ce56f59.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
+Source: `sim/read-snm/mc/records/20260921-124232-cf5e975.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
 
-- **Record ID**: `20260817-102455-ce56f59`
+- **Record ID**: `20260921-124232-cf5e975`
 - **Kind**: Monte Carlo mismatch campaign + `klt yield` report (statistical evidence, klayout-tools `docs/design-evidence-tiers.md` item 6)
 - **Claim**: spec/sram.md Characterization -- read SNM (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)
 - **Testbench**: `sim/read-snm/testbench/tb_read_snm.spice`
@@ -63,30 +63,30 @@ Source: `sim/read-snm/mc/records/20260817-102455-ce56f59.md` (full record; raw p
 - **Seed**: `20260817` (base). Per-sample seed = sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer; delivered to ngspice as `.options seed=<derived>, one independent ngspice invocation per sample`.
 - **Sample count**: 200 mismatch samples per corner, 4 determinism-control samples per corner, 100 negative-control samples per corner.
 - **Spec limits**: `min = 0.0` V -- spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner. No `target_yield` is declared: `spec/sram.md` ratifies no yield target for these rows (that is exactly the open operator decision tracked as issue #20), and this harness does not invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, with Cpk / sigma-to-spec as the quantitative margin statement.
-- **PDK**: `/Users/rwalters/.volare/gf180mcuC` -- **`klt`**: `klt 0.2.0` -- **git**: `ce56f59`
+- **PDK**: `gf180mcuD`, open_pdks `c6d73a35f524070e85faff4a6a9eef49553ebc2b` -- **`klt`**: `klt 0.5.0+gfe6fe526388f.dirty` -- **git**: `cf5e975`
 - **`klt yield` overall status**: `reported` (exit code 0)
-- **Timestamp / author**: 2026-08-17T10:33:16Z / agent-builder
+- **Timestamp / author**: 2026-09-21T12:44:29Z / agent-builder
 - **Supersedes**: (none)
 
 #### Per-corner result (verbatim from the `klt yield` JSON report)
 
 | Corner | N | errored | mean (V) | stddev (V) | empirical yield, 95% lower bound | Cpk | sigma-to-spec | sample-size verdict | negative control |
 |---|---|---|---|---|---|---|---|---|---|
-| `ff_-40c_2.97v` | 200 | 0 | 0.345674 | 0.0209368 | 0.981725 | 5.50345 | 16.5103 | sufficient | detected |
-| `ff_25c_3.30v` | 200 | 0 | 0.291693 | 0.0277681 | 0.981725 | 3.50153 | 10.5046 | sufficient | detected |
-| `ff_125c_2.97v` | 200 | 0 | 0.215995 | 0.0282232 | 0.981725 | 2.55104 | 7.65311 | sufficient | detected |
-| `tt_-40c_3.63v` | 200 | 0 | 0.454546 | 0.0236962 | 0.981725 | 6.39407 | 19.1822 | sufficient | detected |
-| `tt_25c_3.30v` | 200 | 0 | 0.37892 | 0.0238625 | 0.981725 | 5.29311 | 15.8793 | sufficient | detected |
-| `tt_125c_2.97v` | 200 | 0 | 0.297539 | 0.0233139 | 0.981725 | 4.25411 | 12.7623 | sufficient | detected |
-| `ss_-40c_3.63v` | 200 | 0 | 0.561536 | 0.0228921 | 0.981725 | 8.17655 | 24.5296 | sufficient | detected |
-| `ss_25c_2.97v` | 200 | 0 | 0.472551 | 0.0202394 | 0.981725 | 7.7827 | 23.3481 | sufficient | detected |
-| `ss_125c_3.63v` | 200 | 0 | 0.408474 | 0.0268861 | 0.981725 | 5.06426 | 15.1928 | sufficient | detected |
+| `ff_-40c_2.97v` | 200 | 0 | 0.347325 | 0.0226316 | 0.981725 | 5.11564 | 15.3469 | sufficient | detected |
+| `ff_25c_3.30v` | 200 | 0 | 0.293314 | 0.030682 | 0.981725 | 3.18661 | 9.55983 | sufficient | detected |
+| `ff_125c_2.97v` | 200 | 0 | 0.214422 | 0.0279419 | 0.981725 | 2.55795 | 7.67386 | sufficient | detected |
+| `tt_-40c_3.63v` | 200 | 0 | 0.457688 | 0.0212328 | 0.981725 | 7.18525 | 21.5557 | sufficient | detected |
+| `tt_25c_3.30v` | 200 | 0 | 0.382673 | 0.0235576 | 0.981725 | 5.41472 | 16.2442 | sufficient | detected |
+| `tt_125c_2.97v` | 200 | 0 | 0.293317 | 0.0230081 | 0.981725 | 4.24947 | 12.7484 | sufficient | detected |
+| `ss_-40c_3.63v` | 200 | 0 | 0.562762 | 0.0212834 | 0.981725 | 8.81381 | 26.4414 | sufficient | detected |
+| `ss_25c_2.97v` | 200 | 0 | 0.47458 | 0.0224131 | 0.981725 | 7.05806 | 21.1742 | sufficient | detected |
+| `ss_125c_3.63v` | 200 | 0 | 0.406407 | 0.0240491 | 0.981725 | 5.63303 | 16.8991 | sufficient | detected |
 
 `errored` counts draws that produced no usable measurement (for the SNM fixtures: a draw whose butterfly was not bistable, so no square exists to measure). `klt yield` excludes them from every statistic, so a record with a non-zero `errored` column states a yield estimate *conditioned on a measurable draw* -- read the errored count alongside it, never the yield alone.
 
 #### Determinism control (mismatch off)
 
-With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the number the deterministic corner sweep already recorded for the same corner. This is what ties the MC evidence to the ratified 9-corner evidence rather than leaving it a parallel, unanchored claim.
+With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the number the deterministic corner sweep already recorded for the same corner. This is what ties the MC evidence to the ratified 27-corner evidence rather than leaving it a parallel, unanchored claim.
 
 | Corner | N | errored | distinct value(s) (V) | verdict |
 |---|---|---|---|---|
@@ -102,7 +102,7 @@ With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically f
 
 #### Negative control
 
-Deliberate defect: **known-bad variant: sw_stat_mismatch=20, i.e. per-instance Vt/current-factor mismatch drawn at 20x the PDK's own sigma (docs/cli/yield.md's 'a mismatch seed pushed past spec')**, drawn with its own independent, reproducibly-derived seeds and analysed by `klt yield` against the *same* spec limits as the nominal measurement. A `detected` verdict means the control's empirical yield is lower **and** its exact (Clopper-Pearson) confidence interval does not overlap the nominal's -- i.e. these statistics demonstrably do detect a degraded design, rather than being assumed to.
+Deliberate defect: **known-bad variant: sw_stat_mismatch=20 (20x the PDK's per-instance Vt/current-factor mismatch sigma)**, drawn with its own independent, reproducibly-derived seeds and analysed by `klt yield` against the *same* spec limits as the nominal measurement. A `detected` verdict means the control's empirical yield is lower **and** its exact (Clopper-Pearson) confidence interval does not overlap the nominal's -- i.e. these statistics demonstrably do detect a degraded design, rather than being assumed to.
 
 #### `klt yield` run-level warnings
 
@@ -110,9 +110,9 @@ Deliberate defect: **known-bad variant: sw_stat_mismatch=20, i.e. per-instance V
 
 ### Hold SNM -- Monte Carlo / yield detail
 
-Source: `sim/hold-snm/mc/records/20260817-103316-ce56f59.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
+Source: `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
 
-- **Record ID**: `20260817-103316-ce56f59`
+- **Record ID**: `20260921-124534-cf5e975`
 - **Kind**: Monte Carlo mismatch campaign + `klt yield` report (statistical evidence, klayout-tools `docs/design-evidence-tiers.md` item 6)
 - **Claim**: spec/sram.md Characterization -- hold SNM (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)
 - **Testbench**: `sim/hold-snm/testbench/tb_hold_snm.spice`
@@ -122,46 +122,46 @@ Source: `sim/hold-snm/mc/records/20260817-103316-ce56f59.md` (full record; raw p
 - **Seed**: `20260817` (base). Per-sample seed = sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer; delivered to ngspice as `.options seed=<derived>, one independent ngspice invocation per sample`.
 - **Sample count**: 200 mismatch samples per corner, 4 determinism-control samples per corner, 100 negative-control samples per corner.
 - **Spec limits**: `min = 0.0` V -- spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner. No `target_yield` is declared: `spec/sram.md` ratifies no yield target for these rows (that is exactly the open operator decision tracked as issue #20), and this harness does not invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, with Cpk / sigma-to-spec as the quantitative margin statement.
-- **PDK**: `/Users/rwalters/.volare/gf180mcuC` -- **`klt`**: `klt 0.2.0` -- **git**: `ce56f59`
+- **PDK**: `gf180mcuD`, open_pdks `c6d73a35f524070e85faff4a6a9eef49553ebc2b` -- **`klt`**: `klt 0.5.0+gfe6fe526388f.dirty` -- **git**: `cf5e975`
 - **`klt yield` overall status**: `reported` (exit code 0)
-- **Timestamp / author**: 2026-08-17T10:41:15Z / agent-builder
+- **Timestamp / author**: 2026-09-21T12:47:16Z / agent-builder
 - **Supersedes**: (none)
 
 #### Per-corner result (verbatim from the `klt yield` JSON report)
 
 | Corner | N | errored | mean (V) | stddev (V) | empirical yield, 95% lower bound | Cpk | sigma-to-spec | sample-size verdict | negative control |
 |---|---|---|---|---|---|---|---|---|---|
-| `ff_-40c_2.97v` | 200 | 0 | 0.998997 | 0.0178261 | 0.981725 | 18.6804 | 56.0413 | sufficient | detected |
-| `ff_25c_3.30v` | 200 | 0 | 1.04812 | 0.0177677 | 0.981725 | 19.6634 | 58.9902 | sufficient | detected |
-| `ff_125c_2.97v` | 200 | 0 | 0.93145 | 0.0169802 | 0.981725 | 18.285 | 54.855 | sufficient | detected |
-| `tt_-40c_3.63v` | 200 | 0 | 1.21205 | 0.0191129 | 0.981725 | 21.1385 | 63.4154 | sufficient | detected |
-| `tt_25c_3.30v` | 200 | 0 | 1.10934 | 0.0190101 | 0.981725 | 19.4517 | 58.3551 | sufficient | detected |
-| `tt_125c_2.97v` | 200 | 0 | 0.994414 | 0.0177065 | 0.981725 | 18.7203 | 56.1609 | sufficient | detected |
-| `ss_-40c_3.63v` | 200 | 0 | 1.26779 | 0.0184793 | 0.981725 | 22.8687 | 68.6061 | sufficient | detected |
-| `ss_25c_2.97v` | 200 | 0 | 1.08133 | 0.0159573 | 0.981725 | 22.588 | 67.7639 | sufficient | detected |
-| `ss_125c_3.63v` | 200 | 0 | 1.21561 | 0.0182949 | 0.981725 | 22.1484 | 66.4452 | sufficient | detected |
+| `ff_-40c_2.97v` | 200 | 0 | 1.00011 | 0.0173984 | 0.981725 | 19.161 | 57.4829 | sufficient | detected |
+| `ff_25c_3.30v` | 200 | 0 | 1.05079 | 0.0196891 | 0.981725 | 17.7897 | 53.3692 | sufficient | detected |
+| `ff_125c_2.97v` | 200 | 0 | 0.92988 | 0.0189327 | 0.981725 | 16.3717 | 49.1151 | sufficient | detected |
+| `tt_-40c_3.63v` | 200 | 0 | 1.2129 | 0.017096 | 0.981725 | 23.6489 | 70.9466 | sufficient | detected |
+| `tt_25c_3.30v` | 200 | 0 | 1.11069 | 0.0190448 | 0.981725 | 19.4399 | 58.3196 | sufficient | detected |
+| `tt_125c_2.97v` | 200 | 0 | 0.993329 | 0.0166241 | 0.981725 | 19.9175 | 59.7524 | sufficient | detected |
+| `ss_-40c_3.63v` | 200 | 0 | 1.26824 | 0.0168795 | 0.981725 | 25.0449 | 75.1348 | sufficient | detected |
+| `ss_25c_2.97v` | 200 | 0 | 1.08155 | 0.0173882 | 0.981725 | 20.7335 | 62.2005 | sufficient | detected |
+| `ss_125c_3.63v` | 200 | 0 | 1.215 | 0.0179754 | 0.981725 | 22.5308 | 67.5924 | sufficient | detected |
 
 `errored` counts draws that produced no usable measurement (for the SNM fixtures: a draw whose butterfly was not bistable, so no square exists to measure). `klt yield` excludes them from every statistic, so a record with a non-zero `errored` column states a yield estimate *conditioned on a measurable draw* -- read the errored count alongside it, never the yield alone.
 
 #### Determinism control (mismatch off)
 
-With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the number the deterministic corner sweep already recorded for the same corner. This is what ties the MC evidence to the ratified 9-corner evidence rather than leaving it a parallel, unanchored claim.
+With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the number the deterministic corner sweep already recorded for the same corner. This is what ties the MC evidence to the ratified 27-corner evidence rather than leaving it a parallel, unanchored claim.
 
 | Corner | N | errored | distinct value(s) (V) | verdict |
 |---|---|---|---|---|
-| `ff_-40c_2.97v` | 4 | 0 | 0.999014 | PINNED |
+| `ff_-40c_2.97v` | 4 | 0 | 0.999016 | PINNED |
 | `ff_25c_3.30v` | 4 | 0 | 1.04859 | PINNED |
 | `ff_125c_2.97v` | 4 | 0 | 0.930461 | PINNED |
 | `tt_-40c_3.63v` | 4 | 0 | 1.21357 | PINNED |
 | `tt_25c_3.30v` | 4 | 0 | 1.11081 | PINNED |
-| `tt_125c_2.97v` | 4 | 0 | 0.993408 | PINNED |
+| `tt_125c_2.97v` | 4 | 0 | 0.99341 | PINNED |
 | `ss_-40c_3.63v` | 4 | 0 | 1.26881 | PINNED |
 | `ss_25c_2.97v` | 4 | 0 | 1.08238 | PINNED |
 | `ss_125c_3.63v` | 4 | 0 | 1.21645 | PINNED |
 
 #### Negative control
 
-Deliberate defect: **known-bad variant: supply collapsed to 0.50 V, far below spec/sram.md's ratified 2.97 V minimum and below this cell's data-retention voltage (the physical hold-stability failure mechanism), with per-instance mismatch drawn at 12x the PDK's own sigma**, drawn with its own independent, reproducibly-derived seeds and analysed by `klt yield` against the *same* spec limits as the nominal measurement. A `detected` verdict means the control's empirical yield is lower **and** its exact (Clopper-Pearson) confidence interval does not overlap the nominal's -- i.e. these statistics demonstrably do detect a degraded design, rather than being assumed to.
+Deliberate defect: **known-bad variant: sw_stat_mismatch=12 (12x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.50 V (below spec/sram.md's ratified 2.97 V minimum)**, drawn with its own independent, reproducibly-derived seeds and analysed by `klt yield` against the *same* spec limits as the nominal measurement. A `detected` verdict means the control's empirical yield is lower **and** its exact (Clopper-Pearson) confidence interval does not overlap the nominal's -- i.e. these statistics demonstrably do detect a degraded design, rather than being assumed to.
 
 #### `klt yield` run-level warnings
 
@@ -169,9 +169,9 @@ Deliberate defect: **known-bad variant: supply collapsed to 0.50 V, far below sp
 
 ### Write margin -- Monte Carlo / yield detail
 
-Source: `sim/write-margin/mc/records/20260817-104116-ce56f59.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
+Source: `sim/write-margin/mc/records/20260921-124804-cf5e975.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
 
-- **Record ID**: `20260817-104116-ce56f59`
+- **Record ID**: `20260921-124804-cf5e975`
 - **Kind**: Monte Carlo mismatch campaign + `klt yield` report (statistical evidence, klayout-tools `docs/design-evidence-tiers.md` item 6)
 - **Claim**: spec/sram.md Characterization -- write margin, as write trip voltage (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)
 - **Testbench**: `sim/write-margin/testbench/tb_write_margin.spice`
@@ -181,30 +181,30 @@ Source: `sim/write-margin/mc/records/20260817-104116-ce56f59.md` (full record; r
 - **Seed**: `20260817` (base). Per-sample seed = sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer; delivered to ngspice as `.options seed=<derived>, one independent ngspice invocation per sample`.
 - **Sample count**: 200 mismatch samples per corner, 4 determinism-control samples per corner, 100 negative-control samples per corner.
 - **Spec limits**: `min = 0.0` V -- spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner. No `target_yield` is declared: `spec/sram.md` ratifies no yield target for these rows (that is exactly the open operator decision tracked as issue #20), and this harness does not invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, with Cpk / sigma-to-spec as the quantitative margin statement.
-- **PDK**: `/Users/rwalters/.volare/gf180mcuC` -- **`klt`**: `klt 0.2.0` -- **git**: `ce56f59`
+- **PDK**: `gf180mcuD`, open_pdks `c6d73a35f524070e85faff4a6a9eef49553ebc2b` -- **`klt`**: `klt 0.5.0+gfe6fe526388f.dirty` -- **git**: `cf5e975`
 - **`klt yield` overall status**: `reported` (exit code 0)
-- **Timestamp / author**: 2026-08-17T10:48:52Z / agent-builder
+- **Timestamp / author**: 2026-09-21T12:51:14Z / agent-builder
 - **Supersedes**: (none)
 
 #### Per-corner result (verbatim from the `klt yield` JSON report)
 
 | Corner | N | errored | mean (V) | stddev (V) | empirical yield, 95% lower bound | Cpk | sigma-to-spec | sample-size verdict | negative control |
 |---|---|---|---|---|---|---|---|---|---|
-| `ff_-40c_2.97v` | 200 | 0 | 1.69589 | 0.00761785 | 0.981725 | 74.2069 | 222.621 | sufficient | detected |
-| `ff_25c_3.30v` | 200 | 0 | 1.87085 | 0.00669054 | 0.981725 | 93.2087 | 279.626 | sufficient | detected |
-| `ff_125c_2.97v` | 200 | 0 | 1.64071 | 0.00641502 | 0.981725 | 85.2534 | 255.76 | sufficient | detected |
-| `tt_-40c_3.63v` | 200 | 0 | 2.13313 | 0.0072495 | 0.981725 | 98.0816 | 294.245 | sufficient | detected |
-| `tt_25c_3.30v` | 200 | 0 | 1.9105 | 0.00661808 | 0.981725 | 96.2263 | 288.679 | sufficient | detected |
-| `tt_125c_2.97v` | 200 | 0 | 1.67745 | 0.00531525 | 0.981725 | 105.197 | 315.591 | sufficient | detected |
-| `ss_-40c_3.63v` | 200 | 0 | 2.17203 | 0.00660311 | 0.981725 | 109.647 | 328.94 | sufficient | detected |
-| `ss_25c_2.97v` | 200 | 0 | 1.74165 | 0.0049579 | 0.981725 | 117.096 | 351.287 | sufficient | detected |
-| `ss_125c_3.63v` | 200 | 0 | 2.10961 | 0.0052796 | 0.981725 | 133.193 | 399.578 | sufficient | detected |
+| `ff_-40c_2.97v` | 200 | 0 | 1.69603 | 0.00725803 | 0.981725 | 77.892 | 233.676 | sufficient | detected |
+| `ff_25c_3.30v` | 200 | 0 | 1.87109 | 0.00640147 | 0.981725 | 97.4301 | 292.29 | sufficient | detected |
+| `ff_125c_2.97v` | 200 | 0 | 1.63959 | 0.0063209 | 0.981725 | 86.4642 | 259.393 | sufficient | detected |
+| `tt_-40c_3.63v` | 200 | 0 | 2.13283 | 0.0076442 | 0.981725 | 93.0041 | 279.012 | sufficient | detected |
+| `tt_25c_3.30v` | 200 | 0 | 1.91095 | 0.00636431 | 0.981725 | 100.087 | 300.26 | sufficient | detected |
+| `tt_125c_2.97v` | 200 | 0 | 1.67766 | 0.00489921 | 0.981725 | 114.145 | 342.435 | sufficient | detected |
+| `ss_-40c_3.63v` | 200 | 0 | 2.17257 | 0.00697421 | 0.981725 | 103.838 | 311.515 | sufficient | detected |
+| `ss_25c_2.97v` | 200 | 0 | 1.74226 | 0.00546601 | 0.981725 | 106.248 | 318.744 | sufficient | detected |
+| `ss_125c_3.63v` | 200 | 0 | 2.10919 | 0.00524258 | 0.981725 | 134.106 | 402.319 | sufficient | detected |
 
 `errored` counts draws that produced no usable measurement (for the SNM fixtures: a draw whose butterfly was not bistable, so no square exists to measure). `klt yield` excludes them from every statistic, so a record with a non-zero `errored` column states a yield estimate *conditioned on a measurable draw* -- read the errored count alongside it, never the yield alone.
 
 #### Determinism control (mismatch off)
 
-With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the number the deterministic corner sweep already recorded for the same corner. This is what ties the MC evidence to the ratified 9-corner evidence rather than leaving it a parallel, unanchored claim.
+With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically for every draw, the number the deterministic corner sweep already recorded for the same corner. This is what ties the MC evidence to the ratified 27-corner evidence rather than leaving it a parallel, unanchored claim.
 
 | Corner | N | errored | distinct value(s) (V) | verdict |
 |---|---|---|---|---|
@@ -220,7 +220,7 @@ With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically f
 
 #### Negative control
 
-Deliberate defect: **known-bad variant: supply collapsed to 0.60 V, far below spec/sram.md's ratified 2.97 V minimum, with per-instance mismatch drawn at 6x the PDK's own sigma -- a write that no longer completes inside the fixed 1.8 ns write pulse**, drawn with its own independent, reproducibly-derived seeds and analysed by `klt yield` against the *same* spec limits as the nominal measurement. A `detected` verdict means the control's empirical yield is lower **and** its exact (Clopper-Pearson) confidence interval does not overlap the nominal's -- i.e. these statistics demonstrably do detect a degraded design, rather than being assumed to.
+Deliberate defect: **known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)**, drawn with its own independent, reproducibly-derived seeds and analysed by `klt yield` against the *same* spec limits as the nominal measurement. A `detected` verdict means the control's empirical yield is lower **and** its exact (Clopper-Pearson) confidence interval does not overlap the nominal's -- i.e. these statistics demonstrably do detect a degraded design, rather than being assumed to.
 
 #### `klt yield` run-level warnings
 

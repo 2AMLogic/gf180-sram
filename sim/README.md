@@ -577,3 +577,39 @@ to compute that same product as "9 corners"; #53 corrected the spec text to
 correction changed no axis, no corner, and no verdict -- records written
 before it still carry the old "9" in their own generated prose, which the
 append-only rule preserves as-is.
+
+### The minted `klt sim` envelope (issue #128, T1 item 5)
+
+`sim/signoff-sim-envelope.json` is the machine-checkable form of the same
+27-corner sweep: a **minted** `klt sim`-shaped evidence envelope (the only
+evidence kind `klt signoff`'s tier-verdict mode accepts for T1 item 5),
+transcribed verbatim from the same five records the rollup above reads by
+`sim/lib/mint_sim_envelope.py`. It is minted rather than run for a stated,
+structural reason this repo has already documented: `klt sim`'s measurement
+contract is ngspice `.meas` cards over a bare circuit body, and this
+block's three binding methodologies are not expressible that way --
+read/hold SNM is a butterfly-square fit over two independently swept VTC
+curves (`snm_extract.py --pair`), and write margin is a write-trip
+bisection inside the testbench's own `.control` block. The envelope says
+all of this about itself in its `mint` block, carries no `klt_version`
+(nothing `klt`-invoked produced it), and pins its inputs the same way the
+`klt`-native reports do: its `provenance.input.content_hash` is the
+sha256 of the five record files' bytes, which is exactly what the signoff
+manifest's item-5 citation pins.
+
+The regeneration discipline is the same enforced-not-remembered contract
+as the rollup above (`scripts/ci/check_evidence_format.py` check 6):
+
+```bash
+python3 sim/lib/mint_sim_envelope.py > sim/signoff-sim-envelope.json
+./signoff/regenerate.sh   # refreshes the item-8 pin and re-grades the manifest
+```
+
+A superseding corner-sweep record changes the envelope's input pin with
+it, so the item-5 citation goes red in CI instead of silently pinning
+transcribed values that no longer match the committed records -- re-mint,
+re-pin items 5 and 8 in `signoff/block-manifest.json`, and re-grade. If a
+future `klt sim` release grows a way to host these methodologies natively,
+re-run the sweep under the verb and retire the mint in favor of a
+first-party envelope.
+

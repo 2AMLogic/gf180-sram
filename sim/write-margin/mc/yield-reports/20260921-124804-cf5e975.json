@@ -1,0 +1,1093 @@
+{
+  "samples": "sim/write-margin/mc/samples/20260921-124804-cf5e975.json",
+  "limits": null,
+  "source": {
+    "kind": "sample-set",
+    "netlist": null,
+    "monte_carlo": null,
+    "sample_count": 1800
+  },
+  "schema_version": 1,
+  "confidence": 0.95,
+  "target_ci_halfwidth": 0.01,
+  "min_samples": 2,
+  "status": "reported",
+  "measurement_count": 9,
+  "measurements": [
+    {
+      "name": "write_trip_voltage_v@ff_-40c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ff_-40c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 1.6960262500000016,
+        "stddev": 0.007258029165990709,
+        "min": 1.67606,
+        "max": 1.71431,
+        "median": 1.69673,
+        "skewness": 0.02180469659385584,
+        "excess_kurtosis": -0.34925664812001944,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.4151828556868587,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 77.89195529585139,
+        "cpk_confidence_interval": {
+          "low": 70.23938946177654,
+          "high": 85.54452112992624
+        },
+        "sigma_to_spec": 233.67586588755415,
+        "sigma_to_spec_confidence_interval": {
+          "low": 210.71816838532962,
+          "high": 256.6335633897787
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 100,
+        "errored": 0,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.79,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6970846206494601,
+              "high": 0.8650563042946691
+            },
+            "n": 100
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8778938603099056,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.82647940274949,
+              "high": 0.9293083178703211
+            },
+            "n": 100
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@ff_-40c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@ff_25c_3.30v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ff_25c_3.30v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 1.8710883999999988,
+        "stddev": 0.0064014704215351265,
+        "min": 1.85544,
+        "max": 1.88828,
+        "median": 1.87085,
+        "skewness": 0.11982611705081626,
+        "excess_kurtosis": -0.08345429292094986,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.3416119464901061,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 97.43013593176383,
+        "cpk_confidence_interval": {
+          "low": 87.8580867498857,
+          "high": 107.00218511364196
+        },
+        "sigma_to_spec": 292.29040779529146,
+        "sigma_to_spec_confidence_interval": {
+          "low": 263.5742602496571,
+          "high": 321.00655534092584
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 99,
+        "errored": 1,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.8282828282828283,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7393610820060394,
+              "high": 0.8966666781050618
+            },
+            "n": 99
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8902363970324029,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.8412606266724512,
+              "high": 0.9392121673923546
+            },
+            "n": 99
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@ff_25c_3.30v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@ff_125c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ff_125c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 1.6395944999999985,
+        "stddev": 0.006320901417014677,
+        "min": 1.60881,
+        "max": 1.65467,
+        "median": 1.63963,
+        "skewness": -0.7927492098583224,
+        "excess_kurtosis": 2.528090601433033,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.8543112790390502,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "rejected"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 86.46417084260158,
+        "cpk_confidence_interval": {
+          "low": 77.96944908302632,
+          "high": 94.95889260217683
+        },
+        "sigma_to_spec": 259.39251252780474,
+        "sigma_to_spec_confidence_interval": {
+          "low": 233.90834724907896,
+          "high": 284.8766778065305
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 98,
+        "errored": 2,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.8673469387755102,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7838459971285878,
+              "high": 0.9274356875218497
+            },
+            "n": 98
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.928200591383635,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.8892058739270725,
+              "high": 0.9671953088401974
+            },
+            "n": 98
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@ff_125c_2.97v': the sample set is not consistent with a normal distribution (Anderson-Darling A2* = 0.8543 > 0.787); treat the parametric yield estimate and Cpk as indicative only and prefer the empirical estimate",
+        "measurement 'write_trip_voltage_v@ff_125c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@tt_-40c_3.63v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "tt_-40c_3.63v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 2.1328255999999994,
+        "stddev": 0.007644201444140062,
+        "min": 2.1141,
+        "max": 2.14778,
+        "median": 2.1336,
+        "skewness": -0.1978862348659444,
+        "excess_kurtosis": -0.67529781254999,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.7385831301294505,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 93.0040726767692,
+        "cpk_confidence_interval": {
+          "low": 83.86685286730857,
+          "high": 102.14129248622983
+        },
+        "sigma_to_spec": 279.0122180303076,
+        "sigma_to_spec_confidence_interval": {
+          "low": 251.60055860192568,
+          "high": 306.4238774586895
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 100,
+        "errored": 0,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.7,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6001853238201962,
+              "high": 0.7875935795104623
+            },
+            "n": 100
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8052544804023701,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7420487660821111,
+              "high": 0.8684601947226291
+            },
+            "n": 100
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@tt_-40c_3.63v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@tt_25c_3.30v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "tt_25c_3.30v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 1.9109498000000023,
+        "stddev": 0.006364310899549981,
+        "min": 1.89492,
+        "max": 1.93057,
+        "median": 1.91063,
+        "skewness": 0.11012272405068527,
+        "excess_kurtosis": -0.030657915342240383,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.25246502405293175,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 100.08676142953802,
+        "cpk_confidence_interval": {
+          "low": 90.2537173795933,
+          "high": 109.91980547948273
+        },
+        "sigma_to_spec": 300.26028428861406,
+        "sigma_to_spec_confidence_interval": {
+          "low": 270.7611521387799,
+          "high": 329.75941643844817
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 94,
+        "errored": 6,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.6702127659574468,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.565615043837866,
+              "high": 0.7637521771653364
+            },
+            "n": 94
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8245886079713828,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.7620663965111499,
+              "high": 0.8871108194316156
+            },
+            "n": 94
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@tt_25c_3.30v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@tt_125c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "tt_125c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 1.6776607500000003,
+        "stddev": 0.004899212011042777,
+        "min": 1.66627,
+        "max": 1.69002,
+        "median": 1.6776,
+        "skewness": 0.12457683842174071,
+        "excess_kurtosis": -0.47572610485056765,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.27966435139316476,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 114.14493774499307,
+        "cpk_confidence_interval": {
+          "low": 102.93077393727691,
+          "high": 125.35910155270923
+        },
+        "sigma_to_spec": 342.43481323497923,
+        "sigma_to_spec_confidence_interval": {
+          "low": 308.79232181183073,
+          "high": 376.0773046581277
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 97,
+        "errored": 3,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.7319587628865979,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6324160301198938,
+              "high": 0.8168494861322337
+            },
+            "n": 97
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8852065059768397,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.8345870020466165,
+              "high": 0.9358260099070629
+            },
+            "n": 97
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@tt_125c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@ss_-40c_3.63v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ss_-40c_3.63v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 2.1725729500000033,
+        "stddev": 0.006974211203213963,
+        "min": 2.14977,
+        "max": 2.18943,
+        "median": 2.17259,
+        "skewness": -0.10955099386935481,
+        "excess_kurtosis": -0.02494481286576855,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.25994953500481366,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 103.83840727387229,
+        "cpk_confidence_interval": {
+          "low": 93.63679001025118,
+          "high": 114.04002453749341
+        },
+        "sigma_to_spec": 311.5152218216169,
+        "sigma_to_spec_confidence_interval": {
+          "low": 280.91037003075354,
+          "high": 342.1200736124802
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 100,
+        "errored": 0,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.48,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.37900548017796143,
+              "high": 0.5822102345936915
+            },
+            "n": 100
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7595107981763463,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6913591154843819,
+              "high": 0.8276624808683106
+            },
+            "n": 100
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@ss_-40c_3.63v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@ss_25c_2.97v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ss_25c_2.97v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 1.74225645,
+        "stddev": 0.005466010358910661,
+        "min": 1.72664,
+        "max": 1.75746,
+        "median": 1.74241,
+        "skewness": -0.1089839909573006,
+        "excess_kurtosis": -0.17387256208419855,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.24192744649856462,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 106.24790512027862,
+        "cpk_confidence_interval": {
+          "low": 95.80957123967048,
+          "high": 116.68623900088676
+        },
+        "sigma_to_spec": 318.74371536083584,
+        "sigma_to_spec_confidence_interval": {
+          "low": 287.4287137190114,
+          "high": 350.0587170026603
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 96,
+        "errored": 4,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.5,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.3961779239333538,
+              "high": 0.603822076066646
+            },
+            "n": 96
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.7499745101689557,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6795452052734693,
+              "high": 0.820403815064442
+            },
+            "n": 96
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@ss_25c_2.97v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    },
+    {
+      "name": "write_trip_voltage_v@ss_125c_3.63v",
+      "unit": "V",
+      "n": 200,
+      "errored": 0,
+      "failed_unmeasurable": 0,
+      "limits": {
+        "min": 0.0
+      },
+      "source_corners": [
+        "ss_125c_3.63v"
+      ],
+      "distribution": {
+        "model": "normal",
+        "mean": 2.1091886000000004,
+        "stddev": 0.0052425822246207595,
+        "min": 2.09549,
+        "max": 2.12186,
+        "median": 2.10934,
+        "skewness": -0.00407780653079256,
+        "excess_kurtosis": -0.4160046248778788,
+        "normality": {
+          "test": "anderson-darling",
+          "statistic": 0.26947482987756616,
+          "critical_value": 0.787,
+          "significance": 0.05,
+          "verdict": "consistent"
+        }
+      },
+      "yield": {
+        "empirical": {
+          "method": "clopper-pearson",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 0.9817246596448637,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "normal": {
+          "method": "normal-delta",
+          "estimate": 1.0,
+          "confidence": 0.95,
+          "confidence_interval": {
+            "low": 1.0,
+            "high": 1.0
+          },
+          "n": 200
+        },
+        "variance_reduced": null
+      },
+      "capability": {
+        "cp": null,
+        "cpk": 134.10621646807365,
+        "cpk_confidence_interval": {
+          "low": 120.93098861529144,
+          "high": 147.28144432085588
+        },
+        "sigma_to_spec": 402.318649404221,
+        "sigma_to_spec_confidence_interval": {
+          "low": 362.79296584587433,
+          "high": 441.84433296256765
+        },
+        "limiting_side": "lower"
+      },
+      "sample_size": {
+        "n": 200,
+        "observed_ci_halfwidth": 0.009137670177568169,
+        "target_ci_halfwidth": 0.01,
+        "required_n": 183,
+        "required_n_for_target": null,
+        "verdict": "sufficient",
+        "method": "clopper-pearson-zero-failures",
+        "variance_reduced": null
+      },
+      "negative_control": {
+        "description": "known-bad variant: sw_stat_mismatch=6 (6x the PDK's per-instance Vt/current-factor mismatch sigma), VDD=0.60 V (below spec/sram.md's ratified 2.97 V minimum)",
+        "n": 81,
+        "errored": 19,
+        "failed_unmeasurable": 0,
+        "yield": {
+          "empirical": {
+            "method": "clopper-pearson",
+            "estimate": 0.7530864197530864,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.6447397895581881,
+              "high": 0.8421913831723873
+            },
+            "n": 81
+          },
+          "normal": {
+            "method": "normal-delta",
+            "estimate": 0.8654878812190093,
+            "confidence": 0.95,
+            "confidence_interval": {
+              "low": 0.8056257622723044,
+              "high": 0.9253500001657142
+            },
+            "n": 81
+          },
+          "variance_reduced": null
+        },
+        "nominal_empirical_estimate": 1.0,
+        "degradation_detected": true,
+        "verdict": "detected"
+      },
+      "analytic_cross_check": null,
+      "sampling": {
+        "strategy": "plain_random",
+        "replicates": null,
+        "effective_sample_size": null
+      },
+      "status": "reported",
+      "warnings": [
+        "measurement 'write_trip_voltage_v@ss_125c_3.63v': no sample fell outside the limits, so the empirical yield is bounded only from below -- \"at least 98.1725% at 95% confidence, N = 200\" is the honest statement, not \"100% yield\""
+      ]
+    }
+  ],
+  "warnings": [
+    "no measurement declared a target_yield, so no yield claim was checked -- the estimates below are reported, never failed"
+  ]
+}
