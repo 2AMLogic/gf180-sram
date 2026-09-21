@@ -313,13 +313,15 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
    disclosure of that flatten, not a real defect. Array/macro LVS is
    therefore achievable today via `options.flatten_reference`; it was a
    missing compare-side option, not a fundamentally unsolvable
-   flat-vs-hierarchical mismatch. (One caveat: the `klt 0.2.0` build used
-   here predates klayout-tools#1205's `options` echo in the response JSON,
-   so `layout/reports/lvs-array.json` does not literally carry an
-   `options.flatten_reference: true` field — the flatten is instead visible
-   via the `topology.flattened` disclosure entry described above and the
-   fully-matched device/net/pin counts, which are only possible with the
-   reference flattened.)
+   flat-vs-hierarchical mismatch. (Historical caveat: the original `klt 0.2.0`
+   mint of `layout/reports/lvs-array.json` predates klayout-tools#1205's
+   `options` echo in the response JSON, so that earlier artifact did not
+   literally carry an `options.flatten_reference: true` field — the flatten
+   was visible only via the `topology.flattened` disclosure entry described
+   above and the fully-matched device/net/pin counts. The currently
+   committed report, re-minted with `klt 0.5.0` per its `provenance` block,
+   echoes the full `options` object and does literally carry
+   `flatten_reference: true`.)
 3. **No bitcell/array generator, and no grid placement in `gen-compose`** (the
    finding PR #36 recorded): `klt gen`'s generators are generic matched-device
    analog primitives, and `gen-compose`'s placement strategies are `row` and
