@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-09-29
 
+- **Issue #145** (closed): Remove unused repo_relative_path() in sim/lib/env_provenance.py
+- **PR #147**: refactor: drop unused repo_relative_path() from env_provenance
 - **Issue #143** (closed): merge-pr.sh hardcodes squash merge method; fails 405 when repo has allow_squash_merge:false
 
 ### 2026-09-21
