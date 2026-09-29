@@ -65,6 +65,8 @@ If a number is provided (e.g., `/curator 42`):
 
 **CRITICAL**: You MUST run the `gh issue edit` command above BEFORE doing any other work. The `loom:curating` label signals that you have claimed the issue and prevents duplicate work.
 
+**Before claiming, verify `<number>` is actually an issue, not a pull request.** Issue and PR numbers share one namespace, and `gh issue edit <N> --add-label ...` succeeds either way — `gh issue view <N>` does NOT distinguish them (it succeeds for both), so use `gh api repos/OWNER/REPO/issues/<N> --jq 'has("pull_request")'` instead (`true` means `<N>` is a PR). A stray `loom:curating` on a PR has no daemon-side reconciliation and silently drops it out of Judge's review queues (issue #141). This is defense-in-depth alongside the `.loom/hooks/guard-loom-workflow.sh` guard hook, which is the actual enforcement point — not a substitute for it.
+
 **If the named issue already carries `loom:curating`** (someone else's — or a
 dead — claim), do not add the label blindly on top of it: run the "Stale
 `loom:curating` Claim Check" (under "Claiming Work" below) first to decide
