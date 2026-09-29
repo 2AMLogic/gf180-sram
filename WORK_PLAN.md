@@ -10,7 +10,7 @@ hand-edit that region.
 
 Judge-approved PRs stuck under a `loom:operator` merge-risk hold — implementation work is done, only a human merge decision is missing.
 
-_None._
+- **#142**: Guard against issue-only claim labels landing on PRs
 
 ## Operator Priority
 
@@ -50,7 +50,7 @@ Issues carrying `loom:curated`.
 
 ## Proposed (Architect / Hermit)
 
-- **#145**: Remove unused repo_relative_path() in sim/lib/env_provenance.py *(hermit)*
+_None._
 
 ## Epics
 
@@ -60,13 +60,13 @@ _None._
 
 | Tier | Count |
 |------|-------|
-| Operator merge-risk holds | 0 |
+| Operator merge-risk holds | 1 |
 | Operator priority | 0 |
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 1 |
-| Architect / Hermit proposals | 1 |
+| Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
