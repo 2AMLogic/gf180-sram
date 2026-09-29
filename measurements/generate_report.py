@@ -91,25 +91,6 @@ def field_like(fields: dict[str, str], *substrings: str) -> str | None:
     return None
 
 
-def latest_mc_record_for_claim(records_dir: Path, claim_substring: str) -> Path:
-    """Same convention as signoff.latest_record_for_claim, applied to the
-    parallel sim/<experiment>/mc/records/ tree (sim/README.md, "Monte Carlo
-    / yield evidence records")."""
-    candidates = []
-    for path in sorted(records_dir.glob("*.md")):
-        text = path.read_text()
-        for line in text.splitlines():
-            if line.startswith("- **Claim**:") and claim_substring in line:
-                candidates.append(path)
-                break
-    if not candidates:
-        raise SystemExit(
-            f"no MC record under {records_dir} has a Claim containing "
-            f"{claim_substring!r}"
-        )
-    return sorted(candidates)[-1]
-
-
 def rel(p: Path) -> str:
     return str(p.relative_to(REPO_ROOT))
 
@@ -236,7 +217,7 @@ def parse_md_table(text: str, heading_prefix: str) -> list[list[str]]:
 
 def mc_summary(slug: str, claim_substring: str) -> dict:
     records_dir = REPO_ROOT / "sim" / slug / "mc" / "records"
-    record = latest_mc_record_for_claim(records_dir, claim_substring)
+    record = signoff.latest_record_for_claim(records_dir, claim_substring)
     text = record.read_text()
     fields = parse_fields(text)
 
@@ -270,7 +251,7 @@ def embed_mc_record(slug: str, claim_substring: str) -> str:
     klt-yield warnings), dropping the Links/Reproduce/verbatim-text-report
     tail that would otherwise duplicate the same numbers a third time."""
     records_dir = REPO_ROOT / "sim" / slug / "mc" / "records"
-    record = latest_mc_record_for_claim(records_dir, claim_substring)
+    record = signoff.latest_record_for_claim(records_dir, claim_substring)
     text = record.read_text()
     lines = text.splitlines()
 
