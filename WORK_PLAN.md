@@ -41,12 +41,14 @@ _None._
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#142**: Guard against issue-only claim labels landing on PRs
+- **#151**: refactor(measurements): remove duplicated latest_mc_record_for_claim
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
 - **#141**: loom:curating claim label stuck on PR #139 for 2+ days — Curator dispatch mismatched a PR number for an issue *(curated)*
+- **#149**: Remove duplicated latest_mc_record_for_claim: reuse signoff.latest_record_for_claim *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -65,8 +67,8 @@ _None._
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 1 |
-| Curated | 1 |
+| Approved PRs awaiting merge | 2 |
+| Curated | 2 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
