@@ -12,9 +12,9 @@ Judge-approved PRs stuck under a `loom:operator` merge-risk hold — implementat
 
 _None._
 
-## Urgent
+## Operator Priority
 
-Issues flagged as highest priority (`loom:urgent`).
+Issues the operator starred (`loom:operator-priority`); land these first.
 
 _None._
 
@@ -28,8 +28,7 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-- **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9)
-- **#22**: Produce the SRAM macro layout / GDS (T1 item 2)
+_None._
 
 ## PRs Awaiting Review
 
@@ -41,24 +40,17 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-_None._
+- **#142**: Guard against issue-only claim labels landing on PRs
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
-- **#44**: Guard-decision review: git clean -fd ask fired on scoped worktree cleanup, propose keep-flagged *(curated)*
-- **#24**: Ship the ratified 9-corner spec testbenches (T1 item 9) *(curated)*
-- **#23**: Run DRC, LVS, and post-layout PEX verification on the SRAM macro (T1 items 3, 4, 7) *(curated)*
-- **#22**: Produce the SRAM macro layout / GDS (T1 item 2) *(curated)*
+- **#141**: loom:curating claim label stuck on PR #139 for 2+ days — Curator dispatch mismatched a PR number for an issue *(curated)*
 
 ## Proposed (Architect / Hermit)
 
-- **#10**: Lay out the 6T bitcell as a tileable cell, DRC- and LVS-clean standalone and tiled *(architect)*
-- **#9**: Draw and size the 6T bitcell, and measure read SNM, hold SNM, write margin and access time across the ratified nine corners *(architect)*
-- **#8**: Survey gf180mcu's design rules for SRAM-specific allowances, and run the open DRC deck against the foundry's own bitcell *(architect)*
-- **#7**: Spec gap: the write-margin criterion cites a timing target that does not exist, and signoff as ratified cannot reach T1 *(architect)*
-- **#6**: Bootstrap the sim harness, PDK environment, and evidence CI from gf180-bandgap *(architect)*
+- **#145**: Remove unused repo_relative_path() in sim/lib/env_provenance.py *(hermit)*
 
 ## Epics
 
@@ -69,12 +61,12 @@ _None._
 | Tier | Count |
 |------|-------|
 | Operator merge-risk holds | 0 |
-| Urgent | 0 |
+| Operator priority | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 2 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 0 |
-| Curated | 4 |
-| Architect / Hermit proposals | 5 |
+| Approved PRs awaiting merge | 1 |
+| Curated | 1 |
+| Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
