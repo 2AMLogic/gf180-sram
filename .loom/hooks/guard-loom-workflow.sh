@@ -1906,6 +1906,131 @@ if [[ -n "$REPO_ROOT" ]] && echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qE '(^|[^[:aln
 fi
 
 # =============================================================================
+# LOOM: Deny a claim-label add that mismatches issue vs. PR (issue #141)
+#
+# `loom:curating` is an issue-only claim label ("Curator is enhancing this
+# *issue*"). But issue and PR numbers share ONE namespace per repo, and `gh
+# issue edit <N> --add-label <label>` -- whose underlying REST endpoint,
+# `/repos/OWNER/REPO/issues/<N>/labels`, is IDENTICAL for issues and PRs --
+# succeeds whether <N> is an issue or a PR. A Curator dispatch pass that
+# builds its claim-candidate list without filtering out PR numbers can claim
+# a PR by mistake: observed live on this repo's PR #139, where `loom:curating`
+# sat on a draft PR for 2+ days with no daemon-side reconciliation
+# (`.loom/docs/daemon-reference.md` documents `loom:curating` as "agent-side
+# only, no daemon backstop"), making the PR invisible to both Judge review
+# queues.
+#
+# `gh issue view <N>` does NOT distinguish an issue from a PR -- it succeeds
+# for both (verified live against #139) -- so it cannot be the discriminator.
+# The reliable check is the REST issue resource's own `pull_request` key,
+# present only when <N> is a PR:
+#   gh api repos/OWNER/REPO/issues/<N> --jq 'has("pull_request")'
+#
+# This is the one guard in this file that performs a LIVE forge lookup rather
+# than a pure text-pattern match on $COMMAND -- the distinguishing fact
+# (issue vs. PR) does not exist anywhere in the command text itself, only the
+# forge knows it. Consistent with this file's fail-open contract (see header
+# comment at the top of this file): OWNER/REPO resolution failing, the `gh
+# api` call itself failing/erroring/rate-limiting, a missing `gh` binary, or
+# any result other than a literal "true" all fall through to ALLOW -- never a
+# hang, never a deny. A bounded `timeout` keeps a slow/hung network call from
+# blocking the tool call indefinitely. Deliberately narrow (start with the
+# demonstrated failure): only `loom:curating` is covered today, not sibling
+# issue-only claim labels (`loom:triage`, `loom:building`, `loom:architect`).
+# =============================================================================
+
+_CLAIM_LABEL_GUARD_CACHE=""
+claim_label_guard_enabled() {
+    if [[ -z "$_CLAIM_LABEL_GUARD_CACHE" ]]; then
+        local enabled=true raw
+        if [[ -n "$REPO_ROOT" ]]; then
+            raw=$(loom_config_get "$REPO_ROOT" "guards.claimLabelPrMismatch" "true" 2>/dev/null) || raw=true
+            [[ "$raw" == "false" ]] && enabled=false
+        fi
+        case "${LOOM_GUARD_CLAIM_LABEL_PR_MISMATCH:-}" in
+            0 | false | no) enabled=false ;;
+            1 | true | yes) enabled=true ;;
+        esac
+        _CLAIM_LABEL_GUARD_CACHE="$enabled"
+    fi
+    [[ "$_CLAIM_LABEL_GUARD_CACHE" == "true" ]]
+}
+
+CLAIM_LABEL_TO_GUARD="loom:curating"
+CLAIM_LABEL_ISSUE_NUM=""
+
+# Matched against $GH_PR_MERGE_SCAN_TEXT -- the SAME masked copy of $COMMAND
+# already computed above for the gh-pr-merge redirect check -- rather than
+# raw $COMMAND, so a mention of `gh issue edit 139 --add-label loom:curating`
+# purely as inert narration (a quoted echo argument documenting this very
+# guard, a cat-heredoc commit-message body, a --search value, ...) does not
+# false-positive as a real invocation, for the identical reasons and via the
+# identical masking passes documented on GH_PR_MERGE_SCAN_TEXT's own
+# definition above. A raw, unquoted top-level invocation is never masked by
+# any of those passes, so real detection is unaffected.
+
+# Form 1: `gh issue edit <N> ... --add-label <value>[,<value>...]` (also
+# matches `--add-label=<value>`). <value> may be a comma-separated list
+# and/or quoted; every comma-separated entry is checked individually.
+if [[ "$GH_PR_MERGE_SCAN_TEXT" =~ gh[[:space:]]+issue[[:space:]]+edit[[:space:]]+([0-9]+) ]]; then
+    _CLAIM_EDIT_NUM="${BASH_REMATCH[1]}"
+    if [[ "$GH_PR_MERGE_SCAN_TEXT" =~ --add-label[[:space:]]*=?[[:space:]]*[\"\']?([A-Za-z0-9:,_/-]+) ]]; then
+        _CLAIM_LABEL_RAW="${BASH_REMATCH[1]}"
+        IFS=',' read -ra _CLAIM_LABEL_PARTS <<<"$_CLAIM_LABEL_RAW"
+        for _CLAIM_LP in "${_CLAIM_LABEL_PARTS[@]}"; do
+            if [[ "$_CLAIM_LP" == "$CLAIM_LABEL_TO_GUARD" ]]; then
+                CLAIM_LABEL_ISSUE_NUM="$_CLAIM_EDIT_NUM"
+                break
+            fi
+        done
+    fi
+fi
+
+# Form 2: the equivalent REST call, `gh api .../issues/<N>/labels` adding the
+# same label. Deliberately a narrow textual match (a `gh api` invocation
+# whose path contains `issues/<N>/labels` and whose command text also
+# mentions the guarded label), not a full REST-body parse.
+if [[ -z "$CLAIM_LABEL_ISSUE_NUM" ]] && echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qE 'gh[[:space:]]+api' \
+    && [[ "$GH_PR_MERGE_SCAN_TEXT" =~ issues/([0-9]+)/labels ]]; then
+    _CLAIM_API_NUM="${BASH_REMATCH[1]}"
+    if echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qF "$CLAIM_LABEL_TO_GUARD"; then
+        CLAIM_LABEL_ISSUE_NUM="$_CLAIM_API_NUM"
+    fi
+fi
+
+if [[ -n "$CLAIM_LABEL_ISSUE_NUM" ]] && claim_label_guard_enabled; then
+    _CLAIM_OWNER_REPO=""
+    if [[ -n "$CWD" ]] && [[ -d "$CWD" ]]; then
+        _CLAIM_REMOTE_URL=$(git -C "$CWD" config --get remote.origin.url 2>/dev/null) || _CLAIM_REMOTE_URL=""
+        if [[ -n "$_CLAIM_REMOTE_URL" ]]; then
+            _CLAIM_PATH=""
+            if [[ "$_CLAIM_REMOTE_URL" =~ ^git@[^:]+:(.+)$ ]]; then
+                _CLAIM_PATH="${BASH_REMATCH[1]}"
+            elif [[ "$_CLAIM_REMOTE_URL" =~ ^(https?|ssh)://[^/]+/(.+)$ ]]; then
+                _CLAIM_PATH="${BASH_REMATCH[2]}"
+            fi
+            _CLAIM_PATH="${_CLAIM_PATH%.git}"
+            [[ "$_CLAIM_PATH" =~ ^[^/]+/[^/]+$ ]] && _CLAIM_OWNER_REPO="$_CLAIM_PATH"
+        fi
+    fi
+
+    if [[ -n "$_CLAIM_OWNER_REPO" ]] && command -v gh &>/dev/null; then
+        if command -v timeout &>/dev/null; then
+            _CLAIM_IS_PR=$(timeout 10 gh api "repos/${_CLAIM_OWNER_REPO}/issues/${CLAIM_LABEL_ISSUE_NUM}" --jq 'has("pull_request")' 2>/dev/null)
+        else
+            _CLAIM_IS_PR=$(gh api "repos/${_CLAIM_OWNER_REPO}/issues/${CLAIM_LABEL_ISSUE_NUM}" --jq 'has("pull_request")' 2>/dev/null)
+        fi
+        _CLAIM_GH_EXIT=$?
+        if [[ $_CLAIM_GH_EXIT -eq 0 ]] && [[ "$_CLAIM_IS_PR" == "true" ]]; then
+            deny "BLOCKED: #${CLAIM_LABEL_ISSUE_NUM} is a pull request, not an issue -- '${CLAIM_LABEL_TO_GUARD}' is an issue-only claim label. Issue and PR numbers share one namespace and this REST endpoint succeeds for either, so 'gh issue view' cannot tell them apart -- confirmed by 'gh api repos/${_CLAIM_OWNER_REPO}/issues/${CLAIM_LABEL_ISSUE_NUM}' having a pull_request key. See issue #141 (PR #139 in this repo carried this exact stray label for 2+ days)." "loom:claim-label-pr-mismatch"
+        fi
+        # Any other outcome (gh api error, rate limit, auth failure, a
+        # literal "false" result) falls through to ALLOW -- fail-open, per
+        # this file's header contract.
+    fi
+fi
+
+# =============================================================================
 # ALLOW - Everything else passes through
 # =============================================================================
 

@@ -58,3 +58,21 @@ hooks/tests/test-guard-rm-scope-unresolved-var-layout-klt.sh
 # resync that reverts the fork's quoted-resolution hunk turning
 # `test:guards` red rather than silently re-manufacturing the friction.
 hooks/tests/test-guard-worktree-unresolved-var-quoted.sh
+#
+# hooks/guard-loom-workflow.sh (gf180-sram#141): denies adding the
+# issue-only claim label `loom:curating` to a number that is a pull request
+# (`gh issue edit <N> --add-label` and the `gh api .../issues/<N>/labels`
+# form), via a bounded, fail-open live `has("pull_request")` lookup. PR #139
+# carried a stray `loom:curating` for 2+ days with no daemon backstop.
+# Upstream report: rjwalters/loom#9609. No upstream PR yet -- remove these
+# pins once the change lands in defaults/ and arrives via a normal resync.
+hooks/guard-loom-workflow.sh
+hooks/tests/test-guard-loom-workflow-claim-label-pr-mismatch.sh
+#
+# roles/curator.md + commands/loom/curator.md (gf180-sram#141): the same
+# role text installed twice; both carry the "verify <number> is an issue,
+# not a PR, before claiming" paragraph. Pinning only one would leave the
+# other reverted and the two copies disagreeing. Same upstream report and
+# removal condition as the guard above.
+roles/curator.md
+commands/loom/curator.md
