@@ -26,9 +26,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 EXPERIMENT_DIR = ROOT / "sim" / "pex" / "write-margin"
 
-PROCESSES = ["ff", "tt", "ss"]
-TEMPS = [-40, 25, 125]
-VDDS = ["2.97", "3.30", "3.63"]
+SIM_LIB = ROOT / "sim" / "lib"
+sys.path.insert(0, str(SIM_LIB))
+import render_signoff_table as signoff  # noqa: E402  (path-injected import)
 
 RESULT_RE = re.compile(r"RESULT:\s*write_trip_voltage_v\s*=\s*([-\d.eE]+)")
 
@@ -55,18 +55,15 @@ def main(argv: list[str]) -> int:
 
     rows = []
     open_count = 0
-    for process in PROCESSES:
-        for temp in TEMPS:
-            for vdd in VDDS:
-                corner_id = f"{process}_{temp}c_{vdd}v"
-                sch_v = read_wtv(schematic_id, corner_id)
-                ext_v = read_wtv(extracted_id, corner_id)
-                if sch_v is None or ext_v is None:
-                    open_count += 1
-                    rows.append((corner_id, sch_v, ext_v, None, "error"))
-                    continue
-                delta_pct = 100.0 * (ext_v - sch_v) / abs(sch_v) if sch_v != 0 else None
-                rows.append((corner_id, sch_v, ext_v, delta_pct, "pass"))
+    for corner_id in signoff.CORNER_ORDER:
+        sch_v = read_wtv(schematic_id, corner_id)
+        ext_v = read_wtv(extracted_id, corner_id)
+        if sch_v is None or ext_v is None:
+            open_count += 1
+            rows.append((corner_id, sch_v, ext_v, None, "error"))
+            continue
+        delta_pct = 100.0 * (ext_v - sch_v) / abs(sch_v) if sch_v != 0 else None
+        rows.append((corner_id, sch_v, ext_v, delta_pct, "pass"))
 
     out_dir = EXPERIMENT_DIR / "delta"
     out_dir.mkdir(parents=True, exist_ok=True)
