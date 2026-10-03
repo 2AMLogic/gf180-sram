@@ -54,11 +54,16 @@ is amended.
 
 `klt signoff` renders every T1 item either `met` (a cited, freshly-pinned,
 passing check backs it) or `unmet` with a `reason`. Today's committed
-verdict is **10/11 met** (6/11 before issue #126 re-cited items 1, 2, 9, 10) — and per the issue that created this directory, an
-honest mostly-`unmet` mechanical reading is the desired outcome: the
-checklist moved on 2026-09-17 and no hand-read survived that; a report that
-says less than the old hand-read did is worth more than prose nobody can
-re-verify.
+verdict is **10/11 met**. Read it with its caveats: four of those ten rows
+(items 1, 2, 9, 10) are `met` only because issue #126 re-cited them on
+operator direction — the grader accepts a citation there without checking
+that it bears on the item, so those four rows are *not* evidence for their
+items (see the note after the table). Item 11 is unmet because the pinned
+`klt` cannot grade it, not because the evidence is missing. Without the
+operator-directed re-citations the reading is 6/11. (Historical: when this
+directory was created, a mostly-`unmet` mechanical reading was the expected
+and accepted outcome, because the checklist moved on 2026-09-17 and no
+hand-read survived that change.)
 
 | Item | Verdict today | Why — and what would change it |
 |---|---|---|
@@ -74,9 +79,20 @@ re-verify.
 | 10 — Repo hygiene | **met** (cited by issue #126, operator-directed) | Cites `layout/reports/lvs-bitcell.json` (`status: match`), which has **no topical bearing** on hygiene — no `klt` envelope does; it is cited only so the grader renders a verdict. `klt signoff` 0.5.0 grades this item on *some* passing native envelope being cited, not on topical relevance, and rejects `kind: generic` here (only item 8 accepts it) — so the citation satisfies the grader and does not itself prove the item; the substance is the human audit: this README, the root README, `LICENSE`, and `.github/workflows/ci.yml` running on every PR and push. |
 | 11 — Power delivery (structural) | unmet `unrecognized_envelope` | **The evidence now exists** — committed by issue #124: the supply spec `layout/sram_256x32/erc-supply-spec.json` and the `klt erc` report `layout/reports/erc-array-supply.json` (`erc_finding_count: 0` — zero `erc.unconnected_net`, zero `erc.supply_short` naming VDD/VSS, i.e. each declared supply resolves to exactly one electrical island; the check proven to compute via a negative control; input `content_hash` matching the committed array GDS; `erc.missing_tie` not computed, disclosed with its standing-in well-tie evidence — item 4's own `lvs-array.json` carries VDD/VSS in `net_correspondence` against the SPICE reference — full reading in `layout/reports/README.md` § "Item 11"). The row is now **cited** in the manifest (pinned to the same array-GDS `content_hash` item 3's citation pins) but stays mechanically unmet: the pinned 0.5.0 grading wheel predates item 11's grading rules entirely (klayout-tools#2057), so it renders the cited envelope `unrecognized_envelope` — cited-but-unreadable, distinguishable from `no_evidence`. Turning the row `met` needs all three of: (i) a **released** `klt` that grades item 11, adopted per this directory's grading discipline (the regenerate.sh pin, the CI job's pip install, and `check_signoff_freshness.py`'s pin move together, and the vendored `design-evidence-tiers.md` + `--tiers-doc` retire at the same time); (ii) the supply spec **regaining `ties[]`**, minted under the post-#2169-fix `klt`: the false-`erc.supply_short` ties[] blocker is fixed upstream (klayout-tools#2186, 2026-09-20 — tie conduction scoped to tap sites, the tie graph isolated) and the checklist's item 11 now demands zero `erc.missing_tie` *from a tie the run actually checked*, rendering a tie-less spec `supply_spec_incomplete`; #124's committed evidence deliberately omits `ties[]` because it was minted under the pre-fix `klt`, where declaring them collapsed the supply read (the spec's `_comment` records the decision), so a re-mint with a checked `ties[]` (the `Nwell`/`Comp∩Nplus` VDD tap is declarable; gf180mcu's substrate is an undrawn p-well, so a substrate-tie entry may additionally need an upstream answer for PDKs that draw no p-well boundary — tool-tracker territory, this design has only `Nwell` 21/0 to scope) replaces that recorded gap; (iii) ~~issue #128's LVS re-mint with input provenance~~ (landed: item 4 is `met` as of 2026-09-21, so item 4's own LVS report — the analog column's supplies-in-`net_correspondence` half — is citable the same turn a released item-11-grading `klt` and a `ties[]`-bearing supply spec arrive). |
 
-Items 1, 2, 9 and 10 are uncited by deliberate choice: the grader accepts
-any passing envelope for them without checking topical relevance (there is
-no verb to bind them to), and citing an envelope that does not actually
-support the claim — to make rows go green — is the failure mode this
-manifest exists to prevent. Their evidence remains the committed,
-human-auditable artifacts named above.
+**Items 1, 2, 9 and 10: what `met` means here.** Until 2026-10-02 these
+items were deliberately left uncited. No `klt` verb binds to them, and
+`klt signoff` 0.5.0 accepts *any* passing native envelope for them without
+checking topical relevance. It also rejects `kind: generic` for them (only
+item 8 accepts it). So the only way to turn them green was to cite something
+the grader cannot judge, and this directory declined to do that. On
+2026-10-02 the operator granted bronze (T1) on the human-audited record
+([`spec/t1-grant-2026-10-02.md`](../spec/t1-grant-2026-10-02.md)) and, in
+issue #126, directed that these four items be re-cited so the mechanical
+verdict tracks the granted tier. They are now cited. For these four rows,
+`met` means only that "a passing native envelope is cited". **It is not
+evidence for the item.** Items 1, 2 and 9 cite related envelopes. Item 10's
+citation (`lvs-bitcell.json`) has **no topical bearing** on repo hygiene and
+is a placeholder. For all four, the substance is still the human audit
+named in each row. When a released `klt` offers a kind that can actually
+evidence these items, re-cite them to that and retire these placeholder
+citations. The tool gap is tracked upstream at klayout-tools#2718.
