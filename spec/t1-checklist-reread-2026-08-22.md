@@ -106,6 +106,8 @@ procedure (cited by #13's own guardrails), recording an actual grant is an
 operator action, not something this re-read performs — flagged here for
 visibility only:
 
+**Resolved 2026-10-02: bronze (T1) granted — see [`t1-grant-2026-10-02.md`](t1-grant-2026-10-02.md).**
+
 **OPERATOR: bronze (T1) candidate — 10/10 checklist items pass, with three
 disclosed and now-tracked holes (issues #103, #108, #109, #110) and one
 fully investigated structural limitation (item 7's read/hold SNM PEX gap).**

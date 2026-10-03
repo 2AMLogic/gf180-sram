@@ -4,6 +4,15 @@ An SRAM macro on the [gf180mcu](https://github.com/google/gf180mcu-pdk) open
 PDK, built and verified by AI agents driving
 [klayout-tools](https://github.com/2AMLogic/klayout-tools).
 
+**Bronze (T1, simulation-validated) granted 2026-10-02** (operator ruling,
+issue #126; record: [`spec/t1-grant-2026-10-02.md`](spec/t1-grant-2026-10-02.md)).
+Basis: the 2026-08-22 10/10 hand read with every hole it disclosed since
+closed (#103, #108, #109, #110), plus the passing item-11 power-delivery ERC
+(#124). **Disclosed exception:** item 7's read/hold-SNM post-layout (PEX)
+gap (`sim/pex/README.md`). The machine grader reads 10/11 (`signoff/`): the
+remaining unmet item is item 11, a tooling gap (the pinned klt predates
+item-11 grading), not a substance gap.
+
 **Status: spec ratified; bitcell and 256 x 32 array are DRC-clean and
 LVS-clean (`status: match` for both — see `layout/README.md`'s "Status
 (2026-08-16)" section), and 27-corner PVT signoff has passed (read SNM +

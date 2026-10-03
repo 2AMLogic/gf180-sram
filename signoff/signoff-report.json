@@ -4,7 +4,7 @@
   "kind": "analog",
   "tier": null,
   "t1_item_count": 11,
-  "t1_met_count": 6,
+  "t1_met_count": 10,
   "source_doc": "signoff/design-evidence-tiers.md",
   "items": [
     {
@@ -14,9 +14,16 @@
       "partition": null,
       "text": "committed schematic sources (or generator) plus the netlist derived from them, regenerated on design change.",
       "notes": [],
-      "status": "unmet",
-      "reason": "no_evidence",
-      "citation": null
+      "status": "met",
+      "reason": null,
+      "citation": {
+        "file": "layout/reports/lvs-array.json",
+        "command": null,
+        "kind": "lvs",
+        "check_status": "match",
+        "content_hash": "sha256:aa3b06c33e7c872326fa25b428a475e9467d1c4b70ca398dffb5fb432709bfd5",
+        "exit_status": 0
+      }
     },
     {
       "tier": "T1",
@@ -25,9 +32,16 @@
       "partition": null,
       "text": "committed GDS/OASIS, reproducibly generated or with documented provenance.",
       "notes": [],
-      "status": "unmet",
-      "reason": "no_evidence",
-      "citation": null
+      "status": "met",
+      "reason": null,
+      "citation": {
+        "file": "layout/reports/drc-array.json",
+        "command": null,
+        "kind": "drc",
+        "check_status": "clean",
+        "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925",
+        "exit_status": 0
+      }
     },
     {
       "tier": "T1",
@@ -148,9 +162,16 @@
       "partition": null,
       "text": "every claimed measurement's testbench committed, with a documented cold-start invocation a third party can run; pinned PDK revision.",
       "notes": [],
-      "status": "unmet",
-      "reason": "no_evidence",
-      "citation": null
+      "status": "met",
+      "reason": null,
+      "citation": {
+        "file": "sim/signoff-sim-envelope.json",
+        "command": null,
+        "kind": "sim",
+        "check_status": "pass",
+        "content_hash": "sha256:cd76812bf96c97ab6151a0dbf6a7d344fb0aeb2cb2c6ff3e356075945da8d597",
+        "exit_status": 0
+      }
     },
     {
       "tier": "T1",
@@ -159,9 +180,16 @@
       "partition": null,
       "text": "a README stating what the block is, its spec table, and how to reproduce every result; a license; CI that at minimum keeps the harness and evidence formats valid.",
       "notes": [],
-      "status": "unmet",
-      "reason": "no_evidence",
-      "citation": null
+      "status": "met",
+      "reason": null,
+      "citation": {
+        "file": "layout/reports/lvs-bitcell.json",
+        "command": null,
+        "kind": "lvs",
+        "check_status": "match",
+        "content_hash": "sha256:28472aef6de62270059971dfecc41f74272f567ee9dcfea2701f3cdcaa7cf070",
+        "exit_status": 0
+      }
     },
     {
       "tier": "T1",
