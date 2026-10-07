@@ -10,7 +10,7 @@ hand-edit that region.
 
 Judge-approved PRs stuck under a `loom:operator` merge-risk hold — implementation work is done, only a human merge decision is missing.
 
-- **#142**: Guard against issue-only claim labels landing on PRs
+_None._
 
 ## Operator Priority
 
@@ -40,15 +40,13 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#142**: Guard against issue-only claim labels landing on PRs
-- **#151**: refactor(measurements): remove duplicated latest_mc_record_for_claim
+_None._
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
-- **#141**: loom:curating claim label stuck on PR #139 for 2+ days — Curator dispatch mismatched a PR number for an issue *(curated)*
-- **#149**: Remove duplicated latest_mc_record_for_claim: reuse signoff.latest_record_for_claim *(curated)*
+_None._
 
 ## Proposed (Architect / Hermit)
 
@@ -62,13 +60,13 @@ _None._
 
 | Tier | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 0 |
 | Operator priority | 0 |
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 2 |
-| Curated | 2 |
+| Approved PRs awaiting merge | 0 |
+| Curated | 0 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->

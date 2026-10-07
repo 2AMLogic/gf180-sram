@@ -3,7 +3,23 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-03
+
+- **Issue #144** (closed): Guard telemetry review 2026-09-28: all four logged patterns confirmed correct denials (keep flagged)
+- **Issue #126** (closed): OPERATOR: bronze (T1) grant decision — 10/10 read since 2026-08-22, all holes closed, item 11 now outstanding
+- **PR #155**: Record bronze (T1) grant; re-cite items 1, 2, 9, 10 (#126)
+
+### 2026-09-30
+
+- **Issue #141** (closed): loom:curating claim label stuck on PR #139 for 2+ days — Curator dispatch mismatched a PR number for an issue
+- **PR #142**: Guard against issue-only claim labels landing on PRs
+
 ### 2026-09-29
+
+- **Issue #153** (closed): Consolidate duplicated PVT corner-matrix constants: compare_records.py should reuse render_signoff_table's CORNER_ORDER
+- **PR #154**: refactor: reuse render_signoff_table's CORNER_ORDER in compare_records.py
+- **Issue #149** (closed): Remove duplicated latest_mc_record_for_claim: reuse signoff.latest_record_for_claim
+- **PR #151**: refactor(measurements): remove duplicated latest_mc_record_for_claim
 
 - **Issue #145** (closed): Remove unused repo_relative_path() in sim/lib/env_provenance.py
 - **PR #147**: refactor: drop unused repo_relative_path() from env_provenance
