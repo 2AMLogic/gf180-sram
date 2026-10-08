@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-08
 
+- **Issue #158** (closed): T1 item 11: move the signoff grader pin from klt 0.5.0 to the released 0.6.0 so the power-delivery row is graded
+- **PR #161**: chore(signoff): grade with released klt 0.6.0 and retire the vendored checklist
 - **Issue #150** (closed): Guard-decision review: rm-scope-unresolved-var never got its own #3898 review, propose keep-flagged
 
 ### 2026-10-03
