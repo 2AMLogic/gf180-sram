@@ -61,7 +61,7 @@ jobs:
       # released registry wheel carries the git tag identity the freshness
       # check asserts; same-version snapshots can grade differently.
       - name: Install the pinned grading klt (klayout-tools)
-        run: pip install klayout-tools==0.5.0
+        run: pip install klayout-tools==0.6.0
 
       - name: Re-grade the block manifest; require the committed report to match
         run: ./scripts/ci/check-signoff-freshness.sh

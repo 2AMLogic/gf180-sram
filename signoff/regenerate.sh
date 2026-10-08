@@ -11,20 +11,21 @@
 # version, NOT the `klt` already on PATH. An `uv tool install
 # git+https://github.com/2AMLogic/klayout-tools` snapshot and the PyPI wheel
 # of the same version string are NOT the same code -- observed live for
-# 0.5.0: the git-tag snapshot predates the checklist's eleventh item
+# 0.5.0: the git-tag snapshot predated the checklist's eleventh item
 # ("Power delivery (structural)") and its grading rules, while the PyPI
-# 0.5.0 wheel *renders* all 11 item rows (item skeletons parsed from the
-# vendored `--tiers-doc`) though its own grading rules predate item 11 --
-# a cited item-11 envelope therefore renders `unrecognized_envelope` until
-# a released `klt` that grades item 11 ships -- and quotes DRC `coverage`
-# in item 3's citation. Grading with the same distribution CI grades with
-# (.github/workflows/ci.yml `signoff` job) is what makes the committed
-# report byte-reproducible; keep this pin and that pin in sync.
+# 0.5.0 wheel rendered all 11 item rows only from a vendored `--tiers-doc`
+# copy of the checklist, with grading rules that predated item 11. The
+# active pin is 0.6.0, whose released wheel bundles the eleven-item
+# checklist and item 11's grading rules itself, so no `--tiers-doc` is
+# passed and the report's `source_doc` is the bundled checklist. Grading
+# with the same distribution CI grades with (.github/workflows/ci.yml
+# `signoff` job) is what makes the committed report byte-reproducible;
+# keep this pin and that pin in sync.
 set -euo pipefail
 
 # Keep in sync with the `signoff` job's pip install in
 # .github/workflows/ci.yml.
-KLT_VERSION="0.5.0"
+KLT_VERSION="0.6.0"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -56,9 +57,9 @@ python3 -m venv "$WORK/venv"
 
 # The *identity* of the grading build matters as much as its version string:
 # a `uv tool install git+...` snapshot or a full-checkout install of the
-# same version can grade differently (observed live: an 11-item-era
-# full-repo install under the name "0.5.0"). The released registry wheel
-# reports the git tag it was built from -- assert it.
+# same version can grade differently (observed live under the old 0.5.0
+# pin: an 11-item-era full-repo install under the name "0.5.0"). The
+# released registry wheel reports the git tag it was built from -- assert it.
 python3 - "$WORK" "$KLT_VERSION" <<'EOF'
 import json
 import subprocess
@@ -74,15 +75,14 @@ if info.get("package_version") != version or info.get("git_tag") != f"v{version}
           f"got package_version={info.get('package_version')} "
           f"git_tag={info.get('git_tag')} is_release={info.get('is_release')}. "
           "A same-version snapshot/full-checkout install grades differently "
-          "(e.g. it may carry checklist item 11's rules while the release "
-          "does not); refusing to grade with it.", file=sys.stderr)
+          "(e.g. its bundled checklist or grading rules may differ from "
+          "the release's); refusing to grade with it.", file=sys.stderr)
     sys.exit(1)
 EOF
 
 set +e
 "$WORK/venv/bin/klt" signoff \
     --manifest signoff/block-manifest.json \
-    --tiers-doc signoff/design-evidence-tiers.md \
     --format json > signoff/signoff-report.json
 SIGNOFF_RC=$?
 set -e
