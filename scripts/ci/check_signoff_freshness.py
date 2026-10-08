@@ -4,16 +4,20 @@
 This is the "CI re-runs it, so a manifest citing an artifact that has since
 changed fails rather than rotting" half of issue #125's acceptance criteria.
 signoff/signoff-report.json is the verdict of record; this check re-runs
-`klt signoff --manifest signoff/block-manifest.json --tiers-doc
-signoff/design-evidence-tiers.md --format json` with the same pinned
-released klt (see signoff/regenerate.sh for why the distribution identity
-matters) and requires byte-identical output. Any drift fails loudly:
+`klt signoff --manifest signoff/block-manifest.json --format json` with the
+same pinned released klt -- grading against the checklist that wheel
+bundles, so the report's `source_doc`/`source_doc_content_hash` pin the
+bundled checklist (see signoff/regenerate.sh for why the distribution
+identity matters) -- and requires byte-identical output. Any drift fails
+loudly:
 
   - a cited artifact whose committed content changed (layout GDS, reference
     netlist, PEX report, MC samples document, characterization report)
     changes a pinned content_hash check from `met` to `stale_evidence`,
-  - a manifest/vendored-checklist edit changes rows or `source_doc` pins,
-  - a grading-klt change renders differently under the same manifest.
+  - a manifest edit changes rows or citations,
+  - a grading-klt change (including its bundled checklist, pinned in the
+    report's `source_doc_content_hash`) renders differently under the same
+    manifest.
 
 The fix for any of those is the same one-liner: ./signoff/regenerate.sh
 (then commit the refreshed report — that is the ceremony that keeps the
@@ -29,12 +33,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = REPO_ROOT / "signoff" / "block-manifest.json"
-TIERS_DOC = REPO_ROOT / "signoff" / "design-evidence-tiers.md"
 COMMITTED_REPORT = REPO_ROOT / "signoff" / "signoff-report.json"
 
 # Keep in sync with signoff/regenerate.sh and the `signoff` CI job's pip
 # install line in .github/workflows/ci.yml.
-KLT_VERSION = "0.5.0"
+KLT_VERSION = "0.6.0"
 
 RENDRABLE_EXIT_CODES = {0, 3}  # 0 = tier T1; 3 = rendered, >=1 unmet item
 
@@ -51,10 +54,11 @@ def assert_grading_build() -> None:
     """The grading klt must be the pinned *released* registry wheel.
 
     Same version string, different code, is a real hazard here: git-snapshot
-    and full-checkout installs under the name "0.5.0" that predate (or
-    postdate) the release grade this checklist differently (observed live —
-    see signoff/regenerate.sh). The released wheel reports the git tag it
-    was built from; assert it.
+    and full-checkout installs under a released version's name that predate
+    (or postdate) the release can bundle a different checklist or different
+    grading rules (observed live under the old 0.5.0 pin — see
+    signoff/regenerate.sh). The released wheel reports the git tag it was
+    built from; assert it.
     """
     run = subprocess.run(
         ["klt", "version", "--format", "json"],
@@ -84,18 +88,19 @@ def assert_grading_build() -> None:
 
 
 def render_fresh_report() -> str:
-    # Repo-relative path strings, exactly as signoff/regenerate.sh passes
-    # them: the report echoes the --tiers-doc path into `source_doc`, so an
-    # absolute path here would make the fresh output differ from the
-    # committed report on every machine.
+    # Run from the repo root with a repo-relative manifest path, exactly as
+    # signoff/regenerate.sh does: citation paths in the manifest (and any
+    # working-directory fallback the grader uses to resolve paths inside
+    # cited evidence) are relative to the repo root, and an absolute path
+    # here could make the fresh output differ from the committed report.
+    # No --tiers-doc: the grader uses the checklist bundled in the pinned
+    # wheel.
     run = subprocess.run(
         [
             "klt",
             "signoff",
             "--manifest",
             MANIFEST.relative_to(REPO_ROOT).as_posix(),
-            "--tiers-doc",
-            TIERS_DOC.relative_to(REPO_ROOT).as_posix(),
             "--format",
             "json",
         ],
@@ -161,7 +166,7 @@ def summarize_item_differences(
 
 
 def main() -> None:
-    for path in (MANIFEST, TIERS_DOC, COMMITTED_REPORT):
+    for path in (MANIFEST, COMMITTED_REPORT):
         if not path.is_file():
             fail(f"missing {path.relative_to(REPO_ROOT)}")
     assert_grading_build()
@@ -189,8 +194,8 @@ def main() -> None:
         summarize_item_differences(committed_text, fresh_text), file=sys.stderr
     )
     print(
-        "\nA cited artifact, the manifest, the vendored checklist, or the "
-        "grading klt changed since the report was committed.",
+        "\nA cited artifact, the manifest, or the grading klt (or the "
+        "checklist it bundles) changed since the report was committed.",
         file=sys.stderr,
     )
     print(

@@ -14,7 +14,7 @@ set -euo pipefail
 
 if ! command -v klt >/dev/null 2>&1; then
     echo "FATAL: klt (klayout-tools) is required on PATH." >&2
-    echo "       pip install klayout-tools==0.5.0   # pinned released version" >&2
+    echo "       pip install klayout-tools==0.6.0   # pinned released version" >&2
     exit 1
 fi
 
