@@ -136,16 +136,25 @@ captures.
 * The array tiles into the ratified organization with the right connectivity:
   49,152 devices, wordlines shared per row, bitline pairs shared per column,
   single `VDD`/`VSS` nets.
-* Structural power delivery (T1 item 11, issue #124): `klt erc`'s supply read
-  (`layout/sram_256x32/erc-supply-spec.json` →
-  `layout/reports/erc-array-supply.json`) proves each declared supply
-  (`VDD`, `VSS`) resolves to exactly **one** electrical island on the pure
-  metal-connectivity graph — zero `erc.unconnected_net`, zero
+* Structural power delivery (T1 item 11, issues #124 and #159): `klt erc`'s
+  supply read (`layout/sram_256x32/erc-supply-spec.json` →
+  `layout/reports/erc-array-supply.json`, klt 0.6.0) proves each declared
+  supply (`VDD`, `VSS`) resolves to exactly **one** electrical island on the
+  pure metal-connectivity graph — zero `erc.unconnected_net`, zero
   `erc.supply_short` — with a negative control proving the check computes.
-  `erc.missing_tie` is not computed (the spec omits `ties[]` deliberately,
-  klayout-tools#2169); the well-tie evidence standing in for it is item 4's
-  own LVS `match` carrying the supplies in `net_correspondence`. Full
-  field-by-field reading: `layout/reports/README.md` § "Item 11".
+  The spec declares both ties in `ties[]`, and `erc.missing_tie` is computed
+  for each, with zero findings: `nwell_tie` (Nwell 21/0, tap = Comp AND
+  Nplus, net `VDD`) and `substrate_tie` (gf180mcu draws no p-well, so
+  `well_layer: null` + one `well_boxes` entry per row, tap = Comp AND Pplus,
+  net `VSS`). Both sit in `erc_coverage.checked` with `skipped` empty; the
+  substrate tie is graded `checked_by_well_assertion` — its well region is
+  the spec's own assertion (non-degenerate and falsifiable, but asserted, not
+  drawn). A negative control (issue #159: `nwell_tie` declared on `VSS`)
+  fires 256 `erc.missing_tie`, so the tie check can fail on this layout.
+  The citation is compound: the ERC report plus item 4's `lvs-array.json`
+  (`match`, `VDD`/`VSS` paired in `net_correspondence`), cited alongside it
+  rather than in place of a tie check. Full field-by-field reading:
+  `layout/reports/README.md` § "Item 11".
 * Geometry is on a 5 nm grid and passes `klt precheck`'s hygiene battery.
 
 **Does not prove**:

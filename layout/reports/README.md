@@ -158,6 +158,8 @@ What the other report fields do and do not mean:
   still lists both ties as checked. So the tie check computes and can
   fail on this layout. (The positive run's exit code is 4: the antenna half
   reads `not_checked` by design; `generate.sh` tolerates exactly that.)
+  Only the N-well tie has a recorded negative control; no control has yet
+  been run on `substrate_tie` (the asserted-well tie).
 - `provenance.input.content_hash` matches the committed GDS
   (`sha256:c566b015...`, the same hash `drc-array.json` and
   `extract-array.json` grade), and `provenance.spec.content_hash`
