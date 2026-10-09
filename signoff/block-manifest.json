@@ -42,9 +42,15 @@
       "file": "layout/reports/lvs-bitcell.json",
       "content_hash": "sha256:28472aef6de62270059971dfecc41f74272f567ee9dcfea2701f3cdcaa7cf070"
     },
-    "11": {
-      "file": "layout/reports/erc-array-supply.json",
-      "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
-    }
+    "11": [
+      {
+        "file": "layout/reports/erc-array-supply.json",
+        "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
+      },
+      {
+        "file": "layout/reports/lvs-array.json",
+        "content_hash": "sha256:aa3b06c33e7c872326fa25b428a475e9467d1c4b70ca398dffb5fb432709bfd5"
+      }
+    ]
   }
 }

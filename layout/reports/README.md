@@ -26,7 +26,7 @@ out and overwrites the files below in place.
 | `extract-array.json` | `klt extract --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins -- `devices[]`/`nets[]` omitted from the committed file (~18 MB unabridged; every other field, including counts and provenance, is kept in full) |
 | `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` (`options.flatten_reference: true`, see below) | `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins matched -- the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known gap: array-level LVS" below) |
 | `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
-| `erc-array-supply.json` | `klt erc layout/sram_256x32/sram_256x32_array.gds layout/sram_256x32/erc-supply-spec.json --format json` | `erc_finding_count: 0` -- declared supplies VDD/VSS each resolve to exactly one electrical island; `status: not_checked` is the antenna half's rollup, not the supply verdict (see "Item 11" below) |
+| `erc-array-supply.json` | `klt erc layout/sram_256x32/sram_256x32_array.gds layout/sram_256x32/erc-supply-spec.json --format json` | `erc_finding_count: 0` -- declared supplies VDD/VSS each resolve to exactly one electrical island and both declared ties (`nwell_tie`, `substrate_tie`) are checked, none skipped; `status: not_checked` is the antenna half's rollup, not the supply verdict (see "Item 11" below) |
 
 `drc-foundry-bitcell.json` is generated and maintained separately from the
 five reports above -- it checks the *foundry's* macro, not this repo's own
@@ -112,32 +112,60 @@ What the other report fields do and do not mean:
   conditions are the ERC finding rules, not the overall status -- and an
   antenna or floating-gate finding, were one to appear, is a real defect
   that does not block item 11 (klayout-tools#1994).
-- `erc.missing_tie` is **not computed** by this run: the spec deliberately
-  omits `ties[]`, because declaring one on a real routed design collapses
-  the layout into one electrical island and reports a *false*
-  `erc.supply_short` (klayout-tools#2169, reproduced four ways as
-  gf180-drone-fc FRICTION F-034). Per `klt erc`'s own contract an omitted
-  `ties[]` means the rule is never computed -- the committed spec and this
-  section state that explicitly: it is an absence of evidence, not
-  evidence of absence. The well-tie evidence that stands in for it:
-  (1) `lvs-array.json`'s device-aware `match` with the supplies paired in
-  `net_correspondence` above; (2) `extract-array.json`'s 16,706 extracted
-  nets resolving the supplies to exactly one net each; (3) the bitcell's
-  drawn taps (`Pplus` substrate strip, `Nplus`-on-`Nwell` strip,
-  `layout/bitcell/generate.py`), DRC-clean in `drc-bitcell.json` /
-  `drc-array.json`.
+- `erc.missing_tie` IS computed by this run (issue #159). The spec declares
+  two `ties[]` (derivation in the spec's `_comment`, from
+  `layout/bitcell/generate.py` `X_TIE`/`Y_NTIE_*`/`Y_PTIE_*` and the GDS):
+  `nwell_tie` (Nwell 21/0, tap = Comp 22/0 AND Nplus 32/0, net VDD) and
+  `substrate_tie` (gf180mcu draws no p-well, so `well_layer: null` +
+  one `well_boxes` entry per row, tap = Comp 22/0 AND Pplus 31/0, net VSS;
+  klayout-tools#2255). The earlier omission (false `erc.supply_short`,
+  klayout-tools#2169) is fixed upstream (#2186) and in the released klt
+  0.6.0. In the committed report `erc_coverage` has `checked: 16644`
+  (16,640 `erc.floating_gate` + `erc.missing_tie` for each tie +
+  `erc.net_connectivity` for VDD and VSS), `skipped: 0`,
+  `checked_by_well_assertion: 1` (the substrate tie: its well region is the
+  spec's assertion, which `klt erc` accepts only if non-degenerate and
+  falsifiable; disclosed, not hidden). `erc_coverage` is kept in full in the
+  committed abridgement, as are `erc_findings`, `erc_finding_count`,
+  `ties_disclosure` and `provenance`; `gates[]` is truncated to its first 4
+  of 16,640 entries (verbatim; `gate_count` is the true total) so the
+  envelope stays recognizable to `klt signoff` (a top-level `gates` list
+  plus `gate_role`), and the antenna `coverage` row arrays are collapsed.
+  A zero finding count is only evidence because those tie entries sit in
+  `checked` and `skipped` is empty. `lvs-array.json` is still cited beside
+  it (the manifest's item 11 is the list [ERC report, LVS report]).
 - The supply check demonstrably computes on this layout: declaring a net
-  with no label anywhere in the GDS (negative control, `VDX`) fires
-  `erc.unconnected_net` on the same spec/run shape -- the committed
-  zero-findings result is a passed check, not a skipped one.
+  with no label anywhere in the GDS (negative control, `VDX`, issue #124)
+  fires `erc.unconnected_net` on the same spec/run shape.
+- Negative control for the tie check (issue #159). Tool: released
+  `klayout-tools==0.6.0` (git tag `v0.6.0`, commit `c622e8ad`, klayout
+  0.30.12) via `uvx`. Changed field: `ties[0].net` of the committed spec,
+  `"VDD"` -> `"VSS"` (the N-well tap is then declared to be tied to the
+  wrong supply); nothing else differs (spec saved temporarily as
+  `spec-wrongnet.json`, content hash `sha256:b39bfb63...`; the committed
+  spec is untouched). Command (run from the repo root, ~26 min):
+
+  ```sh
+  uvx --from "klayout-tools==0.6.0" klt erc \
+      layout/sram_256x32/sram_256x32_array.gds spec-wrongnet.json --format json
+  ```
+
+  Result: exit code 3, `erc_status: violations`, `erc_finding_count: 256`,
+  every finding `{"rule": "erc.missing_tie", "layer": "nwell_tie", "net":
+  "VSS", "description": "well/tub tap is not connected to declared net
+  'VSS'"}` -- one per row (first finding bbox `left 430, bottom 1039960,
+  right 143150, top 1041940` in nm); no other rule fires, and `erc_coverage`
+  still lists both ties as checked. So the tie check computes and can
+  fail on this layout. (The positive run's exit code is 4: the antenna half
+  reads `not_checked` by design; `generate.sh` tolerates exactly that.)
+  Only the N-well tie has a recorded negative control; no control has yet
+  been run on `substrate_tie` (the asserted-well tie).
 - `provenance.input.content_hash` matches the committed GDS
   (`sha256:c566b015...`, the same hash `drc-array.json` and
-  `extract-array.json` grade), and `provenance.spec.content_hash` pins the
-  committed spec. The report was minted with klt `0.5.0+gd5893304afc2`
-  (klayout 0.30.12); `generate.sh`'s header documents the minimum tool
-  requirement (a klt whose erc envelope carries the #1968
-  status+provenance block -- released 0.5.0 predates it) and the ~26-minute
-  runtime this 16,640-gate array costs `klt erc`.
+  `extract-array.json` grade), and `provenance.spec.content_hash`
+  (`sha256:f4ff7786...`) pins the committed spec. The report was minted with
+  the released klt 0.6.0 (klayout 0.30.12); the ~26-minute runtime is what
+  this 16,640-gate array costs `klt erc`.
 
 
 ## Known gap: array-level LVS (`lvs-array.json`)

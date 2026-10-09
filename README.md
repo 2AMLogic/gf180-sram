@@ -9,9 +9,10 @@ issue #126; record: [`spec/t1-grant-2026-10-02.md`](spec/t1-grant-2026-10-02.md)
 Basis: the 2026-08-22 10/10 hand read with every hole it disclosed since
 closed (#103, #108, #109, #110), plus the passing item-11 power-delivery ERC
 (#124). **Disclosed exception:** item 7's read/hold-SNM post-layout (PEX)
-gap (`sim/pex/README.md`). The machine grader reads 10/11 (`signoff/`): the
-remaining unmet item is item 11, a tooling gap (the pinned klt predates
-item-11 grading), not a substance gap.
+gap (`sim/pex/README.md`). The machine grader now reads 11/11, tier T1 (`signoff/`; issue #159
+closed the item-11 tooling gap with `ties[]` and a compound ERC + LVS
+citation under the released klt 0.6.0). Items 1, 2, 9 and 10 remain
+placeholder citations.
 
 **Status: spec ratified; bitcell and 256 x 32 array are DRC-clean and
 LVS-clean (`status: match` for both — see `layout/README.md`'s "Status
