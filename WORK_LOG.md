@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-09
+
+- **PR #163**: T1 item 11: ties[] in the array supply spec, ERC re-mint, compound ERC + LVS citation
+- **Issue #159** (closed): T1 item 11: declare ties[] in the array supply spec, re-run klt erc, and cite the ERC and LVS reports together
+
 ### 2026-10-08
 
 - **Issue #158** (closed): T1 item 11: move the signoff grader pin from klt 0.5.0 to the released 0.6.0 so the power-delivery row is graded
