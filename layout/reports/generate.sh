@@ -20,11 +20,9 @@
 # post-#1969 checkout klt). Re-minting the LVS pair alone, ERC-style, is:
 # bump PATH to a post-#1969 klt and re-run the step 3-4 blocks below.
 #
-# Step 5 (klt erc, issue #124 / T1 item 11) additionally needs a klt whose
-# erc envelope carries the #1968 status+provenance block -- klayout-tools at
-# d5893304 or later (this report was minted with klt 0.5.0+gd5893304afc2);
-# the released 0.5.0 predates it and would omit provenance.input.
-# content_hash, the freshness pin the report exists to carry. It is also
+# Step 5 (klt erc, issues #124/#159 / T1 item 11) needs the released klt
+# 0.6.0 (status+provenance block, #1968; ties[] incl. well_boxes, #2255;
+# erc_coverage, #2179); the committed report was minted with it. It is also
 # slow on this design (~26 min on the fleet host): klt erc walks every
 # gate net x stackup level over the full array (16,640 gate nets).
 set -euo pipefail
@@ -105,23 +103,40 @@ open('$OUT/lvs-array.json', 'a').write('\n')
 print('status:', d['status'], '| mismatches:', d['mismatch_count'])
 "
 
-hr "5. ERC: array supply read vs erc-supply-spec.json (klt erc, T1 item 11, ~26 min)"
-# T1 item 11 (power delivery, structural), issue #124. The declared supplies
-# (VDD/VSS) must each resolve to exactly ONE electrical island:
-# erc_finding_count counts erc.unconnected_net/erc.supply_short findings
-# naming them -- zero is the pass condition, not the report's top-level
-# status (which reads "not_checked" because klt has no transcribed gf180mcu
-# antenna-limit table; the antenna half of the report is informational).
+hr "5. ERC: array supply + tie read vs erc-supply-spec.json (klt erc, T1 item 11, ~26 min)"
+# T1 item 11 (power delivery, structural), issues #124 and #159. The declared
+# supplies (VDD/VSS) must each resolve to exactly ONE electrical island, and
+# every declared tie (ties[]: the Nwell/VDD tap and the undrawn-well
+# substrate/VSS tap) must be CHECKED and satisfied. erc_finding_count counts
+# erc.unconnected_net/erc.supply_short/erc.missing_tie findings -- zero is the
+# pass condition, not the report's top-level status (which reads
+# "not_checked" because klt has no transcribed gf180mcu antenna-limit table;
+# the antenna half of the report is informational). A zero count only counts
+# if erc_coverage lists each tie as checked and none as skipped: a tie
+# reported degenerate lands in erc_coverage.skipped[] and is NOT evidence.
+# Needs the released klt 0.6.0 (ties[].well_layer:null + well_boxes,
+# klayout-tools#2255; tie fix klayout-tools#2186), e.g. put
+#     uvx --from "klayout-tools==0.6.0" klt
+# in place of `klt` below.
 ERC_SPEC=layout/sram_256x32/erc-supply-spec.json
-klt erc "$ARRAY_GDS" "$ERC_SPEC" --format json > "$WORK/erc-array-full.json"
-# The full report is ~29.7 MB (16,640 gate nets x 4 stackup levels in
-# gates[], plus 66,560 coverage-row entries) -- the same bulk-omission
-# treatment extract-array.json applies to devices[]/nets[]. Every field the
-# item 11 supply read grades (status, erc_findings, erc_finding_count,
-# provenance) is kept in full.
+klt erc "$ARRAY_GDS" "$ERC_SPEC" --format json > "$WORK/erc-array-full.json" || test $? -eq 4
+# (klt erc exits 4 when its overall status is not a clean antenna pass; this
+# run's antenna half reads not_checked by design -- see above.)
+# The full report is ~30 MB (16,640 gate nets x 4 stackup levels in gates[],
+# plus 66,560 antenna-coverage row entries). Bulk omission, same treatment
+# extract-array.json applies to devices[]/nets[]:
+#  * gates[] is kept as a list (klt signoff 0.6.0 recognizes a klt erc
+#    envelope by a top-level `gates` list plus `gate_role`) but truncated to
+#    its first GATES_KEPT real entries, verbatim; gate_count keeps the true
+#    total and _note says so. No gate data is invented.
+#  * coverage (antenna) row arrays are collapsed as before.
+#  * erc_coverage (connectivity -- the tie-check evidence) is kept IN FULL,
+#    as are erc_status, erc_findings, erc_finding_count, ties_disclosure and
+#    provenance.
 ERC_WORK="$WORK" ERC_OUT="$OUT" python3 - <<'PYEOF'
 import json, os
 
+GATES_KEPT = 4
 d = json.load(open(os.path.join(os.environ['ERC_WORK'], 'erc-array-full.json')))
 gate_count = d['gate_count']
 verdicts = sorted({g['antenna_verdict'] for g in d['gates']})
@@ -134,30 +149,36 @@ inapp_reasons = sorted({e.get('reason') for e in cov.get('inapplicable', [])})
 for key in ('checked', 'skipped', 'inapplicable'):
     n = {'checked': n_checked, 'skipped': n_skipped, 'inapplicable': n_inapplicable}[key]
     cov[key] = ['<%d entries omitted as bulk -- see _note>' % n]
-d.pop('gates', None)
+d['gates'] = d['gates'][:GATES_KEPT]
 d['_note'] = (
-    'gates[] and the bulk of coverage row arrays are omitted from this committed '
-    'report, exactly as extract-array.json omits devices[]/nets[] (~18 MB): gates[] '
-    'is %d gate nets x 4 stackup levels (~29.7 MB unabridged at this array size), '
-    'every antenna_verdict reading "%s"; coverage.checked/skipped/inapplicable '
-    'collapsed the same way (%d checked, %d skipped all reason %s, %d inapplicable '
-    'all reason %s) -- coverage\'s scalar summary (known, nothing_checked, '
-    'nothing_checked_reasons) is kept. Every field the T1 item 11 supply read '
-    'grades -- status, erc_findings, erc_finding_count, and provenance (input '
-    'content_hash matching the committed GDS; spec content_hash) -- is kept in '
-    'full. Full output reproducible via layout/reports/generate.sh step 5.'
-) % (gate_count, '", "'.join(verdicts), n_checked, n_skipped,
-     '/'.join(skip_reasons), n_inapplicable, '/'.join(inapp_reasons))
-ordered = {k: d[k] for k in ['schema_version', 'status', 'file', 'spec', 'pdk',
-                             'gate_role', 'gate_count', 'erc_finding_count',
-                             'erc_findings', 'coverage', 'provenance', '_note']
+    'gates[] is truncated to its first %d of %d entries (verbatim; ~29.7 MB '
+    'unabridged at this array size: %d gate nets x 4 stackup levels, every '
+    'antenna_verdict reading "%s") so the envelope stays recognizable to klt '
+    'signoff (top-level gates list + gate_role) -- gate_count is the true total. '
+    'The antenna `coverage` row arrays are collapsed (%d checked, %d skipped all '
+    'reason %s, %d inapplicable all reason %s); its scalar summary is kept. '
+    '`erc_coverage` (the connectivity half: which ERC work was checked, '
+    'skipped, or inapplicable -- including each declared ties[] entry) is kept '
+    'in full, as are status, erc_status, erc_findings, erc_finding_count, '
+    'ties_disclosure and provenance (input content_hash matching the committed '
+    'GDS; spec content_hash). Full output reproducible via '
+    'layout/reports/generate.sh step 5.'
+) % (GATES_KEPT, gate_count, gate_count, '", "'.join(verdicts), n_checked,
+     n_skipped, '/'.join(skip_reasons), n_inapplicable, '/'.join(inapp_reasons))
+ordered = {k: d[k] for k in ['schema_version', 'status', 'erc_status', 'file',
+                             'spec', 'pdk', 'findings_only', 'gate_role',
+                             'gate_count', 'gates', 'erc_finding_count',
+                             'erc_findings', 'coverage', 'erc_coverage',
+                             'ties_disclosure', 'provenance', '_note']
            if k in d}
 out_path = os.path.join(os.environ['ERC_OUT'], 'erc-array-supply.json')
 with open(out_path, 'w') as f:
     json.dump(ordered, f, indent=2)
     f.write('\n')
 print('status:', d['status'], '| gates:', d['gate_count'],
-      '| erc_findings:', d['erc_finding_count'])
+      '| erc_findings:', d['erc_finding_count'],
+      '| erc_checked:', len(d['erc_coverage']['checked']),
+      '| erc_skipped:', len(d['erc_coverage']['skipped']))
 PYEOF
 
 hr "done -- reports written under $OUT/"
