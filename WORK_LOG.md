@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-13
+
+- **PR #166**: chore(loom): drop onIdle [auditor] — follow the fleet idle-role setting
+
 ### 2026-10-09
 
 - **PR #163**: T1 item 11: ties[] in the array supply spec, ERC re-mint, compound ERC + LVS citation
