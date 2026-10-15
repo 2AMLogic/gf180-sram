@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-15
+
+- **PR #168**: loom: unpin curator.md and guard-loom-workflow.sh (2am#4345 Q7)
+
 ### 2026-10-13
 
 - **PR #166**: chore(loom): drop onIdle [auditor] — follow the fleet idle-role setting
