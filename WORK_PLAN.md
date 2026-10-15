@@ -10,7 +10,7 @@ hand-edit that region.
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
-_None._
+- **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
 
 ## Very Important
 
@@ -28,7 +28,7 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-_None._
+- **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
 
 ## In Progress
 
@@ -46,7 +46,7 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-_None._
+- **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
 
 ## Proposed
 
@@ -66,13 +66,13 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 0 |
+| Operator merge-risk holds | 1 |
 | Very important | 0 |
 | Important | 0 |
-| Ready (`loom:issue`) | 0 |
+| Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 0 |
+| Approved PRs awaiting merge | 1 |
 | Curated | 1 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
