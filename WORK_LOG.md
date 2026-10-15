@@ -6,6 +6,7 @@ by the Guide role's document maintenance phase. Newest entries first.
 ### 2026-10-13
 
 - **PR #166**: chore(loom): drop onIdle [auditor] — follow the fleet idle-role setting
+- **Issue #140** (closed): README: embed the fleet burndown chart (one line)
 
 ### 2026-10-09
 
