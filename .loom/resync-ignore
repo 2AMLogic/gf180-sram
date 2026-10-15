@@ -32,6 +32,16 @@
 # via resync.
 hooks/guard-destructive-generic.sh
 #
+# RE-VERIFIED 2026-10-14, PIN RETAINED (2AMLogic/2am#4345): rjwalters/loom
+# now ships its own defaults/hooks/guard-destructive-generic.sh (origin/main
+# 7e4d69c7, 12243 lines vs this fork's 7879). Swapping it in fails every
+# script in `npm run test:guards` (45 failing cases across 9 scripts),
+# including deny cases this fork closes and upstream does not: a sed script
+# with a file-writing `w` flag, a crafted 3-arg `sed -i ""` targeting an
+# out-of-worktree path, and the #63/#66 for-loop, #127 klt and #130 quoted
+# allow cases. Re-porting these onto upstream's rewritten guard is its own
+# change, not a pin edit, so the fork stays pinned.
+#
 # hooks/tests/test-guard-*-unresolved-var-layout-klt.sh (gf180-sram#127):
 # pinning tests for the #127 klt/KLayout layout cold-start extension of the
 # #64/#65/#82 scratch-var exemption above, in the same style as the existing
@@ -59,20 +69,20 @@ hooks/tests/test-guard-rm-scope-unresolved-var-layout-klt.sh
 # `test:guards` red rather than silently re-manufacturing the friction.
 hooks/tests/test-guard-worktree-unresolved-var-quoted.sh
 #
-# hooks/guard-loom-workflow.sh (gf180-sram#141): denies adding the
-# issue-only claim label `loom:curating` to a number that is a pull request
-# (`gh issue edit <N> --add-label` and the `gh api .../issues/<N>/labels`
-# form), via a bounded, fail-open live `has("pull_request")` lookup. PR #139
-# carried a stray `loom:curating` for 2+ days with no daemon backstop.
-# Upstream report: rjwalters/loom#9609. No upstream PR yet -- remove these
-# pins once the change lands in defaults/ and arrives via a normal resync.
-hooks/guard-loom-workflow.sh
-hooks/tests/test-guard-loom-workflow-claim-label-pr-mismatch.sh
-#
-# roles/curator.md + commands/loom/curator.md (gf180-sram#141): the same
-# role text installed twice; both carry the "verify <number> is an issue,
-# not a PR, before claiming" paragraph. Pinning only one would leave the
-# other reverted and the two copies disagreeing. Same upstream report and
-# removal condition as the guard above.
-roles/curator.md
-commands/loom/curator.md
+# UNPINNED 2026-10-14 (2AMLogic/2am#4345, Q7 ruling 2026-10-15):
+# hooks/guard-loom-workflow.sh, hooks/tests/test-guard-loom-workflow-claim-
+# label-pr-mismatch.sh, roles/curator.md and commands/loom/curator.md, all
+# pinned 2026-09-29 for gf180-sram#141 (deny `loom:curating` on a PR number).
+# Their removal condition was "once the change lands upstream". It has, for
+# the part that addresses the root cause: upstream curator.md now runs a
+# PR/issue kind probe before any claim and refuses a PR number or a failed
+# read (rjwalters/loom#9929). The hook half was closed NOT_PLANNED as
+# rjwalters/loom#9609 on 2026-10-14 for lack of evidence beyond the single
+# PR #139 incident; no PR in this repo has carried `loom:curating` since.
+# Holding the pins froze guard-loom-workflow.sh 13 upstream commits behind
+# (including #11568's ask-before-destructive-remote-exec and #8256's
+# role-tool-policy check) and kept curator.md on 44 references to the
+# retired loom:operator-only/-decision/-mechanical labels. The hook and both
+# curator.md copies now match upstream; the pinning test was deleted with
+# the behaviour it tested. If a stray `loom:curating` on a PR recurs,
+# reopen rjwalters/loom#9609 with that evidence rather than re-pinning.

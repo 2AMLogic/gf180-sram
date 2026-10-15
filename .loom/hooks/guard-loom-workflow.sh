@@ -10,10 +10,12 @@
 #   1. LOOM: Prefer merge-pr.sh over 'gh pr merge'
 #   2. LOOM: Block 'pip install -e' inside worktrees (issue #2495, #4079)
 #   3. LOOM: Ask before real-registry-mutating `loom-daemon workspace
-#      add|remove|set-priority` (issue #4326)
+#      add|remove|set-weight` (issue #4326)
 #   4. LOOM: Deny Bash writes that edit an INSTALLED Loom file in place in a
 #      CONSUMER repo (issue #7995) — the Bash-idiom counterpart of the
 #      Edit/Write denial in guard-worktree-paths.sh
+#   5. LOOM: Deny a cargo build whose target dir is under a root nothing owns
+#      (/tmp, $TMPDIR, ~, ~/.cache, .loom/target-*; issue #11582)
 #
 # The generic repository-hygiene guards (catastrophic denies, SQL/cloud toggles,
 # ASK patterns) live in guard-destructive.sh and are being migrated toward Repo
@@ -1569,7 +1571,7 @@ decision_log_enabled() {
 # =============================================================================
 # Workspace-registry guard toggle — default ON (issue #4326).
 #
-# The `loom-daemon workspace add|remove|set-priority` ask (below) is a useful
+# The `loom-daemon workspace add|remove|set-weight` ask (below) is a useful
 # default backstop against accidentally mutating the operator's real
 # ~/.loom/workspaces.json, but — like every other category guard in this
 # file — a repo/session can opt out via the same
@@ -1761,6 +1763,32 @@ if echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qE 'gh\s+pr\s+merge'; then
 fi
 
 # =============================================================================
+# LOOM: Per-role tool restriction (issue #8256) — a role whose JSON declares
+# toolPolicy.allowedCapabilities cannot reach an undeclared sensitive
+# capability (ssh, cloud CLIs, gh secret, credential stores), however it was
+# persuaded to try. Matching and the allowlist live in `loom-daemon
+# role-tool-policy check`, read from THIS hook's own install (not the cwd, so a
+# PR checkout cannot grant itself a capability). Exit 0 allows, exit 1 +
+# prefix denies; any other answer (no binary, a daemon predating `check`)
+# fails CLOSED for the built-in read-only roles. guard-hooks.md has the rule.
+# =============================================================================
+
+# requires-daemon: role-tool-policy optional   #8256 — `check`; with no usable answer the built-in read-only roles are denied, every other role is allowed.
+if [[ -n "${LOOM_ROLE:-}" ]]; then
+    RTP_RC=0
+    # Only heredoc bodies and named text flags (--body/-m/…) are blanked here:
+    # the positional masking above also blanks quoted FILE operands, which would
+    # hide `grep x "$HOME/.ssh/id_rsa"` from the matcher. The matcher itself
+    # tells a grep/rg pattern from a path.
+    RTP_OUT=$("${LOOM_DAEMON_SELF_BIN:-loom-daemon}" role-tool-policy check --roles-dir "$SCRIPT_DIR/../roles" --workspace "$SCRIPT_DIR/../.." --command "$(mask_data_flag_values "$(mask_var_assigned_heredoc_bodies "$(mask_cat_heredoc_bodies "$COMMAND")")")" 2>/dev/null) || RTP_RC=$?
+    if [[ "$RTP_RC" -eq 1 && "$RTP_OUT" == "BLOCKED [role-tool-policy]"* ]]; then
+        deny "$RTP_OUT" "loom:role-tool-policy"
+    elif [[ "$RTP_RC" -ne 0 && " architect auditor champion curator guide hermit judge " == *" $(printf '%s' "$LOOM_ROLE" | tr '[:upper:]_' '[:lower:]-') "* ]]; then
+        deny "BLOCKED [role-tool-policy]: role '$LOOM_ROLE' is restricted, and loom-daemon role-tool-policy check could not answer (exit $RTP_RC), so this command is denied rather than allowed unchecked (#8256). Roll loom-daemon to a release with 'role-tool-policy check'." "loom:role-tool-policy"
+    fi
+fi
+
+# =============================================================================
 # LOOM: Block pip install -e inside worktrees (issue #2495, hardened by #4079)
 #
 # Editable pip installs overwrite a global .pth file in site-packages.
@@ -1794,10 +1822,35 @@ if [[ -n "$WORKTREE_PATH" ]]; then
 fi
 
 # =============================================================================
+# LOOM: Deny a cargo build into a target dir nothing owns (issue #11582) — the
+# enforced form of cargo-target-isolation.md's rule (#8370): no target dir
+# under /tmp, $TMPDIR, ~, ~/.cache or <repo>/.loom/target-*. Resolution
+# (--target-dir, inline/env/export assignment, the session's own value),
+# allowed roots, guards.cargoTargetDir / LOOM_GUARD_CARGO_TARGET_DIR and the
+# deny span all live in `loom-daemon cargo-target-dir guard`
+# (loom-daemon/src/cargo_target_guard.rs). Fork-free prefilter: only a command
+# that mentions cargo or CARGO_TARGET_DIR reaches it. The same verb ASKs (exit
+# 0, ASK [cargo-shared-target]) when a worktree build with no explicit target
+# dir falls through to a shared build.target-dir (#10646).
+# =============================================================================
+
+# requires-daemon: cargo-target-dir optional   #11582 — `guard`; a daemon without the verb exits 2, which this block treats as allow (rule inert).
+if [[ "$GH_PR_MERGE_SCAN_TEXT" == *cargo* || "$GH_PR_MERGE_SCAN_TEXT" == *CARGO_TARGET_DIR* ]]; then
+    CTD_RC=0
+    CTD_OUT=$("${LOOM_DAEMON_SELF_BIN:-loom-daemon}" cargo-target-dir guard --cwd "${CWD:-.}" --for-command "$GH_PR_MERGE_SCAN_TEXT" 2>/dev/null) || CTD_RC=$?
+    if [[ "$CTD_RC" -eq 1 && "$CTD_OUT" == "BLOCKED [cargo-target-dir]"* ]]; then
+        deny "$CTD_OUT" "loom:cargo-target-dir"
+    elif [[ "$CTD_RC" -eq 0 && "$CTD_OUT" == "ASK [cargo-shared-target]"* ]]; then
+        log_guard_decision "ask" "ask" "loom:cargo-shared-target" || true
+        ask "$CTD_OUT"
+    fi
+fi
+
+# =============================================================================
 # LOOM: Ask before registry-mutating `loom-daemon workspace` commands
 # (Issue #4326)
 #
-# `loom-daemon workspace add|remove|set-priority` mutate the machine-level
+# `loom-daemon workspace add|remove|set-weight` mutate the machine-level
 # workspace registry (Issue #3926), normally `~/.loom/workspaces.json` — a
 # SHARED file, not scoped to any one repo/worktree/session. An ad-hoc
 # verification step (a builder/auditor sweep exercising registry behavior)
@@ -1818,10 +1871,10 @@ fi
 # list` is read-only and is NEVER matched by this guard.
 # =============================================================================
 
-if echo "$COMMAND" | grep -qE '(^|[/[:space:];&|])loom-daemon[[:space:]]+workspace[[:space:]]+(add|remove|set-priority)([[:space:]]|$)'; then
+if echo "$COMMAND" | grep -qE '(^|[/[:space:];&|])loom-daemon[[:space:]]+workspace[[:space:]]+(add|remove|set-weight|set-priority)([[:space:]]|$)'; then
     if workspace_registry_guard_enabled; then
         if [[ -z "${LOOM_WORKSPACES_PATH:-}" ]] && ! echo "$COMMAND" | grep -qE 'LOOM_WORKSPACES_PATH='; then
-            ask "This mutates the machine-level workspace registry ('loom-daemon workspace add/remove/set-priority') — by default that is the operator's REAL ~/.loom/workspaces.json, shared across every repo/session (Issue #4326: a leaked test entry once sat at top dispatch priority for most of a day). If this is a test/verification step, prefix the command with LOOM_WORKSPACES_PATH=<scratch-file> to isolate it from the real registry. If this IS an intentional real-registry change, confirm to proceed."
+            ask "This mutates the machine-level workspace registry ('loom-daemon workspace add/remove/set-weight') — by default that is the operator's REAL ~/.loom/workspaces.json, shared across every repo/session (Issue #4326: a leaked test entry once sat at top dispatch priority for most of a day). If this is a test/verification step, prefix the command with LOOM_WORKSPACES_PATH=<scratch-file> to isolate it from the real registry. If this IS an intentional real-registry change, confirm to proceed."
         fi
     fi
 fi
@@ -1906,127 +1959,30 @@ if [[ -n "$REPO_ROOT" ]] && echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qE '(^|[^[:aln
 fi
 
 # =============================================================================
-# LOOM: Deny a claim-label add that mismatches issue vs. PR (issue #141)
-#
-# `loom:curating` is an issue-only claim label ("Curator is enhancing this
-# *issue*"). But issue and PR numbers share ONE namespace per repo, and `gh
-# issue edit <N> --add-label <label>` -- whose underlying REST endpoint,
-# `/repos/OWNER/REPO/issues/<N>/labels`, is IDENTICAL for issues and PRs --
-# succeeds whether <N> is an issue or a PR. A Curator dispatch pass that
-# builds its claim-candidate list without filtering out PR numbers can claim
-# a PR by mistake: observed live on this repo's PR #139, where `loom:curating`
-# sat on a draft PR for 2+ days with no daemon-side reconciliation
-# (`.loom/docs/daemon-reference.md` documents `loom:curating` as "agent-side
-# only, no daemon backstop"), making the PR invisible to both Judge review
-# queues.
-#
-# `gh issue view <N>` does NOT distinguish an issue from a PR -- it succeeds
-# for both (verified live against #139) -- so it cannot be the discriminator.
-# The reliable check is the REST issue resource's own `pull_request` key,
-# present only when <N> is a PR:
-#   gh api repos/OWNER/REPO/issues/<N> --jq 'has("pull_request")'
-#
-# This is the one guard in this file that performs a LIVE forge lookup rather
-# than a pure text-pattern match on $COMMAND -- the distinguishing fact
-# (issue vs. PR) does not exist anywhere in the command text itself, only the
-# forge knows it. Consistent with this file's fail-open contract (see header
-# comment at the top of this file): OWNER/REPO resolution failing, the `gh
-# api` call itself failing/erroring/rate-limiting, a missing `gh` binary, or
-# any result other than a literal "true" all fall through to ALLOW -- never a
-# hang, never a deny. A bounded `timeout` keeps a slow/hung network call from
-# blocking the tool call indefinitely. Deliberately narrow (start with the
-# demonstrated failure): only `loom:curating` is covered today, not sibling
-# issue-only claim labels (`loom:triage`, `loom:building`, `loom:architect`).
+# LOOM: Ask before a destructive remote payload on a fleet host (#11568) —
+# `ssh <fleet-host> 'bash -s' < fix.sh` with `reset --hard` in fix.sh, an
+# inline `ssh host 'git … reset --hard'`, scp/rsync pushes, aws ssm. Parsing,
+# script reading, the fleet roster and the guards.remoteFleetExec /
+# LOOM_GUARD_REMOTE_FLEET_EXEC toggle all live in `loom-daemon guards
+# remote-exec` (loom-daemon/src/remote_fleet_exec/); it gets the RAW command
+# (its lexer is quote-aware, so prose in a --body is never an invocation) and
+# the tool cwd, and this block asks on exit 1 + its prefix. The ask reason
+# carries the approval rule and the break-glass record path; additionalContext
+# repeats it so the session still sees it after the operator approves. Last
+# before the final allow, so every deny above (role-tool-policy) wins.
 # =============================================================================
 
-_CLAIM_LABEL_GUARD_CACHE=""
-claim_label_guard_enabled() {
-    if [[ -z "$_CLAIM_LABEL_GUARD_CACHE" ]]; then
-        local enabled=true raw
-        if [[ -n "$REPO_ROOT" ]]; then
-            raw=$(loom_config_get "$REPO_ROOT" "guards.claimLabelPrMismatch" "true" 2>/dev/null) || raw=true
-            [[ "$raw" == "false" ]] && enabled=false
-        fi
-        case "${LOOM_GUARD_CLAIM_LABEL_PR_MISMATCH:-}" in
-            0 | false | no) enabled=false ;;
-            1 | true | yes) enabled=true ;;
-        esac
-        _CLAIM_LABEL_GUARD_CACHE="$enabled"
-    fi
-    [[ "$_CLAIM_LABEL_GUARD_CACHE" == "true" ]]
-}
-
-CLAIM_LABEL_TO_GUARD="loom:curating"
-CLAIM_LABEL_ISSUE_NUM=""
-
-# Matched against $GH_PR_MERGE_SCAN_TEXT -- the SAME masked copy of $COMMAND
-# already computed above for the gh-pr-merge redirect check -- rather than
-# raw $COMMAND, so a mention of `gh issue edit 139 --add-label loom:curating`
-# purely as inert narration (a quoted echo argument documenting this very
-# guard, a cat-heredoc commit-message body, a --search value, ...) does not
-# false-positive as a real invocation, for the identical reasons and via the
-# identical masking passes documented on GH_PR_MERGE_SCAN_TEXT's own
-# definition above. A raw, unquoted top-level invocation is never masked by
-# any of those passes, so real detection is unaffected.
-
-# Form 1: `gh issue edit <N> ... --add-label <value>[,<value>...]` (also
-# matches `--add-label=<value>`). <value> may be a comma-separated list
-# and/or quoted; every comma-separated entry is checked individually.
-if [[ "$GH_PR_MERGE_SCAN_TEXT" =~ gh[[:space:]]+issue[[:space:]]+edit[[:space:]]+([0-9]+) ]]; then
-    _CLAIM_EDIT_NUM="${BASH_REMATCH[1]}"
-    if [[ "$GH_PR_MERGE_SCAN_TEXT" =~ --add-label[[:space:]]*=?[[:space:]]*[\"\']?([A-Za-z0-9:,_/-]+) ]]; then
-        _CLAIM_LABEL_RAW="${BASH_REMATCH[1]}"
-        IFS=',' read -ra _CLAIM_LABEL_PARTS <<<"$_CLAIM_LABEL_RAW"
-        for _CLAIM_LP in "${_CLAIM_LABEL_PARTS[@]}"; do
-            if [[ "$_CLAIM_LP" == "$CLAIM_LABEL_TO_GUARD" ]]; then
-                CLAIM_LABEL_ISSUE_NUM="$_CLAIM_EDIT_NUM"
-                break
-            fi
-        done
-    fi
-fi
-
-# Form 2: the equivalent REST call, `gh api .../issues/<N>/labels` adding the
-# same label. Deliberately a narrow textual match (a `gh api` invocation
-# whose path contains `issues/<N>/labels` and whose command text also
-# mentions the guarded label), not a full REST-body parse.
-if [[ -z "$CLAIM_LABEL_ISSUE_NUM" ]] && echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qE 'gh[[:space:]]+api' \
-    && [[ "$GH_PR_MERGE_SCAN_TEXT" =~ issues/([0-9]+)/labels ]]; then
-    _CLAIM_API_NUM="${BASH_REMATCH[1]}"
-    if echo "$GH_PR_MERGE_SCAN_TEXT" | grep -qF "$CLAIM_LABEL_TO_GUARD"; then
-        CLAIM_LABEL_ISSUE_NUM="$_CLAIM_API_NUM"
-    fi
-fi
-
-if [[ -n "$CLAIM_LABEL_ISSUE_NUM" ]] && claim_label_guard_enabled; then
-    _CLAIM_OWNER_REPO=""
-    if [[ -n "$CWD" ]] && [[ -d "$CWD" ]]; then
-        _CLAIM_REMOTE_URL=$(git -C "$CWD" config --get remote.origin.url 2>/dev/null) || _CLAIM_REMOTE_URL=""
-        if [[ -n "$_CLAIM_REMOTE_URL" ]]; then
-            _CLAIM_PATH=""
-            if [[ "$_CLAIM_REMOTE_URL" =~ ^git@[^:]+:(.+)$ ]]; then
-                _CLAIM_PATH="${BASH_REMATCH[1]}"
-            elif [[ "$_CLAIM_REMOTE_URL" =~ ^(https?|ssh)://[^/]+/(.+)$ ]]; then
-                _CLAIM_PATH="${BASH_REMATCH[2]}"
-            fi
-            _CLAIM_PATH="${_CLAIM_PATH%.git}"
-            [[ "$_CLAIM_PATH" =~ ^[^/]+/[^/]+$ ]] && _CLAIM_OWNER_REPO="$_CLAIM_PATH"
-        fi
-    fi
-
-    if [[ -n "$_CLAIM_OWNER_REPO" ]] && command -v gh &>/dev/null; then
-        if command -v timeout &>/dev/null; then
-            _CLAIM_IS_PR=$(timeout 10 gh api "repos/${_CLAIM_OWNER_REPO}/issues/${CLAIM_LABEL_ISSUE_NUM}" --jq 'has("pull_request")' 2>/dev/null)
-        else
-            _CLAIM_IS_PR=$(gh api "repos/${_CLAIM_OWNER_REPO}/issues/${CLAIM_LABEL_ISSUE_NUM}" --jq 'has("pull_request")' 2>/dev/null)
-        fi
-        _CLAIM_GH_EXIT=$?
-        if [[ $_CLAIM_GH_EXIT -eq 0 ]] && [[ "$_CLAIM_IS_PR" == "true" ]]; then
-            deny "BLOCKED: #${CLAIM_LABEL_ISSUE_NUM} is a pull request, not an issue -- '${CLAIM_LABEL_TO_GUARD}' is an issue-only claim label. Issue and PR numbers share one namespace and this REST endpoint succeeds for either, so 'gh issue view' cannot tell them apart -- confirmed by 'gh api repos/${_CLAIM_OWNER_REPO}/issues/${CLAIM_LABEL_ISSUE_NUM}' having a pull_request key. See issue #141 (PR #139 in this repo carried this exact stray label for 2+ days)." "loom:claim-label-pr-mismatch"
-        fi
-        # Any other outcome (gh api error, rate limit, auth failure, a
-        # literal "false" result) falls through to ALLOW -- fail-open, per
-        # this file's header contract.
+# requires-daemon: guards optional   a daemon without `guards remote-exec` exits 2 on the unknown verb, which this block treats as allow (rule inert).
+RFE_PREFILTER='(^|[^[:alnum:]_.-])(ssh|scp|rsync)([^[:alnum:]_.-]|$)|[[:space:]]ssm[[:space:]]'
+if [[ "$COMMAND" =~ $RFE_PREFILTER ]]; then
+    RFE_RC=0
+    RFE_ASK=$("${LOOM_DAEMON_SELF_BIN:-loom-daemon}" guards remote-exec --for-command "$COMMAND" --cwd "${CWD:-.}" 2>/dev/null) || RFE_RC=$?
+    if [[ "$RFE_RC" -eq 1 && "$RFE_ASK" == "ASK [remote-fleet-exec]"* ]]; then
+        log_guard_decision "ask" "ask" "loom:remote-fleet-exec" || true
+        jq -n --arg reason "$RFE_ASK" '{hookSpecificOutput: {hookEventName: "PreToolUse",
+            permissionDecision: "ask", permissionDecisionReason: $reason,
+            additionalContext: $reason}}' 2>/dev/null || ask "$RFE_ASK"
+        exit 0
     fi
 fi
 
