@@ -11,6 +11,7 @@ hand-edit that region.
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+- **#176**: Bump Repo Skills 0.24.1 -> 0.24.3
 
 ## Very Important
 
@@ -47,6 +48,7 @@ _None._
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+- **#176**: Bump Repo Skills 0.24.1 -> 0.24.3
 
 ## Proposed
 
@@ -66,13 +68,13 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 2 |
 | Very important | 0 |
 | Important | 0 |
 | Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 1 |
+| Approved PRs awaiting merge | 2 |
 | Curated | 1 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
