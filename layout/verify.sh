@@ -49,10 +49,8 @@ klt drc --deck gf180mcu "$WORK/tile3x3.gds"
 
 hr "5. device extraction + LVS: bitcell vs design/netlist/bitcell_6t.spice"
 klt extract --deck gf180mcu "$BITCELL_GDS" -o "$WORK/bitcell.spice"
-python3 layout/lvs_reference.py design/netlist/bitcell_6t.spice \
-  --layout-netlist "$WORK/bitcell.spice" -o "$WORK/bitcell_ref.spice"
 klt lvs "{\"layout\":{\"netlist\":\"$WORK/bitcell.spice\",\"top\":\"sram_bitcell_6t\"},\
-\"reference\":{\"netlist\":\"$WORK/bitcell_ref.spice\",\"form\":\"subckt-call\"}}"
+\"reference\":{\"netlist\":\"$ROOT/design/netlist/bitcell_6t.spice\",\"form\":\"subckt-call\"}}"
 
 if [ "$QUICK" = "1" ]; then
   hr "skipped (--quick): full-array DRC and extraction"

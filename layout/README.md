@@ -19,7 +19,7 @@ existed) is gone.
 | Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 143.15 x 1382.40 um (0.1979 mm²): 142.72 um of tiled cells plus a 0.43 um wordline landing-pad strip at the left edge (issue #121) |
 | DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on all three |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
-| LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior). Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
+| LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets. Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
 
 Everything above is reproduced end-to-end by `./layout/verify.sh` (see
 "Reproducing and re-checking"). What is *not* claimed is in "What this does
@@ -31,9 +31,6 @@ and does not prove".
 layout/
   README.md                             this file
   verify.sh                             regenerate + re-run every check quoted here
-  lvs_reference.py                      bulk-terminal rewrite for the LVS reference,
-                                        derived from an actual extracted netlist
-                                        (see "Known tool gaps")
   bitcell/
     generate.py                         draws the 6T bitcell (klayout.db API)
     sram_bitcell_6t.gds                 committed, deterministic GDS
@@ -281,18 +278,15 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
    (`uv tool install git+https://github.com/2AMLogic/klayout-tools`, see
    "Tool / PDK versions"), two hosts can report the *same* `klt --version`
    string (`0.2.0`) while running different behavior depending on when each
-   installed it relative to #1113 — this is exactly what happened in
-   [gf180-sram#75](https://github.com/2AMLogic/gf180-sram/issues/75): a host
-   that had already picked up #1113's fix (bulk tied straight to `VDD`/`VSS`)
-   ran against `layout/lvs_reference.py`'s then-hardcoded `vsubs`/`vnw`
-   rewrite, which assumed the pre-#1113 anonymous-net behavior and actively
-   *broke* what would otherwise have been a clean match. `layout/lvs_reference.py`
-   no longer hardcodes body-net
-   names: it takes `--layout-netlist <klt extract output>` and derives each
-   device type's actual bulk net from that run's real extraction, then
-   rewrites *only* the four bulk terminals of the reference netlist to
-   match — a no-op today, and still correct if a future extraction deck (or
-   a bitcell without ties drawn inside it) reintroduces a synthesized net.
+   installed it relative to #1113 — this is what happened in
+   [gf180-sram#75](https://github.com/2AMLogic/gf180-sram/issues/75), where a
+   hardcoded bulk-net rewrite of the reference broke a match that was
+   already clean. The rewrite script that came out of that
+   (`layout/lvs_reference.py`) was a no-op on current builds and was removed
+   (gf180-sram#185): the bitcell LVS now compares against
+   `design/netlist/bitcell_6t.spice` unmodified, verified on the CI-pinned
+   `klayout-tools==0.6.0`. If the bulk-net naming ever regresses, that
+   compare fails loudly.
 2. **`klt extract` is flat-only**, by design ("Flat (not hierarchical)
    extraction, deliberately") — still true today, and not what closed this
    gap. The committed array GDS *is* hierarchical (one bitcell cell, one
@@ -389,10 +383,8 @@ klt precheck --deck gf180mcu --grid-um 0.005 layout/bitcell/sram_bitcell_6t.gds
 klt drc --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds
 klt drc --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds   # ~1 min
 klt extract --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds -o /tmp/bc.spice
-python3 layout/lvs_reference.py design/netlist/bitcell_6t.spice \
-    --layout-netlist /tmp/bc.spice -o /tmp/bc_ref.spice
 klt lvs '{"layout":{"netlist":"/tmp/bc.spice","top":"sram_bitcell_6t"},
-          "reference":{"netlist":"/tmp/bc_ref.spice","form":"subckt-call"}}'
+          "reference":{"netlist":"design/netlist/bitcell_6t.spice","form":"subckt-call"}}'
 
 # 4. inspection
 klt stats layout/bitcell/sram_bitcell_6t.gds
