@@ -13,7 +13,7 @@ checklist state lives here and is re-derived, not re-read.
 | `block-manifest.json` | The block manifest: this block's declared `kind` and, per T1 item, the evidence envelope cited behind it, each pinned to a `content_hash` of the committed artifact it grades. This is the file the fleet roll-up (2AMLogic/2am#956) consumes. |
 | `signoff-report.json` | The committed `klt signoff --manifest block-manifest.json --format json` output — the graded per-item `met`/`unmet` table with a `reason` on every `unmet` row. Regenerate with `./signoff/regenerate.sh`. |
 | `regenerate.sh` | Refreshes the item-8 evidence pin and re-grades the manifest with the pinned released klt, overwriting `signoff-report.json`. |
-| *(retired)* `design-evidence-tiers.md` | Formerly a vendored copy of `klayout-tools`' checklist definition, passed via `--tiers-doc` because no released `klt` before 0.6.0 bundled the eleventh item (item 11, "Power delivery (structural)", klayout-tools#2025). Retired by issue #158: the pinned `klayout-tools==0.6.0` wheel bundles the eleven-item checklist itself (`t1_item_count: 11`, `build_t1_item_count: 11`), so grading passes no `--tiers-doc`. The report's `source_doc` is now the bundled `docs/design-evidence-tiers.md`, and `source_doc_content_hash` pins the bundled copy's content, so a checklist change inside the grading wheel shows up as report drift. |
+| *(retired)* `design-evidence-tiers.md` | Formerly a vendored copy of `klayout-tools`' checklist definition, passed via `--tiers-doc` because no released `klt` before 0.6.0 bundled the eleventh item (item 11, "Power delivery (structural)", klayout-tools#2025). Retired by issue #158: the then-pinned `klayout-tools==0.6.0` wheel (now 0.7.0, which bundles it too) bundles the eleven-item checklist itself (`t1_item_count: 11`, `build_t1_item_count: 11`), so grading passes no `--tiers-doc`. The report's `source_doc` is now the bundled `docs/design-evidence-tiers.md`, and `source_doc_content_hash` pins the bundled copy's content, so a checklist change inside the grading wheel shows up as report drift. |
 
 CI (the `signoff` job in `.github/workflows/ci.yml`) re-grades the manifest on
 every PR and requires byte-identical output to the committed
@@ -26,22 +26,35 @@ refreshed report.
 ## Grader distribution discipline
 
 Regeneration and CI grade with the **released PyPI registry wheel** of
-`klayout-tools==0.6.0`, never the `klt` already on this host. Under the same
+`klayout-tools==0.7.0`, never the `klt` already on this host. Under the same
 version string, a `uv tool install git+...` snapshot or a full-checkout
 install of the klayout-tools repo can grade differently. This was observed
 live under the previous 0.5.0 pin: an 11-item-era full-repo install under
 the name "0.5.0", and the v0.5.0 tag snapshot whose bundled checklist
 predated item 11 entirely (filed upstream as klayout-tools#2216). The
 released wheel reports the git tag it was built from. For the active pin,
-`klt version --format json` reports `package_version: 0.6.0`,
-`git_tag: v0.6.0`, `is_release: true` (git commit
-`c622e8addb362491664d44ba4d717f354ca88bbd`, `grading_ruleset_id`
-`sha256:0d8cc27c752ce25fc78499d4c280a4b472c460ac2dbcd38e56c9694485a17156`;
+`klt version --format json` reports `package_version: 0.7.0`,
+`git_tag: v0.7.0`, `is_release: true` (git commit
+`0e2362bda7309829398a35d54efaa989d5806065`, `grading_ruleset_id`
+`sha256:eb8d2ba54d1700c78f1139ac111aee598fd7bc48688ab9654fca22995b6ac25e`;
 the report's own `build` block echoes the same identity). `regenerate.sh`
 and `scripts/ci/check_signoff_freshness.py` both assert that identity
 before grading. Keep the version pin in `regenerate.sh`, the CI job,
 `check_signoff_freshness.py`, and the install hint in
-`scripts/ci/check-signoff-freshness.sh` in sync (all say `0.6.0` today).
+`scripts/ci/check-signoff-freshness.sh` in sync (all say `0.7.0` today).
+
+Re-grade on 0.7.0 (issue #194): the pin moved from 0.6.0 to 0.7.0 and the
+record was regenerated with no evidence artifact edited. **No row changed
+status or reason**; the verdict stays 11/11 met, tier T1. What did change in
+the record: `build` (0.7.0 identity above), `source_doc_content_hash` (the
+bundled checklist moved to `sha256:4c67ffc5...` from `sha256:63eeec72...`),
+the checklist prose carried in the item 6, 8 and 11 rows' `text`, and two
+disclosure fields the 0.7.0 grader newly echoes -- `yield_campaign` on item
+6's citation (`sample_size: sufficient`, `negative_control: detected`, no
+undersized or undetected measurements) and `power_delivery.supply_unlabelled_islands`
+on item 11's (`{}`: the cited ERC supply spec declares no `nets[].roles`, so
+the severed-rail question is "not measured", not "zero"). Item 6's blocker
+(#160, missing native `yield` extension) is unchanged and out of scope here.
 
 The 0.6.0 wheel bundles the full eleven-item checklist and item 11's
 grading rules, so grading no longer passes a vendored `--tiers-doc`
@@ -73,7 +86,7 @@ is amended.
 
 `klt signoff` renders every T1 item either `met` (a cited, freshly-pinned,
 passing check backs it) or `unmet` with a `reason`. Today's committed
-verdict is **11/11 met, tier T1** (graded by the released `klt` 0.6.0). Read it with its caveats: four of those eleven rows
+verdict is **11/11 met, tier T1** (graded by the released `klt` 0.7.0). Read it with its caveats: four of those eleven rows
 (items 1, 2, 9, 10) are `met` only because issue #126 re-cited them on
 operator direction -- they are still placeholder citations: the grader accepts a citation there without checking
 that it bears on the item, so those four rows are *not* evidence for their
@@ -101,7 +114,7 @@ hand-read survived that change.)
 **Items 1, 2, 9 and 10: what `met` means here.** Until 2026-10-02 these
 items were deliberately left uncited. No `klt` verb binds to them, and
 `klt signoff` 0.5.0 accepts *any* passing native envelope for them without
-checking topical relevance, and 0.6.0 still does. It also rejects `kind: generic` for them (only
+checking topical relevance, and 0.6.0 still does (the same citations still grade `met` under 0.7.0). It also rejects `kind: generic` for them (only
 item 8 accepts it). So the only way to turn them green was to cite something
 the grader cannot judge, and this directory declined to do that. On
 2026-10-02 the operator granted bronze (T1) on the human-audited record
