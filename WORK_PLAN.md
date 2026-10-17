@@ -28,19 +28,19 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+_None._
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#182**: Remove views/run_lef_abstract.py: upstream klayout-tools#1613 is closed
+_None._
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#183**: chore(views): drop LEF-abstract wrapper, regenerate with released klt 0.6.0
+_None._
 
 ## Approved (Awaiting Merge)
 
@@ -70,9 +70,9 @@ _None._
 | Operator merge-risk holds | 1 |
 | Very important | 0 |
 | Important | 1 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 1 |
-| PRs awaiting review | 1 |
+| Ready (`loom:issue`) | 0 |
+| In Progress (`loom:building`) | 0 |
+| PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 2 |
 | Architect / Hermit proposals | 0 |
