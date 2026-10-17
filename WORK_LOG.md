@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-17
+
+- **PR #183**: chore(views): drop LEF-abstract wrapper, regenerate with released klt 0.6.0
+- **Issue #182** (closed): Remove views/run_lef_abstract.py: upstream klayout-tools#1613 is closed
+
 ### 2026-10-16
 
 - **PR #176**: Bump Repo Skills 0.24.1 -> 0.24.3
