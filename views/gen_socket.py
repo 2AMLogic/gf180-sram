@@ -38,8 +38,8 @@ file's ``PIN`` purpose lines resolve those same ``_LBL`` datatypes to the
 same LEF layer name as the drawing datatype). So each pin's socket ``layer``
 here is deliberately the *label* datatype -- the only choice ``klt
 socket-check`` can actually find a match against for this committed GDS. See
-``views/README.md`` ("Pin geometry: why every pin comes back `synthesized`,
-never `drawn`") for what this choice means downstream, in `klt lef-abstract`.
+``views/README.md`` ("Pin geometry: every pin comes back `drawn`") for the
+history of what this choice meant downstream, in `klt lef-abstract`.
 
 Since issue #121 the array draws a Poly2-to-Metal1 landing pad per wordline
 and labels ``WL<row>`` on that pad, so **every** pin in this descriptor now
