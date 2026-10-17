@@ -420,10 +420,8 @@ Expected results, as committed (2026-08-16):
   note below)
 - Python 3.12+ for the generators (stdlib + `klayout` only)
 - PDK: `gf180mcuD`, `open_pdks` commit
-  `c6d73a35f524070e85faff4a6a9eef49553ebc2b` (the commit
-  `spec/bitcell-decision.md` and `design/README.md` both verify against),
-  installed via [volare](https://github.com/efabless/volare) under
-  `~/.volare/gf180mcuD` — see `spec/pdk-variant-decision.md` for why
+  `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (pin: `sim/lib/pdk_pin.txt`; re-pinned from `c6d73a35f524070e85faff4a6a9eef49553ebc2b` by
+  issue #173), installed via ciel 2.6.1 under `~/.ciel/gf180mcuD` — see `spec/pdk-variant-decision.md` for why
   `gf180mcuD`, not the `gf180mcuC` this section cited before. The PDK is
   read here only for the layer/datatype map and the foundry-bitcell area
   comparison — the generators themselves depend on nothing but

@@ -79,9 +79,13 @@ vocabulary).
 
 ## Pinned PDK revision
 
-`open_pdks` commit `c6d73a35f524070e85faff4a6a9eef49553ebc2b`, same pin
-already recorded in `spec/bitcell-decision.md` and `design/README.md`, on
-variant `gf180mcuD` (`spec/pdk-variant-decision.md` -- the SPICE model files
+`open_pdks` commit `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (issue #173; installed with
+[ciel](https://github.com/fossi-foundation/ciel) 2.6.1 under `~/.ciel`). The
+single machine-read definition is `sim/lib/pdk_pin.txt`; `sim/lib/pdk_env.sh`,
+`sim/lib/env_provenance.py` and `design/xschemrc` all read it. Records
+committed before #173 ran under the previous pin `c6d73a35f524070e85faff4a6a9eef49553ebc2b` (volare,
+`~/.volare`) and stay as they are -- append-only evidence; re-qualification
+under the new pin lands as new records. Variant `gf180mcuD` (`spec/pdk-variant-decision.md` -- the SPICE model files
 `sim/lib/pdk_env.sh` resolves below are byte-identical between `gf180mcuC`
 and `gf180mcuD`, so every record committed under `sim/*/records/` and
 `sim/*/mc/records/` while this repo cited `gf180mcuC` remains valid
@@ -90,19 +94,24 @@ evidence; a re-run against `gf180mcuD` would reproduce the same values).
 `GF180_PDK_PATH`, or a standard install prefix -- same resolution order
 `design/xschemrc` already established) and reports the resolved
 `open_pdks` version at the top of every `run_corner_sweep.sh` invocation, so
-a drifted install is visible rather than silent. Reuse this same pin for
+a drifted install is visible rather than silent: `pdk_env.sh` also **fails**
+(non-zero, naming found vs pinned revision) if the resolved tree's revision --
+read from the `/versions/<sha>/` path component, else a `SOURCES` file -- is
+not the pin, so a leftover `~/.volare` tree cannot be used silently. Reuse this same pin for
 consistency unless a documented reason requires bumping it.
 
 ## Cold-start invocation
 
 Prerequisites: `ngspice` and `python3` on `PATH`; a gf180mcu PDK install
-(volare-installed, or any location `sim/lib/pdk_env.sh` resolves -- see that
+(ciel-installed, or any location `sim/lib/pdk_env.sh` resolves -- see that
 file's header for the exact resolution order).
 
 ```bash
-# 1. Install/point at the pinned PDK revision, e.g. via volare:
-#      volare enable --pdk gf180mcu c6d73a35f524070e85faff4a6a9eef49553ebc2b
-export PDK_ROOT="$HOME/.volare"      # parent of gf180mcuD/ -- adjust to your install
+# 1. Install/point at the pinned PDK revision via ciel 2.6.1 (use
+#    `uvx --from ciel==2.6.1 ciel ...` or a venv; not a host-wide install):
+#      pip install ciel==2.6.1
+#      ciel enable --pdk-family gf180mcu -l gf180mcu_fd_pr f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7
+export PDK_ROOT="$HOME/.ciel"        # parent of gf180mcuD/ -- adjust to your install
 export PDK=gf180mcuD
 
 # 2. From a clean checkout, run any one testbench across the full 27-corner
@@ -298,7 +307,7 @@ at all) for anything genuinely external, like a PDK install:
   retire that file.
 - **PDK identity, not location**: every `**PDK**:`/`pdk` field records the
   PDK variant name and its resolved `open_pdks` version (e.g. `gf180mcuD`,
-  `c6d73a3...`), never the absolute install path (`~/.volare/gf180mcuD` on
+  `f6eeac7...`), never the absolute install path (`~/.ciel/gf180mcuD` on
   one host, something else on another) -- the same `{name, source, version}`
   shape `klt extract`/`klt pex`'s own `provenance.pdk` block already uses.
 - **`klt yield`'s echoed `samples` field**: `run_mc_campaign.py` invokes

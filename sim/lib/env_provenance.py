@@ -38,11 +38,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+#: The single pinned open_pdks revision (issue #173); `pdk_env.sh` and
+#: `design/xschemrc` read the same file.
+PDK_PIN = (Path(__file__).with_name("pdk_pin.txt")).read_text(encoding="utf-8").strip()
+
 
 def pdk_identity(variant_dir: str | Path, version: str | None, source: str) -> dict:
     """Classify a gf180mcu PDK install as external-by-identity: a PDK
     install is *always* external to this repo (it is a separate PDK install,
-    e.g. under `~/.volare`), so per the doc's "external input pinned by
+    e.g. under `~/.ciel`), so per the doc's "external input pinned by
     identity, not location" rule this never carries a path at all -- only
     the variant name and resolved `open_pdks` version, the same
     `{name, version}` shape `klt extract`/`klt pex`'s own `provenance.pdk`
