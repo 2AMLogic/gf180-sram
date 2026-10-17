@@ -34,13 +34,13 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#182**: Remove views/run_lef_abstract.py: upstream klayout-tools#1613 is closed
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-_None._
+- **#183**: chore(views): drop LEF-abstract wrapper, regenerate with released klt 0.6.0
 
 ## Approved (Awaiting Merge)
 
@@ -71,8 +71,8 @@ _None._
 | Very important | 0 |
 | Important | 1 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 0 |
-| PRs awaiting review | 0 |
+| In Progress (`loom:building`) | 1 |
+| PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 2 |
 | Architect / Hermit proposals | 0 |
