@@ -57,6 +57,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -100,22 +101,46 @@ LINK_CHECK_GLOBS = [
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
-# The derived per-corner PASS/FAIL rollup and the script that renders it from
-# the append-only records under sim/*/records/ (see check 4 above).
-SIGNOFF_SUMMARY = "sim/signoff-summary.md"
-SIGNOFF_RENDERER = "sim/lib/render_signoff_table.py"
 
-# The derived aggregated characterization report and the script that renders
-# it from the append-only records under sim/*/records/ and sim/*/mc/records/
-# (see check 5 above).
-CHARACTERIZATION_REPORT = "measurements/characterization-report.md"
-CHARACTERIZATION_RENDERER = "measurements/generate_report.py"
+class DerivedFile(NamedTuple):
+    """A committed file that a script re-derives from the append-only records."""
 
-# The minted klt-sim-shaped evidence envelope for T1 item 5 and the script
-# that mints it from the same five corner records sim/signoff-summary.md
-# rolls up (see check 6 above, issue #128).
-SIM_ENVELOPE = "sim/signoff-sim-envelope.json"
-SIM_ENVELOPE_MINTER = "sim/lib/mint_sim_envelope.py"
+    committed: str
+    generator: str
+    verb: str  # how the generator's output is described: "renders" / "mints"
+    sources: str  # records the generator reads, as worded in error text
+    stale_extra: str = ""  # appended inside the "(a newer record ...)" note
+    regen_extra: str = ""  # appended after "Regenerate and commit it"
+
+
+# Derived files, each re-generated from the append-only records under
+# sim/*/records/ (see checks 4-6 above).
+SIGNOFF_SUMMARY = DerivedFile(
+    "sim/signoff-summary.md",  # per-corner PASS/FAIL rollup
+    "sim/lib/render_signoff_table.py",
+    "renders",
+    "sim/*/records/",
+)
+CHARACTERIZATION_REPORT = DerivedFile(
+    "measurements/characterization-report.md",  # aggregated characterization report
+    "measurements/generate_report.py",
+    "renders",
+    "sim/*/records/ and sim/*/mc/records/",
+)
+# The minted klt-sim-shaped evidence envelope for T1 item 5, minted from the
+# same five corner records the signoff summary rolls up (issue #128).
+SIM_ENVELOPE = DerivedFile(
+    "sim/signoff-sim-envelope.json",
+    "sim/lib/mint_sim_envelope.py",
+    "mints",
+    "sim/*/records/",
+    stale_extra=(
+        ", which changes its provenance.input.content_hash and with it the "
+        "signoff manifest's item-5 pin"
+    ),
+    regen_extra=", then re-run ./signoff/regenerate.sh",
+)
+DERIVED_FILES = [SIGNOFF_SUMMARY, CHARACTERIZATION_REPORT, SIM_ENVELOPE]
 
 
 def tracked_files() -> list[str]:
@@ -198,105 +223,38 @@ def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
                 )
 
 
-def check_signoff_summary_fresh(tracked: set[str], errors: list[str]) -> None:
-    """Assert sim/signoff-summary.md still matches its generator's output."""
-    if SIGNOFF_SUMMARY not in tracked or SIGNOFF_RENDERER not in tracked:
+def check_derived_fresh(
+    tracked: set[str], errors: list[str], spec: DerivedFile
+) -> None:
+    """Assert a committed derived file still matches its generator's output."""
+    if spec.committed not in tracked or spec.generator not in tracked:
         # Neither file exists yet in this checkout -- nothing to derive from.
         return
 
     try:
         rendered = subprocess.run(
-            [sys.executable, str(REPO_ROOT / SIGNOFF_RENDERER), str(REPO_ROOT)],
+            [sys.executable, str(REPO_ROOT / spec.generator), str(REPO_ROOT)],
             check=True,
             capture_output=True,
             text=True,
         ).stdout
     except subprocess.CalledProcessError as exc:
         errors.append(
-            f"{SIGNOFF_RENDERER} failed (exit {exc.returncode}); it must be "
-            f"able to re-derive {SIGNOFF_SUMMARY} from the committed records "
-            f"under sim/*/records/. stderr:\n{exc.stderr.strip()}"
+            f"{spec.generator} failed (exit {exc.returncode}); it must be "
+            f"able to re-derive {spec.committed} from the committed records "
+            f"under {spec.sources}. stderr:\n{exc.stderr.strip()}"
         )
         return
 
-    committed = (REPO_ROOT / SIGNOFF_SUMMARY).read_text(encoding="utf-8")
+    committed = (REPO_ROOT / spec.committed).read_text(encoding="utf-8")
     if committed != rendered:
         errors.append(
-            f"{SIGNOFF_SUMMARY} is stale: it does not match what "
-            f"{SIGNOFF_RENDERER} renders from the records currently under "
-            f"sim/*/records/ (a newer record probably superseded one of its "
-            f"sources). Regenerate and commit it:\n"
-            f"      python3 {SIGNOFF_RENDERER} > {SIGNOFF_SUMMARY}"
-        )
-
-
-def check_characterization_report_fresh(tracked: set[str], errors: list[str]) -> None:
-    """Assert measurements/characterization-report.md still matches its
-    generator's output (see check 5 in the module docstring)."""
-    if CHARACTERIZATION_REPORT not in tracked or CHARACTERIZATION_RENDERER not in tracked:
-        # Neither file exists yet in this checkout -- nothing to derive from.
-        return
-
-    try:
-        rendered = subprocess.run(
-            [sys.executable, str(REPO_ROOT / CHARACTERIZATION_RENDERER), str(REPO_ROOT)],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout
-    except subprocess.CalledProcessError as exc:
-        errors.append(
-            f"{CHARACTERIZATION_RENDERER} failed (exit {exc.returncode}); it "
-            f"must be able to re-derive {CHARACTERIZATION_REPORT} from the "
-            f"committed records under sim/*/records/ and sim/*/mc/records/. "
-            f"stderr:\n{exc.stderr.strip()}"
-        )
-        return
-
-    committed = (REPO_ROOT / CHARACTERIZATION_REPORT).read_text(encoding="utf-8")
-    if committed != rendered:
-        errors.append(
-            f"{CHARACTERIZATION_REPORT} is stale: it does not match what "
-            f"{CHARACTERIZATION_RENDERER} renders from the records currently "
-            f"under sim/*/records/ and sim/*/mc/records/ (a newer record "
-            f"probably superseded one of its sources). Regenerate and commit "
-            f"it:\n      python3 {CHARACTERIZATION_RENDERER} > "
-            f"{CHARACTERIZATION_REPORT}"
-        )
-
-
-def check_sim_envelope_fresh(tracked: set[str], errors: list[str]) -> None:
-    """Assert sim/signoff-sim-envelope.json still matches its minter's
-    output (see check 6 in the module docstring)."""
-    if SIM_ENVELOPE not in tracked or SIM_ENVELOPE_MINTER not in tracked:
-        # Neither file exists yet in this checkout -- nothing to derive from.
-        return
-
-    try:
-        rendered = subprocess.run(
-            [sys.executable, str(REPO_ROOT / SIM_ENVELOPE_MINTER), str(REPO_ROOT)],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout
-    except subprocess.CalledProcessError as exc:
-        errors.append(
-            f"{SIM_ENVELOPE_MINTER} failed (exit {exc.returncode}); it must "
-            f"be able to re-derive {SIM_ENVELOPE} from the committed records "
-            f"under sim/*/records/. stderr:\n{exc.stderr.strip()}"
-        )
-        return
-
-    committed = (REPO_ROOT / SIM_ENVELOPE).read_text(encoding="utf-8")
-    if committed != rendered:
-        errors.append(
-            f"{SIM_ENVELOPE} is stale: it does not match what "
-            f"{SIM_ENVELOPE_MINTER} mints from the records currently under "
-            f"sim/*/records/ (a newer record probably superseded one of its "
-            f"sources, which changes its provenance.input.content_hash and "
-            f"with it the signoff manifest's item-5 pin). Regenerate and "
-            f"commit it, then re-run ./signoff/regenerate.sh:\n"
-            f"      python3 {SIM_ENVELOPE_MINTER} > {SIM_ENVELOPE}"
+            f"{spec.committed} is stale: it does not match what "
+            f"{spec.generator} {spec.verb} from the records currently under "
+            f"{spec.sources} (a newer record probably superseded one of its "
+            f"sources{spec.stale_extra}). Regenerate and commit "
+            f"it{spec.regen_extra}:\n"
+            f"      python3 {spec.generator} > {spec.committed}"
         )
 
 
@@ -307,9 +265,8 @@ def main() -> int:
     check_readmes(tracked, errors)
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
-    check_signoff_summary_fresh(tracked, errors)
-    check_characterization_report_fresh(tracked, errors)
-    check_sim_envelope_fresh(tracked, errors)
+    for spec in DERIVED_FILES:
+        check_derived_fresh(tracked, errors, spec)
 
     if errors:
         print("evidence-format check FAILED:\n", file=sys.stderr)
@@ -322,9 +279,8 @@ def main() -> int:
         f"evidence-format check passed: {len(tracked)} tracked files, "
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
         "raw artifacts, no broken relative doc links, "
-        f"{SIGNOFF_SUMMARY} in sync with {SIGNOFF_RENDERER}, "
-        f"{CHARACTERIZATION_REPORT} in sync with {CHARACTERIZATION_RENDERER}, "
-        f"{SIM_ENVELOPE} in sync with {SIM_ENVELOPE_MINTER}."
+        + ", ".join(f"{d.committed} in sync with {d.generator}" for d in DERIVED_FILES)
+        + "."
     )
     return 0
 
