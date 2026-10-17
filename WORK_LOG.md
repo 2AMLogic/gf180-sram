@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-17
 
+- **PR #186**: chore(layout): remove no-op LVS reference rewrite script
+- **Issue #185** (closed): Remove layout/lvs_reference.py: documented no-op bulk-net rewrite
 - **PR #183**: chore(views): drop LEF-abstract wrapper, regenerate with released klt 0.6.0
 - **Issue #182** (closed): Remove views/run_lef_abstract.py: upstream klayout-tools#1613 is closed
 
