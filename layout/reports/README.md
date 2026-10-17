@@ -22,7 +22,7 @@ out and overwrites the files below in place.
 | `drc-bitcell.json` | `klt drc --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds` | `status: clean`, 0 violations |
 | `drc-array.json` | `klt drc --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | `status: clean`, 0 violations |
 | `extract-bitcell.json` | `klt extract --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds` | 6 devices (4 nfet + 2 pfet), 7 nets |
-| `lvs-bitcell.json` | `klt lvs` vs. `design/netlist/bitcell_6t.spice` (via `layout/lvs_reference.py`) | `status: match`, 0 mismatches, 6/6 devices, 7/7 nets |
+| `lvs-bitcell.json` | `klt lvs` vs. `design/netlist/bitcell_6t.spice` | `status: match`, 0 mismatches, 6/6 devices, 7/7 nets |
 | `extract-array.json` | `klt extract --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins -- `devices[]`/`nets[]` omitted from the committed file (~18 MB unabridged; every other field, including counts and provenance, is kept in full) |
 | `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` (`options.flatten_reference: true`, see below) | `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins matched -- the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known gap: array-level LVS" below) |
 | `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
@@ -68,10 +68,9 @@ list in prose).
 ## Item 4 (LVS clean): bitcell only, by design
 
 `lvs-bitcell.json` is a full, clean LVS: 6/6 devices, 7/7 nets, 0
-mismatches, against the actual schematic-derived reference netlist (with
-`layout/lvs_reference.py`'s bulk-terminal rewrite applied -- see
-`layout/README.md` "Known tool gaps" #1 for why that rewrite exists and why
-it is currently a no-op).
+mismatches, directly against the schematic-derived reference netlist, with no
+rewrite of the reference (see `layout/README.md` "Known tool gaps" #1 for
+the bulk-net history).
 
 ## Item 11 (power delivery, structural): the array supply read
 

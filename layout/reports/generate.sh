@@ -51,11 +51,9 @@ python3 -c "import json,sys; d=json.load(open('$OUT/drc-array.json')); print('st
 
 hr "3. Extract + LVS: bitcell vs $BITCELL_REF"
 klt extract --deck gf180mcu --format json "$BITCELL_GDS" -o "$WORK/bitcell.spice" | tee "$OUT/extract-bitcell.json" >/dev/null
-python3 layout/lvs_reference.py "$BITCELL_REF" \
-  --layout-netlist "$WORK/bitcell.spice" -o "$WORK/bitcell_ref.spice"
 cat > "$WORK/lvs-bitcell-request.json" <<EOF
 {"layout":{"netlist":"$WORK/bitcell.spice","top":"sram_bitcell_6t"},
- "reference":{"netlist":"$WORK/bitcell_ref.spice","form":"subckt-call"}}
+ "reference":{"netlist":"$ROOT/$BITCELL_REF","form":"subckt-call"}}
 EOF
 klt lvs "$WORK/lvs-bitcell-request.json" --format json | tee "$OUT/lvs-bitcell.json" >/dev/null
 python3 -c "import json,sys; d=json.load(open('$OUT/lvs-bitcell.json')); print('status:', d['status'], '| mismatches:', d['mismatch_count'])"
