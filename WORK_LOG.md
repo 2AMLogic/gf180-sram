@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-17
 
+- **PR #195**: chore(signoff): re-grade T1 verdict on klayout-tools 0.7.0
+- **Issue #194** (closed): Re-grade the T1 verdict of record on klayout-tools 0.7.0 (grader pin is still 0.6.0)
 - **PR #192**: refactor: table-drive derived-file freshness checks in check_evidence_format
 - **Issue #191** (closed): Simplify check_evidence_format.py: collapse three copy-pasted freshness checks into one
 - **PR #186**: chore(layout): remove no-op LVS reference rewrite script
