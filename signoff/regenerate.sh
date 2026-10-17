@@ -15,7 +15,7 @@
 # ("Power delivery (structural)") and its grading rules, while the PyPI
 # 0.5.0 wheel rendered all 11 item rows only from a vendored `--tiers-doc`
 # copy of the checklist, with grading rules that predated item 11. The
-# active pin is 0.6.0, whose released wheel bundles the eleven-item
+# active pin is 0.7.0, whose released wheel bundles the eleven-item
 # checklist and item 11's grading rules itself, so no `--tiers-doc` is
 # passed and the report's `source_doc` is the bundled checklist. Grading
 # with the same distribution CI grades with (.github/workflows/ci.yml
@@ -25,7 +25,7 @@ set -euo pipefail
 
 # Keep in sync with the `signoff` job's pip install in
 # .github/workflows/ci.yml.
-KLT_VERSION="0.6.0"
+KLT_VERSION="0.7.0"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"

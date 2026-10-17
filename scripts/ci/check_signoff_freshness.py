@@ -37,7 +37,7 @@ COMMITTED_REPORT = REPO_ROOT / "signoff" / "signoff-report.json"
 
 # Keep in sync with signoff/regenerate.sh and the `signoff` CI job's pip
 # install line in .github/workflows/ci.yml.
-KLT_VERSION = "0.6.0"
+KLT_VERSION = "0.7.0"
 
 RENDRABLE_EXIT_CODES = {0, 3}  # 0 = tier T1; 3 = rendered, >=1 unmet item
 
