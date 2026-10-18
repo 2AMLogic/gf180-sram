@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-18
 
+- **PR #221**: feat: draw the column path (precharge and I/O slices) from the netlists
+- **Issue #205** (closed): Draw column periphery layout (precharge, mux, sense amp, write driver)
 - **PR #220**: feat: sweep control pulse and macro smoke over all 27 corners
 - **Issue #217** (closed): Sweep macro-smoke and control-pulse testbenches across the 27-corner PVT set via klt sim
 - **PR #219**: feat: add 64x128 bitcell array layout for the 4:1 organization
