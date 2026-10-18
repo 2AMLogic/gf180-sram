@@ -1,0 +1,115 @@
+{
+  "netlist": "../testbench/tb_wl_rc_row64_x1p5.klt.spice",
+  "engine": "ngspice",
+  "models": {
+    "lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+  },
+  "corners": {
+    "process": [
+      {
+        "name": "ss",
+        "sections": [
+          "ss"
+        ]
+      }
+    ],
+    "supply_v": {
+      "vvdd": [
+        2.97
+      ]
+    },
+    "temperature_c": [
+      125
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "0.005n 30n"
+  },
+  "measurements": [
+    {
+      "name": "drv_rise50_p2ns",
+      "spice": ".meas tran drv_rise50_p2ns trig v(d_in_1) val=0.5 rise=1 targ v(d_drv_1) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_rise50_p2ns",
+      "spice": ".meas tran far_rise50_p2ns trig v(d_in_1) val=0.5 rise=1 targ v(d_far_1) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_width50_p2ns",
+      "spice": ".meas tran far_width50_p2ns trig v(d_far_1) val=0.5 rise=1 targ v(d_far_1) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "drv_width50_p2ns",
+      "spice": ".meas tran drv_width50_p2ns trig v(d_drv_1) val=0.5 rise=1 targ v(d_drv_1) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_rise90_p2ns",
+      "spice": ".meas tran far_rise90_p2ns trig v(d_in_1) val=0.5 rise=1 targ v(d_far90_1) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_rise10_90_p2ns",
+      "spice": ".meas tran far_rise10_90_p2ns trig v(d_far10_1) val=0.5 rise=1 targ v(d_far90_1) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_width90_p2ns",
+      "spice": ".meas tran far_width90_p2ns trig v(d_far90_1) val=0.5 rise=1 targ v(d_far90_1) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "drv_rise50_p588",
+      "spice": ".meas tran drv_rise50_p588 trig v(d_in_2) val=0.5 rise=1 targ v(d_drv_2) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_rise50_p588",
+      "spice": ".meas tran far_rise50_p588 trig v(d_in_2) val=0.5 rise=1 targ v(d_far_2) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_width50_p588",
+      "spice": ".meas tran far_width50_p588 trig v(d_far_2) val=0.5 rise=1 targ v(d_far_2) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "drv_width50_p588",
+      "spice": ".meas tran drv_width50_p588 trig v(d_drv_2) val=0.5 rise=1 targ v(d_drv_2) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_rise90_p588",
+      "spice": ".meas tran far_rise90_p588 trig v(d_in_2) val=0.5 rise=1 targ v(d_far90_2) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_rise10_90_p588",
+      "spice": ".meas tran far_rise10_90_p588 trig v(d_far10_2) val=0.5 rise=1 targ v(d_far90_2) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_width90_p588",
+      "spice": ".meas tran far_width90_p588 trig v(d_far90_2) val=0.5 rise=1 targ v(d_far90_2) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "far_peak_p2ns",
+      "spice": ".meas tran far_peak_p2ns max v(wl_far) from=1n to=3.2n",
+      "unit": "V"
+    },
+    {
+      "name": "far_peak_p588",
+      "spice": ".meas tran far_peak_p588 max v(wl_far) from=12n to=18n",
+      "unit": "V"
+    }
+  ],
+  "netlist_source": "schematic",
+  "options": {
+    "timeout_s": 900
+  }
+}

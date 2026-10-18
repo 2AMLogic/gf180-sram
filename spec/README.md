@@ -87,3 +87,10 @@ Ratified spec and decision records for this block.
   foundry `gf180mcu_fd_ip_sram` macro and OpenRAM (which has no gf180mcu SRAM
   periphery). 4:1 is held conditional on an unmeasured far-end wordline RC
   gate, with fallbacks named. No ratified item changes; no timing ratified.
+- [`wordline-rc-decision.md`](wordline-rc-decision.md) — resolves the
+  "Wordline RC gate" `periphery-architecture.md` assigned to #204: the
+  left-fed 128-cell wordline fails the gate at `ss_125c_2.97v` (far end
+  reaches 1.92 V of 2.97 V on a 2.0 ns pulse), a centre decoder or 2:1 row
+  passes it. Proposed, not ratified: ranks the options (centre decoder
+  recommended) and leaves the choice to the operator. One corner, a
+  Builder-stated criterion, no ratified value changed.
