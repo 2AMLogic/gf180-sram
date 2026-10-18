@@ -23,6 +23,7 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+- **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array
 
 ## Ready
 
@@ -70,7 +71,7 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 1 |
 | Very important | 0 |
-| Important | 1 |
+| Important | 2 |
 | Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 1 |
