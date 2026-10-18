@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-18
 
+- **PR #210**: docs(spec): add periphery architecture, floorplan, and pin placement record
+- **Issue #202** (closed): Periphery architecture and floorplan record for the 1RW macro
 - **PR #208**: docs(spec): fix macro interface details and Liberty corner names
 - **Issue #198** (closed): Ratify 1RW macro interface details and Liberty corner naming (spec decision record)
 
