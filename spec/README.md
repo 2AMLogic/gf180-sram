@@ -79,3 +79,11 @@ Ratified spec and decision records for this block.
   item and is retained as the dated audit snapshot only) — see
   [`signoff/README.md`](../signoff/README.md).
   Informational only — no ratified spec value changes.
+- [`periphery-architecture.md`](periphery-architecture.md) — resolves #202:
+  fixes the periphery architecture (4:1 column mux, 64 x 128 physical array,
+  predecode + pitch-matched wordline drivers, per-I/O sense amp and write
+  driver, self-timed access pulse), the macro floorplan, and the pin
+  placement for the #198-ratified 1RW pins, each row cited against the
+  foundry `gf180mcu_fd_ip_sram` macro and OpenRAM (which has no gf180mcu SRAM
+  periphery). 4:1 is held conditional on an unmeasured far-end wordline RC
+  gate, with fallbacks named. No ratified item changes; no timing ratified.
