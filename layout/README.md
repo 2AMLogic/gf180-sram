@@ -117,6 +117,11 @@ Port-for-port, cell-for-cell, this layout is the same 256 x 32 / 1RW
 organization `spec/sram.md` ratifies and `design/sram_256x32_array.sch`
 captures.
 
+The periphery architecture, macro floorplan and pin placement are fixed in
+[`spec/periphery-architecture.md`](../spec/periphery-architecture.md). Note it
+proposes a 4:1 column mux, i.e. a 64 x 128 physical array rather than the
+256 x 32 drawn here; that re-tiling is not done in this directory yet.
+
 ## What this does and does not prove
 
 **Proves** (all reproducible via `./layout/verify.sh`):
