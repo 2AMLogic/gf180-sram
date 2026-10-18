@@ -1,6 +1,6 @@
 * Control-block pulse widths -- klt sim circuit BODY (issue #217).
 *
-* Same circuit and stimulus as tb_ctrl_pulse.spice, rewritten as a klt sim
+* Control-block testbench (the original local flavor is in git history), written as a klt sim
 * "circuit body" (no .tran/.meas/.end, no corner.inc): process/temperature
 * come from the request's corners, the supply from its `corners.supply_v.vvdd`
 * axis, which alters VVDD. The ratified-style testbench drives its stimulus

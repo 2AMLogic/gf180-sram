@@ -209,7 +209,7 @@ no layout parasitics, no cycle time or clock-to-`Q` is claimed.
 
 ### What the smoke simulation does and does not show
 
-`sim/macro-smoke/` (`run.sh`, records `20261018-072247-f452949`; the 27-corner
+`sim/macro-smoke/` (records `20261018-072247-f452949`, from the since-removed local `run.sh` flavor; the 27-corner
 batch sweep of the same checks is `20261018-082302-37ba562`, 27/27 pass): ten
 cycles at `tt_25c_3.30v`, one local corner. Write 0xDEADBEEF to 0xA7 and 0x12345678 to
 0x3C, read both back, per-bit-masked write (low half masked) to 0xA7 reads back
