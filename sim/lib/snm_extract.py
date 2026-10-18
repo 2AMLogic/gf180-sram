@@ -32,9 +32,13 @@ original (non-symmetric) construction.
 SNM is the side length of the largest axis-aligned square that fits between
 the two curves within one lobe of the butterfly plot. In the single-curve
 case, because the second curve is the exact mirror image of the first about
-y=x, the maximum vertical gap between the sweep curve and its own inverse --
-found for x in one lobe -- equals that maximum square's side length; in the
-two-curve case the same holds between curve 1 and the *inverse of curve 2*.
+y=x, that square's side is the largest gap between the sweep curve and its
+own inverse measured along the y=x direction, divided by sqrt(2) -- the
+diagonal of the square (Seevinck's 45-degree construction), found for points
+in one lobe; in the two-curve case the same holds between curve 1 and the
+*inverse of curve 2*. (A gap measured vertically, at fixed x, is NOT the
+side: it over-reads wherever the curve is steep. Values recorded before
+issue #213 used that vertical gap.)
 
 Finding the two curves' intersections (f1(x) = f2^-1(x)) is equivalent to
 finding the fixed points of f2 composed with f1: f2(f1(x)) = x. (The
@@ -316,20 +320,30 @@ def snm(pts1: Curve, pts2: Curve | None = None) -> tuple[float, float]:
     )
 
     def max_gap(x_start: float, x_end: float) -> float:
-        # Sample within [x_start, x_end] over pts1's grid, evaluating the
-        # vertical distance between curve 1 (f1(x)) and the mirror image of
-        # curve 2 about y=x (f2^-1(x)) -- found by bisection (solve_inverse),
-        # not a sorted inverse table. This vertical gap (a constant-x
-        # cross-section between the curve and the other curve's reflection
-        # about the diagonal) is directly the side length of the largest
-        # axis-aligned square inscribed between the two curves, per
-        # Seevinck et al. 1987's construction -- no additional geometric
-        # factor is needed, symmetric or not.
+        # Seevinck et al. 1987's construction, in the frame rotated 45 degrees
+        # about the origin: u = (x - y)/sqrt2, v = (x + y)/sqrt2. The mirror
+        # image of curve 2 about y=x is (y, x), i.e. u -> -u. For each sample
+        # of curve 1 at (x, f1(x)), find the point (f2(t), t) of that mirror
+        # image at the same u -- (f2(t) - t) = (x - f1(x)), solved by
+        # bisection on the monotone-falling f2(t) - t, never a sorted inverse
+        # table. The two curves' gap along v at equal u is the *diagonal* of
+        # the inscribed square, so its side is that gap divided by sqrt2:
+        #   side = |(x + f1(x)) - (f2(t) + t)| / 2.
+        # A constant-x (vertical) cross-section is NOT the side: it over-reads
+        # wherever the curve is steep (see issue #213).
         best = 0.0
         for x, y in pts1:
             if x_start <= x <= x_end:
-                y_inv = solve_inverse(pts2, x)
-                best = max(best, abs(y_inv - y))
+                d = x - y
+                lo, hi = pts2[0][0], pts2[-1][0]
+                for _ in range(80):
+                    t = (lo + hi) / 2
+                    if interp(pts2, t) - t > d:
+                        lo = t
+                    else:
+                        hi = t
+                t = (lo + hi) / 2
+                best = max(best, abs((x + y) - (interp(pts2, t) + t)) / 2)
         return best
 
     lo_gap = max_gap(x_lo, x_mid)
