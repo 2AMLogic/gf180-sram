@@ -22,23 +22,29 @@ trap 'rm -rf "$WORK"' EXIT
 PY="uv run --with klayout python3"
 BITCELL_GDS=layout/bitcell/sram_bitcell_6t.gds
 ARRAY_GDS=layout/sram_256x32/sram_256x32_array.gds
+ARRAY64_GDS=layout/sram_64x128/sram_64x128_array.gds
 
 hr() { printf '\n=== %s ===\n' "$1"; }
 
 hr "1. regenerate (determinism: the committed GDS must not change)"
 $PY layout/bitcell/generate.py
 $PY layout/sram_256x32/generate.py
-if git diff --quiet -- "$BITCELL_GDS" "$ARRAY_GDS"; then
-  echo "PASS: re-running both generators reproduced the committed GDS byte-for-byte"
+# The ratified 4:1 organization (spec/periphery-architecture.md): same
+# generator, 64 rows x 128 cols (issue #204).
+$PY layout/sram_256x32/generate.py --rows 64 --cols 128 \
+  --top-name sram_64x128_array -o "$ARRAY64_GDS"
+if git diff --quiet -- "$BITCELL_GDS" "$ARRAY_GDS" "$ARRAY64_GDS"; then
+  echo "PASS: re-running the generators reproduced the committed GDS byte-for-byte"
 else
   echo "FAIL: regenerated GDS differs from the committed GDS"
-  git diff --stat -- "$BITCELL_GDS" "$ARRAY_GDS"
+  git diff --stat -- "$BITCELL_GDS" "$ARRAY_GDS" "$ARRAY64_GDS"
   exit 1
 fi
 
 hr "2. layout hygiene (klt precheck, 5 nm grid)"
 klt precheck --deck gf180mcu --grid-um 0.005 "$BITCELL_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY_GDS"
+klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY64_GDS"
 
 hr "3. DRC: bitcell (klt drc --deck gf180mcu)"
 klt drc --deck gf180mcu "$BITCELL_GDS"
@@ -62,3 +68,12 @@ klt drc --deck gf180mcu "$ARRAY_GDS"
 
 hr "7. device extraction: full 256x32 array (~1.5 min)"
 klt extract --deck gf180mcu "$ARRAY_GDS" -o "$WORK/array.spice"
+
+hr "8. DRC: full 64x128 array (~1 min)"
+klt drc --deck gf180mcu "$ARRAY64_GDS"
+
+hr "9. device extraction + LVS: full 64x128 array vs design/netlist/sram_64x128_array.spice"
+klt extract --deck gf180mcu "$ARRAY64_GDS" -o "$WORK/array64.spice"
+klt lvs "{\"layout\":{\"netlist\":\"$WORK/array64.spice\",\"top\":\"sram_64x128_array\"},\
+\"reference\":{\"netlist\":\"$ROOT/design/netlist/sram_64x128_array.spice\",\"form\":\"subckt-call\"},\
+\"options\":{\"flatten_reference\":true}}"
