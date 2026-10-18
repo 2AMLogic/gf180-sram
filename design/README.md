@@ -7,8 +7,8 @@ This directory holds T1 checklist item 1 (issue #21): the 6T bitcell and the
 `spec/sram.md`-ratified 256 x 32 bitcell-array *core* — storage cells plus
 their wordline/bitline/power ports only. Address decode, column mux, sense
 amp and write driver (the rest of a full 1RW macro's pin list: `A`, `CEN`,
-`CLK`, `D`, `Q`, `GWEN`, `WEN`) are periphery, out of this issue's scope; see
-"Scope" below.
+`CLK`, `D`, `Q`, `GWEN`, `WEN`) were out of that issue's scope; they are
+issue #203's, see "Periphery and macro top (issue #203)" below.
 
 ```
 design/
@@ -120,6 +120,119 @@ Top-level ports: 256 `WL<n>` inputs, 32 `BL<n>`/`BLB<n>` inout pairs, `VDD`,
 multiplexing `BL<n>`/`BLB<n>` to `D`/`Q`), which is not drawn here, matching
 `layout/README.md`'s equivalent scoping note for the parallel GDS array.
 
+## Periphery and macro top (issue #203)
+
+Implements the blocks of [`spec/periphery-architecture.md`](../spec/periphery-architecture.md)
+(#202) as schematics and netlists, plus a macro top whose boundary is exactly
+the #198 pins. **Schematic level only**: no layout, no extraction, no
+characterisation. Every transistor size below is a first-cut smoke-sim value
+chosen by this issue (the record sizes nothing); none is optimised.
+
+```
+design/
+  generate_periphery.py     generator for everything below (stdlib only)
+  regen_periphery.sh        generator + `klt netlist` for every block (--check = drift gate)
+  check_macro_pins.py       asserts the macro netlist's ports == the #198 pin list
+  xschemrc.lvs              xschemrc + `lvs_netlist 1` (live top-level .subckt)
+  sram_64x128_array.sch/.sym  the 4:1 physical array (generate_array.py --rows 64 --cols 128)
+  sram_256x32.sch           macro top (LVS reference): netlist/sram_256x32.spice
+  sram_ctrl, row_path, col_decode, precharge_slice, io_slice   blocks
+  inv* nand* and* nor3 rowdrv tg_* dff sa_latch wdrv           leaf cells
+  netlist/<block>.spice     klt-netlist output, one per .sch (24 files)
+```
+
+**4:1 array, new file name.** The record says to regenerate the array as 64 rows
+x 128 columns "via `generate_array.py --rows 64 --cols 128`". It is written to
+**`sram_64x128_array.*`** instead of over `sram_256x32_array.*`: the committed
+256 x 32 netlist is the LVS reference for the committed 256 x 32 layout
+(`layout/reports/generate.sh`, `layout/reports/lvs-array.json`) and the `views/`
+abstract, and overwriting it would make that evidence describe a design that is
+no longer there. The 256 x 32 files are untouched. Same bitcell, 8,192
+instances, `WL0..WL63`, `BL0..BL127`, `BLB0..BLB127`. Retiring the 256 x 32
+files is #204/#206's call when the layout moves to 4:1.
+
+### Hierarchy and what each block is
+
+| Block | Contents (record row) |
+|---|---|
+| `sram_ctrl` | `CLK` buffer; flops on rising `CLK` for `A[7:0]`, `CEN`, `GWEN` (row 10); self-timed pulse generation (row 11) |
+| `row_path` | `A[7:2]`: two 3->8 predecoders (`A[7:5]` gated by `wl_en`, `A[4:2]`), 64 x `rowdrv` (2-input AND whose output inverter is the wordline driver) (row 4) |
+| `col_decode` | `A[1:0]` -> `csel[3:0]`/`cseln[3:0]`, gated by `wl_en` (rows 2, 3, 5) |
+| `precharge_slice` x32 | 3 PMOS per column (two precharge, one equalise), 4 columns; released only for the selected column (row 9) |
+| `io_slice` x32 | 8 transmission gates (4 per line) onto one shared pair; one latch sense amp; one write driver; `D`/`WEN` input flops; `Q` register flop (rows 3, 5-8, 10) |
+| `sram_256x32` | the above, plus the array; ports `A[7:0]`, `CEN`, `GWEN`, `CLK`, `D[31:0]`, `WEN[31:0]`, `Q[31:0]`, `VDD`, `VSS` = 107 signals + 2 supplies |
+
+Physical column `p = 4*i + s` for I/O bit `i` and select `s` (row 3); row =
+`A[7:2]`, select = `A[1:0]` (row 2). `Q` is a flop clocked by a read-only strobe
+(`q_clk`), so it is loaded only on a read and holds across writes and idle
+cycles (row 7). A masked bit (`WEN[i]` = 1) leaves its write driver off (row 8).
+Transistor counts (flattened): array 49,152; periphery 4,476; macro 53,628.
+
+### Column-mux device type: transmission gate
+
+The record leaves NMOS / PMOS / transmission gate open (row 5) with one
+constraint: the read path must pass a bit line near `VDD`, the write path must
+pull one to `VSS`. An NMOS pass gate passes a high only to `VDD - Vt` (and body
+effect makes it worse), which starves the latch sense amp of common-mode; a PMOS
+pass gate passes a low only down to `|Vtp|`, which cannot force a cell write.
+A transmission gate (W 2 um N / 3 um P, `tg_mux`) passes both full-swing. The
+cost is two devices per line per column and a complementary select pair
+(`csel`/`cseln`). That is a reasoned choice, not a measured one: the smoke sim
+shows it works at one corner and says nothing about which of the three is
+smallest or fastest at every corner.
+
+### Self-timed control (record rows 11-12)
+
+`p = clk_buf & ~delay(clk_buf)` is a pulse that starts at the rising edge and
+ends after a 35-stage `inv_dly` chain, so the pulse **end** is set by the delay
+path, not by the `CLK` falling edge (the record's reason for departing from
+OpenRAM's two-phase scheme). Then `wl_en = p & delay(p) & ~CEN` (decode settles
+first), `s_en = wl_en & delay(wl_en) & read` (read only), `q_clk = s_en &
+delay(s_en)` (strobes the `Q` flops), `wpn = ~(wl_en & write)`. The delay chain
+is a plain inverter chain: the record's "replica/delay path" is the *delay*
+variant, **not** a replica bit line, so `s_en` does not track the real
+bit-line differential across PVT or array loading. Whether that is enough is
+open and belongs with the corner sweep and #204's extracted loads. The `CLK`
+high time must exceed the chain delay (about 5 ns nominal); no minimum clock
+width is ratified or claimed.
+
+**Write pulse >= 2 ns (row 12): met at one corner, open at 26.** At `tt_25c_3.30v`
+the internal write pulse (`wpn` low) is 3.69 ns
+(`sim/macro-smoke/records/20261018-072248-f452949.md`). Row 12 requires >= 2 ns
+**at every corner**; that sweep of the control block has not been run. Until it
+is, the alternative clause of row 12 is in force: if any corner's pulse is
+under 2 ns, `sim/write-margin/` (measured against a fixed 2 ns window) must be
+re-run under a new record before it can be cited for this macro. No cycle time
+or clock-to-`Q` is claimed.
+
+### What the smoke simulation does and does not show
+
+`sim/macro-smoke/` (`run.sh`, records `20261018-072247-f452949`): ten cycles at
+`tt_25c_3.30v`, one local corner. Write 0xDEADBEEF to 0xA7 and 0x12345678 to
+0x3C, read both back, per-bit-masked write (low half masked) to 0xA7 reads back
+0xFFFFBEEF, a `CEN`=1 cycle with `GWEN`=0 and fresh data does not write and `Q`
+holds. All pass. Limits, in the record and repeated here because they are
+easy to lose: the array is **reduced** to the two addressed rows with a 20 fF
+bit-line stand-in (the full 8,192-cell transient did not finish in 10 minutes
+on a shared host); no wire RC (the wordline RC gate is #204's); no sense-amp
+offset claim (needs Monte Carlo per `spec/statistical-treatment-decision.md`;
+none is made); no timing, no PVT. The existing `sim/` array-level evidence on
+the 256 x 32 array is not rewritten.
+
+### Netlisting
+
+`klt netlist` with `--rcfile design/xschemrc.lvs` (not `--block`). While
+building this, `--block` left the continuation lines of a wrapped top-level
+pin list as `*+` comments, so the macro's pin list silently shrank to the first
+line's ports (filed upstream as `2AMLogic/klayout-tools#3899`, closed the same
+day; the klt on this host, `0.7.1.dev1909`, now keeps the `+` lines). Two
+reasons `xschemrc.lvs` stays: xschem's `lvs_netlist` option gives a live
+`.subckt` without depending on that fix, and `--block` still joins bus bits with
+commas (`A[7],A[6],...`) where `lvs_netlist` gives space-separated ports.
+Whether ngspice accepts the comma form was not tested. `check_macro_pins.py`
+guards the pin list either way. Every netlist here ends in a bare `.end`, like
+the existing ones.
+
 ## Regenerating the netlists
 
 ```bash
@@ -179,7 +292,11 @@ schematic — regenerate and re-commit both together.
 
 ## Tool / PDK versions used
 
-- `xschem` V3.4.7 (Homebrew, macOS)
+- `xschem` V3.4.7 (Homebrew, macOS) for the bitcell and 256 x 32 array
+  netlists; V3.4.4 (Linux, via `klt netlist`) for the #203 netlists. The two
+  differ only in where they wrap long lines (re-netlisting `bitcell_6t.sch`
+  with 3.4.4 gives the same devices on re-wrapped lines), so the older
+  committed netlists were left as they are
 - `ngspice` ngspice-47 (used for the ad hoc functional check above; not
   required to regenerate the netlists themselves)
 - Python 3.14 (`generate_array.py`; stdlib only, no third-party

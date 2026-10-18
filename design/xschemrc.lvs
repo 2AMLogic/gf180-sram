@@ -1,0 +1,7 @@
+#### xschem config for netlisting a sheet as an includable top-level .subckt.
+#### Sources the project rc, then turns on xschem's "LVS netlist: top level is
+#### a .subckt" option so the top sheet's .subckt/.ends are live and a long pin
+#### list keeps its '+' continuation lines (a plain `klt netlist --block` only
+#### uncomments the first line of a wrapped pin list; see design/README.md).
+source [file join [file dirname [info script]] xschemrc]
+set lvs_netlist 1
