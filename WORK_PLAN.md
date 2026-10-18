@@ -35,7 +35,6 @@ Human-approved issues ready for implementation (`loom:issue`).
 Issues currently being built (`loom:building`).
 
 - **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array
-- **#205**: Draw column periphery layout (precharge, mux, sense amp, write driver)
 
 ## PRs Awaiting Review
 
@@ -54,7 +53,6 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 Issues carrying `loom:curated`.
 
 - **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array *(curated)*
-- **#205**: Draw column periphery layout (precharge, mux, sense amp, write driver) *(curated)*
 - **#160**: T1 item 6: make the klt yield report's samples path resolve from any working directory *(curated)*
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3 *(curated)*
 
@@ -74,10 +72,10 @@ _None._
 | Very important | 0 |
 | Important | 1 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 2 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
-| Curated | 4 |
+| Curated | 3 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->

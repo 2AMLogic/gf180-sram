@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-18
 
+- **PR #226**: refactor: drop local-only macro smoke flavor in favor of klt sim
+- **Issue #224** (closed): Retire local-only macro-smoke testbench flavor; the klt twin supersedes it
 - **PR #221**: feat: draw the column path (precharge and I/O slices) from the netlists
 - **Issue #205** (closed): Draw column periphery layout (precharge, mux, sense amp, write driver)
 - **PR #220**: feat: sweep control pulse and macro smoke over all 27 corners
