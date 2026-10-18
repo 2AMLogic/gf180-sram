@@ -37,6 +37,10 @@ layout/
   sram_256x32/
     generate.py                         tiles the bitcell into the 256 x 32 array
     sram_256x32_array.gds               committed, deterministic GDS
+  sram_64x128/
+    sram_64x128_array.gds               64 x 128 array (4:1 organization), emitted by
+                                        sram_256x32/generate.py --rows 64 --cols 128
+                                        --top-name sram_64x128_array (issue #204)
 ```
 
 ### The bitcell
@@ -120,7 +124,11 @@ captures.
 The periphery architecture, macro floorplan and pin placement are fixed in
 [`spec/periphery-architecture.md`](../spec/periphery-architecture.md). Note it
 proposes a 4:1 column mux, i.e. a 64 x 128 physical array rather than the
-256 x 32 drawn here; that re-tiling is not done in this directory yet.
+256 x 32 drawn here. The 64 x 128 re-tiling (571.31 x 345.60 um, `WL0..WL63`,
+same bitcell and landing-pad strip) is `sram_64x128/sram_64x128_array.gds`
+(issue #204), emitted by the same generator and checked by `verify.sh` steps 1,
+2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`).
+The 256 x 32 files are left untouched until macro assembly (#206) retires them.
 
 ## What this does and does not prove
 

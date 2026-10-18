@@ -177,7 +177,8 @@ def _insert_text(layout: kdb.Layout, cell: kdb.Cell, lp: tuple[int, int],
     )
 
 
-def build(rows: int = ROWS, cols: int = COLS) -> kdb.Layout:
+def build(rows: int = ROWS, cols: int = COLS,
+          top_name: str = TOP_CELL) -> kdb.Layout:
     layout = kdb.Layout()
     layout.dbu = 0.001  # 1 dbu = 1 nm
 
@@ -189,7 +190,7 @@ def build(rows: int = ROWS, cols: int = COLS) -> kdb.Layout:
     cell = layout.create_cell(bitcell.TOP_CELL)
     bitcell.draw(layout, cell, with_labels=False)
 
-    top = layout.create_cell(TOP_CELL)
+    top = layout.create_cell(top_name)
 
     pitch_x = int(round(bitcell.W_CELL / layout.dbu))
     pitch_y = int(round(bitcell.H_CELL / layout.dbu))
@@ -278,15 +279,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--rows", type=int, default=ROWS)
     parser.add_argument("--cols", type=int, default=COLS)
+    parser.add_argument("--top-name", default=TOP_CELL,
+                        help="top cell name (default: %(default)s); the "
+                        "64 x 128 array is --rows 64 --cols 128 --top-name "
+                        "sram_64x128_array")
     parser.add_argument("-o", "--out", default=None)
     args = parser.parse_args()
 
     out_path = args.out or os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), f"{TOP_CELL}.gds"
+        os.path.dirname(os.path.abspath(__file__)), f"{args.top_name}.gds"
     )
-    layout = build(args.rows, args.cols)
+    layout = build(args.rows, args.cols, args.top_name)
     layout.write(out_path, save_options())
-    bbox = layout.cell(TOP_CELL).bbox()
+    bbox = layout.cell(args.top_name).bbox()
     dbu = layout.dbu
     width = bbox.width() * dbu
     height = bbox.height() * dbu
