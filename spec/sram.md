@@ -57,6 +57,9 @@ interface (`A[n]`, `CEN`, `CLK`, `D[n]`, `Q[n]`, `GWEN`, `WEN`, documented in
 **Stretch: 1RW1R** (add an independent read-only port), matching this
 repo's original draft table.
 
+Pin widths, polarity, `WEN` semantics, read latency, and Liberty corner
+names: `spec/macro-interface-decision.md`.
+
 This item was already corroborated during `spec/bitcell-decision.md`'s own
 scope decision ("Port target: 1RW first ..., 1RW1R as a stretch goal —
 consistent with the existing draft spec table in `README.md`") and is
