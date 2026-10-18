@@ -473,6 +473,19 @@ the campaign counts those separately (`errored` in the report, `n_errored` in
 `summary.json`). **A record with a non-zero errored count states a yield
 conditioned on a measurable draw** — read the two numbers together.
 
+### Earlier SNM values over-read (issue #213)
+
+Read/hold SNM values committed before issue #213 were extracted with a
+*vertical* gap between the butterfly curves (constant x) and treated that gap
+as the inscribed square's side. The side is the gap along y = x divided by
+sqrt(2) (Seevinck's 45-degree construction), so the vertical gap over-reads
+wherever the VTC is steep. `sim/lib/snm_extract.py` now measures the side
+correctly and `sim/lib/test_snm_extract.py` checks it against an independent
+brute-force largest-square search. The committed records are append-only
+evidence and were **not** edited: their SNM values (and anything derived from
+them, e.g. the read-SNM Cpk quoted in `spec/`) use the old, over-reading
+measure until the sweeps are re-run and new records are issued.
+
 The same episode is why `tb_write_margin.spice` now bisects instead of
 scanning 41 points: at VDD/40 resolution the trip point quantized onto one
 grid value for every draw at a corner, giving a sample standard deviation of
