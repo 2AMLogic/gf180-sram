@@ -1,0 +1,823 @@
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sram_256x32.sch
+.subckt sram_256x32 A[7] A[6] A[5] A[4] A[3] A[2] A[1] A[0] CEN GWEN CLK D[31] D[30] D[29] D[28]
++ D[27] D[26] D[25] D[24] D[23] D[22] D[21] D[20] D[19] D[18] D[17] D[16] D[15] D[14] D[13] D[12] D[11]
++ D[10] D[9] D[8] D[7] D[6] D[5] D[4] D[3] D[2] D[1] D[0] WEN[31] WEN[30] WEN[29] WEN[28] WEN[27] WEN[26]
++ WEN[25] WEN[24] WEN[23] WEN[22] WEN[21] WEN[20] WEN[19] WEN[18] WEN[17] WEN[16] WEN[15] WEN[14] WEN[13]
++ WEN[12] WEN[11] WEN[10] WEN[9] WEN[8] WEN[7] WEN[6] WEN[5] WEN[4] WEN[3] WEN[2] WEN[1] WEN[0] Q[31] Q[30]
++ Q[29] Q[28] Q[27] Q[26] Q[25] Q[24] Q[23] Q[22] Q[21] Q[20] Q[19] Q[18] Q[17] Q[16] Q[15] Q[14] Q[13]
++ Q[12] Q[11] Q[10] Q[9] Q[8] Q[7] Q[6] Q[5] Q[4] Q[3] Q[2] Q[1] Q[0] VDD VSS
+*.PININFO A[7:0]:I CEN:I GWEN:I CLK:I D[31:0]:I WEN[31:0]:I Q[31:0]:O VDD:B VSS:B
+XXctrl A[0] A[1] A[2] A[3] A[4] A[5] A[6] A[7] CEN GWEN CLK aq0 aq1 aq2 aq3 aq4 aq5 aq6 aq7 aqb0
++ aqb1 aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 clk_buf wl_en wl_en_n s_en q_clk wpn VDD VSS sram_ctrl
+XXrow aq2 aq3 aq4 aq5 aq6 aq7 aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 wl_en WL0 WL1 WL2 WL3 WL4 WL5 WL6 WL7
++ WL8 WL9 WL10 WL11 WL12 WL13 WL14 WL15 WL16 WL17 WL18 WL19 WL20 WL21 WL22 WL23 WL24 WL25 WL26 WL27 WL28
++ WL29 WL30 WL31 WL32 WL33 WL34 WL35 WL36 WL37 WL38 WL39 WL40 WL41 WL42 WL43 WL44 WL45 WL46 WL47 WL48 WL49
++ WL50 WL51 WL52 WL53 WL54 WL55 WL56 WL57 WL58 WL59 WL60 WL61 WL62 WL63 VDD VSS row_path
+XXcol aq0 aqb0 aq1 aqb1 wl_en csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 VDD VSS col_decode
+XXarray WL0 WL1 WL2 WL3 WL4 WL5 WL6 WL7 WL8 WL9 WL10 WL11 WL12 WL13 WL14 WL15 WL16 WL17 WL18 WL19
++ WL20 WL21 WL22 WL23 WL24 WL25 WL26 WL27 WL28 WL29 WL30 WL31 WL32 WL33 WL34 WL35 WL36 WL37 WL38 WL39 WL40
++ WL41 WL42 WL43 WL44 WL45 WL46 WL47 WL48 WL49 WL50 WL51 WL52 WL53 WL54 WL55 WL56 WL57 WL58 WL59 WL60 WL61
++ WL62 WL63 BL0 BLB0 BL1 BLB1 BL2 BLB2 BL3 BLB3 BL4 BLB4 BL5 BLB5 BL6 BLB6 BL7 BLB7 BL8 BLB8 BL9 BLB9 BL10
++ BLB10 BL11 BLB11 BL12 BLB12 BL13 BLB13 BL14 BLB14 BL15 BLB15 BL16 BLB16 BL17 BLB17 BL18 BLB18 BL19 BLB19
++ BL20 BLB20 BL21 BLB21 BL22 BLB22 BL23 BLB23 BL24 BLB24 BL25 BLB25 BL26 BLB26 BL27 BLB27 BL28 BLB28 BL29
++ BLB29 BL30 BLB30 BL31 BLB31 BL32 BLB32 BL33 BLB33 BL34 BLB34 BL35 BLB35 BL36 BLB36 BL37 BLB37 BL38 BLB38
++ BL39 BLB39 BL40 BLB40 BL41 BLB41 BL42 BLB42 BL43 BLB43 BL44 BLB44 BL45 BLB45 BL46 BLB46 BL47 BLB47 BL48
++ BLB48 BL49 BLB49 BL50 BLB50 BL51 BLB51 BL52 BLB52 BL53 BLB53 BL54 BLB54 BL55 BLB55 BL56 BLB56 BL57 BLB57
++ BL58 BLB58 BL59 BLB59 BL60 BLB60 BL61 BLB61 BL62 BLB62 BL63 BLB63 BL64 BLB64 BL65 BLB65 BL66 BLB66 BL67
++ BLB67 BL68 BLB68 BL69 BLB69 BL70 BLB70 BL71 BLB71 BL72 BLB72 BL73 BLB73 BL74 BLB74 BL75 BLB75 BL76 BLB76
++ BL77 BLB77 BL78 BLB78 BL79 BLB79 BL80 BLB80 BL81 BLB81 BL82 BLB82 BL83 BLB83 BL84 BLB84 BL85 BLB85 BL86
++ BLB86 BL87 BLB87 BL88 BLB88 BL89 BLB89 BL90 BLB90 BL91 BLB91 BL92 BLB92 BL93 BLB93 BL94 BLB94 BL95 BLB95
++ BL96 BLB96 BL97 BLB97 BL98 BLB98 BL99 BLB99 BL100 BLB100 BL101 BLB101 BL102 BLB102 BL103 BLB103 BL104
++ BLB104 BL105 BLB105 BL106 BLB106 BL107 BLB107 BL108 BLB108 BL109 BLB109 BL110 BLB110 BL111 BLB111 BL112
++ BLB112 BL113 BLB113 BL114 BLB114 BL115 BLB115 BL116 BLB116 BL117 BLB117 BL118 BLB118 BL119 BLB119 BL120
++ BLB120 BL121 BLB121 BL122 BLB122 BL123 BLB123 BL124 BLB124 BL125 BLB125 BL126 BLB126 BL127 BLB127 VDD VSS
++ sram_64x128_array
+XXpc0 csel0 csel1 csel2 csel3 BL0 BL1 BL2 BL3 BLB0 BLB1 BLB2 BLB3 VDD VSS precharge_slice
+XXio0 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[0] WEN[0] clk_buf q_clk s_en wl_en_n wpn
++ Q[0] BL0 BL1 BL2 BL3 BLB0 BLB1 BLB2 BLB3 VDD VSS io_slice
+XXpc1 csel0 csel1 csel2 csel3 BL4 BL5 BL6 BL7 BLB4 BLB5 BLB6 BLB7 VDD VSS precharge_slice
+XXio1 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[1] WEN[1] clk_buf q_clk s_en wl_en_n wpn
++ Q[1] BL4 BL5 BL6 BL7 BLB4 BLB5 BLB6 BLB7 VDD VSS io_slice
+XXpc2 csel0 csel1 csel2 csel3 BL8 BL9 BL10 BL11 BLB8 BLB9 BLB10 BLB11 VDD VSS precharge_slice
+XXio2 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[2] WEN[2] clk_buf q_clk s_en wl_en_n wpn
++ Q[2] BL8 BL9 BL10 BL11 BLB8 BLB9 BLB10 BLB11 VDD VSS io_slice
+XXpc3 csel0 csel1 csel2 csel3 BL12 BL13 BL14 BL15 BLB12 BLB13 BLB14 BLB15 VDD VSS precharge_slice
+XXio3 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[3] WEN[3] clk_buf q_clk s_en wl_en_n wpn
++ Q[3] BL12 BL13 BL14 BL15 BLB12 BLB13 BLB14 BLB15 VDD VSS io_slice
+XXpc4 csel0 csel1 csel2 csel3 BL16 BL17 BL18 BL19 BLB16 BLB17 BLB18 BLB19 VDD VSS precharge_slice
+XXio4 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[4] WEN[4] clk_buf q_clk s_en wl_en_n wpn
++ Q[4] BL16 BL17 BL18 BL19 BLB16 BLB17 BLB18 BLB19 VDD VSS io_slice
+XXpc5 csel0 csel1 csel2 csel3 BL20 BL21 BL22 BL23 BLB20 BLB21 BLB22 BLB23 VDD VSS precharge_slice
+XXio5 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[5] WEN[5] clk_buf q_clk s_en wl_en_n wpn
++ Q[5] BL20 BL21 BL22 BL23 BLB20 BLB21 BLB22 BLB23 VDD VSS io_slice
+XXpc6 csel0 csel1 csel2 csel3 BL24 BL25 BL26 BL27 BLB24 BLB25 BLB26 BLB27 VDD VSS precharge_slice
+XXio6 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[6] WEN[6] clk_buf q_clk s_en wl_en_n wpn
++ Q[6] BL24 BL25 BL26 BL27 BLB24 BLB25 BLB26 BLB27 VDD VSS io_slice
+XXpc7 csel0 csel1 csel2 csel3 BL28 BL29 BL30 BL31 BLB28 BLB29 BLB30 BLB31 VDD VSS precharge_slice
+XXio7 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[7] WEN[7] clk_buf q_clk s_en wl_en_n wpn
++ Q[7] BL28 BL29 BL30 BL31 BLB28 BLB29 BLB30 BLB31 VDD VSS io_slice
+XXpc8 csel0 csel1 csel2 csel3 BL32 BL33 BL34 BL35 BLB32 BLB33 BLB34 BLB35 VDD VSS precharge_slice
+XXio8 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[8] WEN[8] clk_buf q_clk s_en wl_en_n wpn
++ Q[8] BL32 BL33 BL34 BL35 BLB32 BLB33 BLB34 BLB35 VDD VSS io_slice
+XXpc9 csel0 csel1 csel2 csel3 BL36 BL37 BL38 BL39 BLB36 BLB37 BLB38 BLB39 VDD VSS precharge_slice
+XXio9 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[9] WEN[9] clk_buf q_clk s_en wl_en_n wpn
++ Q[9] BL36 BL37 BL38 BL39 BLB36 BLB37 BLB38 BLB39 VDD VSS io_slice
+XXpc10 csel0 csel1 csel2 csel3 BL40 BL41 BL42 BL43 BLB40 BLB41 BLB42 BLB43 VDD VSS precharge_slice
+XXio10 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[10] WEN[10] clk_buf q_clk s_en wl_en_n
++ wpn Q[10] BL40 BL41 BL42 BL43 BLB40 BLB41 BLB42 BLB43 VDD VSS io_slice
+XXpc11 csel0 csel1 csel2 csel3 BL44 BL45 BL46 BL47 BLB44 BLB45 BLB46 BLB47 VDD VSS precharge_slice
+XXio11 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[11] WEN[11] clk_buf q_clk s_en wl_en_n
++ wpn Q[11] BL44 BL45 BL46 BL47 BLB44 BLB45 BLB46 BLB47 VDD VSS io_slice
+XXpc12 csel0 csel1 csel2 csel3 BL48 BL49 BL50 BL51 BLB48 BLB49 BLB50 BLB51 VDD VSS precharge_slice
+XXio12 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[12] WEN[12] clk_buf q_clk s_en wl_en_n
++ wpn Q[12] BL48 BL49 BL50 BL51 BLB48 BLB49 BLB50 BLB51 VDD VSS io_slice
+XXpc13 csel0 csel1 csel2 csel3 BL52 BL53 BL54 BL55 BLB52 BLB53 BLB54 BLB55 VDD VSS precharge_slice
+XXio13 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[13] WEN[13] clk_buf q_clk s_en wl_en_n
++ wpn Q[13] BL52 BL53 BL54 BL55 BLB52 BLB53 BLB54 BLB55 VDD VSS io_slice
+XXpc14 csel0 csel1 csel2 csel3 BL56 BL57 BL58 BL59 BLB56 BLB57 BLB58 BLB59 VDD VSS precharge_slice
+XXio14 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[14] WEN[14] clk_buf q_clk s_en wl_en_n
++ wpn Q[14] BL56 BL57 BL58 BL59 BLB56 BLB57 BLB58 BLB59 VDD VSS io_slice
+XXpc15 csel0 csel1 csel2 csel3 BL60 BL61 BL62 BL63 BLB60 BLB61 BLB62 BLB63 VDD VSS precharge_slice
+XXio15 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[15] WEN[15] clk_buf q_clk s_en wl_en_n
++ wpn Q[15] BL60 BL61 BL62 BL63 BLB60 BLB61 BLB62 BLB63 VDD VSS io_slice
+XXpc16 csel0 csel1 csel2 csel3 BL64 BL65 BL66 BL67 BLB64 BLB65 BLB66 BLB67 VDD VSS precharge_slice
+XXio16 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[16] WEN[16] clk_buf q_clk s_en wl_en_n
++ wpn Q[16] BL64 BL65 BL66 BL67 BLB64 BLB65 BLB66 BLB67 VDD VSS io_slice
+XXpc17 csel0 csel1 csel2 csel3 BL68 BL69 BL70 BL71 BLB68 BLB69 BLB70 BLB71 VDD VSS precharge_slice
+XXio17 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[17] WEN[17] clk_buf q_clk s_en wl_en_n
++ wpn Q[17] BL68 BL69 BL70 BL71 BLB68 BLB69 BLB70 BLB71 VDD VSS io_slice
+XXpc18 csel0 csel1 csel2 csel3 BL72 BL73 BL74 BL75 BLB72 BLB73 BLB74 BLB75 VDD VSS precharge_slice
+XXio18 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[18] WEN[18] clk_buf q_clk s_en wl_en_n
++ wpn Q[18] BL72 BL73 BL74 BL75 BLB72 BLB73 BLB74 BLB75 VDD VSS io_slice
+XXpc19 csel0 csel1 csel2 csel3 BL76 BL77 BL78 BL79 BLB76 BLB77 BLB78 BLB79 VDD VSS precharge_slice
+XXio19 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[19] WEN[19] clk_buf q_clk s_en wl_en_n
++ wpn Q[19] BL76 BL77 BL78 BL79 BLB76 BLB77 BLB78 BLB79 VDD VSS io_slice
+XXpc20 csel0 csel1 csel2 csel3 BL80 BL81 BL82 BL83 BLB80 BLB81 BLB82 BLB83 VDD VSS precharge_slice
+XXio20 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[20] WEN[20] clk_buf q_clk s_en wl_en_n
++ wpn Q[20] BL80 BL81 BL82 BL83 BLB80 BLB81 BLB82 BLB83 VDD VSS io_slice
+XXpc21 csel0 csel1 csel2 csel3 BL84 BL85 BL86 BL87 BLB84 BLB85 BLB86 BLB87 VDD VSS precharge_slice
+XXio21 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[21] WEN[21] clk_buf q_clk s_en wl_en_n
++ wpn Q[21] BL84 BL85 BL86 BL87 BLB84 BLB85 BLB86 BLB87 VDD VSS io_slice
+XXpc22 csel0 csel1 csel2 csel3 BL88 BL89 BL90 BL91 BLB88 BLB89 BLB90 BLB91 VDD VSS precharge_slice
+XXio22 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[22] WEN[22] clk_buf q_clk s_en wl_en_n
++ wpn Q[22] BL88 BL89 BL90 BL91 BLB88 BLB89 BLB90 BLB91 VDD VSS io_slice
+XXpc23 csel0 csel1 csel2 csel3 BL92 BL93 BL94 BL95 BLB92 BLB93 BLB94 BLB95 VDD VSS precharge_slice
+XXio23 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[23] WEN[23] clk_buf q_clk s_en wl_en_n
++ wpn Q[23] BL92 BL93 BL94 BL95 BLB92 BLB93 BLB94 BLB95 VDD VSS io_slice
+XXpc24 csel0 csel1 csel2 csel3 BL96 BL97 BL98 BL99 BLB96 BLB97 BLB98 BLB99 VDD VSS precharge_slice
+XXio24 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[24] WEN[24] clk_buf q_clk s_en wl_en_n
++ wpn Q[24] BL96 BL97 BL98 BL99 BLB96 BLB97 BLB98 BLB99 VDD VSS io_slice
+XXpc25 csel0 csel1 csel2 csel3 BL100 BL101 BL102 BL103 BLB100 BLB101 BLB102 BLB103 VDD VSS
++ precharge_slice
+XXio25 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[25] WEN[25] clk_buf q_clk s_en wl_en_n
++ wpn Q[25] BL100 BL101 BL102 BL103 BLB100 BLB101 BLB102 BLB103 VDD VSS io_slice
+XXpc26 csel0 csel1 csel2 csel3 BL104 BL105 BL106 BL107 BLB104 BLB105 BLB106 BLB107 VDD VSS
++ precharge_slice
+XXio26 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[26] WEN[26] clk_buf q_clk s_en wl_en_n
++ wpn Q[26] BL104 BL105 BL106 BL107 BLB104 BLB105 BLB106 BLB107 VDD VSS io_slice
+XXpc27 csel0 csel1 csel2 csel3 BL108 BL109 BL110 BL111 BLB108 BLB109 BLB110 BLB111 VDD VSS
++ precharge_slice
+XXio27 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[27] WEN[27] clk_buf q_clk s_en wl_en_n
++ wpn Q[27] BL108 BL109 BL110 BL111 BLB108 BLB109 BLB110 BLB111 VDD VSS io_slice
+XXpc28 csel0 csel1 csel2 csel3 BL112 BL113 BL114 BL115 BLB112 BLB113 BLB114 BLB115 VDD VSS
++ precharge_slice
+XXio28 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[28] WEN[28] clk_buf q_clk s_en wl_en_n
++ wpn Q[28] BL112 BL113 BL114 BL115 BLB112 BLB113 BLB114 BLB115 VDD VSS io_slice
+XXpc29 csel0 csel1 csel2 csel3 BL116 BL117 BL118 BL119 BLB116 BLB117 BLB118 BLB119 VDD VSS
++ precharge_slice
+XXio29 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[29] WEN[29] clk_buf q_clk s_en wl_en_n
++ wpn Q[29] BL116 BL117 BL118 BL119 BLB116 BLB117 BLB118 BLB119 VDD VSS io_slice
+XXpc30 csel0 csel1 csel2 csel3 BL120 BL121 BL122 BL123 BLB120 BLB121 BLB122 BLB123 VDD VSS
++ precharge_slice
+XXio30 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[30] WEN[30] clk_buf q_clk s_en wl_en_n
++ wpn Q[30] BL120 BL121 BL122 BL123 BLB120 BLB121 BLB122 BLB123 VDD VSS io_slice
+XXpc31 csel0 csel1 csel2 csel3 BL124 BL125 BL126 BL127 BLB124 BLB125 BLB126 BLB127 VDD VSS
++ precharge_slice
+XXio31 csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 D[31] WEN[31] clk_buf q_clk s_en wl_en_n
++ wpn Q[31] BL124 BL125 BL126 BL127 BLB124 BLB125 BLB126 BLB127 VDD VSS io_slice
+.ends
+
+* expanding   symbol:  sram_ctrl.sym # of pins=35
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sram_ctrl.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sram_ctrl.sch
+.subckt sram_ctrl A0 A1 A2 A3 A4 A5 A6 A7 CEN GWEN CLK aq0 aq1 aq2 aq3 aq4 aq5 aq6 aq7 aqb0 aqb1
++ aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 clk_buf wl_en wl_en_n s_en q_clk wpn VDD VSS
+
+*.PININFO A0:I A1:I A2:I A3:I A4:I A5:I A6:I A7:I CEN:I GWEN:I CLK:I aq0:O aq1:O aq2:O aq3:O aq4:O
+*+ aq5:O aq6:O aq7:O aqb0:O aqb1:O aqb2:O aqb3:O aqb4:O aqb5:O aqb6:O aqb7:O clk_buf:O wl_en:O wl_en_n:O
+*+ s_en:O q_clk:O wpn:O VDD:B VSS:B
+XXcb1 CLK clkb VDD VSS inv
+XXcb2 clkb clk_buf VDD VSS inv_x16
+XXfa0 A0 clk_buf aq0 aqb0 VDD VSS dff
+XXfa1 A1 clk_buf aq1 aqb1 VDD VSS dff
+XXfa2 A2 clk_buf aq2 aqb2 VDD VSS dff
+XXfa3 A3 clk_buf aq3 aqb3 VDD VSS dff
+XXfa4 A4 clk_buf aq4 aqb4 VDD VSS dff
+XXfa5 A5 clk_buf aq5 aqb5 VDD VSS dff
+XXfa6 A6 clk_buf aq6 aqb6 VDD VSS dff
+XXfa7 A7 clk_buf aq7 aqb7 VDD VSS dff
+XXfcen CEN clk_buf cenq en_q VDD VSS dff
+XXfgw GWEN clk_buf gwq gwqb VDD VSS dff
+XXrd en_q gwq rd_q VDD VSS and2
+XXwr en_q gwqb wr_q VDD VSS and2
+XXdp0 clk_buf dp1 VDD VSS inv_dly
+XXdp1 dp1 dp2 VDD VSS inv_dly
+XXdp2 dp2 dp3 VDD VSS inv_dly
+XXdp3 dp3 dp4 VDD VSS inv_dly
+XXdp4 dp4 dp5 VDD VSS inv_dly
+XXdp5 dp5 dp6 VDD VSS inv_dly
+XXdp6 dp6 dp7 VDD VSS inv_dly
+XXdp7 dp7 dp8 VDD VSS inv_dly
+XXdp8 dp8 dp9 VDD VSS inv_dly
+XXdp9 dp9 dp10 VDD VSS inv_dly
+XXdp10 dp10 dp11 VDD VSS inv_dly
+XXdp11 dp11 dp12 VDD VSS inv_dly
+XXdp12 dp12 dp13 VDD VSS inv_dly
+XXdp13 dp13 dp14 VDD VSS inv_dly
+XXdp14 dp14 dp15 VDD VSS inv_dly
+XXdp15 dp15 dp16 VDD VSS inv_dly
+XXdp16 dp16 dp17 VDD VSS inv_dly
+XXdp17 dp17 dp18 VDD VSS inv_dly
+XXdp18 dp18 dp19 VDD VSS inv_dly
+XXdp19 dp19 dp20 VDD VSS inv_dly
+XXdp20 dp20 dp21 VDD VSS inv_dly
+XXdp21 dp21 dp22 VDD VSS inv_dly
+XXdp22 dp22 dp23 VDD VSS inv_dly
+XXdp23 dp23 dp24 VDD VSS inv_dly
+XXdp24 dp24 dp25 VDD VSS inv_dly
+XXdp25 dp25 dp26 VDD VSS inv_dly
+XXdp26 dp26 dp27 VDD VSS inv_dly
+XXdp27 dp27 dp28 VDD VSS inv_dly
+XXdp28 dp28 dp29 VDD VSS inv_dly
+XXdp29 dp29 dp30 VDD VSS inv_dly
+XXdp30 dp30 dp31 VDD VSS inv_dly
+XXdp31 dp31 dp32 VDD VSS inv_dly
+XXdp32 dp32 dp33 VDD VSS inv_dly
+XXdp33 dp33 dp34 VDD VSS inv_dly
+XXdp34 dp34 dn VDD VSS inv_dly
+XXpn clk_buf dn p_n VDD VSS nand2
+XXp p_n p VDD VSS inv
+XXdd0 p dd1 VDD VSS inv_dly
+XXdd1 dd1 dd2 VDD VSS inv_dly
+XXdd2 dd2 dd3 VDD VSS inv_dly
+XXdd3 dd3 dd4 VDD VSS inv_dly
+XXdd4 dd4 dd5 VDD VSS inv_dly
+XXdd5 dd5 p_d VDD VSS inv_dly
+XXwen p p_d en_q wl_en_i VDD VSS nand3
+XXwe1 wl_en_i wl_en VDD VSS inv_x8
+XXwe2 wl_en wl_en_n VDD VSS inv_x8
+XXdb0 wl_en db1 VDD VSS inv_dly
+XXdb1 db1 db2 VDD VSS inv_dly
+XXdb2 db2 db3 VDD VSS inv_dly
+XXdb3 db3 db4 VDD VSS inv_dly
+XXdb4 db4 db5 VDD VSS inv_dly
+XXdb5 db5 wl_d2 VDD VSS inv_dly
+XXsn wl_en wl_d2 rd_q s_en_i VDD VSS nand3
+XXs1 s_en_i s_en VDD VSS inv_x8
+XXdq0 s_en dq1 VDD VSS inv_dly
+XXdq1 dq1 dq2 VDD VSS inv_dly
+XXdq2 dq2 dq3 VDD VSS inv_dly
+XXdq3 dq3 s_d VDD VSS inv_dly
+XXqn s_en s_d q_clk_i VDD VSS nand2
+XXq1 q_clk_i q_clk VDD VSS inv_x8
+XXwn wl_en wr_q w_n VDD VSS nand2
+XXw1 w_n w_p VDD VSS inv_x4
+XXw2 w_p wpn VDD VSS inv_x16
+.ends
+
+
+* expanding   symbol:  row_path.sym # of pins=79
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/row_path.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/row_path.sch
+.subckt row_path aq2 aq3 aq4 aq5 aq6 aq7 aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 wl_en wl0 wl1 wl2 wl3 wl4 wl5
++ wl6 wl7 wl8 wl9 wl10 wl11 wl12 wl13 wl14 wl15 wl16 wl17 wl18 wl19 wl20 wl21 wl22 wl23 wl24 wl25 wl26
++ wl27 wl28 wl29 wl30 wl31 wl32 wl33 wl34 wl35 wl36 wl37 wl38 wl39 wl40 wl41 wl42 wl43 wl44 wl45 wl46 wl47
++ wl48 wl49 wl50 wl51 wl52 wl53 wl54 wl55 wl56 wl57 wl58 wl59 wl60 wl61 wl62 wl63 VDD VSS
+
+*.PININFO aq2:I aq3:I aq4:I aq5:I aq6:I aq7:I aqb2:I aqb3:I aqb4:I aqb5:I aqb6:I aqb7:I wl_en:I
+*+ wl0:O wl1:O wl2:O wl3:O wl4:O wl5:O wl6:O wl7:O wl8:O wl9:O wl10:O wl11:O wl12:O wl13:O wl14:O wl15:O
+*+ wl16:O wl17:O wl18:O wl19:O wl20:O wl21:O wl22:O wl23:O wl24:O wl25:O wl26:O wl27:O wl28:O wl29:O wl30:O
+*+ wl31:O wl32:O wl33:O wl34:O wl35:O wl36:O wl37:O wl38:O wl39:O wl40:O wl41:O wl42:O wl43:O wl44:O wl45:O
+*+ wl46:O wl47:O wl48:O wl49:O wl50:O wl51:O wl52:O wl53:O wl54:O wl55:O wl56:O wl57:O wl58:O wl59:O wl60:O
+*+ wl61:O wl62:O wl63:O VDD:B VSS:B
+XXph0 aqb7 aqb6 aqb5 wl_en ph0 VDD VSS and4
+XXph1 aqb7 aqb6 aq5 wl_en ph1 VDD VSS and4
+XXph2 aqb7 aq6 aqb5 wl_en ph2 VDD VSS and4
+XXph3 aqb7 aq6 aq5 wl_en ph3 VDD VSS and4
+XXph4 aq7 aqb6 aqb5 wl_en ph4 VDD VSS and4
+XXph5 aq7 aqb6 aq5 wl_en ph5 VDD VSS and4
+XXph6 aq7 aq6 aqb5 wl_en ph6 VDD VSS and4
+XXph7 aq7 aq6 aq5 wl_en ph7 VDD VSS and4
+XXpl0 aqb4 aqb3 aqb2 pl0 VDD VSS and3
+XXpl1 aqb4 aqb3 aq2 pl1 VDD VSS and3
+XXpl2 aqb4 aq3 aqb2 pl2 VDD VSS and3
+XXpl3 aqb4 aq3 aq2 pl3 VDD VSS and3
+XXpl4 aq4 aqb3 aqb2 pl4 VDD VSS and3
+XXpl5 aq4 aqb3 aq2 pl5 VDD VSS and3
+XXpl6 aq4 aq3 aqb2 pl6 VDD VSS and3
+XXpl7 aq4 aq3 aq2 pl7 VDD VSS and3
+XXrow0 ph0 pl0 wl0 VDD VSS rowdrv
+XXrow1 ph0 pl1 wl1 VDD VSS rowdrv
+XXrow2 ph0 pl2 wl2 VDD VSS rowdrv
+XXrow3 ph0 pl3 wl3 VDD VSS rowdrv
+XXrow4 ph0 pl4 wl4 VDD VSS rowdrv
+XXrow5 ph0 pl5 wl5 VDD VSS rowdrv
+XXrow6 ph0 pl6 wl6 VDD VSS rowdrv
+XXrow7 ph0 pl7 wl7 VDD VSS rowdrv
+XXrow8 ph1 pl0 wl8 VDD VSS rowdrv
+XXrow9 ph1 pl1 wl9 VDD VSS rowdrv
+XXrow10 ph1 pl2 wl10 VDD VSS rowdrv
+XXrow11 ph1 pl3 wl11 VDD VSS rowdrv
+XXrow12 ph1 pl4 wl12 VDD VSS rowdrv
+XXrow13 ph1 pl5 wl13 VDD VSS rowdrv
+XXrow14 ph1 pl6 wl14 VDD VSS rowdrv
+XXrow15 ph1 pl7 wl15 VDD VSS rowdrv
+XXrow16 ph2 pl0 wl16 VDD VSS rowdrv
+XXrow17 ph2 pl1 wl17 VDD VSS rowdrv
+XXrow18 ph2 pl2 wl18 VDD VSS rowdrv
+XXrow19 ph2 pl3 wl19 VDD VSS rowdrv
+XXrow20 ph2 pl4 wl20 VDD VSS rowdrv
+XXrow21 ph2 pl5 wl21 VDD VSS rowdrv
+XXrow22 ph2 pl6 wl22 VDD VSS rowdrv
+XXrow23 ph2 pl7 wl23 VDD VSS rowdrv
+XXrow24 ph3 pl0 wl24 VDD VSS rowdrv
+XXrow25 ph3 pl1 wl25 VDD VSS rowdrv
+XXrow26 ph3 pl2 wl26 VDD VSS rowdrv
+XXrow27 ph3 pl3 wl27 VDD VSS rowdrv
+XXrow28 ph3 pl4 wl28 VDD VSS rowdrv
+XXrow29 ph3 pl5 wl29 VDD VSS rowdrv
+XXrow30 ph3 pl6 wl30 VDD VSS rowdrv
+XXrow31 ph3 pl7 wl31 VDD VSS rowdrv
+XXrow32 ph4 pl0 wl32 VDD VSS rowdrv
+XXrow33 ph4 pl1 wl33 VDD VSS rowdrv
+XXrow34 ph4 pl2 wl34 VDD VSS rowdrv
+XXrow35 ph4 pl3 wl35 VDD VSS rowdrv
+XXrow36 ph4 pl4 wl36 VDD VSS rowdrv
+XXrow37 ph4 pl5 wl37 VDD VSS rowdrv
+XXrow38 ph4 pl6 wl38 VDD VSS rowdrv
+XXrow39 ph4 pl7 wl39 VDD VSS rowdrv
+XXrow40 ph5 pl0 wl40 VDD VSS rowdrv
+XXrow41 ph5 pl1 wl41 VDD VSS rowdrv
+XXrow42 ph5 pl2 wl42 VDD VSS rowdrv
+XXrow43 ph5 pl3 wl43 VDD VSS rowdrv
+XXrow44 ph5 pl4 wl44 VDD VSS rowdrv
+XXrow45 ph5 pl5 wl45 VDD VSS rowdrv
+XXrow46 ph5 pl6 wl46 VDD VSS rowdrv
+XXrow47 ph5 pl7 wl47 VDD VSS rowdrv
+XXrow48 ph6 pl0 wl48 VDD VSS rowdrv
+XXrow49 ph6 pl1 wl49 VDD VSS rowdrv
+XXrow50 ph6 pl2 wl50 VDD VSS rowdrv
+XXrow51 ph6 pl3 wl51 VDD VSS rowdrv
+XXrow52 ph6 pl4 wl52 VDD VSS rowdrv
+XXrow53 ph6 pl5 wl53 VDD VSS rowdrv
+XXrow54 ph6 pl6 wl54 VDD VSS rowdrv
+XXrow55 ph6 pl7 wl55 VDD VSS rowdrv
+XXrow56 ph7 pl0 wl56 VDD VSS rowdrv
+XXrow57 ph7 pl1 wl57 VDD VSS rowdrv
+XXrow58 ph7 pl2 wl58 VDD VSS rowdrv
+XXrow59 ph7 pl3 wl59 VDD VSS rowdrv
+XXrow60 ph7 pl4 wl60 VDD VSS rowdrv
+XXrow61 ph7 pl5 wl61 VDD VSS rowdrv
+XXrow62 ph7 pl6 wl62 VDD VSS rowdrv
+XXrow63 ph7 pl7 wl63 VDD VSS rowdrv
+.ends
+
+
+* expanding   symbol:  col_decode.sym # of pins=15
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/col_decode.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/col_decode.sch
+.subckt col_decode aq0 aqb0 aq1 aqb1 wl_en csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 VDD
++ VSS
+
+*.PININFO aq0:I aqb0:I aq1:I aqb1:I wl_en:I csel0:O csel1:O csel2:O csel3:O cseln0:O cseln1:O
+*+ cseln2:O cseln3:O VDD:B VSS:B
+XXn0 wl_en aqb1 aqb0 sn0 VDD VSS nand3
+XXc0 sn0 csel0 VDD VSS inv_x16
+XXcn0 csel0 cseln0 VDD VSS inv_x16
+XXn1 wl_en aqb1 aq0 sn1 VDD VSS nand3
+XXc1 sn1 csel1 VDD VSS inv_x16
+XXcn1 csel1 cseln1 VDD VSS inv_x16
+XXn2 wl_en aq1 aqb0 sn2 VDD VSS nand3
+XXc2 sn2 csel2 VDD VSS inv_x16
+XXcn2 csel2 cseln2 VDD VSS inv_x16
+XXn3 wl_en aq1 aq0 sn3 VDD VSS nand3
+XXc3 sn3 csel3 VDD VSS inv_x16
+XXcn3 csel3 cseln3 VDD VSS inv_x16
+.ends
+
+
+* expanding   symbol:  sram_64x128_array.sym # of pins=322
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sram_64x128_array.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sram_64x128_array.sch
+
+
+* expanding   symbol:  precharge_slice.sym # of pins=14
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/precharge_slice.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/precharge_slice.sch
+.subckt precharge_slice csel0 csel1 csel2 csel3 bl0 bl1 bl2 bl3 blb0 blb1 blb2 blb3 VDD VSS
+
+*.PININFO csel0:I csel1:I csel2:I csel3:I bl0:B bl1:B bl2:B bl3:B blb0:B blb1:B blb2:B blb3:B VDD:B
+*+ VSS:B
+XMPB0 bl0 csel0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPN0 blb0 csel0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPE0 bl0 csel0 blb0 VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPB1 bl1 csel1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPN1 blb1 csel1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPE1 bl1 csel1 blb1 VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPB2 bl2 csel2 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPN2 blb2 csel2 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPE2 bl2 csel2 blb2 VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPB3 bl3 csel3 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPN3 blb3 csel3 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPE3 bl3 csel3 blb3 VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  io_slice.sym # of pins=26
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/io_slice.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/io_slice.sch
+.subckt io_slice csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 d_in wen_in clk q_clk s_en
++ wl_en_n wpn q_out bl0 bl1 bl2 bl3 blb0 blb1 blb2 blb3 VDD VSS
+
+*.PININFO csel0:I csel1:I csel2:I csel3:I cseln0:I cseln1:I cseln2:I cseln3:I d_in:I wen_in:I clk:I
+*+ q_clk:I s_en:I wl_en_n:I wpn:I q_out:O bl0:B bl1:B bl2:B bl3:B blb0:B blb1:B blb2:B blb3:B VDD:B VSS:B
+XXmb0 bl0 csel0 cseln0 mbl VDD VSS tg_mux
+XXmn0 blb0 csel0 cseln0 mblb VDD VSS tg_mux
+XXmb1 bl1 csel1 cseln1 mbl VDD VSS tg_mux
+XXmn1 blb1 csel1 cseln1 mblb VDD VSS tg_mux
+XXmb2 bl2 csel2 cseln2 mbl VDD VSS tg_mux
+XXmn2 blb2 csel2 cseln2 mblb VDD VSS tg_mux
+XXmb3 bl3 csel3 cseln3 mbl VDD VSS tg_mux
+XXmn3 blb3 csel3 cseln3 mblb VDD VSS tg_mux
+XXfd d_in clk dq dqb VDD VSS dff
+XXfw wen_in clk wq wqb VDD VSS dff
+XXwd dq wq wpn mbl mblb VDD VSS wdrv
+XXsa s_en wl_en_n mbl mblb VDD VSS sa_latch
+XXfq mbl q_clk q_out qnc VDD VSS dff
+.ends
+
+
+* expanding   symbol:  inv.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sch
+.subckt inv a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  inv_x16.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x16.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x16.sch
+.subckt inv_x16 a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.28u W=16u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.28u W=8u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  dff.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/dff.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/dff.sch
+.subckt dff d clk q qb VDD VSS
+
+*.PININFO d:I clk:I q:O qb:O VDD:B VSS:B
+XXckb clk ckb VDD VSS inv
+XXckp ckb ckp VDD VSS inv
+XXtm d ckb ckp m VDD VSS tg_s
+XXnm m nm VDD VSS inv
+XXmf nm mf VDD VSS inv
+XXtmf mf ckp ckb m VDD VSS tg_s
+XXts nm ckp ckb s VDD VSS tg_s
+XXns s q VDD VSS inv
+XXsf q qb VDD VSS inv
+XXtsf qb ckb ckp s VDD VSS tg_s
+.ends
+
+
+* expanding   symbol:  and2.sym # of pins=5
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and2.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and2.sch
+.subckt and2 a0 a1 y VDD VSS
+
+*.PININFO a0:I a1:I y:O VDD:B VSS:B
+XMP0 nb a0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 nb a1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 nb a0 s1 VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 VSS VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPO y nb VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNO y nb VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  inv_dly.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_dly.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_dly.sch
+.subckt inv_dly a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.6u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.6u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  nand2.sym # of pins=5
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand2.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand2.sch
+.subckt nand2 a0 a1 y VDD VSS
+
+*.PININFO a0:I a1:I y:O VDD:B VSS:B
+XMP0 y a0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 y a1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 y a0 s1 VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 VSS VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  nand3.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand3.sch
+.subckt nand3 a0 a1 a2 y VDD VSS
+
+*.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
+XMP0 y a0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 y a1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP2 y a2 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 y a0 s1 VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 s2 VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN2 s2 a2 VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  inv_x8.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x8.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x8.sch
+.subckt inv_x8 a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.28u W=8u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.28u W=4u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  inv_x4.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x4.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x4.sch
+.subckt inv_x4 a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.28u W=4u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  and4.sym # of pins=7
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and4.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and4.sch
+.subckt and4 a0 a1 a2 a3 y VDD VSS
+
+*.PININFO a0:I a1:I a2:I a3:I y:O VDD:B VSS:B
+XMP0 nb a0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 nb a1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP2 nb a2 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP3 nb a3 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 nb a0 s1 VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 s2 VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN2 s2 a2 s3 VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN3 s3 a3 VSS VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPO y nb VDD VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNO y nb VSS VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  and3.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and3.sch
+.subckt and3 a0 a1 a2 y VDD VSS
+
+*.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
+XMP0 nb a0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 nb a1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP2 nb a2 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 nb a0 s1 VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 s2 VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN2 s2 a2 VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPO y nb VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNO y nb VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  rowdrv.sym # of pins=5
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/rowdrv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/rowdrv.sch
+.subckt rowdrv a0 a1 y VDD VSS
+
+*.PININFO a0:I a1:I y:O VDD:B VSS:B
+XMP0 nb a0 VDD VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 nb a1 VDD VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 nb a0 s1 VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 VSS VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPO y nb VDD VDD pfet_03v3 L=0.28u W=6u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNO y nb VSS VSS nfet_03v3 L=0.28u W=3u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  bitcell_6t.sym # of pins=5
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/bitcell_6t.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/bitcell_6t.sch
+.subckt bitcell_6t BL BLB WL VDD VSS
+
+*.PININFO BL:B BLB:B WL:I VDD:B VSS:B
+XMPL Q QB VDD VDD pfet_03v3 L=0.28u W=0.22u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPR QB Q VDD VDD pfet_03v3 L=0.28u W=0.22u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNL Q QB VSS VSS nfet_03v3 L=0.28u W=0.36u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNR QB Q VSS VSS nfet_03v3 L=0.28u W=0.36u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMAL BL WL Q VSS nfet_03v3 L=0.28u W=0.24u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMAR BLB WL QB VSS nfet_03v3 L=0.28u W=0.24u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  tg_mux.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_mux.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_mux.sch
+.subckt tg_mux a en enb b VDD VSS
+
+*.PININFO a:I en:I enb:I b:B VDD:B VSS:B
+XMN a en b VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP a enb b VDD pfet_03v3 L=0.28u W=3u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  wdrv.sym # of pins=7
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/wdrv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/wdrv.sch
+.subckt wdrv d wen wpn bl blb VDD VSS
+
+*.PININFO d:I wen:I wpn:I bl:B blb:B VDD:B VSS:B
+XMNWL bl pl VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNWR blb pr VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XXdn d dn VDD VSS inv
+XXpl wen wpn d pl VDD VSS nor3
+XXpr wen wpn dn pr VDD VSS nor3
+.ends
+
+
+* expanding   symbol:  sa_latch.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sa_latch.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sa_latch.sch
+.subckt sa_latch s_en eqn bl blb VDD VSS
+
+*.PININFO s_en:I eqn:I bl:B blb:B VDD:B VSS:B
+XMPA bl blb VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPB blb bl VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNA bl blb tail VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNB blb bl tail VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNT tail s_en VSS VSS nfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPE1 bl eqn VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMPE2 blb eqn VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  tg_s.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_s.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_s.sch
+.subckt tg_s a en enb b VDD VSS
+
+*.PININFO a:I en:I enb:I b:B VDD:B VSS:B
+XMN a en b VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP a enb b VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  nor3.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sch
+.subckt nor3 a0 a1 a2 y VDD VSS
+
+*.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
+XMP0 t1 a0 VDD VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 t2 a1 t1 VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP2 y a2 t2 VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 y a0 VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 y a1 VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN2 y a2 VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+.end

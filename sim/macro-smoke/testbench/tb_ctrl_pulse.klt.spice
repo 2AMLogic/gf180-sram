@@ -1,0 +1,50 @@
+* Control-block pulse widths -- klt sim circuit BODY (issue #217).
+*
+* Same circuit and stimulus as tb_ctrl_pulse.spice, rewritten as a klt sim
+* "circuit body" (no .tran/.meas/.end, no corner.inc): process/temperature
+* come from the request's corners, the supply from its `corners.supply_v.vvdd`
+* axis, which alters VVDD. The ratified-style testbench drives its stimulus
+* from `.param VDDC`; a body is corner-invariant text, so here every stimulus
+* is a 0..1 PWL scaled by V(VDD) through a B-source, and each probed node is
+* digitised (`d_*` = 1 when above VDD/2) so the request's .meas cards use the
+* literal threshold 0.5 instead of 'VDDC/2'. Request: requests/ctrl_pulse.json.
+.include '../../../design/netlist/sram_ctrl.spice'
+
+* PDK default params normally supplied by design.ngspice (via corner.inc)
+.param sw_stat_global=0
+.param sw_stat_mismatch=0
+.param mc_skew=3
+.param res_mc_skew=3
+.param cap_mc_skew=3
+.param fnoicor=0
+
+VVDD VDD 0 DC 3.3
+* edge1 @5ns (idle init), edge2 @45ns write, edge3 @85ns read; CLK high 30 ns
+V1CLK clk1 0 PWL(0 0 5n 0 5.1n 1 35n 1 35.1n 0 45n 0 45.1n 1 75n 1 75.1n 0 85n 0 85.1n 1 115n 1 115.1n 0)
+V1CEN cen1 0 PWL(0 1 38n 1 38.1n 0)
+V1GW gw1 0 PWL(0 1 38n 1 38.1n 0 78n 0 78.1n 1)
+BCLK CLK 0 V='v(VDD)*v(clk1)'
+BCEN CEN 0 V='v(VDD)*v(cen1)'
+BGW GWEN 0 V='v(VDD)*v(gw1)'
+BA0 A0 0 V=0
+BA1 A1 0 V='v(VDD)'
+BA2 A2 0 V=0
+BA3 A3 0 V=0
+BA4 A4 0 V=0
+BA5 A5 0 V=0
+BA6 A6 0 V=0
+BA7 A7 0 V='v(VDD)'
+XC A0 A1 A2 A3 A4 A5 A6 A7 CEN GWEN CLK aq0 aq1 aq2 aq3 aq4 aq5 aq6 aq7 aqb0 aqb1 aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 clk_buf wl_en wl_en_n s_en q_clk wpn VDD 0 sram_ctrl
+Cwl wl_en 0 100f
+Cwn wl_en_n 0 500f
+Csen s_en 0 300f
+Cqc q_clk 0 300f
+Cwp wpn 0 800f
+Ccb clk_buf 0 400f
+
+* digitised probes (1 when above VDD/2)
+Bd_clkbuf d_clkbuf 0 V='v(clk_buf) > v(VDD)/2 ? 1 : 0'
+Bd_wlen d_wlen 0 V='v(wl_en) > v(VDD)/2 ? 1 : 0'
+Bd_sen d_sen 0 V='v(s_en) > v(VDD)/2 ? 1 : 0'
+Bd_qclk d_qclk 0 V='v(q_clk) > v(VDD)/2 ? 1 : 0'
+Bd_wpn d_wpn 0 V='v(wpn) > v(VDD)/2 ? 1 : 0'

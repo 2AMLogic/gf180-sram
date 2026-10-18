@@ -1,0 +1,7 @@
+# klt sim batch unit ss/2.970V/25C status=pass runtime_s=245.042
+wr_wl_en_width = 4.82e-09
+wr_wpn_width = 4.9e-09
+wr_clk_to_wl_en = 1.54e-09
+rd_sen_after_wl_en = 1.62e-09
+rd_qclk_after_sen = 1.3e-09
+rd_sen_width = 3.94e-09

@@ -1,0 +1,81 @@
+{
+  "netlist": "../testbench/tb_ctrl_pulse.klt.spice",
+  "engine": "ngspice",
+  "models": {
+    "lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+  },
+  "corners": {
+    "process": [
+      {
+        "name": "ff",
+        "sections": [
+          "ff"
+        ]
+      },
+      {
+        "name": "tt",
+        "sections": [
+          "typical"
+        ]
+      },
+      {
+        "name": "ss",
+        "sections": [
+          "ss"
+        ]
+      }
+    ],
+    "supply_v": {
+      "vvdd": [
+        2.97,
+        3.3,
+        3.63
+      ]
+    },
+    "temperature_c": [
+      -40,
+      25,
+      125
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "0.02n 125n"
+  },
+  "measurements": [
+    {
+      "name": "wr_wl_en_width",
+      "spice": ".meas tran wr_wl_en_width trig v(d_wlen) val=0.5 rise=1 targ v(d_wlen) val=0.5 fall=1",
+      "unit": "s"
+    },
+    {
+      "name": "wr_wpn_width",
+      "spice": ".meas tran wr_wpn_width trig v(d_wpn) val=0.5 fall=1 targ v(d_wpn) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "wr_clk_to_wl_en",
+      "spice": ".meas tran wr_clk_to_wl_en trig v(d_clkbuf) val=0.5 rise=2 targ v(d_wlen) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "rd_sen_after_wl_en",
+      "spice": ".meas tran rd_sen_after_wl_en trig v(d_wlen) val=0.5 rise=2 targ v(d_sen) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "rd_qclk_after_sen",
+      "spice": ".meas tran rd_qclk_after_sen trig v(d_sen) val=0.5 rise=1 targ v(d_qclk) val=0.5 rise=1",
+      "unit": "s"
+    },
+    {
+      "name": "rd_sen_width",
+      "spice": ".meas tran rd_sen_width trig v(d_sen) val=0.5 rise=1 targ v(d_sen) val=0.5 fall=1",
+      "unit": "s"
+    }
+  ],
+  "netlist_source": "schematic",
+  "options": {
+    "timeout_s": 400
+  }
+}
