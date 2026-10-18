@@ -1,0 +1,61 @@
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/col_decode.sch
+.subckt col_decode aq0 aqb0 aq1 aqb1 wl_en csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 VDD
++ VSS
+*.PININFO aq0:I aqb0:I aq1:I aqb1:I wl_en:I csel0:O csel1:O csel2:O csel3:O cseln0:O cseln1:O
+*+ cseln2:O cseln3:O VDD:B VSS:B
+XXn0 wl_en aqb1 aqb0 sn0 VDD VSS nand3
+XXc0 sn0 csel0 VDD VSS inv_x16
+XXcn0 csel0 cseln0 VDD VSS inv_x16
+XXn1 wl_en aqb1 aq0 sn1 VDD VSS nand3
+XXc1 sn1 csel1 VDD VSS inv_x16
+XXcn1 csel1 cseln1 VDD VSS inv_x16
+XXn2 wl_en aq1 aqb0 sn2 VDD VSS nand3
+XXc2 sn2 csel2 VDD VSS inv_x16
+XXcn2 csel2 cseln2 VDD VSS inv_x16
+XXn3 wl_en aq1 aq0 sn3 VDD VSS nand3
+XXc3 sn3 csel3 VDD VSS inv_x16
+XXcn3 csel3 cseln3 VDD VSS inv_x16
+.ends
+
+* expanding   symbol:  nand3.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand3.sch
+.subckt nand3 a0 a1 a2 y VDD VSS
+
+*.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
+XMP0 y a0 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 y a1 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP2 y a2 VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 y a0 s1 VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 s1 a1 s2 VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN2 s2 a2 VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  inv_x16.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x16.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x16.sch
+.subckt inv_x16 a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.28u W=16u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.28u W=8u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+.end

@@ -1,0 +1,56 @@
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/wdrv.sch
+.subckt wdrv d wen wpn bl blb VDD VSS
+*.PININFO d:I wen:I wpn:I bl:B blb:B VDD:B VSS:B
+XMNWL bl pl VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMNWR blb pr VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XXdn d dn VDD VSS inv
+XXpl wen wpn d pl VDD VSS nor3
+XXpr wen wpn dn pr VDD VSS nor3
+.ends
+
+* expanding   symbol:  inv.sym # of pins=4
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sch
+.subckt inv a y VDD VSS
+
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+
+* expanding   symbol:  nor3.sym # of pins=6
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sch
+.subckt nor3 a0 a1 a2 y VDD VSS
+
+*.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
+XMP0 t1 a0 VDD VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP1 t2 a1 t1 VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMP2 y a2 t2 VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN0 y a0 VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN1 y a1 VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN2 y a2 VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+
+.end

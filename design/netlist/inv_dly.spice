@@ -1,0 +1,11 @@
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_dly.sch
+.subckt inv_dly a y VDD VSS
+*.PININFO a:I y:O VDD:B VSS:B
+XMP y a VDD VDD pfet_03v3 L=0.6u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+XMN y a VSS VSS nfet_03v3 L=0.6u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
++ pd='2*int((nf+1)/2) * (W/nf + 0.18u)' ps='2*int((nf+2)/2) * (W/nf + 0.18u)' nrd='0.18u / W' nrs='0.18u / W'
++ sa=0 sb=0 sd=0 m=1
+.ends
+.end
