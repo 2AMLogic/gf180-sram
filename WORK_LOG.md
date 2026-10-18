@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-18
 
+- **PR #216**: feat: add periphery netlists, 4:1 array and macro top with write/read smoke sim
+- **Issue #203** (closed): Periphery schematics, netlists and macro top netlist for the 1RW macro
 - **PR #214**: fix: measure SNM as inscribed-square side, not vertical curve gap
 - **Issue #213** (closed): snm_extract.py reports the largest vertical gap, not the inscribed square (over-reads SNM)
 - **PR #210**: docs(spec): add periphery architecture, floorplan, and pin placement record

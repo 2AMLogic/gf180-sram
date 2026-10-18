@@ -23,7 +23,7 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
-- **#203**: Periphery schematics, netlists and macro top netlist for the 1RW macro
+- **#217**: Sweep macro-smoke and control-pulse testbenches across the 27-corner PVT set via klt sim
 
 ## Ready
 
@@ -35,7 +35,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-- **#203**: Periphery schematics, netlists and macro top netlist for the 1RW macro
+_None._
 
 ## PRs Awaiting Review
 
@@ -55,7 +55,6 @@ Issues carrying `loom:curated`.
 
 - **#160**: T1 item 6: make the klt yield report's samples path resolve from any working directory *(curated)*
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3 *(curated)*
-- **#203**: Periphery schematics, netlists and macro top netlist for the 1RW macro *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -73,10 +72,10 @@ _None._
 | Very important | 0 |
 | Important | 2 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 1 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
-| Curated | 3 |
+| Curated | 2 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
