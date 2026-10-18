@@ -196,19 +196,22 @@ open and belongs with the corner sweep and #204's extracted loads. The `CLK`
 high time must exceed the chain delay (about 5 ns nominal); no minimum clock
 width is ratified or claimed.
 
-**Write pulse >= 2 ns (row 12): met at one corner, open at 26.** At `tt_25c_3.30v`
-the internal write pulse (`wpn` low) is 3.69 ns
-(`sim/macro-smoke/records/20261018-072248-f452949.md`). Row 12 requires >= 2 ns
-**at every corner**; that sweep of the control block has not been run. Until it
-is, the alternative clause of row 12 is in force: if any corner's pulse is
-under 2 ns, `sim/write-margin/` (measured against a fixed 2 ns window) must be
-re-run under a new record before it can be cited for this macro. No cycle time
-or clock-to-`Q` is claimed.
+**Write pulse >= 2 ns (row 12): met at all 27 corners.** The internal write
+pulse (`wpn` low) of the control block, swept over the full ff/tt/ss x
+-40/25/125 C x 2.97/3.30/3.63 V set on the batch fleet
+(`sim/macro-smoke/records/20261018-082301-37ba562.md`), is 2.50 ns at its
+smallest (`ff_-40c_3.63v`) and 5.98 ns at its largest (`ss_125c_2.97v`); the
+nominal-only record `20261018-072248-f452949` (3.69 ns) is superseded. No
+corner is under 2 ns, so the alternative clause of row 12 (a `sim/write-margin/`
+re-run against a fixed 2 ns window) is not triggered. This is a schematic-level,
+control-block-alone result with capacitor stand-ins for the loads; no wire RC,
+no layout parasitics, no cycle time or clock-to-`Q` is claimed.
 
 ### What the smoke simulation does and does not show
 
-`sim/macro-smoke/` (`run.sh`, records `20261018-072247-f452949`): ten cycles at
-`tt_25c_3.30v`, one local corner. Write 0xDEADBEEF to 0xA7 and 0x12345678 to
+`sim/macro-smoke/` (`run.sh`, records `20261018-072247-f452949`; the 27-corner
+batch sweep of the same checks is `20261018-082302-37ba562`, 27/27 pass): ten
+cycles at `tt_25c_3.30v`, one local corner. Write 0xDEADBEEF to 0xA7 and 0x12345678 to
 0x3C, read both back, per-bit-masked write (low half masked) to 0xA7 reads back
 0xFFFFBEEF, a `CEN`=1 cycle with `GWEN`=0 and fresh data does not write and `Q`
 holds. All pass. Limits, in the record and repeated here because they are
@@ -216,7 +219,8 @@ easy to lose: the array is **reduced** to the two addressed rows with a 20 fF
 bit-line stand-in (the full 8,192-cell transient did not finish in 10 minutes
 on a shared host); no wire RC (the wordline RC gate is #204's); no sense-amp
 offset claim (needs Monte Carlo per `spec/statistical-treatment-decision.md`;
-none is made); no timing, no PVT. The existing `sim/` array-level evidence on
+none is made); no timing. PVT: the functional pass holds at all 27 corners, but
+that is a pass/fail on the written words, not a margin. The existing `sim/` array-level evidence on
 the 256 x 32 array is not rewritten.
 
 ### Netlisting
