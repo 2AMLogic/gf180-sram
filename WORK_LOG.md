@@ -5,6 +5,9 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-18
 
+- **PR #220**: feat: sweep control pulse and macro smoke over all 27 corners
+- **Issue #217** (closed): Sweep macro-smoke and control-pulse testbenches across the 27-corner PVT set via klt sim
+- **PR #219**: feat: add 64x128 bitcell array layout for the 4:1 organization
 - **PR #216**: feat: add periphery netlists, 4:1 array and macro top with write/read smoke sim
 - **Issue #203** (closed): Periphery schematics, netlists and macro top netlist for the 1RW macro
 - **PR #214**: fix: measure SNM as inscribed-square side, not vertical curve gap
