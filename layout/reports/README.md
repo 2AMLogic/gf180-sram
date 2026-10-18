@@ -13,9 +13,12 @@ sufficient to detect staleness").
 Regenerate everything here with `./layout/reports/generate.sh` (from the
 repo root). It re-runs `klt drc`/`klt extract`/`klt lvs`/`klt erc` against
 whatever `layout/*.gds` and `design/netlist/*.spice` are currently checked
-out and overwrites the files below in place.
+out and overwrites the files below in place. `./layout/reports/generate.sh
+--column-path` regenerates only the column-path reports (~2 min), and adding
+`--native` also runs them against the PDK's native DRC deck (~3 min more);
+the full run's `klt erc` step alone is ~26 min.
 
-## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124)
+## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205)
 
 | Report | Command | Result |
 |---|---|---|
@@ -27,9 +30,14 @@ out and overwrites the files below in place.
 | `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` (`options.flatten_reference: true`, see below) | `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins matched -- the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known gap: array-level LVS" below) |
 | `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
 | `erc-array-supply.json` | `klt erc layout/sram_256x32/sram_256x32_array.gds layout/sram_256x32/erc-supply-spec.json --format json` | `erc_finding_count: 0` -- declared supplies VDD/VSS each resolve to exactly one electrical island and both declared ties (`nwell_tie`, `substrate_tie`) are checked, none skipped; `status: not_checked` is the antenna half's rollup, not the supply verdict (see "Item 11" below) |
+| `drc-column-precharge-slice.json`, `drc-column-io-slice.json`, `drc-column-band.json` | `klt drc --deck gf180mcu` on `layout/periphery/column/{precharge_slice,io_slice,column_band}.gds` (issue #205) | `status: clean`, 0 violations each |
+| `drc-column-abut.json` | `klt drc --deck gf180mcu` on the scratch composite `periphery/column/generate.py --abut` builds: a 64 x 128 array with `io_band` below and `precharge_band` above (the array is not committed; `file` says so) | `status: clean`, 0 violations -- the bit-line seam and the first/last slice against the array's edges |
+| `drc-native-column-precharge-slice.json`, `drc-native-column-io-slice.json`, `drc-native-column-abut.json` | `klt drc --engine klayout` with the PDK's native deck (`generate.sh --column-path --native`) | `status: clean`, 0 violations, `coverage_assertion` 640 expected = 640 observed rule categories |
+| `extract-column-precharge-slice.json`, `extract-column-io-slice.json` | `klt extract --deck gf180mcu` on the slices | 12 devices (pfet), 14 nets, 14 pins; 99 devices (50 nfet + 49 pfet), 59 nets, 26 pins |
+| `lvs-column-precharge-slice.json`, `lvs-column-io-slice.json` | `klt lvs` (inline `layout.file` + `deck`, `options.flatten_reference: true`) vs. `design/netlist/{precharge,io}_slice.spice` | `status: match`; 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins. `mismatches[]` holds only `severity: warning` entries: the `topology.flattened` disclosure and "device class absent on both sides" notes -- no `net.supply_fragmented` |
 
 `drc-foundry-bitcell.json` is generated and maintained separately from the
-five reports above -- it checks the *foundry's* macro, not this repo's own
+reports above -- it checks the *foundry's* macro, not this repo's own
 layout, so it is not part of `generate.sh`'s regeneration loop (nothing in
 `design/`/`layout/` changing would ever change it). See
 [`sram-rule-survey.md`](sram-rule-survey.md) (issue #8) for the full survey

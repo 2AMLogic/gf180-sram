@@ -2,8 +2,8 @@
 # Regenerate the committed layout and re-run every check layout/README.md
 # reports a number for. Run from the repo root:
 #
-#     ./layout/verify.sh            # bitcell + 3x3 abutment tile + full array
-#     ./layout/verify.sh --quick    # skip the two full-array (minutes) steps
+#     ./layout/verify.sh            # bitcell + 3x3 tile + full array + column path
+#     ./layout/verify.sh --quick    # skip the full-array and column-seam (minutes) steps
 #
 # This is a *layout self-check*, not the signoff flow: DRC/LVS/PEX sign-off
 # evidence (with a recorded, append-only evidence trail) is issue #23's job.
@@ -22,23 +22,31 @@ trap 'rm -rf "$WORK"' EXIT
 PY="uv run --with klayout python3"
 BITCELL_GDS=layout/bitcell/sram_bitcell_6t.gds
 ARRAY_GDS=layout/sram_256x32/sram_256x32_array.gds
+COLUMN_DIR=layout/periphery/column
+PRECHARGE_GDS=$COLUMN_DIR/precharge_slice.gds
+IO_GDS=$COLUMN_DIR/io_slice.gds
+BAND_GDS=$COLUMN_DIR/column_band.gds
 
 hr() { printf '\n=== %s ===\n' "$1"; }
 
 hr "1. regenerate (determinism: the committed GDS must not change)"
 $PY layout/bitcell/generate.py
 $PY layout/sram_256x32/generate.py
-if git diff --quiet -- "$BITCELL_GDS" "$ARRAY_GDS"; then
-  echo "PASS: re-running both generators reproduced the committed GDS byte-for-byte"
+$PY $COLUMN_DIR/generate.py
+if git diff --quiet -- "$BITCELL_GDS" "$ARRAY_GDS" "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS"; then
+  echo "PASS: re-running all three generators reproduced the committed GDS byte-for-byte"
 else
   echo "FAIL: regenerated GDS differs from the committed GDS"
-  git diff --stat -- "$BITCELL_GDS" "$ARRAY_GDS"
+  git diff --stat -- "$BITCELL_GDS" "$ARRAY_GDS" "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS"
   exit 1
 fi
 
 hr "2. layout hygiene (klt precheck, 5 nm grid)"
 klt precheck --deck gf180mcu --grid-um 0.005 "$BITCELL_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY_GDS"
+for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS"; do
+  klt precheck --deck gf180mcu --grid-um 0.005 "$gds"
+done
 
 hr "3. DRC: bitcell (klt drc --deck gf180mcu)"
 klt drc --deck gf180mcu "$BITCELL_GDS"
@@ -52,8 +60,27 @@ klt extract --deck gf180mcu "$BITCELL_GDS" -o "$WORK/bitcell.spice"
 klt lvs "{\"layout\":{\"netlist\":\"$WORK/bitcell.spice\",\"top\":\"sram_bitcell_6t\"},\
 \"reference\":{\"netlist\":\"$ROOT/design/netlist/bitcell_6t.spice\",\"form\":\"subckt-call\"}}"
 
+hr "5b. DRC: column path -- both slices and the 32-slice bands (issue #205)"
+for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS"; do
+  klt drc --deck gf180mcu "$gds"
+done
+
+hr "5c. extraction + LVS: column slices vs design/netlist/{precharge,io}_slice.spice"
+# The reference netlists are hierarchical (dff -> inv/tg_s); the layout is
+# drawn flat per slice, so the reference is flattened (same option, and the same
+# disclosed topology.flattened warning, as the array LVS -- see README). The
+# layout side is extracted inline (layout.file + deck): only that form carries
+# the drawn labels `net.supply_fragmented` needs, which matters here because
+# each slice has several same-net supply rails.
+for cell in precharge_slice io_slice; do
+  klt extract --deck gf180mcu "$COLUMN_DIR/$cell.gds" -o "$WORK/$cell.spice"
+  klt lvs "{\"layout\":{\"file\":\"$ROOT/$COLUMN_DIR/$cell.gds\",\"deck\":\"gf180mcu\",\"top\":\"$cell\"},\
+\"reference\":{\"netlist\":\"$ROOT/design/netlist/$cell.spice\",\"form\":\"subckt-call\"},\
+\"options\":{\"flatten_reference\":true}}"
+done
+
 if [ "$QUICK" = "1" ]; then
-  hr "skipped (--quick): full-array DRC and extraction"
+  hr "skipped (--quick): full-array DRC and extraction, column-seam DRC"
   exit 0
 fi
 
@@ -62,3 +89,14 @@ klt drc --deck gf180mcu "$ARRAY_GDS"
 
 hr "7. device extraction: full 256x32 array (~1.5 min)"
 klt extract --deck gf180mcu "$ARRAY_GDS" -o "$WORK/array.spice"
+
+hr "8. DRC: column bands abutted to a 64x128 array (bit-line seam, ~1 min)"
+# #202 row 1: the 4:1 array is 64 rows x 128 columns. That array is not
+# committed (its layout and reports are unowned, see layout/README.md); the
+# same generator, same bitcell, with --rows/--cols builds it as a scratch copy.
+# `generate.py --abut` places io_slice x32 under it and precharge_slice x32
+# above it at the array's own column x, so the Metal1 bit-line seam (and the
+# first/last slice against the array's edges) is checked in one run.
+$PY layout/sram_256x32/generate.py --rows 64 --cols 128 -o "$WORK/array64x128.gds" >/dev/null
+$PY $COLUMN_DIR/generate.py --abut "$WORK/array64x128.gds" -o "$WORK/column_abut.gds" >/dev/null
+klt drc --deck gf180mcu "$WORK/column_abut.gds"
