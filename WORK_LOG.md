@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-18
+
+- **PR #208**: docs(spec): fix macro interface details and Liberty corner names
+- **Issue #198** (closed): Ratify 1RW macro interface details and Liberty corner naming (spec decision record)
+
 ### 2026-10-17
 
 - **PR #195**: chore(signoff): re-grade T1 verdict on klayout-tools 0.7.0
