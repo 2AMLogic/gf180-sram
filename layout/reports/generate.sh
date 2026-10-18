@@ -7,7 +7,9 @@
 # distinction is deliberate here).
 #
 # Run from the repo root:
-#     ./layout/reports/generate.sh
+#     ./layout/reports/generate.sh                  # everything (step 5 is ~26 min)
+#     ./layout/reports/generate.sh --column-path    # only step 0, the column path (#205)
+#     ./layout/reports/generate.sh --column-path --native   # ... plus the PDK-native DRC deck
 #
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
@@ -40,6 +42,112 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 hr() { printf '\n=== %s ===\n' "$1"; }
+
+# --- 0. column path (issue #205) -------------------------------------------
+# precharge_slice / io_slice are checked per cell (DRC, extract, LVS against
+# design/netlist/<cell>.spice), the 32-slice bands for DRC, and the bands
+# abutted to the committed 64x128 array (issue #204) for the bit-line seam DRC.
+# The abutted composite is a scratch file; the array and the bands are committed.
+# `./layout/reports/generate.sh --column-path` runs only this block (~2 min);
+# adding `--native` also runs it against the PDK's own DRC deck (~3 min more).
+COLUMN_DIR=layout/periphery/column
+
+hr "0. column path (issue #205): DRC, extract, LVS, bit-line seam"
+for cell in precharge_slice io_slice; do
+  name="${cell//_/-}"
+  klt drc --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" | tee "$OUT/drc-column-$name.json" >/dev/null
+  klt extract --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
+  python3 -c "
+import json
+d = json.load(open('$WORK/extract-$cell-raw.json'))
+d['netlist_path'] = '$cell.spice'  # a temp dir at generation time
+json.dump(d, open('$OUT/extract-column-$name.json', 'w'), indent=2)
+open('$OUT/extract-column-$name.json', 'a').write('\n')
+"
+  # LVS from the GDS (inline extraction, `layout.file` + `deck`), not from a
+  # pre-extracted netlist: only the inline form carries the drawn labels that
+  # `net.supply_fragmented` and the body-tie verification need (a pre-extracted
+  # netlist with three disjoint `VDD`s -- `VDD`, `VDD$1`, `VDD$2` -- compares
+  # without naming the cause; see layout/README.md "Known tool gaps").
+  cat > "$WORK/lvs-$cell-request.json" <<EOF
+{"layout":{"file":"$ROOT/$COLUMN_DIR/$cell.gds","deck":"gf180mcu","top":"$cell"},
+ "reference":{"netlist":"$ROOT/design/netlist/$cell.spice","form":"subckt-call"},
+ "options":{"flatten_reference":true}}
+EOF
+  klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
+  # The echoed `layout`/`reference` paths are host-specific (this checkout):
+  # rewrite them to stable repo-relative names before committing, as the array
+  # LVS block below does for `reference`.
+  python3 -c "
+import json
+d = json.load(open('$WORK/lvs-$cell-raw.json'))
+if d.get('layout') == '$ROOT/$COLUMN_DIR/$cell.gds':
+    d['layout'] = '$COLUMN_DIR/$cell.gds'
+if d.get('reference') == '$ROOT/design/netlist/$cell.spice':
+    d['reference'] = 'design/netlist/$cell.spice'
+json.dump(d, open('$OUT/lvs-column-$name.json', 'w'), indent=2)
+open('$OUT/lvs-column-$name.json', 'a').write('\n')
+print('$cell LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
+"
+done
+klt drc --deck gf180mcu --format json "$COLUMN_DIR/column_band.gds" | tee "$OUT/drc-column-band.json" >/dev/null
+uv run --with klayout python3 "$COLUMN_DIR/generate.py" --abut layout/sram_64x128/sram_64x128_array.gds -o "$WORK/column_abut.gds"
+klt drc --deck gf180mcu --format json "$WORK/column_abut.gds" > "$WORK/drc-column-abut-raw.json"
+python3 -c "
+import json
+d = json.load(open('$WORK/drc-column-abut-raw.json'))
+d['file'] = ('(scratch composite) committed 64x128 array + io_band + precharge_band, '
+             '$COLUMN_DIR/generate.py --abut')
+json.dump(d, open('$OUT/drc-column-abut.json', 'w'), indent=2)
+open('$OUT/drc-column-abut.json', 'a').write('\n')
+"
+for f in precharge-slice io-slice band abut; do
+  python3 -c "import json; d=json.load(open('$OUT/drc-column-$f.json')); print('drc-column-$f:', d['status'], '| violations:', d['violation_count'])"
+done
+if [ "${2:-}" = "--native" ]; then
+  # The PDK's own native KLayout deck (all FEOL+BEOL rule tables), driven by
+  # `klt drc --engine klayout`. Needs a gf180mcuD install (`klt pdk find`) and
+  # the `docopt` and `klayout` packages (run_drc.py). The deck script is materialized
+  # with the PDK's own `--macro_gen` (its --path must exist but is unused there); --expect-rule-categories fails the run if
+  # the deck silently declared fewer rule tables than the 640 it should (the
+  # failure mode klayout-tools#1302 documented).
+  hr "0n. column path vs the PDK's native DRC deck (klt drc --engine klayout)"
+  RUN_DRC=""
+  for root in "${PDK_ROOT:-}" "$HOME/.volare" "$HOME/.ciel"; do
+    if [ -n "$root" ] && [ -f "$root/gf180mcuD/libs.tech/klayout/tech/drc/run_drc.py" ]; then
+      RUN_DRC="$root/gf180mcuD/libs.tech/klayout/tech/drc/run_drc.py"
+      break
+    fi
+  done
+  [ -n "$RUN_DRC" ] || { echo "no gf180mcuD tech/drc/run_drc.py under \$PDK_ROOT, ~/.volare or ~/.ciel" >&2; exit 1; }
+  mkdir -p "$WORK/native"
+  uv run --with docopt --with klayout python3 "$RUN_DRC" --macro_gen --variant=D \
+    --run_dir="$WORK/native" --path="$COLUMN_DIR/io_slice.gds" > "$WORK/native/macro_gen.log" 2>&1 \
+    || { cat "$WORK/native/macro_gen.log" >&2; exit 1; }
+  NATIVE=(--engine klayout --deck-file "$WORK/native/main.drc"
+          --deck-var feol=true --deck-var beol=true --deck-var metal_top=11K
+          --deck-var metal_level=5LM --deck-var mim_option=B --deck-var offgrid=true
+          --deck-var connectivity=false --expect-rule-categories 640)
+  for target in "precharge-slice:$COLUMN_DIR/precharge_slice.gds" \
+                "io-slice:$COLUMN_DIR/io_slice.gds" \
+                "abut:$WORK/column_abut.gds"; do
+    name="${target%%:*}"
+    gds="${target#*:}"
+    klt drc "${NATIVE[@]}" --format json "$gds" > "$WORK/native-$name-raw.json"
+    python3 -c "
+import json
+d = json.load(open('$WORK/native-$name-raw.json'))
+d['deck'] = 'main.drc (gf180mcuD tech/drc/run_drc.py --macro_gen --variant=D)'
+if '$name' == 'abut':
+    d['file'] = ('(scratch composite) committed 64x128 array + io_band + precharge_band, '
+                 '$COLUMN_DIR/generate.py --abut')
+json.dump(d, open('$OUT/drc-native-column-$name.json', 'w'), indent=2)
+open('$OUT/drc-native-column-$name.json', 'a').write('\n')
+print('drc-native-column-$name:', d['status'], '| violations:', d['violation_count'])
+"
+  done
+fi
+if [ "${1:-}" = "--column-path" ]; then exit 0; fi
 
 hr "1. DRC: bitcell (klt drc --deck gf180mcu)"
 klt drc --deck gf180mcu --format json "$BITCELL_GDS" | tee "$OUT/drc-bitcell.json" >/dev/null
