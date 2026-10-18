@@ -23,6 +23,7 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+- **#203**: Periphery schematics, netlists and macro top netlist for the 1RW macro
 
 ## Ready
 
@@ -34,7 +35,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-- **#198**: Ratify 1RW macro interface details and Liberty corner naming (spec decision record)
+- **#203**: Periphery schematics, netlists and macro top netlist for the 1RW macro
 
 ## PRs Awaiting Review
 
@@ -54,7 +55,7 @@ Issues carrying `loom:curated`.
 
 - **#160**: T1 item 6: make the klt yield report's samples path resolve from any working directory *(curated)*
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3 *(curated)*
-- **#198**: Ratify 1RW macro interface details and Liberty corner naming (spec decision record) *(curated)*
+- **#203**: Periphery schematics, netlists and macro top netlist for the 1RW macro *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -70,7 +71,7 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 1 |
 | Very important | 0 |
-| Important | 1 |
+| Important | 2 |
 | Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
