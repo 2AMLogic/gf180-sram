@@ -46,8 +46,8 @@ hr() { printf '\n=== %s ===\n' "$1"; }
 # --- 0. column path (issue #205) -------------------------------------------
 # precharge_slice / io_slice are checked per cell (DRC, extract, LVS against
 # design/netlist/<cell>.spice), the 32-slice bands for DRC, and the bands
-# abutted to a 64x128 array for the bit-line seam DRC. That array is a scratch
-# copy: its own layout and reports are unowned (see layout/README.md).
+# abutted to the committed 64x128 array (issue #204) for the bit-line seam DRC.
+# The abutted composite is a scratch file; the array and the bands are committed.
 # `./layout/reports/generate.sh --column-path` runs only this block (~2 min);
 # adding `--native` also runs it against the PDK's own DRC deck (~3 min more).
 COLUMN_DIR=layout/periphery/column
@@ -91,13 +91,12 @@ print('$cell LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '|
 "
 done
 klt drc --deck gf180mcu --format json "$COLUMN_DIR/column_band.gds" | tee "$OUT/drc-column-band.json" >/dev/null
-uv run --with klayout python3 layout/sram_256x32/generate.py --rows 64 --cols 128 -o "$WORK/array64x128.gds" >/dev/null
-uv run --with klayout python3 "$COLUMN_DIR/generate.py" --abut "$WORK/array64x128.gds" -o "$WORK/column_abut.gds"
+uv run --with klayout python3 "$COLUMN_DIR/generate.py" --abut layout/sram_64x128/sram_64x128_array.gds -o "$WORK/column_abut.gds"
 klt drc --deck gf180mcu --format json "$WORK/column_abut.gds" > "$WORK/drc-column-abut-raw.json"
 python3 -c "
 import json
 d = json.load(open('$WORK/drc-column-abut-raw.json'))
-d['file'] = ('(scratch, not committed) 64x128 array + io_band + precharge_band, '
+d['file'] = ('(scratch composite) committed 64x128 array + io_band + precharge_band, '
              '$COLUMN_DIR/generate.py --abut')
 json.dump(d, open('$OUT/drc-column-abut.json', 'w'), indent=2)
 open('$OUT/drc-column-abut.json', 'a').write('\n')
@@ -140,7 +139,7 @@ import json
 d = json.load(open('$WORK/native-$name-raw.json'))
 d['deck'] = 'main.drc (gf180mcuD tech/drc/run_drc.py --macro_gen --variant=D)'
 if '$name' == 'abut':
-    d['file'] = ('(scratch, not committed) 64x128 array + io_band + precharge_band, '
+    d['file'] = ('(scratch composite) committed 64x128 array + io_band + precharge_band, '
                  '$COLUMN_DIR/generate.py --abut')
 json.dump(d, open('$OUT/drc-native-column-$name.json', 'w'), indent=2)
 open('$OUT/drc-native-column-$name.json', 'a').write('\n')

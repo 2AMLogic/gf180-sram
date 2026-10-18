@@ -20,7 +20,7 @@ existed) is gone.
 | DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on all three |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
 | LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets. Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
-| Column path (issue #205) | `periphery/column/` — `precharge_slice` (12 PMOS, 17.84 x 7.50 um) and `io_slice` (99 devices: 4:1 mux, sense amp, write driver, three flops; 17.84 x 58.50 um), each exactly four bitcell columns wide, plus a 32-slice band of each (570.88 um). `klt drc --deck gf180mcu`: **clean** on both slices, both bands, and on the bands abutted to a 64 x 128 array (scratch copy). The PDK's native deck (640 rule categories, `klt drc --engine klayout`): **clean** on both slices and on the abutted composite. `klt lvs` vs `design/netlist/{precharge,io}_slice.spice`: **`status: match`** — 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins (reference flattened, same `topology.flattened` disclosure as the array). See "The column path" |
+| Column path (issue #205) | `periphery/column/` — `precharge_slice` (12 PMOS, 17.84 x 7.50 um) and `io_slice` (99 devices: 4:1 mux, sense amp, write driver, three flops; 17.84 x 58.50 um), each exactly four bitcell columns wide, plus a 32-slice band of each (570.88 um). `klt drc --deck gf180mcu`: **clean** on both slices, both bands, and on the bands abutted to the committed 64 x 128 array. The PDK's native deck (640 rule categories, `klt drc --engine klayout`): **clean** on both slices and on the abutted composite. `klt lvs` vs `design/netlist/{precharge,io}_slice.spice`: **`status: match`** — 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins (reference flattened, same `topology.flattened` disclosure as the array). See "The column path" |
 
 Everything above is reproduced end-to-end by `./layout/verify.sh` (see
 "Reproducing and re-checking"). What is *not* claimed is in "What this does
@@ -44,6 +44,10 @@ layout/
     io_slice.gds                        committed: mux + sense amp + write driver + 3 flops
     column_band.gds                     committed: 32-slice io_band / precharge_band
   reports/                              machine-readable DRC/LVS/extract evidence (README inside)
+  sram_64x128/
+    sram_64x128_array.gds               64 x 128 array (4:1 organization), emitted by
+                                        sram_256x32/generate.py --rows 64 --cols 128
+                                        --top-name sram_64x128_array (issue #204)
 ```
 
 ### The bitcell
@@ -180,12 +184,11 @@ why the pitch is not 0.62 or 0.60.
   `coverage_assertion` with 640 expected = 640 observed categories, so a deck
   that silently ran fewer rules would have failed) and regenerated with
   `./layout/reports/generate.sh --column-path --native`.
-* The 64 x 128 array this seam is checked against is **not committed** —
-  `periphery-architecture.md` assigned it to #203/#204's first step, #203 did
-  not draw it and #204's text still says 256 rows. `verify.sh` step 8 and
-  `reports/drc-column-abut.json` use a scratch copy built by the same
-  generator (`sram_256x32/generate.py --rows 64 --cols 128`); its own layout,
-  netlist LVS and reports remain unowned.
+* The 64 x 128 array this seam is checked against is the committed
+  `sram_64x128/sram_64x128_array.gds` (issue #204); its own DRC and LVS are
+  `verify.sh` steps 8 and 9. `verify.sh` step 10 and
+  `reports/drc-column-abut.json` check the bands abutted to it (the composite
+  itself is a scratch file built by `periphery/column/generate.py --abut`).
 * Rails: strap columns 1 and 24 of the 26 are reserved for `Metal2`. Other
   columns are free.
 
@@ -204,10 +207,14 @@ captures.
 The periphery architecture, macro floorplan and pin placement are fixed in
 [`spec/periphery-architecture.md`](../spec/periphery-architecture.md). Note it
 proposes a 4:1 column mux, i.e. a 64 x 128 physical array rather than the
-256 x 32 drawn here; that re-tiling is not done in this directory yet. Of the
-periphery, only the **column path** (precharge, 4:1 mux, sense amp, write
-driver, input/`Q` flops) is drawn so far — see "The column path" above; row
-decode and control (#204), and macro assembly and pins (#206), are not.
+256 x 32 drawn here. The 64 x 128 re-tiling (571.31 x 345.60 um, `WL0..WL63`,
+same bitcell and landing-pad strip) is `sram_64x128/sram_64x128_array.gds`
+(issue #204), emitted by the same generator and checked by `verify.sh` steps 1,
+2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`).
+The 256 x 32 files are left untouched until macro assembly (#206) retires them.
+Of the periphery, only the **column path** (precharge, 4:1 mux, sense amp,
+write driver, input/`Q` flops) is drawn so far -- see "The column path" above;
+row decode and control (#204), and macro assembly and pins (#206), are not.
 
 ## What this does and does not prove
 

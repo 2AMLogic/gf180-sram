@@ -1,0 +1,1171 @@
+{
+  "netlist": "../testbench/tb_macro_write_read.klt.spice",
+  "engine": "ngspice",
+  "models": {
+    "lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+  },
+  "corners": {
+    "process": [
+      {
+        "name": "ff",
+        "sections": [
+          "ff"
+        ]
+      },
+      {
+        "name": "tt",
+        "sections": [
+          "typical"
+        ]
+      },
+      {
+        "name": "ss",
+        "sections": [
+          "ss"
+        ]
+      }
+    ],
+    "supply_v": {
+      "vvdd": [
+        2.97,
+        3.3,
+        3.63
+      ]
+    },
+    "temperature_c": [
+      -40,
+      25,
+      125
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "0.02n 205n"
+  },
+  "measurements": [
+    {
+      "name": "q0_op3",
+      "spice": ".meas tran q0_op3 FIND v(Q[0]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op3",
+      "spice": ".meas tran q1_op3 FIND v(Q[1]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op3",
+      "spice": ".meas tran q2_op3 FIND v(Q[2]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op3",
+      "spice": ".meas tran q3_op3 FIND v(Q[3]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op3",
+      "spice": ".meas tran q4_op3 FIND v(Q[4]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op3",
+      "spice": ".meas tran q5_op3 FIND v(Q[5]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op3",
+      "spice": ".meas tran q6_op3 FIND v(Q[6]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op3",
+      "spice": ".meas tran q7_op3 FIND v(Q[7]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op3",
+      "spice": ".meas tran q8_op3 FIND v(Q[8]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op3",
+      "spice": ".meas tran q9_op3 FIND v(Q[9]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op3",
+      "spice": ".meas tran q10_op3 FIND v(Q[10]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op3",
+      "spice": ".meas tran q11_op3 FIND v(Q[11]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op3",
+      "spice": ".meas tran q12_op3 FIND v(Q[12]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op3",
+      "spice": ".meas tran q13_op3 FIND v(Q[13]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op3",
+      "spice": ".meas tran q14_op3 FIND v(Q[14]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op3",
+      "spice": ".meas tran q15_op3 FIND v(Q[15]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op3",
+      "spice": ".meas tran q16_op3 FIND v(Q[16]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op3",
+      "spice": ".meas tran q17_op3 FIND v(Q[17]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op3",
+      "spice": ".meas tran q18_op3 FIND v(Q[18]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op3",
+      "spice": ".meas tran q19_op3 FIND v(Q[19]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op3",
+      "spice": ".meas tran q20_op3 FIND v(Q[20]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op3",
+      "spice": ".meas tran q21_op3 FIND v(Q[21]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op3",
+      "spice": ".meas tran q22_op3 FIND v(Q[22]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op3",
+      "spice": ".meas tran q23_op3 FIND v(Q[23]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op3",
+      "spice": ".meas tran q24_op3 FIND v(Q[24]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op3",
+      "spice": ".meas tran q25_op3 FIND v(Q[25]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op3",
+      "spice": ".meas tran q26_op3 FIND v(Q[26]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op3",
+      "spice": ".meas tran q27_op3 FIND v(Q[27]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op3",
+      "spice": ".meas tran q28_op3 FIND v(Q[28]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op3",
+      "spice": ".meas tran q29_op3 FIND v(Q[29]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op3",
+      "spice": ".meas tran q30_op3 FIND v(Q[30]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op3",
+      "spice": ".meas tran q31_op3 FIND v(Q[31]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q0_op4",
+      "spice": ".meas tran q0_op4 FIND v(Q[0]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op4",
+      "spice": ".meas tran q1_op4 FIND v(Q[1]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op4",
+      "spice": ".meas tran q2_op4 FIND v(Q[2]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op4",
+      "spice": ".meas tran q3_op4 FIND v(Q[3]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op4",
+      "spice": ".meas tran q4_op4 FIND v(Q[4]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op4",
+      "spice": ".meas tran q5_op4 FIND v(Q[5]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op4",
+      "spice": ".meas tran q6_op4 FIND v(Q[6]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op4",
+      "spice": ".meas tran q7_op4 FIND v(Q[7]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op4",
+      "spice": ".meas tran q8_op4 FIND v(Q[8]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op4",
+      "spice": ".meas tran q9_op4 FIND v(Q[9]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op4",
+      "spice": ".meas tran q10_op4 FIND v(Q[10]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op4",
+      "spice": ".meas tran q11_op4 FIND v(Q[11]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op4",
+      "spice": ".meas tran q12_op4 FIND v(Q[12]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op4",
+      "spice": ".meas tran q13_op4 FIND v(Q[13]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op4",
+      "spice": ".meas tran q14_op4 FIND v(Q[14]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op4",
+      "spice": ".meas tran q15_op4 FIND v(Q[15]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op4",
+      "spice": ".meas tran q16_op4 FIND v(Q[16]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op4",
+      "spice": ".meas tran q17_op4 FIND v(Q[17]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op4",
+      "spice": ".meas tran q18_op4 FIND v(Q[18]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op4",
+      "spice": ".meas tran q19_op4 FIND v(Q[19]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op4",
+      "spice": ".meas tran q20_op4 FIND v(Q[20]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op4",
+      "spice": ".meas tran q21_op4 FIND v(Q[21]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op4",
+      "spice": ".meas tran q22_op4 FIND v(Q[22]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op4",
+      "spice": ".meas tran q23_op4 FIND v(Q[23]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op4",
+      "spice": ".meas tran q24_op4 FIND v(Q[24]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op4",
+      "spice": ".meas tran q25_op4 FIND v(Q[25]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op4",
+      "spice": ".meas tran q26_op4 FIND v(Q[26]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op4",
+      "spice": ".meas tran q27_op4 FIND v(Q[27]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op4",
+      "spice": ".meas tran q28_op4 FIND v(Q[28]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op4",
+      "spice": ".meas tran q29_op4 FIND v(Q[29]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op4",
+      "spice": ".meas tran q30_op4 FIND v(Q[30]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op4",
+      "spice": ".meas tran q31_op4 FIND v(Q[31]) AT=94n",
+      "unit": "V"
+    },
+    {
+      "name": "q0_op5",
+      "spice": ".meas tran q0_op5 FIND v(Q[0]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op5",
+      "spice": ".meas tran q1_op5 FIND v(Q[1]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op5",
+      "spice": ".meas tran q2_op5 FIND v(Q[2]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op5",
+      "spice": ".meas tran q3_op5 FIND v(Q[3]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op5",
+      "spice": ".meas tran q4_op5 FIND v(Q[4]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op5",
+      "spice": ".meas tran q5_op5 FIND v(Q[5]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op5",
+      "spice": ".meas tran q6_op5 FIND v(Q[6]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op5",
+      "spice": ".meas tran q7_op5 FIND v(Q[7]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op5",
+      "spice": ".meas tran q8_op5 FIND v(Q[8]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op5",
+      "spice": ".meas tran q9_op5 FIND v(Q[9]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op5",
+      "spice": ".meas tran q10_op5 FIND v(Q[10]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op5",
+      "spice": ".meas tran q11_op5 FIND v(Q[11]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op5",
+      "spice": ".meas tran q12_op5 FIND v(Q[12]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op5",
+      "spice": ".meas tran q13_op5 FIND v(Q[13]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op5",
+      "spice": ".meas tran q14_op5 FIND v(Q[14]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op5",
+      "spice": ".meas tran q15_op5 FIND v(Q[15]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op5",
+      "spice": ".meas tran q16_op5 FIND v(Q[16]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op5",
+      "spice": ".meas tran q17_op5 FIND v(Q[17]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op5",
+      "spice": ".meas tran q18_op5 FIND v(Q[18]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op5",
+      "spice": ".meas tran q19_op5 FIND v(Q[19]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op5",
+      "spice": ".meas tran q20_op5 FIND v(Q[20]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op5",
+      "spice": ".meas tran q21_op5 FIND v(Q[21]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op5",
+      "spice": ".meas tran q22_op5 FIND v(Q[22]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op5",
+      "spice": ".meas tran q23_op5 FIND v(Q[23]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op5",
+      "spice": ".meas tran q24_op5 FIND v(Q[24]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op5",
+      "spice": ".meas tran q25_op5 FIND v(Q[25]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op5",
+      "spice": ".meas tran q26_op5 FIND v(Q[26]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op5",
+      "spice": ".meas tran q27_op5 FIND v(Q[27]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op5",
+      "spice": ".meas tran q28_op5 FIND v(Q[28]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op5",
+      "spice": ".meas tran q29_op5 FIND v(Q[29]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op5",
+      "spice": ".meas tran q30_op5 FIND v(Q[30]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op5",
+      "spice": ".meas tran q31_op5 FIND v(Q[31]) AT=114n",
+      "unit": "V"
+    },
+    {
+      "name": "q0_op6",
+      "spice": ".meas tran q0_op6 FIND v(Q[0]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op6",
+      "spice": ".meas tran q1_op6 FIND v(Q[1]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op6",
+      "spice": ".meas tran q2_op6 FIND v(Q[2]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op6",
+      "spice": ".meas tran q3_op6 FIND v(Q[3]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op6",
+      "spice": ".meas tran q4_op6 FIND v(Q[4]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op6",
+      "spice": ".meas tran q5_op6 FIND v(Q[5]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op6",
+      "spice": ".meas tran q6_op6 FIND v(Q[6]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op6",
+      "spice": ".meas tran q7_op6 FIND v(Q[7]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op6",
+      "spice": ".meas tran q8_op6 FIND v(Q[8]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op6",
+      "spice": ".meas tran q9_op6 FIND v(Q[9]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op6",
+      "spice": ".meas tran q10_op6 FIND v(Q[10]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op6",
+      "spice": ".meas tran q11_op6 FIND v(Q[11]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op6",
+      "spice": ".meas tran q12_op6 FIND v(Q[12]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op6",
+      "spice": ".meas tran q13_op6 FIND v(Q[13]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op6",
+      "spice": ".meas tran q14_op6 FIND v(Q[14]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op6",
+      "spice": ".meas tran q15_op6 FIND v(Q[15]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op6",
+      "spice": ".meas tran q16_op6 FIND v(Q[16]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op6",
+      "spice": ".meas tran q17_op6 FIND v(Q[17]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op6",
+      "spice": ".meas tran q18_op6 FIND v(Q[18]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op6",
+      "spice": ".meas tran q19_op6 FIND v(Q[19]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op6",
+      "spice": ".meas tran q20_op6 FIND v(Q[20]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op6",
+      "spice": ".meas tran q21_op6 FIND v(Q[21]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op6",
+      "spice": ".meas tran q22_op6 FIND v(Q[22]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op6",
+      "spice": ".meas tran q23_op6 FIND v(Q[23]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op6",
+      "spice": ".meas tran q24_op6 FIND v(Q[24]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op6",
+      "spice": ".meas tran q25_op6 FIND v(Q[25]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op6",
+      "spice": ".meas tran q26_op6 FIND v(Q[26]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op6",
+      "spice": ".meas tran q27_op6 FIND v(Q[27]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op6",
+      "spice": ".meas tran q28_op6 FIND v(Q[28]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op6",
+      "spice": ".meas tran q29_op6 FIND v(Q[29]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op6",
+      "spice": ".meas tran q30_op6 FIND v(Q[30]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op6",
+      "spice": ".meas tran q31_op6 FIND v(Q[31]) AT=134n",
+      "unit": "V"
+    },
+    {
+      "name": "q0_op7",
+      "spice": ".meas tran q0_op7 FIND v(Q[0]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op7",
+      "spice": ".meas tran q1_op7 FIND v(Q[1]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op7",
+      "spice": ".meas tran q2_op7 FIND v(Q[2]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op7",
+      "spice": ".meas tran q3_op7 FIND v(Q[3]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op7",
+      "spice": ".meas tran q4_op7 FIND v(Q[4]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op7",
+      "spice": ".meas tran q5_op7 FIND v(Q[5]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op7",
+      "spice": ".meas tran q6_op7 FIND v(Q[6]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op7",
+      "spice": ".meas tran q7_op7 FIND v(Q[7]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op7",
+      "spice": ".meas tran q8_op7 FIND v(Q[8]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op7",
+      "spice": ".meas tran q9_op7 FIND v(Q[9]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op7",
+      "spice": ".meas tran q10_op7 FIND v(Q[10]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op7",
+      "spice": ".meas tran q11_op7 FIND v(Q[11]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op7",
+      "spice": ".meas tran q12_op7 FIND v(Q[12]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op7",
+      "spice": ".meas tran q13_op7 FIND v(Q[13]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op7",
+      "spice": ".meas tran q14_op7 FIND v(Q[14]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op7",
+      "spice": ".meas tran q15_op7 FIND v(Q[15]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op7",
+      "spice": ".meas tran q16_op7 FIND v(Q[16]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op7",
+      "spice": ".meas tran q17_op7 FIND v(Q[17]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op7",
+      "spice": ".meas tran q18_op7 FIND v(Q[18]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op7",
+      "spice": ".meas tran q19_op7 FIND v(Q[19]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op7",
+      "spice": ".meas tran q20_op7 FIND v(Q[20]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op7",
+      "spice": ".meas tran q21_op7 FIND v(Q[21]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op7",
+      "spice": ".meas tran q22_op7 FIND v(Q[22]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op7",
+      "spice": ".meas tran q23_op7 FIND v(Q[23]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op7",
+      "spice": ".meas tran q24_op7 FIND v(Q[24]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op7",
+      "spice": ".meas tran q25_op7 FIND v(Q[25]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op7",
+      "spice": ".meas tran q26_op7 FIND v(Q[26]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op7",
+      "spice": ".meas tran q27_op7 FIND v(Q[27]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op7",
+      "spice": ".meas tran q28_op7 FIND v(Q[28]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op7",
+      "spice": ".meas tran q29_op7 FIND v(Q[29]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op7",
+      "spice": ".meas tran q30_op7 FIND v(Q[30]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op7",
+      "spice": ".meas tran q31_op7 FIND v(Q[31]) AT=154n",
+      "unit": "V"
+    },
+    {
+      "name": "q0_op8",
+      "spice": ".meas tran q0_op8 FIND v(Q[0]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op8",
+      "spice": ".meas tran q1_op8 FIND v(Q[1]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op8",
+      "spice": ".meas tran q2_op8 FIND v(Q[2]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op8",
+      "spice": ".meas tran q3_op8 FIND v(Q[3]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op8",
+      "spice": ".meas tran q4_op8 FIND v(Q[4]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op8",
+      "spice": ".meas tran q5_op8 FIND v(Q[5]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op8",
+      "spice": ".meas tran q6_op8 FIND v(Q[6]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op8",
+      "spice": ".meas tran q7_op8 FIND v(Q[7]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op8",
+      "spice": ".meas tran q8_op8 FIND v(Q[8]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op8",
+      "spice": ".meas tran q9_op8 FIND v(Q[9]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op8",
+      "spice": ".meas tran q10_op8 FIND v(Q[10]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op8",
+      "spice": ".meas tran q11_op8 FIND v(Q[11]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op8",
+      "spice": ".meas tran q12_op8 FIND v(Q[12]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op8",
+      "spice": ".meas tran q13_op8 FIND v(Q[13]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op8",
+      "spice": ".meas tran q14_op8 FIND v(Q[14]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op8",
+      "spice": ".meas tran q15_op8 FIND v(Q[15]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op8",
+      "spice": ".meas tran q16_op8 FIND v(Q[16]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op8",
+      "spice": ".meas tran q17_op8 FIND v(Q[17]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op8",
+      "spice": ".meas tran q18_op8 FIND v(Q[18]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op8",
+      "spice": ".meas tran q19_op8 FIND v(Q[19]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op8",
+      "spice": ".meas tran q20_op8 FIND v(Q[20]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op8",
+      "spice": ".meas tran q21_op8 FIND v(Q[21]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op8",
+      "spice": ".meas tran q22_op8 FIND v(Q[22]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op8",
+      "spice": ".meas tran q23_op8 FIND v(Q[23]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op8",
+      "spice": ".meas tran q24_op8 FIND v(Q[24]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op8",
+      "spice": ".meas tran q25_op8 FIND v(Q[25]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op8",
+      "spice": ".meas tran q26_op8 FIND v(Q[26]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op8",
+      "spice": ".meas tran q27_op8 FIND v(Q[27]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op8",
+      "spice": ".meas tran q28_op8 FIND v(Q[28]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op8",
+      "spice": ".meas tran q29_op8 FIND v(Q[29]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op8",
+      "spice": ".meas tran q30_op8 FIND v(Q[30]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op8",
+      "spice": ".meas tran q31_op8 FIND v(Q[31]) AT=174n",
+      "unit": "V"
+    },
+    {
+      "name": "q0_op9",
+      "spice": ".meas tran q0_op9 FIND v(Q[0]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_op9",
+      "spice": ".meas tran q1_op9 FIND v(Q[1]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_op9",
+      "spice": ".meas tran q2_op9 FIND v(Q[2]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_op9",
+      "spice": ".meas tran q3_op9 FIND v(Q[3]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_op9",
+      "spice": ".meas tran q4_op9 FIND v(Q[4]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_op9",
+      "spice": ".meas tran q5_op9 FIND v(Q[5]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_op9",
+      "spice": ".meas tran q6_op9 FIND v(Q[6]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_op9",
+      "spice": ".meas tran q7_op9 FIND v(Q[7]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_op9",
+      "spice": ".meas tran q8_op9 FIND v(Q[8]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_op9",
+      "spice": ".meas tran q9_op9 FIND v(Q[9]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_op9",
+      "spice": ".meas tran q10_op9 FIND v(Q[10]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_op9",
+      "spice": ".meas tran q11_op9 FIND v(Q[11]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_op9",
+      "spice": ".meas tran q12_op9 FIND v(Q[12]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_op9",
+      "spice": ".meas tran q13_op9 FIND v(Q[13]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_op9",
+      "spice": ".meas tran q14_op9 FIND v(Q[14]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_op9",
+      "spice": ".meas tran q15_op9 FIND v(Q[15]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_op9",
+      "spice": ".meas tran q16_op9 FIND v(Q[16]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_op9",
+      "spice": ".meas tran q17_op9 FIND v(Q[17]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_op9",
+      "spice": ".meas tran q18_op9 FIND v(Q[18]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_op9",
+      "spice": ".meas tran q19_op9 FIND v(Q[19]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_op9",
+      "spice": ".meas tran q20_op9 FIND v(Q[20]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_op9",
+      "spice": ".meas tran q21_op9 FIND v(Q[21]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_op9",
+      "spice": ".meas tran q22_op9 FIND v(Q[22]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_op9",
+      "spice": ".meas tran q23_op9 FIND v(Q[23]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_op9",
+      "spice": ".meas tran q24_op9 FIND v(Q[24]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_op9",
+      "spice": ".meas tran q25_op9 FIND v(Q[25]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_op9",
+      "spice": ".meas tran q26_op9 FIND v(Q[26]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_op9",
+      "spice": ".meas tran q27_op9 FIND v(Q[27]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_op9",
+      "spice": ".meas tran q28_op9 FIND v(Q[28]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_op9",
+      "spice": ".meas tran q29_op9 FIND v(Q[29]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_op9",
+      "spice": ".meas tran q30_op9 FIND v(Q[30]) AT=194n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_op9",
+      "spice": ".meas tran q31_op9 FIND v(Q[31]) AT=194n",
+      "unit": "V"
+    }
+  ],
+  "netlist_source": "schematic",
+  "options": {
+    "timeout_s": 1500
+  }
+}
