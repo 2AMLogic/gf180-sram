@@ -40,9 +40,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pinned, not floating "3.x": klayout wheels lag new CPython releases
+      # (none for cp315), so a floating pin falls back to a source build that
+      # fails. Keep both jobs on the same version.
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.12"
 
       - name: Validate sim/ layout/ measurements/ evidence-record format
         run: ./scripts/ci/check-evidence-format.sh
@@ -53,9 +56,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pinned, not floating "3.x": klayout wheels lag new CPython releases
+      # (none for cp315), so a floating pin falls back to a source build that
+      # fails. Keep both jobs on the same version.
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.12"
 
       # Keep this pin in sync with signoff/regenerate.sh's KLT_VERSION. The
       # released registry wheel carries the git tag identity the freshness
