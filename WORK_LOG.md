@@ -5,6 +5,7 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-20
 
+- **PR #233**: feat(sim): offline klt deck-mode adapter for the 27-corner grid
 - **PR #236**: refactor(sim): inline PDK identity dict and remove env_provenance shim
 - **Issue #235** (closed): Remove sim/lib/env_provenance.py: single-use shim for a klt subcommand that now exists
 
