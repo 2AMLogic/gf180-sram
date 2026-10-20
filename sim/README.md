@@ -119,6 +119,16 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned g
   `snm_extract.py`). Deck mode reports process success only: exit 0 is never a
   PASS, and missing corners, duplicate/unexpected ids, missing declared outputs
   and timeouts all come back `OPEN`.
+* `mc-build` / `mc-reduce` are the Monte Carlo counterpart for the
+  `run_mc_campaign.py` pool: one deck per (corner, kind, sample) -- two (L/R)
+  per sample for the `snm-pair` SNM families -- with `corner.inc` bytes from
+  `run_mc_campaign.build_corner_inc` and seeds from its `derive_seed` (imported,
+  not re-derived; the request records every unit's seed and `mc-reduce` refuses
+  a request whose seeds drifted). `mc-reduce` regroups a deck report into the
+  per-seed `(index, results, errors)` tuples `run_batch`/`run_batch_pair`
+  return plus the `klt yield` sample-set measurement blocks. Same fail-closed
+  rules as `reduce`; exit 0 is never a PASS. Example:
+  `sim/lib/deck_adapter.py mc-build read-snm --corner tt:25:3.30 --corner ff:125:2.97 --seed 1 --stage-dir /tmp/mc --request-out /tmp/mc/request.json`
 * `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
   reports. Stub results are contract checks, **not** physical evidence.
 
@@ -131,8 +141,8 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned g
    `corner.inc` resolve on it (otherwise pass `build --pdk-dir`).
 2. *Measurement parity receipt.* Per family, one corner (or the full set) from
    deck mode must match the committed record value for the same corner. No such
-   receipt exists yet; the Monte Carlo pool has no adapter yet (seed identities
-   must be preserved), so `run_mc_campaign.py` is untouched.
+   receipt exists yet, for the corner grid or the Monte Carlo adapter (which is
+   ready offline); `run_mc_campaign.py` and its pool are untouched.
 3. *Cutover.* Retiring `run_corner_sweep.sh`/the MC pool, switching defaults, and
    updating the cold-start section below happen only after 1 and 2 are met.
    Single-point probes stay local. Until then the cold-start section below is
