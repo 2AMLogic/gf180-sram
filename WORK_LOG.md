@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-20
+
+- **PR #236**: refactor(sim): inline PDK identity dict and remove env_provenance shim
+- **Issue #235** (closed): Remove sim/lib/env_provenance.py: single-use shim for a klt subcommand that now exists
+
 ### 2026-10-18
 
 - **PR #226**: refactor: drop local-only macro smoke flavor in favor of klt sim
