@@ -37,7 +37,7 @@ x two resistance cases:
 
 `x1` uses the extractor's Poly2 resistance as reported; `x1p5` multiplies every `WL0` segment by 1.5.
 The extractor applies no process or temperature scaling to Poly2 R, so `x1p5` brackets that
-unknown. 1.5 is a bound, not a PDK number.
+unknown. 1.5 is an assumed sensitivity, not a PDK-characterized bound or a corner.
 
 Each run applies two input pulses: 2.0 ns (the floor of `spec/write-pulse-width-decision.md`)
 and 5.88 ns (the `wl_en` width the control block makes at this corner, `sim/macro-smoke`

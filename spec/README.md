@@ -91,6 +91,7 @@ Ratified spec and decision records for this block.
   "Wordline RC gate" `periphery-architecture.md` assigned to #204: the
   left-fed 128-cell wordline fails the gate at `ss_125c_2.97v` (far end
   reaches 1.92 V of 2.97 V on a 2.0 ns pulse), a centre decoder or 2:1 row
-  passes it. Proposed, not ratified: ranks the options (centre decoder
-  recommended) and leaves the choice to the operator. One corner, a
-  Builder-stated criterion, no ratified value changed.
+  passes it. Proposed, not ratified: records the centre-fed 4:1 as the
+  operator's preferred candidate (2026-10-19), with its cost and its unresolved
+  write-waveform margin concern, and a later validation matrix. One corner, a
+  Builder-stated criterion, no timing qualified, no ratified value changed.
