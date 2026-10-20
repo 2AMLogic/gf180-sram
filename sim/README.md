@@ -288,15 +288,10 @@ path) into a newly-generated record. This follows the model
 inside this repo, and *identity, never location* (name + version, no path
 at all) for anything genuinely external, like a PDK install:
 
-- **This host's installed `klt` does not yet ship `env-provenance`**
-  (verified 2026-08-25: `klt --version` reports `0.2.0`; neither
-  `klt env-provenance --help` nor `klayout_tools.env_provenance` resolve).
-  `sim/lib/env_provenance.py` reimplements just the piece these scripts
-  need by hand, matching the documented `{path, scope}` shape, so a record
-  written today reads the same way a record written once
-  `klt env-provenance` is available would. Prefer the real subcommand/module
-  directly once it is available on the host running these scripts, and
-  retire that file.
+- **No env-provenance shim**: `run_mc_campaign.py` builds the `pdk`
+  identity block inline. `klt env-provenance emit` (host/OS/tool-version
+  blocks, `--path` normalisation) does not pin PDK variant/version, so it
+  is not a drop-in for that block.
 - **PDK identity, not location**: every `**PDK**:`/`pdk` field records the
   PDK variant name and its resolved `open_pdks` version (e.g. `gf180mcuD`,
   `c6d73a3...`), never the absolute install path (`~/.volare/gf180mcuD` on
