@@ -11,6 +11,7 @@ hand-edit that region.
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+- **#233**: feat(sim): offline klt deck-mode adapter for the 27-corner grid
 
 ## Very Important
 
@@ -35,19 +36,21 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
+_None._
 
 ## Approved (Awaiting Merge)
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+- **#228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
+- **#233**: feat(sim): offline klt deck-mode adapter for the 27-corner grid
 
 ## Proposed
 
@@ -59,7 +62,7 @@ Issues carrying `loom:curated`.
 
 ## Proposed (Architect / Hermit)
 
-- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(hermit)*
+_None._
 
 ## Epics
 
@@ -69,14 +72,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 2 |
 | Very important | 0 |
 | Important | 2 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 0 |
-| PRs awaiting review | 1 |
-| Approved PRs awaiting merge | 1 |
+| In Progress (`loom:building`) | 1 |
+| PRs awaiting review | 0 |
+| Approved PRs awaiting merge | 3 |
 | Curated | 3 |
-| Architect / Hermit proposals | 1 |
+| Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
