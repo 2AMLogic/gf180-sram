@@ -12,6 +12,7 @@
 #     ./layout/reports/generate.sh --column-path --native   # ... plus the PDK-native DRC deck
 #     ./layout/reports/generate.sh --row-path       # only the row decoder strip (#204)
 #     ./layout/reports/generate.sh --control        # only sram_ctrl + col_decode (#246)
+#     ./layout/reports/generate.sh --macro          # only the assembled macro (#247; long, see below)
 #
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
@@ -60,6 +61,55 @@ COLUMN_DIR=layout/periphery/column
 # wordline-RC claim (layout/README.md "Row path").
 # `./layout/reports/generate.sh --row-path` runs only this block (~10 s).
 ROW_GDS=layout/periphery/row/row_path.gds
+
+# --- 0m. the assembled macro (issue #247) ------------------------------------
+# One hierarchical top cell, `sram_256x32` (layout/macro/sram_256x32.gds): DRC with the
+# curated deck, then extraction + LVS against the hierarchical macro netlist, flattened.
+# Macro-level only: no timing, parasitic, wordline-RC or area claim (layout/README.md).
+# `./layout/reports/generate.sh --macro` runs only this block.
+#
+# Extraction and LVS run on the CI-pinned klayout-tools 0.6.0 by default (override with
+# KLT_MACRO_EXTRACT): on this host's `klt 0.7.1.dev2397` a single 64 x 64 half array
+# (24,576 devices) takes 13.5 min to extract against 43 s on 0.6.0, so the macro (53,628
+# devices) is not practical with it (layout/README.md "Known tool gaps" 8).
+MACRO_GDS=layout/macro/sram_256x32.gds
+KLT_MACRO_EXTRACT="${KLT_MACRO_EXTRACT:-uvx --from klayout-tools==0.6.0 klt}"
+run_macro() {
+hr "0m. macro (issue #247): DRC, extract, LVS"
+klt drc --deck gf180mcu --format json "$MACRO_GDS" > "$OUT/drc-macro.json"
+$KLT_MACRO_EXTRACT extract --deck gf180mcu --format json "$MACRO_GDS" -o "$WORK/macro.spice" > "$WORK/extract-macro-full.json"
+python3 -c "
+import json
+d = json.load(open('$WORK/extract-macro-full.json'))
+d.pop('devices', None)
+d.pop('nets', None)
+d['netlist_path'] = 'macro.spice'  # a temp dir at generation time
+d['_note'] = 'devices[]/nets[] omitted from this committed report (see device_count/net_count/pin_count); full output reproducible via layout/reports/generate.sh --macro'
+json.dump(d, open('$OUT/extract-macro.json', 'w'), indent=2)
+open('$OUT/extract-macro.json', 'a').write('\n')
+print('extract-macro: devices', d['device_count'], '| nets:', d['net_count'], '| pins:', d['pin_count'])
+"
+cat > "$WORK/lvs-macro-request.json" <<EOF
+{"layout":{"file":"$ROOT/$MACRO_GDS","deck":"gf180mcu","top":"sram_256x32"},
+ "reference":{"netlist":"$ROOT/design/netlist/sram_256x32.spice","form":"subckt-call"},
+ "options":{"flatten_reference":true}}
+EOF
+$KLT_MACRO_EXTRACT lvs "$WORK/lvs-macro-request.json" --format json > "$WORK/lvs-macro-raw.json" || true
+python3 -c "
+import json
+d = json.load(open('$WORK/lvs-macro-raw.json'))
+if d.get('layout') == '$ROOT/$MACRO_GDS':
+    d['layout'] = '$MACRO_GDS'
+if d.get('reference') == '$ROOT/design/netlist/sram_256x32.spice':
+    d['reference'] = 'design/netlist/sram_256x32.spice'
+json.dump(d, open('$OUT/lvs-macro.json', 'w'), indent=2)
+open('$OUT/lvs-macro.json', 'a').write('\n')
+print('macro LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
+d = json.load(open('$OUT/drc-macro.json'))
+print('drc-macro:', d['status'], '| violations:', d['violation_count'])
+"
+}
+if [ "${1:-}" = "--macro" ]; then run_macro; exit 0; fi
 
 if [ "${1:-}" != "--control" ]; then
 hr "0r. row path (issue #204): DRC, extract, LVS"
@@ -370,5 +420,7 @@ print('status:', d['status'], '| gates:', d['gate_count'],
       '| erc_checked:', len(d['erc_coverage']['checked']),
       '| erc_skipped:', len(d['erc_coverage']['skipped']))
 PYEOF
+
+run_macro
 
 hr "done -- reports written under $OUT/"
