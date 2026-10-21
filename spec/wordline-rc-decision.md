@@ -11,8 +11,9 @@ timing claim.
 **Resolves**: the "Wordline RC gate" of `spec/periphery-architecture.md`, assigned
 to #204 (child of #201)
 **Would supersede (only if ratified)**: rows 1 and 4 of
-`spec/periphery-architecture.md` — "Decisions" table, and the "Wordline RC gate"
-section's fallback list, which asked for exactly this record. **Until ratified,
+`spec/periphery-architecture.md` — "Decisions" table, its "Floorplan" and
+"Consequences of 4:1" sections, and the "Wordline RC gate" section's fallback list,
+which asked for exactly this record. **Until ratified,
 `spec/periphery-architecture.md` stands unedited and in force.** A later superseding
 record must name exactly what it changes (see "What a superseding record would change").
 **Amends**: nothing in `spec/sram.md` or `spec/macro-interface-decision.md`.
@@ -36,7 +37,7 @@ real `rowdrv` from the landing-pad end:
 
 | Left-fed 128-cell row, `ss_125c_2.97v` | Poly2 R as extracted | Poly2 R x1.5 |
 |---|---|---|
-| Driver output reaches 50 % (after the input edge) | 0.22 ns | 0.21 ns |
+| Driver output reaches 50 % (after the input edge) | 0.21 ns | 0.21 ns |
 | **Far end** reaches 50 % | **1.57 ns** | 2.16 ns (on a long pulse; never on 2.0 ns) |
 | Far end reaches 90 % (5.88 ns pulse) | 3.92 ns | 5.59 ns |
 | Far-end peak on a 2.0 ns pulse | **1.92 V (65 % of VDD)** | 1.43 V (48 %) |
@@ -62,7 +63,14 @@ real `rowdrv` from the landing-pad end:
   floor* (`spec/write-pulse-width-decision.md`) is not honoured at the far cell and that
   the read-path proxy has little spare margin. It does not show that a write fails.
 * **1.5x Poly2 R is a sensitivity assumption.** It is not a PDK-characterized bound
-  and not a corner.
+  and not a corner. For reference (reviewer addition, 2026-10-20): the extractor's
+  Poly2 sheet resistance is the PDK's nominal `resist (allpolynonres)/active 7300`
+  (7.3 ohm/sq, `libs.tech/magic/gf180mcuD.tech` at `open_pdks` `c6d73a3`), and the
+  same file's "high-end corner" table lists `15000` (15 ohm/sq, 2.05x nominal). The
+  extracted 21.97 kohm is 1.37x a plain 571 x 0.26 µm stripe at 7.3 ohm/sq (the
+  extractor's whole-fragment square count includes the gate stubs), so 1.5x of it
+  (32.9 kohm) happens to equal that stripe at 15 ohm/sq. None of this was simulated as
+  a corner; the extracted resistors carry no temperature coefficient.
 
 For comparison, the same bench for the two fallbacks the architecture record named:
 
@@ -146,6 +154,10 @@ limitations are preserved; evidence is appended only when measured, never edited
 existing records.
 
 1. **All 27 operating corners** for the chosen topology, on the batch fleet (this record covers one).
+   Each corner's second pulse is that corner's own `wl_en` width from the `sim/macro-smoke`
+   record (2.46 ns at `ff_-40c_3.63v` to 5.88 ns here), not 5.88 ns everywhere as `gen.py`
+   hard-codes today; Poly2 R is run at the PDK's stated high-end sheet resistance (15 ohm/sq,
+   above) as well as the 1.5x assumption, so the resistance case is a PDK figure, not a guess.
 2. **Actual predecoder slew and row/driver loading**, not the bench's ideal stimulus and single `rowdrv`.
 3. **Correct topology for each bench**: pad-end drive versus centre drive, with the driven
    node identified per bench (see "Extracted-node provenance").
@@ -159,8 +171,8 @@ existing records.
 
 The first version of the bench read as a pass because `klt extract --distributed-rc` puts
 the net's pin on a mid-ladder terminal (the 129th of 256 gates), so driving the pin fed the
-line from its centre. Filed as 2AMLogic/klayout-tools#3937, which documents and reports the
-middle-pin convention.
+line from its centre. Filed as 2AMLogic/klayout-tools#3937 (closed 2026-10-18), which
+documents and reports the middle-pin convention.
 
 * **Closing #3937 does not repin the frozen extracted ladder** in `sim/wordline-rc/dut/`,
   and does not validate this macro. Those netlists keep the mid-ladder pin as extracted.

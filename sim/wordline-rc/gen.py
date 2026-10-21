@@ -27,7 +27,8 @@ Topologies:
 
 Each is run with the extracted Poly2 resistance as reported (``x1``) and with every
 WL0 segment resistance x1.5 (``x1p5``); the extractor applies no process or
-temperature scaling to Poly2 R, 1.5 is a bound, not a PDK number.
+temperature scaling to Poly2 R. 1.5 is an assumed sensitivity, not a
+PDK-characterized bound and not a corner (spec/wordline-rc-decision.md).
 """
 import collections
 import json

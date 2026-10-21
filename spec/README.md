@@ -89,9 +89,10 @@ Ratified spec and decision records for this block.
   gate, with fallbacks named. No ratified item changes; no timing ratified.
 - [`wordline-rc-decision.md`](wordline-rc-decision.md) — resolves the
   "Wordline RC gate" `periphery-architecture.md` assigned to #204: the
-  left-fed 128-cell wordline fails the gate at `ss_125c_2.97v` (far end
-  reaches 1.92 V of 2.97 V on a 2.0 ns pulse), a centre decoder or 2:1 row
-  passes it. Proposed, not ratified: records the centre-fed 4:1 as the
+  left-fed 128-cell wordline does not meet the drafting agent's G1 criterion at
+  `ss_125c_2.97v` (far end reaches 1.92 V of 2.97 V on a 2.0 ns pulse; a write
+  on the actual 5.88 ns pulse was not shown to fail), a centre decoder or 2:1
+  row meets it on the same bench. Proposed, not ratified: records the centre-fed 4:1 as the
   operator's preferred candidate (2026-10-19), with its cost and its unresolved
   write-waveform margin concern, and a later validation matrix. One corner, a
   Builder-stated criterion, no timing qualified, no ratified value changed.
