@@ -5,6 +5,7 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-21
 
+- **PR #251**: Bump Repo Skills 0.24.3 -> 0.24.7
 - **PR #249**: layout: draw sram_ctrl and col_decode, DRC clean and LVS-matched at block level
 - **Issue #246** (closed): Layout the sram_ctrl and col_decode blocks (block-level DRC and LVS)
 - **PR #244**: layout: draw the row decoder and wordline-driver strip
