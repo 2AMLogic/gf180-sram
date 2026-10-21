@@ -28,6 +28,9 @@ IO_GDS=$COLUMN_DIR/io_slice.gds
 BAND_GDS=$COLUMN_DIR/column_band.gds
 ARRAY64_GDS=layout/sram_64x128/sram_64x128_array.gds
 ROW_GDS=layout/periphery/row/row_path.gds
+CTRL_DIR=layout/periphery/control
+CTRL_GDS=$CTRL_DIR/sram_ctrl.gds
+COLDEC_GDS=$CTRL_DIR/col_decode.gds
 
 hr() { printf '\n=== %s ===\n' "$1"; }
 
@@ -41,7 +44,9 @@ $PY layout/sram_256x32/generate.py --rows 64 --cols 128 \
   --top-name sram_64x128_array -o "$ARRAY64_GDS"
 # The row-decoder + wordline-driver strip (issue #204).
 $PY layout/periphery/row/generate.py
-GENERATED_GDS="$BITCELL_GDS $ARRAY_GDS $ARRAY64_GDS $PRECHARGE_GDS $IO_GDS $BAND_GDS $ROW_GDS"
+# The control block and the column decoder (issue #246).
+$PY $CTRL_DIR/generate.py
+GENERATED_GDS="$BITCELL_GDS $ARRAY_GDS $ARRAY64_GDS $PRECHARGE_GDS $IO_GDS $BAND_GDS $ROW_GDS $CTRL_GDS $COLDEC_GDS"
 if git diff --quiet -- $GENERATED_GDS; then
   echo "PASS: re-running the generators reproduced the committed GDS byte-for-byte"
 else
@@ -54,7 +59,7 @@ hr "2. layout hygiene (klt precheck, 5 nm grid)"
 klt precheck --deck gf180mcu --grid-um 0.005 "$BITCELL_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY64_GDS"
-for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS" "$ROW_GDS"; do
+for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS" "$ROW_GDS" "$CTRL_GDS" "$COLDEC_GDS"; do
   klt precheck --deck gf180mcu --grid-um 0.005 "$gds"
 done
 
@@ -97,6 +102,18 @@ klt extract --deck gf180mcu "$ROW_GDS" -o "$WORK/row_path.spice"
 klt lvs "{\"layout\":{\"file\":\"$ROOT/$ROW_GDS\",\"deck\":\"gf180mcu\",\"top\":\"row_path\"},\
 \"reference\":{\"netlist\":\"$ROOT/design/netlist/row_path.spice\",\"form\":\"subckt-call\"},\
 \"options\":{\"flatten_reference\":true}}"
+
+hr "5e. DRC + extraction + LVS: sram_ctrl and col_decode vs design/netlist/{sram_ctrl,col_decode}.spice (issue #246)"
+# Block level only: two flat cells, each its own top. Says nothing about timing,
+# delay-chain calibration or parasitics, nor about how the macro places or routes
+# to the pins (README "Control block and column decoder").
+for cell in sram_ctrl col_decode; do
+  klt drc --deck gf180mcu "$CTRL_DIR/$cell.gds"
+  klt extract --deck gf180mcu "$CTRL_DIR/$cell.gds" -o "$WORK/$cell.spice"
+  klt lvs "{\"layout\":{\"file\":\"$ROOT/$CTRL_DIR/$cell.gds\",\"deck\":\"gf180mcu\",\"top\":\"$cell\"},\
+\"reference\":{\"netlist\":\"$ROOT/design/netlist/$cell.spice\",\"form\":\"subckt-call\"},\
+\"options\":{\"flatten_reference\":true}}"
+done
 
 if [ "$QUICK" = "1" ]; then
   hr "skipped (--quick): full-array DRC and extraction, column-seam DRC"

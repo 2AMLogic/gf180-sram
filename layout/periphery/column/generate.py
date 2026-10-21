@@ -169,6 +169,12 @@ VIA_SZ = bitcell.V1_SIZE  # 0.26   V1.1 / V2.1
 HVIA = 0.5 * VIA_SZ
 L_GATE = bitcell.L_GATE  # 0.28
 HGATE = 0.5 * L_GATE
+L_LONG = 0.6  # the long-channel delay inverter (``inv_dly``, issue #246)
+
+
+def hgate(dev) -> float:
+    """Half the drawn poly width of ``dev``: its channel length."""
+    return 0.5 * dev.l
 POLY_EXT = 0.24  # PL.4 (0.22) + 0.02: poly past COMP
 POLY_PAD_COMP = 0.10  # PL.5a_LV: field poly pad to COMP
 IMP_ENC_GATE = bitcell.IMP_ENC_GATE  # 0.23 NP.5a / PP.5a
@@ -628,7 +634,8 @@ def layout_strip(ctx: Ctx, strip: Strip, devmap: dict[str, Dev], jrb: int, jfloo
                     e["n"] = max(e["n"], n_contacts(p.dev.w))
             for p in ch:
                 w = p.dev.w
-                assert abs(p.dev.l - L_GATE) < 1e-9, f"{p.dev.name}: L != {L_GATE}"
+                assert min(abs(p.dev.l - L_GATE), abs(p.dev.l - L_LONG)) < 1e-9, \
+                    f"{p.dev.name}: L != {L_GATE} / {L_LONG}"
                 if side == "A":
                     yb = Y(j0) - 0.19
                     yt = yb + w
@@ -692,10 +699,11 @@ def layout_strip(ctx: Ctx, strip: Strip, devmap: dict[str, Dev], jrb: int, jfloo
                     pad = max(i_[4] for i_ in infos) if side == "A" else min(i_[4] for i_ in infos)
                     xs = [X(p.cg) for p in grp]
                     for (p, (_, _, yb, yt, _)) in zip(grp, infos):
+                        hg = hgate(p.dev)
                         if side == "A":
-                            ctx.box(L_POLY2, X(p.cg) - HGATE, yb - POLY_EXT, X(p.cg) + HGATE, Y(pad) + HGATE)
+                            ctx.box(L_POLY2, X(p.cg) - hg, yb - POLY_EXT, X(p.cg) + hg, Y(pad) + HGATE)
                         else:
-                            ctx.box(L_POLY2, X(p.cg) - HGATE, Y(pad) - HGATE, X(p.cg) + HGATE, yt + POLY_EXT)
+                            ctx.box(L_POLY2, X(p.cg) - hg, Y(pad) - HGATE, X(p.cg) + hg, yt + POLY_EXT)
                     ctx.box(L_POLY2, xs[0] - HGATE, Y(pad) - HGATE, xs[-1] + HGATE, Y(pad) + HGATE)
                     gate_pad(xs[len(xs) // 2], pad, grp[0].dev.g)
                     for p in grp:
@@ -711,18 +719,21 @@ def layout_strip(ctx: Ctx, strip: Strip, devmap: dict[str, Dev], jrb: int, jfloo
             jc = (max(pads_a) + min(pads_b)) // 2
             assert pa <= jc <= pb, f"{strip.name}: no common-gate pad row for col {col}"
             xg = X(col)
-            ctx.box(L_POLY2, xg - HGATE, a[2] - POLY_EXT, xg + HGATE, b[3] + POLY_EXT)
+            hg = hgate(a[0].dev)
+            ctx.box(L_POLY2, xg - hg, a[2] - POLY_EXT, xg + hg, b[3] + POLY_EXT)
             gate_pad(xg, jc, a[0].dev.g)
             continue
         if a:
             p, _, yb, yt, pad = a
             xg = X(col)
-            ctx.box(L_POLY2, xg - HGATE, yb - POLY_EXT, xg + HGATE, Y(pad) + HGATE)
+            hg = hgate(p.dev)
+            ctx.box(L_POLY2, xg - hg, yb - POLY_EXT, xg + hg, Y(pad) + HGATE)
             gate_pad(xg, pad, p.dev.g)
         if b:
             p, _, yb, yt, pad = b
             xg = X(col)
-            ctx.box(L_POLY2, xg - HGATE, Y(pad) - HGATE, xg + HGATE, yt + POLY_EXT)
+            hg = hgate(p.dev)
+            ctx.box(L_POLY2, xg - hg, Y(pad) - HGATE, xg + hg, yt + POLY_EXT)
             gate_pad(xg, pad, p.dev.g)
     return jrt, {"ja0": ja0, "jb0": jb0, "jrb": jrb, "jrt": jrt}
 

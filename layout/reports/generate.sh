@@ -11,6 +11,7 @@
 #     ./layout/reports/generate.sh --column-path    # only step 0, the column path (#205)
 #     ./layout/reports/generate.sh --column-path --native   # ... plus the PDK-native DRC deck
 #     ./layout/reports/generate.sh --row-path       # only the row decoder strip (#204)
+#     ./layout/reports/generate.sh --control        # only sram_ctrl + col_decode (#246)
 #
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
@@ -60,6 +61,7 @@ COLUMN_DIR=layout/periphery/column
 # `./layout/reports/generate.sh --row-path` runs only this block (~10 s).
 ROW_GDS=layout/periphery/row/row_path.gds
 
+if [ "${1:-}" != "--control" ]; then
 hr "0r. row path (issue #204): DRC, extract, LVS"
 klt drc --deck gf180mcu --format json "$ROW_GDS" | tee "$OUT/drc-row-path.json" >/dev/null
 klt extract --deck gf180mcu --format json "$ROW_GDS" -o "$WORK/row_path.spice" > "$WORK/extract-row-raw.json"
@@ -89,7 +91,48 @@ print('row_path LVS status:', d['status'], '| mismatches:', d['mismatch_count'],
 d = json.load(open('$OUT/drc-row-path.json'))
 print('drc-row-path:', d['status'], '| violations:', d['violation_count'])
 "
+fi
 if [ "${1:-}" = "--row-path" ]; then exit 0; fi
+
+# --- 0c. control block + column decoder (issue #246) ------------------------
+# Two flat cells, each checked against its own design/netlist/<cell>.spice.
+# Block level only: no timing, delay-chain calibration or parasitic claim.
+# `./layout/reports/generate.sh --control` runs only this block (~1 min).
+CTRL_DIR=layout/periphery/control
+
+hr "0c. control block + column decoder (issue #246): DRC, extract, LVS"
+for cell in sram_ctrl col_decode; do
+  name="${cell//_/-}"
+  klt drc --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" | tee "$OUT/drc-$name.json" >/dev/null
+  klt extract --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
+  python3 -c "
+import json
+d = json.load(open('$WORK/extract-$cell-raw.json'))
+d['netlist_path'] = '$cell.spice'  # a temp dir at generation time
+json.dump(d, open('$OUT/extract-$name.json', 'w'), indent=2)
+open('$OUT/extract-$name.json', 'a').write('\n')
+"
+  cat > "$WORK/lvs-$cell-request.json" <<EOF
+{"layout":{"file":"$ROOT/$CTRL_DIR/$cell.gds","deck":"gf180mcu","top":"$cell"},
+ "reference":{"netlist":"$ROOT/design/netlist/$cell.spice","form":"subckt-call"},
+ "options":{"flatten_reference":true}}
+EOF
+  klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
+  python3 -c "
+import json
+d = json.load(open('$WORK/lvs-$cell-raw.json'))
+if d.get('layout') == '$ROOT/$CTRL_DIR/$cell.gds':
+    d['layout'] = '$CTRL_DIR/$cell.gds'
+if d.get('reference') == '$ROOT/design/netlist/$cell.spice':
+    d['reference'] = 'design/netlist/$cell.spice'
+json.dump(d, open('$OUT/lvs-$name.json', 'w'), indent=2)
+open('$OUT/lvs-$name.json', 'a').write('\n')
+print('$cell LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
+d = json.load(open('$OUT/drc-$name.json'))
+print('drc-$name:', d['status'], '| violations:', d['violation_count'])
+"
+done
+if [ "${1:-}" = "--control" ]; then exit 0; fi
 
 if [ "${1:-}" != "--row-path" ]; then
 hr "0. column path (issue #205): DRC, extract, LVS, bit-line seam"

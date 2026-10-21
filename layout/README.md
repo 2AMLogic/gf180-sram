@@ -46,6 +46,10 @@ layout/
   periphery/row/
     generate.py                         draws the row decoder + wordline-driver strip (issue #204)
     row_path.gds                        committed: 16 predecoders + 64 rowdrv, one flat cell
+  periphery/control/
+    generate.py                         draws the control block + column decoder (issue #246)
+    sram_ctrl.gds                       committed: 10 dff + 51 inv_dly + gates/drivers, one flat cell
+    col_decode.gds                      committed: 4 nand3 + 12 inv_x16, one flat cell
   reports/                              machine-readable DRC/LVS/extract evidence (README inside)
   sram_64x128/
     sram_64x128_array.gds               64 x 128 array (4:1 organization), emitted by
@@ -251,6 +255,55 @@ placement.
 * The strip is area-naive (single-finger devices, 0.65 um grid, three driver
   columns with the gaps between them): it is a correct drawing, not an
   optimized one.
+
+### Control block and column decoder (issue #246)
+
+`periphery/control/generate.py` draws `design/netlist/sram_ctrl.spice` and
+`design/netlist/col_decode.spice` as two separate flat cells (the macro top
+instantiates them as `XXctrl` / `XXcol`; assembly, #247, places them separately).
+Same flow as the row path -- the column path's netlist reader, strip placer and
+maze router, plus the row generator's per-strip rail / implant / strap helpers.
+The one change to shared code is in `periphery/column/generate.py`: poly width
+now follows each device's own `L`, so the `L = 0.6 um` delay inverter can be
+drawn (the existing GDS are byte-for-byte unchanged).
+
+| cell | devices | nets | pins | size (um) |
+| --- | --- | --- | --- | --- |
+| `sram_ctrl` | 356 (178 n + 178 p): 10 `dff`, 51 `inv_dly`, 8 `inv`, 4 `inv_x8`, 2 `inv_x16`, 1 `inv_x4`, 3 `nand2`, 2 `nand3`, 2 `and2` | 171 | 35 | 37.78 x 171.78 |
+| `col_decode` | 40: 4 `nand3`, 12 `inv_x16` | 27 | 15 | 22.80 x 50.23 |
+
+New cell kinds for the placer: `dff` (the column path's `dff_chains` table
+shifted to the cell's first column), `inv_dly` (two consecutive stages share
+supply diffusion, five columns per pair) and the tall single-finger
+`inv_x4/x8/x16` (`W` up to 16 um drawn as one transistor, as in the netlist).
+
+**Pin edges (provisional, recorded here for #247).** Pins are `Metal2` stubs to
+the cell edge, labelled on `Metal2`; `VDD` / `VSS` are labelled `Metal2` straps
+at the left of the cell.
+
+| cell | bottom edge | top edge |
+| --- | --- | --- |
+| `sram_ctrl` | `A0..A7`, `CEN`, `GWEN`, `CLK` (macro inputs); `clk_buf`, `wl_en_n`, `s_en`, `q_clk`, `wpn` (io-band buses sit below the array) | `aq0..aq7`, `aqb0..aqb7`, `wl_en` (row path, `col_decode`) |
+| `col_decode` | `aq0`, `aqb0`, `aq1`, `aqb1`, `wl_en` | `csel0..3`, `cseln0..3` |
+
+This is a choice made without a macro floorplan: assembly may need a different
+edge, and moving a pin is a one-line change in `SRAM_CTRL_PINS` / `COL_DECODE_PINS` in the generator.
+
+**Findings.**
+
+* `klt drc --deck gf180mcu`: 0 violations on both. `klt lvs` (inline extraction,
+  `flatten_reference`, as for `row_path`): `status: match` on both -- `sram_ctrl`
+  356/356 devices, 171/171 nets, 35/35 pins; `col_decode` 40/40, 27/27, 15/15;
+  the only `mismatches[]` entries are the `topology.flattened` disclosure and the
+  "no bjt on either side" note. The extracted netlist carries 102 devices at
+  `L = 0.6 um` (51 stages x 2). Reports: `reports/{drc,extract,lvs}-sram-ctrl.json`
+  and `...-col-decode.json` (`reports/generate.sh --control`).
+* Not run: the PDK-native DRC deck (not installed on the generating host), so the
+  implant / well rules the curated deck does not model are unchecked here.
+* **Not claimed:** timing, delay-chain calibration (the 35 / 6 / 6 / 4-stage
+  chains are drawn to the netlist's device sizes only), wire RC, parasitics, or
+  physical fit with the array, the bands or the row path. The blocks are
+  area-naive (single-finger devices, 0.65 um grid, one rail pair per strip).
 
 ### Scope: the storage-array core, matching `design/`
 
