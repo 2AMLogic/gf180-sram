@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-21
 
+- **PR #249**: layout: draw sram_ctrl and col_decode, DRC clean and LVS-matched at block level
+- **Issue #246** (closed): Layout the sram_ctrl and col_decode blocks (block-level DRC and LVS)
 - **PR #244**: layout: draw the row decoder and wordline-driver strip
 - **Issue #204** (closed): Draw row decoder and wordline driver layout, pitch-matched to the array
 - **PR #228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
