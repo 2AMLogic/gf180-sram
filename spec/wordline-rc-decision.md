@@ -153,16 +153,34 @@ Executing any of this needs separate authorization. Existing records and their o
 limitations are preserved; evidence is appended only when measured, never edited into
 existing records.
 
+**Pass criterion** (operator ruling, 2026-10-20, attended `/fleet:decide`; set as part of
+the ratification this PR's approval enacts): *the wordline pulse at the far cell must meet
+the write-margin requirement at all 27 corners, evaluated with the PDK's high-end Poly2
+sheet resistance (15 ohm/sq) rather than the 1.5x factor.* The write-margin requirement is
+the one already ratified, not a new number: `spec/sram.md` "Write margin" — the minimum
+write-driver drive (write trip voltage) that flips the cell within the fixed **2 ns**
+write-pulse width of `spec/write-pulse-width-decision.md`, with **positive margin at every
+corner** (`sim/signoff-summary.md` grades it PASS iff the recorded value is strictly > 0 V).
+Today's evidence (`sim/write-margin/records/20260817-105029-ce56f59.md`, 27/27 PASS, minimum
+1.64 V) was measured with an ideal wordline. The recheck applies the same testbench and the
+same > 0 V grading with the far-cell wordline waveform from item 1 in place of the ideal
+pulse; how that waveform is injected into `tb_write_margin.spice` is the first validation
+issue's to define, citing this paragraph. No threshold is invented here.
+
 1. **All 27 operating corners** for the chosen topology, on the batch fleet (this record covers one).
    Each corner's second pulse is that corner's own `wl_en` width from the `sim/macro-smoke`
    record (2.46 ns at `ff_-40c_3.63v` to 5.88 ns here), not 5.88 ns everywhere as `gen.py`
-   hard-codes today; Poly2 R is run at the PDK's stated high-end sheet resistance (15 ohm/sq,
-   above) as well as the 1.5x assumption, so the resistance case is a PDK figure, not a guess.
+   hard-codes today. Poly2 R is run at the PDK's stated high-end sheet resistance,
+   **15 ohm/sq** (`resist (allpolynonres)/active 15000`, above), which replaces the 1.5x
+   assumption as the resistance case; the 1.5x figures in this record stay as the recorded
+   single-corner comparison only.
 2. **Actual predecoder slew and row/driver loading**, not the bench's ideal stimulus and single `rowdrv`.
 3. **Correct topology for each bench**: pad-end drive versus centre drive, with the driven
    node identified per bench (see "Extracted-node provenance").
-4. **Far-end waveform write-margin recheck** with the extracted wordline waveform, including
-   the centre-fed 1.5x R case where only 0.38 ns is above 90 % of VDD.
+4. **Far-end waveform write-margin recheck** with the extracted wordline waveform at
+   15 ohm/sq (the pass criterion above). The recorded centre-fed 1.5x R case, where only
+   0.38 ns is above 90 % of VDD, is the single-corner comparison that motivates it, not the
+   case graded.
 5. **Integrated read/control timing**, replacing the G2 sum with a simulated read that has
    wire RC in the `s_en` path.
 6. **DRC, LVS, connectivity and abutment** on the actual rearranged layout.
