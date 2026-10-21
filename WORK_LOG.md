@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-21
+
+- **PR #228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
+
 ### 2026-10-20
 
 - **PR #241**: ci: pin setup-python to 3.12 so klayout installs from wheels
