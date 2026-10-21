@@ -95,6 +95,60 @@ evidence; a re-run against `gf180mcuD` would reproduce the same values).
 a drifted install is visible rather than silent. Reuse this same pin for
 consistency unless a documented reason requires bumping it.
 
+## Staged migration to `klt sim` deck mode (#230, in progress)
+
+`run_corner_sweep.sh` and the `run_mc_campaign.py` process pool are a
+hand-launched local grid, which dispatch workers must not run (host policy:
+grids go through `klt sim`). The four characterization families carry their own
+`.control` blocks (`wrdata`, bisection) and must run unmodified for comparability
+with the append-only records, so the migration target is `klt sim`'s
+**precomposed-deck** transport (`decks` request), not reshaping the testbenches.
+
+**Ready (offline):** `sim/lib/deck_adapter.py`
+
+```bash
+sim/lib/deck_adapter.py families
+sim/lib/deck_adapter.py build read-snm --stage-dir /tmp/stage --request-out /tmp/stage/request.json
+sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned grading
+```
+
+* `build` stages the same per-corner scratch the launcher composes (testbench,
+  generated `corner.inc`, DUT netlist) and writes a deck-list request. The only
+  deck-byte change is `@@REPO_ROOT@@` -> `.` (deck mode refuses absolute includes);
+  source and composed sha256 are in the request's `x_gf180_sram_adapter` block.
+* `reduce` re-applies the launcher's grading (`RESULT:`/`RESULT-ERROR:`,
+  `snm_extract.py`). Deck mode reports process success only: exit 0 is never a
+  PASS, and missing corners, duplicate/unexpected ids, missing declared outputs
+  and timeouts all come back `OPEN`.
+* `mc-build` / `mc-reduce` are the Monte Carlo counterpart for the
+  `run_mc_campaign.py` pool: one deck per (corner, kind, sample) -- two (L/R)
+  per sample for the `snm-pair` SNM families -- with `corner.inc` bytes from
+  `run_mc_campaign.build_corner_inc` and seeds from its `derive_seed` (imported,
+  not re-derived; the request records every unit's seed and `mc-reduce` refuses
+  a request whose seeds drifted). `mc-reduce` regroups a deck report into the
+  per-seed `(index, results, errors)` tuples `run_batch`/`run_batch_pair`
+  return plus the `klt yield` sample-set measurement blocks. Same fail-closed
+  rules as `reduce`; exit 0 is never a PASS. Example:
+  `sim/lib/deck_adapter.py mc-build read-snm --corner tt:25:3.30 --corner ff:125:2.97 --seed 1 --stage-dir /tmp/mc --request-out /tmp/mc/request.json`
+* `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
+  reports. Stub results are contract checks, **not** physical evidence.
+
+**Blocked (named prerequisites; launchers stay, no campaign authorised):**
+
+1. *Executor capability.* No batch image build verified to accept deck-list
+   requests; the local `klt` source supports them, a deployed image is unverified.
+   Needed: the intended executor's installed klt/ngspice build identity (from a
+   report's `environment`), and confirmation that `$PDK_ROOT/...` includes in
+   `corner.inc` resolve on it (otherwise pass `build --pdk-dir`).
+2. *Measurement parity receipt.* Per family, one corner (or the full set) from
+   deck mode must match the committed record value for the same corner. No such
+   receipt exists yet, for the corner grid or the Monte Carlo adapter (which is
+   ready offline); `run_mc_campaign.py` and its pool are untouched.
+3. *Cutover.* Retiring `run_corner_sweep.sh`/the MC pool, switching defaults, and
+   updating the cold-start section below happen only after 1 and 2 are met.
+   Single-point probes stay local. Until then the cold-start section below is
+   the historical procedure and is not to be run on dispatch workers.
+
 ## Cold-start invocation
 
 Prerequisites: `ngspice` and `python3` on `PATH`; a gf180mcu PDK install
@@ -289,15 +343,10 @@ path) into a newly-generated record. This follows the model
 inside this repo, and *identity, never location* (name + version, no path
 at all) for anything genuinely external, like a PDK install:
 
-- **This host's installed `klt` does not yet ship `env-provenance`**
-  (verified 2026-08-25: `klt --version` reports `0.2.0`; neither
-  `klt env-provenance --help` nor `klayout_tools.env_provenance` resolve).
-  `sim/lib/env_provenance.py` reimplements just the piece these scripts
-  need by hand, matching the documented `{path, scope}` shape, so a record
-  written today reads the same way a record written once
-  `klt env-provenance` is available would. Prefer the real subcommand/module
-  directly once it is available on the host running these scripts, and
-  retire that file.
+- **No env-provenance shim**: `run_mc_campaign.py` builds the `pdk`
+  identity block inline. `klt env-provenance emit` (host/OS/tool-version
+  blocks, `--path` normalisation) does not pin PDK variant/version, so it
+  is not a drop-in for that block.
 - **PDK identity, not location**: every `**PDK**:`/`pdk` field records the
   PDK variant name and its resolved `open_pdks` version (e.g. `gf180mcuD`,
   `c6d73a3...`), never the absolute install path (`~/.volare/gf180mcuD` on

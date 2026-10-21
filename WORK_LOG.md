@@ -3,6 +3,15 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-20
+
+- **PR #241**: ci: pin setup-python to 3.12 so klayout installs from wheels
+- **Issue #239** (closed): CI: signoff job fails installing klayout-tools==0.7.0 when setup-python '3.x' resolves to 3.15 (no klayout wheel)
+- **PR #238**: feat(sim): add offline Monte Carlo deck-mode adapter
+- **PR #233**: feat(sim): offline klt deck-mode adapter for the 27-corner grid
+- **PR #236**: refactor(sim): inline PDK identity dict and remove env_provenance shim
+- **Issue #235** (closed): Remove sim/lib/env_provenance.py: single-use shim for a klt subcommand that now exists
+
 ### 2026-10-18
 
 - **PR #226**: refactor: drop local-only macro smoke flavor in favor of klt sim
