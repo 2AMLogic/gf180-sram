@@ -43,6 +43,9 @@ layout/
     precharge_slice.gds                 committed: 12 PMOS, one I/O's four columns
     io_slice.gds                        committed: mux + sense amp + write driver + 3 flops
     column_band.gds                     committed: 32-slice io_band / precharge_band
+  periphery/row/
+    generate.py                         draws the row decoder + wordline-driver strip (issue #204)
+    row_path.gds                        committed: 16 predecoders + 64 rowdrv, one flat cell
   reports/                              machine-readable DRC/LVS/extract evidence (README inside)
   sram_64x128/
     sram_64x128_array.gds               64 x 128 array (4:1 organization), emitted by
@@ -192,6 +195,63 @@ why the pitch is not 0.62 or 0.60.
 * Rails: strap columns 1 and 24 of the 26 are reserved for `Metal2`. Other
   columns are free.
 
+### The row path (issue #204)
+
+`periphery/row/generate.py` draws `design/netlist/row_path.spice` as one flat
+cell `row_path`: two 3->8 predecoders (8 x `and4` for `wl_en` and the high
+address bits, 8 x `and3` for the low bits) and 64 `rowdrv` wordline drivers --
+528 devices (264 nfet + 264 pfet), 53.59 x 397.33 um. It reuses the column
+path's netlist reader, strip placer and maze router unchanged (it imports
+`periphery/column/generate.py`; only the slice-width globals are set per build),
+so the 0.65 um grid argument above applies here too.
+
+**Scope.** The decoder strip only, for the center-fed 4:1 organization
+(`spec/wordline-rc-decision.md`, ratified by the operator's ruling on #228).
+Placing the 16 + 16 column slices, the second landing-pad strip and re-tiling
+the array are #206. The existing `sram_64x128/sram_64x128_array.gds` is
+**left-fed and unchanged**.
+
+**Does `rowdrv` fit the 5.40 um row pitch? No.** Its 6 um PMOS / 3 um NMOS output
+stage plus the 2 um NAND2 make it **13.65 um rail to rail** (smallest channel
+that routes, `chan = 1`), 2.5 row pitches. The drivers are interleaved in 3
+columns: driver `k` sits in column `k % 3`, so consecutive drivers of a column
+are 16.2 um apart, and each `WL<k>` leaves on a `Metal3` track at row `k`'s
+height. A predecoder/driver split into one 5.40 um column would need a smaller
+output stage or a different cell topology, which is a design change, not
+placement.
+
+**Interface.**
+
+* `WL<k>`: a `Metal3` track at `y = 48.750 + k * 5.40 + wl_y` (strip frame; the
+  array's row 0 goes at strip y = 48.750 so each track is at its row's landing-pad
+  height), spanning the strip's full width and ending in a labelled
+  0.70 um-wide `Metal3` pin stub (`max(WL_PAD_BAND, ...)`) at **both** edges (the strip sits between the two
+  halves). The array's landing pads are `Metal1`; joining them is assembly's
+  job (#206), as is any mirroring of the second half.
+* `aq2..aq7`, `aqb2..aqb7`, `wl_en`: `Metal2` stubs on the bottom edge.
+* `VDD`/`VSS`: `Metal2` straps (labelled) joined by two `Metal3` jumpers.
+
+**Findings.**
+
+* `klt drc --deck gf180mcu`: 0 violations. `klt lvs` against `row_path.spice`
+  (inline extraction, `flatten_reference`): `status: match`, 528/528 devices,
+  279/279 nets, 79/79 pins; the only `mismatches[]` entries are the
+  `topology.flattened` disclosure and the "no bjt on either side" note. Reports:
+  `reports/{drc,extract,lvs}-row-path.json`.
+* **Not run: the PDK-native DRC deck.** This host has no `gf180mcuD`
+  `run_drc.py` (`~/.ciel/gf180mcuD/libs.tech/klayout/tech/drc` is absent), so
+  unlike the column path no native-deck result exists for the strip. The curated
+  deck models none of the implant rules, so implant and well spacing on this
+  strip is not checked by any deck run here.
+* Not claimed: physical fit with the array or the column bands, abutment or
+  connectivity of the assembled floorplan, parasitics, timing, or any validation
+  result. **Full-array wordline RC / write-margin validation (the 27-corner,
+  15 ohm/sq matrix in `spec/wordline-rc-decision.md`) is pending** and needs a
+  separate operator grant.
+* The strip is area-naive (single-finger devices, 0.65 um grid, three driver
+  columns with the gaps between them): it is a correct drawing, not an
+  optimized one.
+
 ### Scope: the storage-array core, matching `design/`
 
 Like the schematic side (see `design/README.md`), this is the bitcell-array
@@ -212,9 +272,10 @@ same bitcell and landing-pad strip) is `sram_64x128/sram_64x128_array.gds`
 (issue #204), emitted by the same generator and checked by `verify.sh` steps 1,
 2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`).
 The 256 x 32 files are left untouched until macro assembly (#206) retires them.
-Of the periphery, only the **column path** (precharge, 4:1 mux, sense amp,
-write driver, input/`Q` flops) is drawn so far -- see "The column path" above;
-row decode and control (#204), and macro assembly and pins (#206), are not.
+Of the periphery, the **column path** (precharge, 4:1 mux, sense amp, write
+driver, input/`Q` flops) and the **row decode / wordline-driver strip** are
+drawn so far -- see "The column path" and "The row path" above; control and
+macro assembly and pins (#206) are not.
 
 ## What this does and does not prove
 
@@ -309,8 +370,8 @@ row decode and control (#204), and macro assembly and pins (#206), are not.
   the cycle — those need `klt pex` of these cells against the ratified
   testbenches, and the `io_slice` reference is compared *flattened* (the layout
   is drawn flat per slice), so no per-subcircuit hierarchy is verified.
-* **A routed macro.** There is still no row decode, control logic or macro
-  assembly (#204, #206). The LEF abstract
+* **A routed macro.** There is still no control logic or macro
+  assembly (#206), and the row strip is drawn but not placed against the array. The LEF abstract
   (`views/sram_256x32_array.lef`, issues #120/#182) is generated by the
   released klt 0.6.0 and all 322 pins carry real drawn `PORT` geometry
   (klayout-tools#1614 fixed; the wordlines reach Metal1 since issue #121), but
@@ -505,7 +566,7 @@ Everything in one command, from the repo root:
 
 ```bash
 ./layout/verify.sh            # ~5 min: adds the full-array DRC + extraction and the column seam DRC
-./layout/verify.sh --quick    # ~20 s: bitcell, 3x3 tile and the column path (slices, bands, LVS)
+./layout/verify.sh --quick    # ~1 min: bitcell, 3x3 tile, the column path (slices, bands, LVS) and the row strip
 ```
 
 It regenerates all GDS files (bitcell, array, column path), fails if any

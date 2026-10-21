@@ -10,6 +10,7 @@
 #     ./layout/reports/generate.sh                  # everything (step 5 is ~26 min)
 #     ./layout/reports/generate.sh --column-path    # only step 0, the column path (#205)
 #     ./layout/reports/generate.sh --column-path --native   # ... plus the PDK-native DRC deck
+#     ./layout/reports/generate.sh --row-path       # only the row decoder strip (#204)
 #
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
@@ -52,6 +53,45 @@ hr() { printf '\n=== %s ===\n' "$1"; }
 # adding `--native` also runs it against the PDK's own DRC deck (~3 min more).
 COLUMN_DIR=layout/periphery/column
 
+# --- 0r. row decoder / wordline-driver strip (issue #204) -------------------
+# One flat cell (16 predecoders + 64 rowdrv), checked against
+# design/netlist/row_path.spice. Strip only: nothing here is a physical-fit or
+# wordline-RC claim (layout/README.md "Row path").
+# `./layout/reports/generate.sh --row-path` runs only this block (~10 s).
+ROW_GDS=layout/periphery/row/row_path.gds
+
+hr "0r. row path (issue #204): DRC, extract, LVS"
+klt drc --deck gf180mcu --format json "$ROW_GDS" | tee "$OUT/drc-row-path.json" >/dev/null
+klt extract --deck gf180mcu --format json "$ROW_GDS" -o "$WORK/row_path.spice" > "$WORK/extract-row-raw.json"
+python3 -c "
+import json
+d = json.load(open('$WORK/extract-row-raw.json'))
+d['netlist_path'] = 'row_path.spice'  # a temp dir at generation time
+json.dump(d, open('$OUT/extract-row-path.json', 'w'), indent=2)
+open('$OUT/extract-row-path.json', 'a').write('\n')
+"
+cat > "$WORK/lvs-row-request.json" <<EOF
+{"layout":{"file":"$ROOT/$ROW_GDS","deck":"gf180mcu","top":"row_path"},
+ "reference":{"netlist":"$ROOT/design/netlist/row_path.spice","form":"subckt-call"},
+ "options":{"flatten_reference":true}}
+EOF
+klt lvs "$WORK/lvs-row-request.json" --format json > "$WORK/lvs-row-raw.json"
+python3 -c "
+import json
+d = json.load(open('$WORK/lvs-row-raw.json'))
+if d.get('layout') == '$ROOT/$ROW_GDS':
+    d['layout'] = '$ROW_GDS'
+if d.get('reference') == '$ROOT/design/netlist/row_path.spice':
+    d['reference'] = 'design/netlist/row_path.spice'
+json.dump(d, open('$OUT/lvs-row-path.json', 'w'), indent=2)
+open('$OUT/lvs-row-path.json', 'a').write('\n')
+print('row_path LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
+d = json.load(open('$OUT/drc-row-path.json'))
+print('drc-row-path:', d['status'], '| violations:', d['violation_count'])
+"
+if [ "${1:-}" = "--row-path" ]; then exit 0; fi
+
+if [ "${1:-}" != "--row-path" ]; then
 hr "0. column path (issue #205): DRC, extract, LVS, bit-line seam"
 for cell in precharge_slice io_slice; do
   name="${cell//_/-}"
@@ -146,6 +186,7 @@ open('$OUT/drc-native-column-$name.json', 'a').write('\n')
 print('drc-native-column-$name:', d['status'], '| violations:', d['violation_count'])
 "
   done
+fi
 fi
 if [ "${1:-}" = "--column-path" ]; then exit 0; fi
 

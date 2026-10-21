@@ -1,0 +1,1568 @@
+{
+  "schema_version": 1,
+  "engine": "klayout",
+  "layout": "layout/periphery/row/row_path.gds",
+  "reference": "design/netlist/row_path.spice",
+  "top": "row_path",
+  "reference_top": "ROW_PATH",
+  "reference_conversion": {
+    "form": "subckt-call",
+    "deck": null,
+    "device_map": null
+  },
+  "parameter_tolerance": null,
+  "options": {
+    "combine_devices": false,
+    "combine_devices_per_circuit": null,
+    "combine_devices_max_attempts": 5,
+    "flatten_layout": false,
+    "flatten_reference": true,
+    "netgen_setup": null,
+    "parameter_tolerance": null,
+    "compare_parameters": null,
+    "power_connectivity": null,
+    "anchor_top_level_pins": null,
+    "strict_top_level_pin_count": false,
+    "compare_mos_flavour": false,
+    "supply_nets": [
+      "GND",
+      "VCC",
+      "VDD",
+      "VGND",
+      "VPWR",
+      "VSS"
+    ],
+    "finfet_bulk": null
+  },
+  "hints_applied": null,
+  "constant_nets_applied": null,
+  "status": "match",
+  "power_connectivity": {
+    "status": "unchecked",
+    "reason": "reference.form is 'subckt-call', whose reference netlist carries its own power/ground pins and nets -- they take part in the ordinary compare, so this check (which exists to cover the signal-only 'gate-level-verilog' form) does not apply",
+    "power_pins": [],
+    "power_pins_derivation": null,
+    "instance_count": 0,
+    "expected_nets": null,
+    "unchecked_expected_pins": [],
+    "findings": [],
+    "finding_count": 0
+  },
+  "body_verification": {
+    "status": "verified",
+    "reason": null,
+    "device_classes": [],
+    "device_count": 0,
+    "findings": [],
+    "finding_count": 0
+  },
+  "device_parameter_coverage": [],
+  "mismatch_count": 2,
+  "error_count": 0,
+  "category_counts": {
+    "topology": 1,
+    "topology.flattened": 1
+  },
+  "category_error_counts": {},
+  "counts": {
+    "nets": {
+      "layout": 279,
+      "reference": 279,
+      "matched": 279
+    },
+    "devices": {
+      "layout": 528,
+      "reference": 528,
+      "matched": 528
+    },
+    "pins": {
+      "layout": 79,
+      "reference": 79,
+      "matched": 79
+    }
+  },
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "cap_nmos_03v3",
+    "cap_nmos_03v3_dn",
+    "cap_pmos_03v3",
+    "cap_pmos_03v3_dn",
+    "cap_nmos_06v0",
+    "cap_nmos_06v0_dn",
+    "cap_pmos_06v0",
+    "cap_pmos_06v0_dn",
+    "cap_nmos_03v3_b",
+    "cap_pmos_03v3_b",
+    "cap_nmos_06v0_b",
+    "cap_pmos_06v0_b",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "environment": {
+    "engine": "klayout",
+    "engine_version": "0.30.12",
+    "netgen_binary": null,
+    "layout_sha256": "13b9465fe21a88dc8630841950c91c652405d00a0f22b3ecad194eed55375563",
+    "reference_sha256": "24720c5ab8f4c065ff431f163e58cbdc819ffc995e64b4cc6e11c7cad100b6fa",
+    "extracted_netlist": null
+  },
+  "provenance": {
+    "klt_version": "0.7.1.dev2379+g28c56ed58269",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:0eb6df1bafc5106ec50bd58479dbd7cda36bb685f1ef18cd3a2244a6e7e48666",
+      "released": false,
+      "options": {
+        "metal_top": "9K",
+        "mim_cap": "cap_mim_2f0_m4m5_noshield",
+        "poly_res": "1k"
+      },
+      "options_explicit": {
+        "metal_top": false,
+        "mim_cap": false,
+        "poly_res": false
+      },
+      "options_hash": "sha256:6a7dc7660a470994263c5ca8ace6d8ac8c605d77e6876a9c5490949de6e7cb05"
+    },
+    "input": {
+      "content_hash": "sha256:13b9465fe21a88dc8630841950c91c652405d00a0f22b3ecad194eed55375563",
+      "role": "layout"
+    },
+    "klayout_version_mismatch": false
+  },
+  "mismatches": [
+    {
+      "category": "topology",
+      "severity": "warning",
+      "description": "device class has no counterpart on the other side, but no devices of this class were extracted either -- not a real topology mismatch: 'bjt'",
+      "side": "layout",
+      "net": null,
+      "device": {
+        "layout": null,
+        "reference": null,
+        "class": "bjt"
+      },
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    },
+    {
+      "category": "topology.flattened",
+      "severity": "warning",
+      "description": "options.flatten_reference flattened the reference netlist before comparing: 4 circuit(s) were collapsed into 1 top-level circuit(s), substituting every subcircuit-call instance in place -- this compare verified topology only after removing the original hierarchy boundaries on this side (see docs/cli/lvs.md, \"topology.flattened\")",
+      "side": "reference",
+      "net": null,
+      "device": null,
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    }
+  ],
+  "net_correspondence": [
+    {
+      "layout": "aq2",
+      "reference": "AQ2",
+      "pin": true
+    },
+    {
+      "layout": "aq3",
+      "reference": "AQ3",
+      "pin": true
+    },
+    {
+      "layout": "aq4",
+      "reference": "AQ4",
+      "pin": true
+    },
+    {
+      "layout": "aq5",
+      "reference": "AQ5",
+      "pin": true
+    },
+    {
+      "layout": "aq6",
+      "reference": "AQ6",
+      "pin": true
+    },
+    {
+      "layout": "aq7",
+      "reference": "AQ7",
+      "pin": true
+    },
+    {
+      "layout": "aqb2",
+      "reference": "AQB2",
+      "pin": true
+    },
+    {
+      "layout": "aqb3",
+      "reference": "AQB3",
+      "pin": true
+    },
+    {
+      "layout": "aqb4",
+      "reference": "AQB4",
+      "pin": true
+    },
+    {
+      "layout": "aqb5",
+      "reference": "AQB5",
+      "pin": true
+    },
+    {
+      "layout": "aqb6",
+      "reference": "AQB6",
+      "pin": true
+    },
+    {
+      "layout": "aqb7",
+      "reference": "AQB7",
+      "pin": true
+    },
+    {
+      "layout": "\\$11",
+      "reference": "PH0",
+      "pin": false
+    },
+    {
+      "layout": "\\$16",
+      "reference": "PH1",
+      "pin": false
+    },
+    {
+      "layout": "\\$22",
+      "reference": "PH2",
+      "pin": false
+    },
+    {
+      "layout": "\\$161",
+      "reference": "PH3",
+      "pin": false
+    },
+    {
+      "layout": "\\$189",
+      "reference": "PH4",
+      "pin": false
+    },
+    {
+      "layout": "\\$40",
+      "reference": "PH5",
+      "pin": false
+    },
+    {
+      "layout": "\\$44",
+      "reference": "PH6",
+      "pin": false
+    },
+    {
+      "layout": "\\$50",
+      "reference": "PH7",
+      "pin": false
+    },
+    {
+      "layout": "\\$51",
+      "reference": "PL0",
+      "pin": false
+    },
+    {
+      "layout": "\\$55",
+      "reference": "PL1",
+      "pin": false
+    },
+    {
+      "layout": "\\$59",
+      "reference": "PL2",
+      "pin": false
+    },
+    {
+      "layout": "\\$96",
+      "reference": "PL3",
+      "pin": false
+    },
+    {
+      "layout": "\\$70",
+      "reference": "PL4",
+      "pin": false
+    },
+    {
+      "layout": "\\$127",
+      "reference": "PL5",
+      "pin": false
+    },
+    {
+      "layout": "\\$76",
+      "reference": "PL6",
+      "pin": false
+    },
+    {
+      "layout": "\\$80",
+      "reference": "PL7",
+      "pin": false
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
+      "pin": true
+    },
+    {
+      "layout": "VSS",
+      "reference": "VSS",
+      "pin": true
+    },
+    {
+      "layout": "wl0",
+      "reference": "WL0",
+      "pin": true
+    },
+    {
+      "layout": "wl1",
+      "reference": "WL1",
+      "pin": true
+    },
+    {
+      "layout": "wl10",
+      "reference": "WL10",
+      "pin": true
+    },
+    {
+      "layout": "wl11",
+      "reference": "WL11",
+      "pin": true
+    },
+    {
+      "layout": "wl12",
+      "reference": "WL12",
+      "pin": true
+    },
+    {
+      "layout": "wl13",
+      "reference": "WL13",
+      "pin": true
+    },
+    {
+      "layout": "wl14",
+      "reference": "WL14",
+      "pin": true
+    },
+    {
+      "layout": "wl15",
+      "reference": "WL15",
+      "pin": true
+    },
+    {
+      "layout": "wl16",
+      "reference": "WL16",
+      "pin": true
+    },
+    {
+      "layout": "wl17",
+      "reference": "WL17",
+      "pin": true
+    },
+    {
+      "layout": "wl18",
+      "reference": "WL18",
+      "pin": true
+    },
+    {
+      "layout": "wl19",
+      "reference": "WL19",
+      "pin": true
+    },
+    {
+      "layout": "wl2",
+      "reference": "WL2",
+      "pin": true
+    },
+    {
+      "layout": "wl20",
+      "reference": "WL20",
+      "pin": true
+    },
+    {
+      "layout": "wl21",
+      "reference": "WL21",
+      "pin": true
+    },
+    {
+      "layout": "wl22",
+      "reference": "WL22",
+      "pin": true
+    },
+    {
+      "layout": "wl23",
+      "reference": "WL23",
+      "pin": true
+    },
+    {
+      "layout": "wl24",
+      "reference": "WL24",
+      "pin": true
+    },
+    {
+      "layout": "wl25",
+      "reference": "WL25",
+      "pin": true
+    },
+    {
+      "layout": "wl26",
+      "reference": "WL26",
+      "pin": true
+    },
+    {
+      "layout": "wl27",
+      "reference": "WL27",
+      "pin": true
+    },
+    {
+      "layout": "wl28",
+      "reference": "WL28",
+      "pin": true
+    },
+    {
+      "layout": "wl29",
+      "reference": "WL29",
+      "pin": true
+    },
+    {
+      "layout": "wl3",
+      "reference": "WL3",
+      "pin": true
+    },
+    {
+      "layout": "wl30",
+      "reference": "WL30",
+      "pin": true
+    },
+    {
+      "layout": "wl31",
+      "reference": "WL31",
+      "pin": true
+    },
+    {
+      "layout": "wl32",
+      "reference": "WL32",
+      "pin": true
+    },
+    {
+      "layout": "wl33",
+      "reference": "WL33",
+      "pin": true
+    },
+    {
+      "layout": "wl34",
+      "reference": "WL34",
+      "pin": true
+    },
+    {
+      "layout": "wl35",
+      "reference": "WL35",
+      "pin": true
+    },
+    {
+      "layout": "wl36",
+      "reference": "WL36",
+      "pin": true
+    },
+    {
+      "layout": "wl37",
+      "reference": "WL37",
+      "pin": true
+    },
+    {
+      "layout": "wl38",
+      "reference": "WL38",
+      "pin": true
+    },
+    {
+      "layout": "wl39",
+      "reference": "WL39",
+      "pin": true
+    },
+    {
+      "layout": "wl4",
+      "reference": "WL4",
+      "pin": true
+    },
+    {
+      "layout": "wl40",
+      "reference": "WL40",
+      "pin": true
+    },
+    {
+      "layout": "wl41",
+      "reference": "WL41",
+      "pin": true
+    },
+    {
+      "layout": "wl42",
+      "reference": "WL42",
+      "pin": true
+    },
+    {
+      "layout": "wl43",
+      "reference": "WL43",
+      "pin": true
+    },
+    {
+      "layout": "wl44",
+      "reference": "WL44",
+      "pin": true
+    },
+    {
+      "layout": "wl45",
+      "reference": "WL45",
+      "pin": true
+    },
+    {
+      "layout": "wl46",
+      "reference": "WL46",
+      "pin": true
+    },
+    {
+      "layout": "wl47",
+      "reference": "WL47",
+      "pin": true
+    },
+    {
+      "layout": "wl48",
+      "reference": "WL48",
+      "pin": true
+    },
+    {
+      "layout": "wl49",
+      "reference": "WL49",
+      "pin": true
+    },
+    {
+      "layout": "wl5",
+      "reference": "WL5",
+      "pin": true
+    },
+    {
+      "layout": "wl50",
+      "reference": "WL50",
+      "pin": true
+    },
+    {
+      "layout": "wl51",
+      "reference": "WL51",
+      "pin": true
+    },
+    {
+      "layout": "wl52",
+      "reference": "WL52",
+      "pin": true
+    },
+    {
+      "layout": "wl53",
+      "reference": "WL53",
+      "pin": true
+    },
+    {
+      "layout": "wl54",
+      "reference": "WL54",
+      "pin": true
+    },
+    {
+      "layout": "wl55",
+      "reference": "WL55",
+      "pin": true
+    },
+    {
+      "layout": "wl56",
+      "reference": "WL56",
+      "pin": true
+    },
+    {
+      "layout": "wl57",
+      "reference": "WL57",
+      "pin": true
+    },
+    {
+      "layout": "wl58",
+      "reference": "WL58",
+      "pin": true
+    },
+    {
+      "layout": "wl59",
+      "reference": "WL59",
+      "pin": true
+    },
+    {
+      "layout": "wl6",
+      "reference": "WL6",
+      "pin": true
+    },
+    {
+      "layout": "wl60",
+      "reference": "WL60",
+      "pin": true
+    },
+    {
+      "layout": "wl61",
+      "reference": "WL61",
+      "pin": true
+    },
+    {
+      "layout": "wl62",
+      "reference": "WL62",
+      "pin": true
+    },
+    {
+      "layout": "wl63",
+      "reference": "WL63",
+      "pin": true
+    },
+    {
+      "layout": "wl7",
+      "reference": "WL7",
+      "pin": true
+    },
+    {
+      "layout": "wl8",
+      "reference": "WL8",
+      "pin": true
+    },
+    {
+      "layout": "wl9",
+      "reference": "WL9",
+      "pin": true
+    },
+    {
+      "layout": "wl_en",
+      "reference": "WL_EN",
+      "pin": true
+    },
+    {
+      "layout": "\\$7",
+      "reference": "XPH0_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$8",
+      "reference": "XPH0_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$9",
+      "reference": "XPH0_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$10",
+      "reference": "XPH0_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$12",
+      "reference": "XPH1_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$13",
+      "reference": "XPH1_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$14",
+      "reference": "XPH1_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$15",
+      "reference": "XPH1_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$17",
+      "reference": "XPH2_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$19",
+      "reference": "XPH2_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$20",
+      "reference": "XPH2_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$21",
+      "reference": "XPH2_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$23",
+      "reference": "XPH3_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$24",
+      "reference": "XPH3_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$25",
+      "reference": "XPH3_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$26",
+      "reference": "XPH3_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$27",
+      "reference": "XPH4_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$28",
+      "reference": "XPH4_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$29",
+      "reference": "XPH4_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$30",
+      "reference": "XPH4_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$36",
+      "reference": "XPH5_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$37",
+      "reference": "XPH5_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$38",
+      "reference": "XPH5_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$39",
+      "reference": "XPH5_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$41",
+      "reference": "XPH6_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$42",
+      "reference": "XPH6_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$43",
+      "reference": "XPH6_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$45",
+      "reference": "XPH6_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$46",
+      "reference": "XPH7_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$47",
+      "reference": "XPH7_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$48",
+      "reference": "XPH7_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$49",
+      "reference": "XPH7_S3",
+      "pin": false
+    },
+    {
+      "layout": "\\$52",
+      "reference": "XPL0_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$54",
+      "reference": "XPL0_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$53",
+      "reference": "XPL0_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$56",
+      "reference": "XPL1_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$58",
+      "reference": "XPL1_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$57",
+      "reference": "XPL1_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$60",
+      "reference": "XPL2_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$62",
+      "reference": "XPL2_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$61",
+      "reference": "XPL2_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$63",
+      "reference": "XPL3_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$65",
+      "reference": "XPL3_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$64",
+      "reference": "XPL3_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$69",
+      "reference": "XPL4_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$73",
+      "reference": "XPL4_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$72",
+      "reference": "XPL4_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$68",
+      "reference": "XPL5_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$75",
+      "reference": "XPL5_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$74",
+      "reference": "XPL5_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$77",
+      "reference": "XPL6_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$79",
+      "reference": "XPL6_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$78",
+      "reference": "XPL6_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$81",
+      "reference": "XPL7_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$83",
+      "reference": "XPL7_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$82",
+      "reference": "XPL7_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$84",
+      "reference": "XROW0_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$85",
+      "reference": "XROW0_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$115",
+      "reference": "XROW10_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$116",
+      "reference": "XROW10_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$118",
+      "reference": "XROW11_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$119",
+      "reference": "XROW11_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$121",
+      "reference": "XROW12_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$122",
+      "reference": "XROW12_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$124",
+      "reference": "XROW13_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$125",
+      "reference": "XROW13_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$128",
+      "reference": "XROW14_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$129",
+      "reference": "XROW14_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$131",
+      "reference": "XROW15_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$132",
+      "reference": "XROW15_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$134",
+      "reference": "XROW16_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$135",
+      "reference": "XROW16_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$137",
+      "reference": "XROW17_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$138",
+      "reference": "XROW17_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$140",
+      "reference": "XROW18_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$141",
+      "reference": "XROW18_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$143",
+      "reference": "XROW19_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$144",
+      "reference": "XROW19_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$87",
+      "reference": "XROW1_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$88",
+      "reference": "XROW1_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$146",
+      "reference": "XROW20_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$147",
+      "reference": "XROW20_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$149",
+      "reference": "XROW21_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$150",
+      "reference": "XROW21_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$152",
+      "reference": "XROW22_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$153",
+      "reference": "XROW22_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$155",
+      "reference": "XROW23_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$156",
+      "reference": "XROW23_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$158",
+      "reference": "XROW24_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$159",
+      "reference": "XROW24_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$162",
+      "reference": "XROW25_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$163",
+      "reference": "XROW25_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$165",
+      "reference": "XROW26_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$166",
+      "reference": "XROW26_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$168",
+      "reference": "XROW27_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$169",
+      "reference": "XROW27_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$171",
+      "reference": "XROW28_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$172",
+      "reference": "XROW28_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$174",
+      "reference": "XROW29_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$175",
+      "reference": "XROW29_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$90",
+      "reference": "XROW2_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$91",
+      "reference": "XROW2_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$177",
+      "reference": "XROW30_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$178",
+      "reference": "XROW30_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$180",
+      "reference": "XROW31_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$181",
+      "reference": "XROW31_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$183",
+      "reference": "XROW32_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$184",
+      "reference": "XROW32_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$186",
+      "reference": "XROW33_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$187",
+      "reference": "XROW33_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$190",
+      "reference": "XROW34_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$191",
+      "reference": "XROW34_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$193",
+      "reference": "XROW35_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$194",
+      "reference": "XROW35_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$196",
+      "reference": "XROW36_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$197",
+      "reference": "XROW36_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$199",
+      "reference": "XROW37_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$200",
+      "reference": "XROW37_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$202",
+      "reference": "XROW38_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$203",
+      "reference": "XROW38_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$205",
+      "reference": "XROW39_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$206",
+      "reference": "XROW39_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$93",
+      "reference": "XROW3_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$94",
+      "reference": "XROW3_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$208",
+      "reference": "XROW40_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$209",
+      "reference": "XROW40_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$211",
+      "reference": "XROW41_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$212",
+      "reference": "XROW41_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$214",
+      "reference": "XROW42_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$215",
+      "reference": "XROW42_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$217",
+      "reference": "XROW43_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$218",
+      "reference": "XROW43_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$220",
+      "reference": "XROW44_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$221",
+      "reference": "XROW44_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$223",
+      "reference": "XROW45_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$224",
+      "reference": "XROW45_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$226",
+      "reference": "XROW46_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$227",
+      "reference": "XROW46_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$229",
+      "reference": "XROW47_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$230",
+      "reference": "XROW47_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$232",
+      "reference": "XROW48_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$233",
+      "reference": "XROW48_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$235",
+      "reference": "XROW49_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$236",
+      "reference": "XROW49_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$97",
+      "reference": "XROW4_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$98",
+      "reference": "XROW4_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$238",
+      "reference": "XROW50_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$239",
+      "reference": "XROW50_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$241",
+      "reference": "XROW51_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$242",
+      "reference": "XROW51_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$244",
+      "reference": "XROW52_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$245",
+      "reference": "XROW52_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$247",
+      "reference": "XROW53_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$248",
+      "reference": "XROW53_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$250",
+      "reference": "XROW54_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$251",
+      "reference": "XROW54_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$253",
+      "reference": "XROW55_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$254",
+      "reference": "XROW55_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$259",
+      "reference": "XROW56_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$260",
+      "reference": "XROW56_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$256",
+      "reference": "XROW57_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$257",
+      "reference": "XROW57_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$262",
+      "reference": "XROW58_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$263",
+      "reference": "XROW58_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$265",
+      "reference": "XROW59_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$266",
+      "reference": "XROW59_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$100",
+      "reference": "XROW5_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$101",
+      "reference": "XROW5_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$268",
+      "reference": "XROW60_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$269",
+      "reference": "XROW60_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$271",
+      "reference": "XROW61_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$272",
+      "reference": "XROW61_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$274",
+      "reference": "XROW62_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$275",
+      "reference": "XROW62_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$277",
+      "reference": "XROW63_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$278",
+      "reference": "XROW63_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$103",
+      "reference": "XROW6_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$104",
+      "reference": "XROW6_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$106",
+      "reference": "XROW7_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$107",
+      "reference": "XROW7_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$109",
+      "reference": "XROW8_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$110",
+      "reference": "XROW8_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$112",
+      "reference": "XROW9_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$113",
+      "reference": "XROW9_S1",
+      "pin": false
+    }
+  ]
+}

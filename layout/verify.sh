@@ -27,6 +27,7 @@ PRECHARGE_GDS=$COLUMN_DIR/precharge_slice.gds
 IO_GDS=$COLUMN_DIR/io_slice.gds
 BAND_GDS=$COLUMN_DIR/column_band.gds
 ARRAY64_GDS=layout/sram_64x128/sram_64x128_array.gds
+ROW_GDS=layout/periphery/row/row_path.gds
 
 hr() { printf '\n=== %s ===\n' "$1"; }
 
@@ -38,7 +39,9 @@ $PY $COLUMN_DIR/generate.py
 # generator, 64 rows x 128 cols (issue #204).
 $PY layout/sram_256x32/generate.py --rows 64 --cols 128 \
   --top-name sram_64x128_array -o "$ARRAY64_GDS"
-GENERATED_GDS="$BITCELL_GDS $ARRAY_GDS $ARRAY64_GDS $PRECHARGE_GDS $IO_GDS $BAND_GDS"
+# The row-decoder + wordline-driver strip (issue #204).
+$PY layout/periphery/row/generate.py
+GENERATED_GDS="$BITCELL_GDS $ARRAY_GDS $ARRAY64_GDS $PRECHARGE_GDS $IO_GDS $BAND_GDS $ROW_GDS"
 if git diff --quiet -- $GENERATED_GDS; then
   echo "PASS: re-running the generators reproduced the committed GDS byte-for-byte"
 else
@@ -51,7 +54,7 @@ hr "2. layout hygiene (klt precheck, 5 nm grid)"
 klt precheck --deck gf180mcu --grid-um 0.005 "$BITCELL_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY64_GDS"
-for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS"; do
+for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS" "$ROW_GDS"; do
   klt precheck --deck gf180mcu --grid-um 0.005 "$gds"
 done
 
@@ -85,6 +88,15 @@ for cell in precharge_slice io_slice; do
 \"reference\":{\"netlist\":\"$ROOT/design/netlist/$cell.spice\",\"form\":\"subckt-call\"},\
 \"options\":{\"flatten_reference\":true}}"
 done
+
+hr "5d. DRC + extraction + LVS: row decoder / wordline-driver strip vs design/netlist/row_path.spice (issue #204)"
+# Strip only: 16 predecoders + 64 rowdrv, one flat cell. This says nothing about
+# the strip fitting the array or the wordline RC (README "Row path").
+klt drc --deck gf180mcu "$ROW_GDS"
+klt extract --deck gf180mcu "$ROW_GDS" -o "$WORK/row_path.spice"
+klt lvs "{\"layout\":{\"file\":\"$ROOT/$ROW_GDS\",\"deck\":\"gf180mcu\",\"top\":\"row_path\"},\
+\"reference\":{\"netlist\":\"$ROOT/design/netlist/row_path.spice\",\"form\":\"subckt-call\"},\
+\"options\":{\"flatten_reference\":true}}"
 
 if [ "$QUICK" = "1" ]; then
   hr "skipped (--quick): full-array DRC and extraction, column-seam DRC"
