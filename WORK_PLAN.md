@@ -11,7 +11,6 @@ hand-edit that region.
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
-- **#228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
 
 ## Very Important
 
@@ -24,7 +23,6 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
-- **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array
 
 ## Ready
 
@@ -37,7 +35,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS
 
 ## PRs Awaiting Review
 
@@ -50,16 +48,16 @@ _None._
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
-- **#228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
-- **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array *(curated)*
-- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
 - **#160**: T1 item 6: make the klt yield report's samples path resolve from any working directory *(curated)*
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3 *(curated)*
+- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
+- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -73,14 +71,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 2 |
+| Operator merge-risk holds | 1 |
 | Very important | 0 |
-| Important | 2 |
+| Important | 1 |
 | Ready (`loom:issue`) | 2 |
-| In Progress (`loom:building`) | 0 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 2 |
-| Curated | 4 |
+| Approved PRs awaiting merge | 1 |
+| Curated | 5 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
