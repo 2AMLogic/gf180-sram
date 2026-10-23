@@ -30,25 +30,25 @@ _None._
 Human-approved issues ready for implementation (`loom:issue`).
 
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
-- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+- **#264**: feat: store new evidence bytes in the artifact store, commit manifests only
 
 ## Approved (Awaiting Merge)
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-_None._
+- **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
 
 ## Proposed
 
@@ -58,6 +58,8 @@ Issues carrying `loom:curated`.
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3 *(curated)*
 - **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 
@@ -76,10 +78,10 @@ _None._
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
 | Important | 2 |
-| Ready (`loom:issue`) | 2 |
-| In Progress (`loom:building`) | 1 |
+| Ready (`loom:issue`) | 1 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 1 |
-| Approved PRs awaiting merge | 0 |
+| Approved PRs awaiting merge | 1 |
 | Curated | 6 |
 | Architect / Hermit proposals | 1 |
 | Active epics | 0 |
