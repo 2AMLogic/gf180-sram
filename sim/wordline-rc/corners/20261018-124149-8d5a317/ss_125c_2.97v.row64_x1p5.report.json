@@ -1,0 +1,492 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": "sim/wordline-rc/testbench/tb_wl_rc_row64_x1p5.klt.spice",
+    "scope": "repo"
+  },
+  "status": "pass",
+  "corner_count": 1,
+  "passed": 1,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 1,
+    "sim__corner__passed_count": 1,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "42",
+    "ngspice_binary": "/usr/bin/ngspice",
+    "engine_build": {
+      "version_banner": "******\n** ngspice-42 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2023, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Sun Mar 31 20:15:14 UTC 2024\n******",
+      "binary_sha256": "820658317b0b54035208da41936fd6871ce924036e5ea4113a4168b821b7fc45",
+      "probe": "ok",
+      "reason": null
+    },
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "6edba54d23b38a2c60f8ffdbaa3eb75a7568c615e4820808969bd1121b77b1aa",
+    "models_lib_sha256_scope": "local",
+    "netlist_sha256": "1bb0f423915bb6f9db6e9949d26bfacdc921a1609cb8f759dde72501d8b8c06c",
+    "netlist_closure": [
+      {
+        "path": "sim/wordline-rc/testbench/tb_wl_rc_row64_x1p5.klt.spice",
+        "scope": "repo",
+        "sha256": "1bb0f423915bb6f9db6e9949d26bfacdc921a1609cb8f759dde72501d8b8c06c"
+      },
+      {
+        "path": "design/netlist/rowdrv.spice",
+        "scope": "repo",
+        "sha256": "9f27e7898f1f01312ed7a4fe9b99f851576a4f49573f9edb2ef7ad15ad859f03"
+      },
+      {
+        "path": "sim/wordline-rc/dut/wl_row_64.x1p5.ported.spice",
+        "scope": "repo",
+        "sha256": "c112f51d17e7fefbd796fabb76f8bdb9c6364a41c670af0462c600a8f3a5cb3f"
+      }
+    ],
+    "netlist_identity": "sha256:b0d8d4492669ae4f4783e45d92242fc6e9e4c5fb3241a9bd57a1cb2f7d94a09d",
+    "netlist_source": "schematic",
+    "engine_host": "local",
+    "backend": {
+      "resolved": "local",
+      "source": "flag",
+      "requested": "local"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 1,
+    "measurements_declared": 16,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"ss/2.970V/125C\",\"drv_rise50_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"drv_rise50_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"drv_width50_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"drv_width50_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_peak_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_peak_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_rise10_90_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_rise10_90_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_rise50_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_rise50_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_rise90_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_rise90_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_width50_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_width50_p588\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_width90_p2ns\"]/observation",
+      "measurement:[0,\"ss/2.970V/125C\",\"far_width90_p588\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"drv_rise50_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"drv_rise50_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"drv_width50_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"drv_width50_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_peak_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_peak_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_rise10_90_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_rise10_90_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_rise50_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_rise50_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_rise90_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_rise90_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_width50_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_width50_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_width90_p2ns\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ss/2.970V/125C\",\"far_width90_p588\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.1.dev2022+g36b9922d8596",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": {
+      "name": "sm141064.ngspice",
+      "content_hash": "sha256:6edba54d23b38a2c60f8ffdbaa3eb75a7568c615e4820808969bd1121b77b1aa",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:1bb0f423915bb6f9db6e9949d26bfacdc921a1609cb8f759dde72501d8b8c06c",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "drv_rise50_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 2.05e-10,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_rise50_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 7.25e-10,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_width50_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 1.905e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "drv_width50_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 1.945e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_rise90_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 1.64e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_rise10_90_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 1.32e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_width90_p2ns",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 5.9e-10,
+        "margin": null
+      }
+    },
+    {
+      "name": "drv_rise50_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 2e-10,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_rise50_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 7.25e-10,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_width50_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 5.8e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "drv_width50_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 5.83e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_rise90_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 1.635e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_rise10_90_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 1.315e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_width90_p588",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 4.51e-09,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_peak_p2ns",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 2.846839,
+        "margin": null
+      }
+    },
+    {
+      "name": "far_peak_p588",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ss/2.970V/125C",
+        "value": 2.973193,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "ss/2.970V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vvdd": 2.97
+      },
+      "temperature_c": 125,
+      "status": "pass",
+      "runtime_s": 5.78,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "drv_rise50_p2ns",
+          "value": 2.05e-10,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_rise50_p2ns",
+          "value": 7.25e-10,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_width50_p2ns",
+          "value": 1.905e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "drv_width50_p2ns",
+          "value": 1.945e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_rise90_p2ns",
+          "value": 1.64e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_rise10_90_p2ns",
+          "value": 1.32e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_width90_p2ns",
+          "value": 5.9e-10,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "drv_rise50_p588",
+          "value": 2e-10,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_rise50_p588",
+          "value": 7.25e-10,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_width50_p588",
+          "value": 5.8e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "drv_width50_p588",
+          "value": 5.83e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_rise90_p588",
+          "value": 1.635e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_rise10_90_p588",
+          "value": 1.315e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_width90_p588",
+          "value": 4.51e-09,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_peak_p2ns",
+          "value": 2.846839,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "far_peak_p588",
+          "value": 2.973193,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": null,
+        "raw": null,
+        "waveform": null,
+        "deck": null
+      },
+      "monte_carlo": null
+    }
+  ]
+}

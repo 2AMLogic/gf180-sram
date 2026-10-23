@@ -16,7 +16,10 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 PY="uv run --with klayout python3"
-PY_KLT="uv run --with klayout-tools python3"
+# Released klt pinned the same way signoff/regenerate.sh pins it -- never the
+# klt already on the host.
+KLT_VERSION="0.6.0"
+KLT="uvx --from klayout-tools==$KLT_VERSION klt"
 
 ARRAY_GDS=layout/sram_256x32/sram_256x32_array.gds
 SOCKET=views/sram_256x32_array.socket.json
@@ -38,8 +41,8 @@ else
   exit 1
 fi
 
-hr "2. klt socket-check (real, unmodified klt -- no workaround needed here)"
-klt socket-check "$ARRAY_GDS" --socket "$SOCKET" --format json > "$WORK/socket-check.json"
+hr "2. klt socket-check (released klt $KLT_VERSION)"
+$KLT socket-check "$ARRAY_GDS" --socket "$SOCKET" --format json > "$WORK/socket-check.json"
 cat "$WORK/socket-check.json"
 SOCKET_STATUS="$(python3 -c "import json; print(json.load(open('$WORK/socket-check.json'))['status'])")"
 if [ "$SOCKET_STATUS" != "pass" ]; then
@@ -48,16 +51,16 @@ if [ "$SOCKET_STATUS" != "pass" ]; then
 fi
 echo "PASS: klt socket-check status=pass (outline + all 322 pins)"
 
-hr "3. klt lef-abstract (via views/run_lef_abstract.py -- see its docstring:"
-hr "   klayout-tools#1613 crashes the unmodified CLI on this design's OBS geometry)"
-$PY_KLT views/run_lef_abstract.py "$ARRAY_GDS" \
+hr "3. klt lef-abstract (released klt $KLT_VERSION)"
+$KLT lef-abstract "$ARRAY_GDS" \
   --socket "$SOCKET" \
   --macro-name sram_256x32_array \
   --cell-library "$CELL_LIBRARY" \
   --class BLOCK \
   --pdk "$PDK_VARIANT" \
-  -o "$WORK/regen.lef" \
-  --report "$WORK/regen.lef-abstract.json"
+  --format json \
+  -o "$WORK/regen.lef" > "$WORK/regen.lef-abstract.json"
+echo "wrote $WORK/regen.lef"
 
 if diff -q "$WORK/regen.lef" "$LEF" >/dev/null; then
   echo "PASS: regenerated LEF is byte-identical to the committed $LEF"

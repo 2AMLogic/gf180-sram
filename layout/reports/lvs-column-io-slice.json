@@ -1,0 +1,456 @@
+{
+  "schema_version": 1,
+  "engine": "klayout",
+  "layout": "layout/periphery/column/io_slice.gds",
+  "reference": "design/netlist/io_slice.spice",
+  "top": "io_slice",
+  "reference_top": "IO_SLICE",
+  "reference_conversion": {
+    "form": "subckt-call",
+    "deck": null,
+    "device_map": null
+  },
+  "parameter_tolerance": null,
+  "options": {
+    "combine_devices": false,
+    "combine_devices_per_circuit": null,
+    "combine_devices_max_attempts": 5,
+    "flatten_layout": false,
+    "flatten_reference": true,
+    "netgen_setup": null,
+    "parameter_tolerance": null,
+    "compare_parameters": null,
+    "power_connectivity": null,
+    "anchor_top_level_pins": null,
+    "strict_top_level_pin_count": false,
+    "compare_mos_flavour": false,
+    "supply_nets": [
+      "GND",
+      "VCC",
+      "VDD",
+      "VGND",
+      "VPWR",
+      "VSS"
+    ],
+    "finfet_bulk": null
+  },
+  "hints_applied": null,
+  "constant_nets_applied": null,
+  "status": "match",
+  "power_connectivity": {
+    "status": "unchecked",
+    "reason": "reference.form is 'subckt-call', whose reference netlist carries its own power/ground pins and nets -- they take part in the ordinary compare, so this check (which exists to cover the signal-only 'gate-level-verilog' form) does not apply",
+    "power_pins": [],
+    "power_pins_derivation": null,
+    "instance_count": 0,
+    "expected_nets": null,
+    "unchecked_expected_pins": [],
+    "findings": [],
+    "finding_count": 0
+  },
+  "body_verification": {
+    "status": "verified",
+    "reason": null,
+    "device_classes": [],
+    "device_count": 0,
+    "findings": [],
+    "finding_count": 0
+  },
+  "device_parameter_coverage": [],
+  "mismatch_count": 2,
+  "error_count": 0,
+  "category_counts": {
+    "topology": 1,
+    "topology.flattened": 1
+  },
+  "category_error_counts": {},
+  "counts": {
+    "nets": {
+      "layout": 59,
+      "reference": 59,
+      "matched": 59
+    },
+    "devices": {
+      "layout": 99,
+      "reference": 99,
+      "matched": 99
+    },
+    "pins": {
+      "layout": 26,
+      "reference": 26,
+      "matched": 26
+    }
+  },
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "environment": {
+    "engine": "klayout",
+    "engine_version": "0.30.12",
+    "netgen_binary": null,
+    "layout_sha256": "addcc88cafb8df1e6335c2d28a21d68bc8a589e3267972cc5da04f86af767906",
+    "reference_sha256": "26018e033ca4d80f1122e2c843e226ef9044522a99900e30d98beea2be8b3697",
+    "extracted_netlist": null
+  },
+  "provenance": {
+    "klt_version": "0.7.1.dev1911+g02c9f6b8ebab",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:46a68344acc0c5244cb708b89a8e4fd2cbc519f815dbea4d2b819f6fb9e81104",
+      "released": false,
+      "options": {
+        "metal_top": "9K",
+        "mim_cap": "cap_mim_2f0_m4m5_noshield",
+        "poly_res": "1k"
+      },
+      "options_explicit": {
+        "metal_top": false,
+        "mim_cap": false,
+        "poly_res": false
+      },
+      "options_hash": "sha256:6a7dc7660a470994263c5ca8ace6d8ac8c605d77e6876a9c5490949de6e7cb05"
+    },
+    "input": {
+      "content_hash": "sha256:addcc88cafb8df1e6335c2d28a21d68bc8a589e3267972cc5da04f86af767906",
+      "role": "layout"
+    },
+    "klayout_version_mismatch": false
+  },
+  "mismatches": [
+    {
+      "category": "topology",
+      "severity": "warning",
+      "description": "device class has no counterpart on the other side, but no devices of this class were extracted either -- not a real topology mismatch: 'bjt'",
+      "side": "layout",
+      "net": null,
+      "device": {
+        "layout": null,
+        "reference": null,
+        "class": "bjt"
+      },
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    },
+    {
+      "category": "topology.flattened",
+      "severity": "warning",
+      "description": "options.flatten_reference flattened the reference netlist before comparing: 8 circuit(s) were collapsed into 1 top-level circuit(s), substituting every subcircuit-call instance in place -- this compare verified topology only after removing the original hierarchy boundaries on this side (see docs/cli/lvs.md, \"topology.flattened\")",
+      "side": "reference",
+      "net": null,
+      "device": null,
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    }
+  ],
+  "net_correspondence": [
+    {
+      "layout": "bl0",
+      "reference": "BL0",
+      "pin": true
+    },
+    {
+      "layout": "bl1",
+      "reference": "BL1",
+      "pin": true
+    },
+    {
+      "layout": "bl2",
+      "reference": "BL2",
+      "pin": true
+    },
+    {
+      "layout": "bl3",
+      "reference": "BL3",
+      "pin": true
+    },
+    {
+      "layout": "blb0",
+      "reference": "BLB0",
+      "pin": true
+    },
+    {
+      "layout": "blb1",
+      "reference": "BLB1",
+      "pin": true
+    },
+    {
+      "layout": "blb2",
+      "reference": "BLB2",
+      "pin": true
+    },
+    {
+      "layout": "blb3",
+      "reference": "BLB3",
+      "pin": true
+    },
+    {
+      "layout": "clk",
+      "reference": "CLK",
+      "pin": true
+    },
+    {
+      "layout": "csel0",
+      "reference": "CSEL0",
+      "pin": true
+    },
+    {
+      "layout": "csel1",
+      "reference": "CSEL1",
+      "pin": true
+    },
+    {
+      "layout": "csel2",
+      "reference": "CSEL2",
+      "pin": true
+    },
+    {
+      "layout": "csel3",
+      "reference": "CSEL3",
+      "pin": true
+    },
+    {
+      "layout": "cseln0",
+      "reference": "CSELN0",
+      "pin": true
+    },
+    {
+      "layout": "cseln1",
+      "reference": "CSELN1",
+      "pin": true
+    },
+    {
+      "layout": "cseln2",
+      "reference": "CSELN2",
+      "pin": true
+    },
+    {
+      "layout": "cseln3",
+      "reference": "CSELN3",
+      "pin": true
+    },
+    {
+      "layout": "\\$9",
+      "reference": "DQ",
+      "pin": false
+    },
+    {
+      "layout": "\\$10",
+      "reference": "DQB",
+      "pin": false
+    },
+    {
+      "layout": "d_in",
+      "reference": "D_IN",
+      "pin": true
+    },
+    {
+      "layout": "\\$31",
+      "reference": "MBL",
+      "pin": false
+    },
+    {
+      "layout": "\\$41",
+      "reference": "MBLB",
+      "pin": false
+    },
+    {
+      "layout": "\\$38",
+      "reference": "QNC",
+      "pin": false
+    },
+    {
+      "layout": "q_clk",
+      "reference": "Q_CLK",
+      "pin": true
+    },
+    {
+      "layout": "q_out",
+      "reference": "Q_OUT",
+      "pin": true
+    },
+    {
+      "layout": "s_en",
+      "reference": "S_EN",
+      "pin": true
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
+      "pin": true
+    },
+    {
+      "layout": "VSS",
+      "reference": "VSS",
+      "pin": true
+    },
+    {
+      "layout": "wen_in",
+      "reference": "WEN_IN",
+      "pin": true
+    },
+    {
+      "layout": "wl_en_n",
+      "reference": "WL_EN_N",
+      "pin": true
+    },
+    {
+      "layout": "wpn",
+      "reference": "WPN",
+      "pin": true
+    },
+    {
+      "layout": "\\$21",
+      "reference": "WQ",
+      "pin": false
+    },
+    {
+      "layout": "\\$20",
+      "reference": "WQB",
+      "pin": false
+    },
+    {
+      "layout": "\\$2",
+      "reference": "XFD_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$3",
+      "reference": "XFD_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$5",
+      "reference": "XFD_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$6",
+      "reference": "XFD_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$7",
+      "reference": "XFD_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$8",
+      "reference": "XFD_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$32",
+      "reference": "XFQ_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$36",
+      "reference": "XFQ_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$33",
+      "reference": "XFQ_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$34",
+      "reference": "XFQ_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$35",
+      "reference": "XFQ_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$37",
+      "reference": "XFQ_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$15",
+      "reference": "XFW_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$14",
+      "reference": "XFW_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$16",
+      "reference": "XFW_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$17",
+      "reference": "XFW_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$18",
+      "reference": "XFW_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$19",
+      "reference": "XFW_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$40",
+      "reference": "XSA_TAIL",
+      "pin": false
+    },
+    {
+      "layout": "\\$25",
+      "reference": "XWD_DN",
+      "pin": false
+    },
+    {
+      "layout": "\\$23",
+      "reference": "XWD_PL",
+      "pin": false
+    },
+    {
+      "layout": "\\$24",
+      "reference": "XWD_PR",
+      "pin": false
+    },
+    {
+      "layout": "\\$27",
+      "reference": "XWD_XPL_T1",
+      "pin": false
+    },
+    {
+      "layout": "\\$28",
+      "reference": "XWD_XPL_T2",
+      "pin": false
+    },
+    {
+      "layout": "\\$29",
+      "reference": "XWD_XPR_T1",
+      "pin": false
+    },
+    {
+      "layout": "\\$30",
+      "reference": "XWD_XPR_T2",
+      "pin": false
+    }
+  ]
+}

@@ -19,7 +19,8 @@ existed) is gone.
 | Array | `sram_256x32/sram_256x32_array.gds` — 8,192 cells, 143.15 x 1382.40 um (0.1979 mm²): 142.72 um of tiled cells plus a 0.43 um wordline landing-pad strip at the left edge (issue #121) |
 | DRC | `klt drc --deck gf180mcu`: **clean, 0 violations** — bitcell, 3x3 abutment tile, and the full 256 x 32 array. The PDK's **own native** deck (all 547 FEOL+BEOL rules, run directly per `reports/sram-rule-survey.md` "B.4") is also **clean, 0 violations** on all three |
 | Devices | `klt extract --deck gf180mcu`: 6 devices in the bitcell, 49,152 (32,768 nfet + 16,384 pfet) in the array — exactly 6 x 8,192 |
-| LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets (see "Known tool gaps" #1 for how `layout/lvs_reference.py` keeps this reproducible across `klt` extraction-deck behavior). Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
+| LVS | Bitcell: `klt lvs` vs. `design/netlist/bitcell_6t.spice`: **`status: match`** — 6/6 devices, 7/7 nets. Array: `klt lvs` vs. `design/netlist/sram_256x32_array.spice`, using `options.flatten_reference` (klayout-tools#1085, closed 2026-08-17): **`status: match`** — 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins; the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known tool gaps" #2 and `layout/reports/lvs-array.json`, issue #108) |
+| Column path (issue #205) | `periphery/column/` — `precharge_slice` (12 PMOS, 17.84 x 7.50 um) and `io_slice` (99 devices: 4:1 mux, sense amp, write driver, three flops; 17.84 x 58.50 um), each exactly four bitcell columns wide, plus a 32-slice band of each (570.88 um). `klt drc --deck gf180mcu`: **clean** on both slices, both bands, and on the bands abutted to the committed 64 x 128 array. The PDK's native deck (640 rule categories, `klt drc --engine klayout`): **clean** on both slices and on the abutted composite. `klt lvs` vs `design/netlist/{precharge,io}_slice.spice`: **`status: match`** — 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins (reference flattened, same `topology.flattened` disclosure as the array). See "The column path" |
 
 Everything above is reproduced end-to-end by `./layout/verify.sh` (see
 "Reproducing and re-checking"). What is *not* claimed is in "What this does
@@ -31,15 +32,29 @@ and does not prove".
 layout/
   README.md                             this file
   verify.sh                             regenerate + re-run every check quoted here
-  lvs_reference.py                      bulk-terminal rewrite for the LVS reference,
-                                        derived from an actual extracted netlist
-                                        (see "Known tool gaps")
   bitcell/
     generate.py                         draws the 6T bitcell (klayout.db API)
     sram_bitcell_6t.gds                 committed, deterministic GDS
   sram_256x32/
     generate.py                         tiles the bitcell into the 256 x 32 array
     sram_256x32_array.gds               committed, deterministic GDS
+  periphery/column/
+    generate.py                         draws the column path (netlist-driven, see below)
+    precharge_slice.gds                 committed: 12 PMOS, one I/O's four columns
+    io_slice.gds                        committed: mux + sense amp + write driver + 3 flops
+    column_band.gds                     committed: 32-slice io_band / precharge_band
+  periphery/row/
+    generate.py                         draws the row decoder + wordline-driver strip (issue #204)
+    row_path.gds                        committed: 16 predecoders + 64 rowdrv, one flat cell
+  periphery/control/
+    generate.py                         draws the control block + column decoder (issue #246)
+    sram_ctrl.gds                       committed: 10 dff + 51 inv_dly + gates/drivers, one flat cell
+    col_decode.gds                      committed: 4 nand3 + 12 inv_x16, one flat cell
+  reports/                              machine-readable DRC/LVS/extract evidence (README inside)
+  sram_64x128/
+    sram_64x128_array.gds               64 x 128 array (4:1 organization), emitted by
+                                        sram_256x32/generate.py --rows 64 --cols 128
+                                        --top-name sram_64x128_array (issue #204)
 ```
 
 ### The bitcell
@@ -108,17 +123,212 @@ the identical rule margins as the cell it abuts. It adds no devices and no
 nets — LVS still matches the unchanged
 `design/netlist/sram_256x32_array.spice` port-for-port.
 
+### The column path (issue #205)
+
+`periphery/column/generate.py` draws the two per-I/O cells
+`spec/periphery-architecture.md` (#202) fixed and `design/netlist/` (#203)
+captured, each exactly **4 x `W_CELL` = 17.84 um** wide (one I/O = four
+bitcell columns, #202 row 3) so 32 of them tile into a band:
+
+| Cell | Netlist | Devices | Size | Sits |
+|---|---|---|---|---|
+| `precharge_slice` | `precharge_slice.spice` | 12 PMOS (precharge + equalize, 4 columns) | 17.84 x 7.50 um | above the array |
+| `io_slice` | `io_slice.spice` | 99: 8 `tg_mux`, `sa_latch`, `wdrv`, 3 `dff` (`D` and `WEN` capture, `Q` register) | 17.84 x 58.50 um | below the array |
+
+A 32-slice band is 570.88 um wide (`column_band.gds`: `io_band`,
+`precharge_band`), 33,396 um² and 4,282 um² respectively — about 19% on top of
+the 64 x 128 array's 197,445 um². **That is not an optimised number**: devices
+are single-finger and diffusion sits on a 0.65 um grid (below), and the flops
+alone are four times the height they would be in a hand-packed standard cell.
+
+**How it is drawn.** No polygon is hand-placed. `generate.py` parses and
+flattens the netlist (device `W`/`L` come from the file; the layout must
+extract back to them, and `klt lvs` compares them), places devices in
+shared-diffusion *chains* whose order is the only hand-made input, builds
+N-row/P-row strips between `Metal1` supply rails (mirrored so strips share a
+rail and its tie strip), and routes every signal net with a small
+deterministic maze router on a 0.65 um grid over `Metal1`/`2`/`3`. The grid
+pitch is chosen so any two different-net shapes on different nodes already
+meet the width/space/narrow-line/wide-metal rules, so the router only keeps
+nets on distinct nodes; static geometry (contact bars, rails, bit-line stubs,
+bus tracks) is entered as obstacles with computed clearance. The module
+docstring has the full reasoning, including why `Metal1`/`2`/`3` wires are
+0.35 um (just clear of the DRM's < 0.34 um narrow-line end-of-line rules) and
+why the pitch is not 0.62 or 0.60.
+
+**Interface** (checked by the seam DRC, below):
+
+* `BL`/`BLB`: 0.30 um `Metal1` stubs at the array's own bit-line x
+  (`bitcell.X_BL_C`/`X_BLB_C` + k * `W_CELL`), flush with the slice's
+  array-facing edge, so the seam adds no new bit-line geometry. 512 bit-line
+  crossings (2 seams x 32 slices x 8) are asserted to be one `Metal1` polygon
+  across the array/band seam by `generate.py --abut` itself, which has a
+  negative control (shifting the band by 1 um fails the check).
+* `VDD`/`VSS`: full-width `Metal1` rails at the same y in every slice, with
+  continuous tie strips (substrate and n-well). A slice's several rails of one
+  supply are joined by one vertical `Metal2` strap per supply — without it each
+  `VDD` rail is its own well and the slice does not compare (see "Known tool
+  gaps" #5).
+* Shared control inputs (`csel*`, `cseln*`, `clk`, `q_clk`, `s_en`,
+  `wl_en_n`, `wpn`): full-width `Metal3` bus tracks at the same y in every
+  slice, so a band forms one net per control line.
+* `d_in`, `wen_in`, `q_out` (#202 "Pin placement"): `Metal2` stubs at the
+  bottom edge, at x = 2.745, 6.645 and 14.445 um within the slice (0.35 um
+  wide, 1.475 um deep; #202's ~1.12 x 5 um foundry-style macro pins are #206's).
+* Everything lies inside `0 <= x <= 17.84`, and diffusion stays >= 0.6 um from
+  the slice's left/right edge, so a slice keeps the Nwell overlap of PCOMP on
+  its own and the first and last slice of a band need no end cap.
+
+**Findings.**
+
+* The three flops of `io_slice.spice` *do* fit in the 17.84 um width (each is
+  one strip of 25 of the 26 grid columns); the netlist and #202 are unchanged.
+* The curated deck models none of the implant rules, and this cell is mostly
+  implant bands, tie strips and wells — so the same geometry is also checked
+  against the **PDK's native deck** (640 rule categories, `klt drc --engine
+  klayout`): **0 violations** on both slices and on the abutted composite,
+  committed as `reports/drc-native-column-*.json` (each carries
+  `coverage_assertion` with 640 expected = 640 observed categories, so a deck
+  that silently ran fewer rules would have failed) and regenerated with
+  `./layout/reports/generate.sh --column-path --native`.
+* The 64 x 128 array this seam is checked against is the committed
+  `sram_64x128/sram_64x128_array.gds` (issue #204); its own DRC and LVS are
+  `verify.sh` steps 8 and 9. `verify.sh` step 10 and
+  `reports/drc-column-abut.json` check the bands abutted to it (the composite
+  itself is a scratch file built by `periphery/column/generate.py --abut`).
+* Rails: strap columns 1 and 24 of the 26 are reserved for `Metal2`. Other
+  columns are free.
+
+### The row path (issue #204)
+
+`periphery/row/generate.py` draws `design/netlist/row_path.spice` as one flat
+cell `row_path`: two 3->8 predecoders (8 x `and4` for `wl_en` and the high
+address bits, 8 x `and3` for the low bits) and 64 `rowdrv` wordline drivers --
+528 devices (264 nfet + 264 pfet), 53.59 x 397.33 um. It reuses the column
+path's netlist reader, strip placer and maze router unchanged (it imports
+`periphery/column/generate.py`; only the slice-width globals are set per build),
+so the 0.65 um grid argument above applies here too.
+
+**Scope.** The decoder strip only, for the center-fed 4:1 organization
+(`spec/wordline-rc-decision.md`, ratified by the operator's ruling on #228).
+Placing the 16 + 16 column slices, the second landing-pad strip and re-tiling
+the array are #206. The existing `sram_64x128/sram_64x128_array.gds` is
+**left-fed and unchanged**.
+
+**Does `rowdrv` fit the 5.40 um row pitch? No.** Its 6 um PMOS / 3 um NMOS output
+stage plus the 2 um NAND2 make it **13.65 um rail to rail** (smallest channel
+that routes, `chan = 1`), 2.5 row pitches. The drivers are interleaved in 3
+columns: driver `k` sits in column `k % 3`, so consecutive drivers of a column
+are 16.2 um apart, and each `WL<k>` leaves on a `Metal3` track at row `k`'s
+height. A predecoder/driver split into one 5.40 um column would need a smaller
+output stage or a different cell topology, which is a design change, not
+placement.
+
+**Interface.**
+
+* `WL<k>`: a `Metal3` track at `y = 48.750 + k * 5.40 + wl_y` (strip frame; the
+  array's row 0 goes at strip y = 48.750 so each track is at its row's landing-pad
+  height), spanning the strip's full width and ending in a labelled
+  0.70 um-wide `Metal3` pin stub (`max(WL_PAD_BAND, ...)`) at **both** edges (the strip sits between the two
+  halves). The array's landing pads are `Metal1`; joining them is assembly's
+  job (#206), as is any mirroring of the second half.
+* `aq2..aq7`, `aqb2..aqb7`, `wl_en`: `Metal2` stubs on the bottom edge.
+* `VDD`/`VSS`: `Metal2` straps (labelled) joined by two `Metal3` jumpers.
+
+**Findings.**
+
+* `klt drc --deck gf180mcu`: 0 violations. `klt lvs` against `row_path.spice`
+  (inline extraction, `flatten_reference`): `status: match`, 528/528 devices,
+  279/279 nets, 79/79 pins; the only `mismatches[]` entries are the
+  `topology.flattened` disclosure and the "no bjt on either side" note. Reports:
+  `reports/{drc,extract,lvs}-row-path.json`.
+* **Not run: the PDK-native DRC deck.** This host has no `gf180mcuD`
+  `run_drc.py` (`~/.ciel/gf180mcuD/libs.tech/klayout/tech/drc` is absent), so
+  unlike the column path no native-deck result exists for the strip. The curated
+  deck models none of the implant rules, so implant and well spacing on this
+  strip is not checked by any deck run here.
+* Not claimed: physical fit with the array or the column bands, abutment or
+  connectivity of the assembled floorplan, parasitics, timing, or any validation
+  result. **Full-array wordline RC / write-margin validation (the 27-corner,
+  15 ohm/sq matrix in `spec/wordline-rc-decision.md`) is pending** and needs a
+  separate operator grant.
+* The strip is area-naive (single-finger devices, 0.65 um grid, three driver
+  columns with the gaps between them): it is a correct drawing, not an
+  optimized one.
+
+### Control block and column decoder (issue #246)
+
+`periphery/control/generate.py` draws `design/netlist/sram_ctrl.spice` and
+`design/netlist/col_decode.spice` as two separate flat cells (the macro top
+instantiates them as `XXctrl` / `XXcol`; assembly, #247, places them separately).
+Same flow as the row path -- the column path's netlist reader, strip placer and
+maze router, plus the row generator's per-strip rail / implant / strap helpers.
+The one change to shared code is in `periphery/column/generate.py`: poly width
+now follows each device's own `L`, so the `L = 0.6 um` delay inverter can be
+drawn (the existing GDS are byte-for-byte unchanged).
+
+| cell | devices | nets | pins | size (um) |
+| --- | --- | --- | --- | --- |
+| `sram_ctrl` | 356 (178 n + 178 p): 10 `dff`, 51 `inv_dly`, 8 `inv`, 4 `inv_x8`, 2 `inv_x16`, 1 `inv_x4`, 3 `nand2`, 2 `nand3`, 2 `and2` | 171 | 35 | 37.78 x 171.78 |
+| `col_decode` | 40: 4 `nand3`, 12 `inv_x16` | 27 | 15 | 22.80 x 50.23 |
+
+New cell kinds for the placer: `dff` (the column path's `dff_chains` table
+shifted to the cell's first column), `inv_dly` (two consecutive stages share
+supply diffusion, five columns per pair) and the tall single-finger
+`inv_x4/x8/x16` (`W` up to 16 um drawn as one transistor, as in the netlist).
+
+**Pin edges (provisional, recorded here for #247).** Pins are `Metal2` stubs to
+the cell edge, labelled on `Metal2`; `VDD` / `VSS` are labelled `Metal2` straps
+at the left of the cell.
+
+| cell | bottom edge | top edge |
+| --- | --- | --- |
+| `sram_ctrl` | `A0..A7`, `CEN`, `GWEN`, `CLK` (macro inputs); `clk_buf`, `wl_en_n`, `s_en`, `q_clk`, `wpn` (io-band buses sit below the array) | `aq0..aq7`, `aqb0..aqb7`, `wl_en` (row path, `col_decode`) |
+| `col_decode` | `aq0`, `aqb0`, `aq1`, `aqb1`, `wl_en` | `csel0..3`, `cseln0..3` |
+
+This is a choice made without a macro floorplan: assembly may need a different
+edge, and moving a pin is a one-line change in `SRAM_CTRL_PINS` / `COL_DECODE_PINS` in the generator.
+
+**Findings.**
+
+* `klt drc --deck gf180mcu`: 0 violations on both. `klt lvs` (inline extraction,
+  `flatten_reference`, as for `row_path`): `status: match` on both -- `sram_ctrl`
+  356/356 devices, 171/171 nets, 35/35 pins; `col_decode` 40/40, 27/27, 15/15;
+  the only `mismatches[]` entries are the `topology.flattened` disclosure and the
+  "no bjt on either side" note. The extracted netlist carries 102 devices at
+  `L = 0.6 um` (51 stages x 2). Reports: `reports/{drc,extract,lvs}-sram-ctrl.json`
+  and `...-col-decode.json` (`reports/generate.sh --control`).
+* Not run: the PDK-native DRC deck (not installed on the generating host), so the
+  implant / well rules the curated deck does not model are unchecked here.
+* **Not claimed:** timing, delay-chain calibration (the 35 / 6 / 6 / 4-stage
+  chains are drawn to the netlist's device sizes only), wire RC, parasitics, or
+  physical fit with the array, the bands or the row path. The blocks are
+  area-naive (single-finger devices, 0.65 um grid, one rail pair per strip).
+
 ### Scope: the storage-array core, matching `design/`
 
 Like the schematic side (see `design/README.md`), this is the bitcell-array
 **core**. Address decode, column mux, sense amps and write drivers — the rest
 of `spec/sram.md`'s 1RW pin list (`A`, `CEN`, `CLK`, `D`, `Q`, `GWEN`, `WEN`)
-— are periphery and are not drawn. The array's ports are the raw
+— are periphery. The array's ports are the raw
 per-row/per-column pins the ratified organization implies and the committed
 netlist declares: `WL0..WL255`, `BL0..BL31`, `BLB0..BLB31`, `VDD`, `VSS`.
 Port-for-port, cell-for-cell, this layout is the same 256 x 32 / 1RW
 organization `spec/sram.md` ratifies and `design/sram_256x32_array.sch`
 captures.
+
+The periphery architecture, macro floorplan and pin placement are fixed in
+[`spec/periphery-architecture.md`](../spec/periphery-architecture.md). Note it
+proposes a 4:1 column mux, i.e. a 64 x 128 physical array rather than the
+256 x 32 drawn here. The 64 x 128 re-tiling (571.31 x 345.60 um, `WL0..WL63`,
+same bitcell and landing-pad strip) is `sram_64x128/sram_64x128_array.gds`
+(issue #204), emitted by the same generator and checked by `verify.sh` steps 1,
+2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`).
+The 256 x 32 files are left untouched until macro assembly (#206) retires them.
+Of the periphery, the **column path** (precharge, 4:1 mux, sense amp, write
+driver, input/`Q` flops) and the **row decode / wordline-driver strip** are
+drawn so far -- see "The column path" and "The row path" above; control and
+macro assembly and pins (#206) are not.
 
 ## What this does and does not prove
 
@@ -205,18 +415,22 @@ captures.
   sha256, and no PASS/FAIL verdict moved from the pre-#103 records
   (preserved, unedited, under `sim/pex/pre-issue-103/`); see
   `sim/pex/README.md` "Freshness" for the full re-run record.
-* **A routed macro.** There is still no periphery, and the LEF abstract that
-  now exists (`views/sram_256x32_array.lef`, issue #120) is not a *routable*
-  one: every pin's `PORT` is a synthesized placeholder disconnected from the
-  real drawn metal it sits on — a klayout-tools gap, klayout-tools#1614.
-  `klt place-and-route` would not accept this LEF today. What *is* fixed as
-  of issue #121 is the design half of that gap: all 322 pins (including the
-  256 wordlines, which used to be labelled on non-routing Poly2 and reported
-  in `unroutable_pins[]`) now have routing-layer metal on their net, so
-  klayout-tools#1614 is the only thing left between this abstract and real
-  drawn `PORT` geometry. No Liberty view exists yet either. See
-  `views/README.md`'s "Pin geometry" and "What this does and does not
-  prove" for the full breakdown.
+* **The column path is a drawn, verified layout — not a characterised one.**
+  Geometry, DRC and netlist agreement are proven (see "The column path"); no
+  parasitic extraction, timing, or `sim/` result exists for it. Nothing here
+  shows the sense amp resolves the bit-line differential, that the write
+  driver wins against the bitcell, or that the 4:1 mux and flop timing meet
+  the cycle — those need `klt pex` of these cells against the ratified
+  testbenches, and the `io_slice` reference is compared *flattened* (the layout
+  is drawn flat per slice), so no per-subcircuit hierarchy is verified.
+* **A routed macro.** There is still no control logic or macro
+  assembly (#206), and the row strip is drawn but not placed against the array. The LEF abstract
+  (`views/sram_256x32_array.lef`, issues #120/#182) is generated by the
+  released klt 0.6.0 and all 322 pins carry real drawn `PORT` geometry
+  (klayout-tools#1614 fixed; the wordlines reach Metal1 since issue #121), but
+  `klt place-and-route` has not been run against it, so it is not claimed
+  routable. No Liberty view exists yet either. See `views/README.md`'s
+  "Pin geometry" and "What this does and does not prove".
 * **Array-level LVS.** Achieved — see "Known tool gaps" #2. `klt extract`
   itself stays flat-only (the layout side is always a single flat circuit),
   but `klt lvs`'s `options.flatten_reference` (klayout-tools#1085, closed
@@ -265,7 +479,7 @@ no periphery at all.
 
 ## Known tool gaps (friction protocol)
 
-Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
+Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md` (1–4 predate the column path; 5–7 are from issue #205):
 
 1. **No tap/tie layer in the gf180mcu extraction deck — filed, and since
    fixed upstream, but the fix changed what this repo's compare needs to
@@ -286,18 +500,15 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
    (`uv tool install git+https://github.com/2AMLogic/klayout-tools`, see
    "Tool / PDK versions"), two hosts can report the *same* `klt --version`
    string (`0.2.0`) while running different behavior depending on when each
-   installed it relative to #1113 — this is exactly what happened in
-   [gf180-sram#75](https://github.com/2AMLogic/gf180-sram/issues/75): a host
-   that had already picked up #1113's fix (bulk tied straight to `VDD`/`VSS`)
-   ran against `layout/lvs_reference.py`'s then-hardcoded `vsubs`/`vnw`
-   rewrite, which assumed the pre-#1113 anonymous-net behavior and actively
-   *broke* what would otherwise have been a clean match. `layout/lvs_reference.py`
-   no longer hardcodes body-net
-   names: it takes `--layout-netlist <klt extract output>` and derives each
-   device type's actual bulk net from that run's real extraction, then
-   rewrites *only* the four bulk terminals of the reference netlist to
-   match — a no-op today, and still correct if a future extraction deck (or
-   a bitcell without ties drawn inside it) reintroduces a synthesized net.
+   installed it relative to #1113 — this is what happened in
+   [gf180-sram#75](https://github.com/2AMLogic/gf180-sram/issues/75), where a
+   hardcoded bulk-net rewrite of the reference broke a match that was
+   already clean. The rewrite script that came out of that
+   (`layout/lvs_reference.py`) was a no-op on current builds and was removed
+   (gf180-sram#185): the bitcell LVS now compares against
+   `design/netlist/bitcell_6t.spice` unmodified, verified on the CI-pinned
+   `klayout-tools==0.6.0`. If the bulk-net naming ever regresses, that
+   compare fails loudly.
 2. **`klt extract` is flat-only**, by design ("Flat (not hierarchical)
    extraction, deliberately") — still true today, and not what closed this
    gap. The committed array GDS *is* hierarchical (one bitcell cell, one
@@ -357,6 +568,40 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md`:
    `klayout -b -r` directly with the full variable set, bypassing `klt` for
    that one step.
 
+5. **Pre-extracted `klt lvs` never raises `net.supply_fragmented`; a split
+   supply is dozens of anonymous errors** (found by the column path, issue
+   #205). Three unstrapped `VDD` rails in one cell extract as `VDD VDD$1
+   VDD$2` with no warning, and `klt lvs` on that netlist reported 70 errors
+   (`device.unmatched`, `net.merged`, `net.split` with layout names `\$13`…)
+   and no supply finding; the finding exists (klayout-tools#2078) but only on
+   the inline `layout.file` + `deck` form. Filed as
+   [klayout-tools#3920](https://github.com/2AMLogic/klayout-tools/issues/3920).
+   The column-path checks therefore use the inline form
+   (`layout/verify.sh` 5c, `layout/reports/generate.sh` step 0), which also
+   turns `body_verification` from `unchecked` to `verified`; the bitcell and
+   array LVS above still use the extracted-netlist form.
+6. **No netlist → placed/routed layout verb** (third instance of
+   klayout-tools#346 / #1116, both closed as spikes). The column path needed a
+   bespoke ~1,100-line `klayout.db` generator — shared-diffusion chains,
+   rails/ties/wells/implants, a DRC-safe-by-construction multi-terminal grid
+   router, port stubs at externally dictated x — because `klt gen`'s
+   generators are uniform arrays and `gen-compose` cannot route nets of three
+   or more terminals. Filed as
+   [klayout-tools#3922](https://github.com/2AMLogic/klayout-tools/issues/3922)
+   with the capability list and two pitfalls (the curated deck models neither
+   the wide-metal nor the narrow-line end-of-line rules the pitch had to
+   respect; see also the open klayout-tools#3796 and #2351).
+7. **`klt drc --engine klayout` now works for gf180mcu, but only with the
+   deck script built by hand.** Item 4's silent-zero-rules failure is closed
+   (klayout-tools#1302): `--deck-file` + repeated `--deck-var` +
+   `--expect-rule-categories 640` drives the PDK's native deck and fails if it
+   runs fewer rule tables. `--pdk gf180mcuD` alone still answers "no PDK-native
+   klayout DRC deck script found", because the deck is produced by the PDK's
+   `run_drc.py --macro_gen` (which needs the `docopt` and `klayout` packages
+   and a `--path` that exists but is unused). `layout/reports/generate.sh
+   --column-path --native` does those steps. Not re-filed: it continues
+   klayout-tools#1302 / #3816, not a new gap.
+
 ## Install `klt`
 
 ```bash
@@ -373,12 +618,12 @@ primitives — no KLayout GUI/application binary, no `DISPLAY`, no Qt.
 Everything in one command, from the repo root:
 
 ```bash
-./layout/verify.sh            # ~3 min: adds the full-array DRC + extraction
-./layout/verify.sh --quick    # ~20 s: bitcell + 3x3 tile only
+./layout/verify.sh            # ~5 min: adds the full-array DRC + extraction and the column seam DRC
+./layout/verify.sh --quick    # ~1 min: bitcell, 3x3 tile, the column path (slices, bands, LVS) and the row strip
 ```
 
-It regenerates both GDS files, fails if either differs from the committed
-bytes, then runs `klt precheck`, `klt drc`, `klt extract` and `klt lvs` and
+It regenerates all GDS files (bitcell, array, column path), fails if any
+differs from the committed bytes, then runs `klt precheck`, `klt drc`, `klt extract` and `klt lvs` and
 prints each verdict. Individually:
 
 ```bash
@@ -394,10 +639,22 @@ klt precheck --deck gf180mcu --grid-um 0.005 layout/bitcell/sram_bitcell_6t.gds
 klt drc --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds
 klt drc --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds   # ~1 min
 klt extract --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds -o /tmp/bc.spice
-python3 layout/lvs_reference.py design/netlist/bitcell_6t.spice \
-    --layout-netlist /tmp/bc.spice -o /tmp/bc_ref.spice
 klt lvs '{"layout":{"netlist":"/tmp/bc.spice","top":"sram_bitcell_6t"},
-          "reference":{"netlist":"/tmp/bc_ref.spice","form":"subckt-call"}}'
+          "reference":{"netlist":"design/netlist/bitcell_6t.spice","form":"subckt-call"}}'
+
+# 3b. column path (issue #205): slices, 32-slice bands, per-slice LVS
+uv run --with klayout python3 layout/periphery/column/generate.py
+klt drc --deck gf180mcu layout/periphery/column/io_slice.gds
+klt drc --deck gf180mcu layout/periphery/column/column_band.gds
+klt lvs '{"layout":{"file":"layout/periphery/column/io_slice.gds","deck":"gf180mcu","top":"io_slice"},
+          "reference":{"netlist":"design/netlist/io_slice.spice","form":"subckt-call"},
+          "options":{"flatten_reference":true}}'
+#    bit-line seam against a scratch 64 x 128 array (~1 min):
+uv run --with klayout python3 layout/sram_256x32/generate.py --rows 64 --cols 128 -o /tmp/a.gds
+uv run --with klayout python3 layout/periphery/column/generate.py --abut /tmp/a.gds -o /tmp/abut.gds
+klt drc --deck gf180mcu /tmp/abut.gds
+#    the PDK-native deck too (writes layout/reports/drc-native-column-*.json):
+./layout/reports/generate.sh --column-path --native
 
 # 4. inspection
 klt stats layout/bitcell/sram_bitcell_6t.gds
@@ -422,6 +679,11 @@ Expected results, as committed (2026-08-16):
 | `klt extract` (bitcell) | 6 devices (4 nfet + 2 pfet), 7 nets, W/L per `design/netlist/bitcell_6t.spice` |
 | `klt extract` (full array) | 49,152 devices, 16,706 nets, 322 pins (~94 s) |
 | `klt lvs` (bitcell vs. rewritten reference) | `status: match`, 0 mismatches |
+| `periphery/column/generate.py` re-run | byte-identical to the committed three GDS files (also across `PYTHONHASHSEED`) |
+| `klt drc --deck gf180mcu` (precharge_slice, io_slice, column_band) | `status: clean`, 0 violations |
+| `klt drc --deck gf180mcu` (bands abutted to a 64 x 128 array, scratch) | `status: clean`, 0 violations (~1 min) |
+| `klt drc --engine klayout` native deck (both slices, abutted composite) | `status: clean`, 0 violations, 640/640 rule categories |
+| `klt lvs` (precharge_slice / io_slice, reference flattened) | `status: match`; 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins; `mismatches[]` holds only warnings |
 | `klt stats` (bitcell) | `bbox_um: (0.0, 0.0) - (4.46, 5.4)`, 38 polygons |
 | `klt stats` (array) | `bbox_um: (0.0, 0.0) - (143.15, 1382.4)` |
 

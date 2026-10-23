@@ -3,6 +3,62 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-23
+
+- **PR #259**: ci: pin Node to 22.23.4 (Node 20 is end-of-life)
+- **Issue #258** (closed): security: pin CI Node to 22.23.4 (node-version 20 is end-of-life)
+
+### 2026-10-21
+
+- **PR #251**: Bump Repo Skills 0.24.3 -> 0.24.7
+- **PR #249**: layout: draw sram_ctrl and col_decode, DRC clean and LVS-matched at block level
+- **Issue #246** (closed): Layout the sram_ctrl and col_decode blocks (block-level DRC and LVS)
+- **PR #244**: layout: draw the row decoder and wordline-driver strip
+- **Issue #204** (closed): Draw row decoder and wordline driver layout, pitch-matched to the array
+- **PR #228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
+
+### 2026-10-20
+
+- **PR #241**: ci: pin setup-python to 3.12 so klayout installs from wheels
+- **Issue #239** (closed): CI: signoff job fails installing klayout-tools==0.7.0 when setup-python '3.x' resolves to 3.15 (no klayout wheel)
+- **PR #238**: feat(sim): add offline Monte Carlo deck-mode adapter
+- **PR #233**: feat(sim): offline klt deck-mode adapter for the 27-corner grid
+- **PR #236**: refactor(sim): inline PDK identity dict and remove env_provenance shim
+- **Issue #235** (closed): Remove sim/lib/env_provenance.py: single-use shim for a klt subcommand that now exists
+
+### 2026-10-18
+
+- **PR #226**: refactor: drop local-only macro smoke flavor in favor of klt sim
+- **Issue #224** (closed): Retire local-only macro-smoke testbench flavor; the klt twin supersedes it
+- **PR #221**: feat: draw the column path (precharge and I/O slices) from the netlists
+- **Issue #205** (closed): Draw column periphery layout (precharge, mux, sense amp, write driver)
+- **PR #220**: feat: sweep control pulse and macro smoke over all 27 corners
+- **Issue #217** (closed): Sweep macro-smoke and control-pulse testbenches across the 27-corner PVT set via klt sim
+- **PR #219**: feat: add 64x128 bitcell array layout for the 4:1 organization
+- **PR #216**: feat: add periphery netlists, 4:1 array and macro top with write/read smoke sim
+- **Issue #203** (closed): Periphery schematics, netlists and macro top netlist for the 1RW macro
+- **PR #214**: fix: measure SNM as inscribed-square side, not vertical curve gap
+- **Issue #213** (closed): snm_extract.py reports the largest vertical gap, not the inscribed square (over-reads SNM)
+- **PR #210**: docs(spec): add periphery architecture, floorplan, and pin placement record
+- **Issue #202** (closed): Periphery architecture and floorplan record for the 1RW macro
+- **PR #208**: docs(spec): fix macro interface details and Liberty corner names
+- **Issue #198** (closed): Ratify 1RW macro interface details and Liberty corner naming (spec decision record)
+
+### 2026-10-17
+
+- **PR #195**: chore(signoff): re-grade T1 verdict on klayout-tools 0.7.0
+- **Issue #194** (closed): Re-grade the T1 verdict of record on klayout-tools 0.7.0 (grader pin is still 0.6.0)
+- **PR #192**: refactor: table-drive derived-file freshness checks in check_evidence_format
+- **Issue #191** (closed): Simplify check_evidence_format.py: collapse three copy-pasted freshness checks into one
+- **PR #186**: chore(layout): remove no-op LVS reference rewrite script
+- **Issue #185** (closed): Remove layout/lvs_reference.py: documented no-op bulk-net rewrite
+- **PR #183**: chore(views): drop LEF-abstract wrapper, regenerate with released klt 0.6.0
+- **Issue #182** (closed): Remove views/run_lef_abstract.py: upstream klayout-tools#1613 is closed
+
+### 2026-10-16
+
+- **PR #176**: Bump Repo Skills 0.24.1 -> 0.24.3
+
 ### 2026-10-15
 
 - **PR #170**: Bump Repo Skills 0.19.5 -> 0.24.1

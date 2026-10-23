@@ -134,9 +134,6 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
-sys.path.insert(0, str(SCRIPT_DIR))
-import env_provenance  # noqa: E402  (path-injected import, sibling module)
-
 # gf180mcu process-corner label -> the model file's own bare `.LIB` section
 # name (same mapping sim/lib/run_corner_sweep.sh uses -- "tt" is this
 # repo's/spec's label for gf180mcu's "typical" section).
@@ -824,18 +821,13 @@ def main() -> int:
                 "source": "spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner",
             },
             "mismatch": mismatch_provenance,
-            # Issue #109: never embed the PDK install's absolute host path
-            # (e.g. `/Users/<name>/.volare/gf180mcuD`) in a committed
-            # evidence record. A PDK install is inherently external to this
-            # repo, so per `klt env-provenance`'s documented model (this
-            # host's installed `klt` does not yet ship that subcommand --
-            # see sim/lib/env_provenance.py's module docstring) it is pinned
-            # by identity (variant + open_pdks version), never by location.
-            "pdk": env_provenance.pdk_identity(
-                pdk["GF180_VARIANT_DIR"],
-                pdk.get("GF180_PDK_VERSION"),
-                "sim/lib/pdk_env.sh resolution (GF180_PDK_PATH / PDK_ROOT+PDK / standard install prefix)",
-            ),
+            # Issue #109: pin the PDK by identity (variant + open_pdks
+            # version), never by location -- no absolute install path.
+            "pdk": {
+                "variant": Path(pdk["GF180_VARIANT_DIR"]).name,
+                "version": pdk.get("GF180_PDK_VERSION") or "unknown",
+                "source": "sim/lib/pdk_env.sh resolution (GF180_PDK_PATH / PDK_ROOT+PDK / standard install prefix)",
+            },
             "klt_version": klt_version,
             "git_sha": git_sha,
         },

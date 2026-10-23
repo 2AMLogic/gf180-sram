@@ -1,0 +1,1028 @@
+{
+  "schema_version": 1,
+  "engine": "klayout",
+  "layout": "layout/periphery/control/sram_ctrl.gds",
+  "reference": "design/netlist/sram_ctrl.spice",
+  "top": "sram_ctrl",
+  "reference_top": "SRAM_CTRL",
+  "reference_conversion": {
+    "form": "subckt-call",
+    "deck": null,
+    "device_map": null
+  },
+  "parameter_tolerance": null,
+  "options": {
+    "combine_devices": false,
+    "combine_devices_per_circuit": null,
+    "combine_devices_max_attempts": 5,
+    "flatten_layout": false,
+    "flatten_reference": true,
+    "netgen_setup": null,
+    "parameter_tolerance": null,
+    "compare_parameters": null,
+    "power_connectivity": null,
+    "anchor_top_level_pins": null,
+    "strict_top_level_pin_count": false,
+    "compare_mos_flavour": false,
+    "supply_nets": [
+      "GND",
+      "VCC",
+      "VDD",
+      "VGND",
+      "VPWR",
+      "VSS"
+    ],
+    "finfet_bulk": null
+  },
+  "hints_applied": null,
+  "constant_nets_applied": null,
+  "status": "match",
+  "power_connectivity": {
+    "status": "unchecked",
+    "reason": "reference.form is 'subckt-call', whose reference netlist carries its own power/ground pins and nets -- they take part in the ordinary compare, so this check (which exists to cover the signal-only 'gate-level-verilog' form) does not apply",
+    "power_pins": [],
+    "power_pins_derivation": null,
+    "instance_count": 0,
+    "expected_nets": null,
+    "unchecked_expected_pins": [],
+    "findings": [],
+    "finding_count": 0
+  },
+  "body_verification": {
+    "status": "verified",
+    "reason": null,
+    "device_classes": [],
+    "device_count": 0,
+    "findings": [],
+    "finding_count": 0
+  },
+  "device_parameter_coverage": [],
+  "mismatch_count": 2,
+  "error_count": 0,
+  "category_counts": {
+    "topology": 1,
+    "topology.flattened": 1
+  },
+  "category_error_counts": {},
+  "counts": {
+    "nets": {
+      "layout": 171,
+      "reference": 171,
+      "matched": 171
+    },
+    "devices": {
+      "layout": 356,
+      "reference": 356,
+      "matched": 356
+    },
+    "pins": {
+      "layout": 35,
+      "reference": 35,
+      "matched": 35
+    }
+  },
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "cap_nmos_03v3",
+    "cap_nmos_03v3_dn",
+    "cap_pmos_03v3",
+    "cap_pmos_03v3_dn",
+    "cap_nmos_06v0",
+    "cap_nmos_06v0_dn",
+    "cap_pmos_06v0",
+    "cap_pmos_06v0_dn",
+    "cap_nmos_03v3_b",
+    "cap_pmos_03v3_b",
+    "cap_nmos_06v0_b",
+    "cap_pmos_06v0_b",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "environment": {
+    "engine": "klayout",
+    "engine_version": "0.30.12",
+    "netgen_binary": null,
+    "layout_sha256": "6a4a01b0c6870d90d3565bee8071efda0a14a93d06666b06dbb13a8ca9527e92",
+    "reference_sha256": "ac64d49ea6b53c80cd1f5913ff69df9b61082e39944abdba0931b9108f5d9962",
+    "extracted_netlist": null
+  },
+  "provenance": {
+    "klt_version": "0.7.1.dev2397+ge984d6a9bbb5",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:0eb6df1bafc5106ec50bd58479dbd7cda36bb685f1ef18cd3a2244a6e7e48666",
+      "released": false,
+      "options": {
+        "metal_top": "9K",
+        "mim_cap": "cap_mim_2f0_m4m5_noshield",
+        "poly_res": "1k"
+      },
+      "options_explicit": {
+        "metal_top": false,
+        "mim_cap": false,
+        "poly_res": false
+      },
+      "options_hash": "sha256:6a7dc7660a470994263c5ca8ace6d8ac8c605d77e6876a9c5490949de6e7cb05"
+    },
+    "input": {
+      "content_hash": "sha256:6a4a01b0c6870d90d3565bee8071efda0a14a93d06666b06dbb13a8ca9527e92",
+      "role": "layout"
+    },
+    "klayout_version_mismatch": false
+  },
+  "mismatches": [
+    {
+      "category": "topology",
+      "severity": "warning",
+      "description": "device class has no counterpart on the other side, but no devices of this class were extracted either -- not a real topology mismatch: 'bjt'",
+      "side": "layout",
+      "net": null,
+      "device": {
+        "layout": null,
+        "reference": null,
+        "class": "bjt"
+      },
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    },
+    {
+      "category": "topology.flattened",
+      "severity": "warning",
+      "description": "options.flatten_reference flattened the reference netlist before comparing: 11 circuit(s) were collapsed into 1 top-level circuit(s), substituting every subcircuit-call instance in place -- this compare verified topology only after removing the original hierarchy boundaries on this side (see docs/cli/lvs.md, \"topology.flattened\")",
+      "side": "reference",
+      "net": null,
+      "device": null,
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    }
+  ],
+  "net_correspondence": [
+    {
+      "layout": "A0",
+      "reference": "A0",
+      "pin": true
+    },
+    {
+      "layout": "A1",
+      "reference": "A1",
+      "pin": true
+    },
+    {
+      "layout": "A2",
+      "reference": "A2",
+      "pin": true
+    },
+    {
+      "layout": "A3",
+      "reference": "A3",
+      "pin": true
+    },
+    {
+      "layout": "A4",
+      "reference": "A4",
+      "pin": true
+    },
+    {
+      "layout": "A5",
+      "reference": "A5",
+      "pin": true
+    },
+    {
+      "layout": "A6",
+      "reference": "A6",
+      "pin": true
+    },
+    {
+      "layout": "A7",
+      "reference": "A7",
+      "pin": true
+    },
+    {
+      "layout": "aq0",
+      "reference": "AQ0",
+      "pin": true
+    },
+    {
+      "layout": "aq1",
+      "reference": "AQ1",
+      "pin": true
+    },
+    {
+      "layout": "aq2",
+      "reference": "AQ2",
+      "pin": true
+    },
+    {
+      "layout": "aq3",
+      "reference": "AQ3",
+      "pin": true
+    },
+    {
+      "layout": "aq4",
+      "reference": "AQ4",
+      "pin": true
+    },
+    {
+      "layout": "aq5",
+      "reference": "AQ5",
+      "pin": true
+    },
+    {
+      "layout": "aq6",
+      "reference": "AQ6",
+      "pin": true
+    },
+    {
+      "layout": "aq7",
+      "reference": "AQ7",
+      "pin": true
+    },
+    {
+      "layout": "aqb0",
+      "reference": "AQB0",
+      "pin": true
+    },
+    {
+      "layout": "aqb1",
+      "reference": "AQB1",
+      "pin": true
+    },
+    {
+      "layout": "aqb2",
+      "reference": "AQB2",
+      "pin": true
+    },
+    {
+      "layout": "aqb3",
+      "reference": "AQB3",
+      "pin": true
+    },
+    {
+      "layout": "aqb4",
+      "reference": "AQB4",
+      "pin": true
+    },
+    {
+      "layout": "aqb5",
+      "reference": "AQB5",
+      "pin": true
+    },
+    {
+      "layout": "aqb6",
+      "reference": "AQB6",
+      "pin": true
+    },
+    {
+      "layout": "aqb7",
+      "reference": "AQB7",
+      "pin": true
+    },
+    {
+      "layout": "CEN",
+      "reference": "CEN",
+      "pin": true
+    },
+    {
+      "layout": "\\$166",
+      "reference": "CENQ",
+      "pin": false
+    },
+    {
+      "layout": "CLK",
+      "reference": "CLK",
+      "pin": true
+    },
+    {
+      "layout": "\\$60",
+      "reference": "CLKB",
+      "pin": false
+    },
+    {
+      "layout": "clk_buf",
+      "reference": "CLK_BUF",
+      "pin": true
+    },
+    {
+      "layout": "\\$13",
+      "reference": "DB1",
+      "pin": false
+    },
+    {
+      "layout": "\\$14",
+      "reference": "DB2",
+      "pin": false
+    },
+    {
+      "layout": "\\$15",
+      "reference": "DB3",
+      "pin": false
+    },
+    {
+      "layout": "\\$16",
+      "reference": "DB4",
+      "pin": false
+    },
+    {
+      "layout": "\\$17",
+      "reference": "DB5",
+      "pin": false
+    },
+    {
+      "layout": "\\$7",
+      "reference": "DD1",
+      "pin": false
+    },
+    {
+      "layout": "\\$8",
+      "reference": "DD2",
+      "pin": false
+    },
+    {
+      "layout": "\\$9",
+      "reference": "DD3",
+      "pin": false
+    },
+    {
+      "layout": "\\$10",
+      "reference": "DD4",
+      "pin": false
+    },
+    {
+      "layout": "\\$11",
+      "reference": "DD5",
+      "pin": false
+    },
+    {
+      "layout": "\\$69",
+      "reference": "DN",
+      "pin": false
+    },
+    {
+      "layout": "\\$24",
+      "reference": "DP1",
+      "pin": false
+    },
+    {
+      "layout": "\\$32",
+      "reference": "DP10",
+      "pin": false
+    },
+    {
+      "layout": "\\$33",
+      "reference": "DP11",
+      "pin": false
+    },
+    {
+      "layout": "\\$34",
+      "reference": "DP12",
+      "pin": false
+    },
+    {
+      "layout": "\\$35",
+      "reference": "DP13",
+      "pin": false
+    },
+    {
+      "layout": "\\$36",
+      "reference": "DP14",
+      "pin": false
+    },
+    {
+      "layout": "\\$37",
+      "reference": "DP15",
+      "pin": false
+    },
+    {
+      "layout": "\\$38",
+      "reference": "DP16",
+      "pin": false
+    },
+    {
+      "layout": "\\$39",
+      "reference": "DP17",
+      "pin": false
+    },
+    {
+      "layout": "\\$40",
+      "reference": "DP18",
+      "pin": false
+    },
+    {
+      "layout": "\\$42",
+      "reference": "DP19",
+      "pin": false
+    },
+    {
+      "layout": "\\$25",
+      "reference": "DP2",
+      "pin": false
+    },
+    {
+      "layout": "\\$43",
+      "reference": "DP20",
+      "pin": false
+    },
+    {
+      "layout": "\\$45",
+      "reference": "DP21",
+      "pin": false
+    },
+    {
+      "layout": "\\$58",
+      "reference": "DP22",
+      "pin": false
+    },
+    {
+      "layout": "\\$46",
+      "reference": "DP23",
+      "pin": false
+    },
+    {
+      "layout": "\\$47",
+      "reference": "DP24",
+      "pin": false
+    },
+    {
+      "layout": "\\$48",
+      "reference": "DP25",
+      "pin": false
+    },
+    {
+      "layout": "\\$49",
+      "reference": "DP26",
+      "pin": false
+    },
+    {
+      "layout": "\\$50",
+      "reference": "DP27",
+      "pin": false
+    },
+    {
+      "layout": "\\$51",
+      "reference": "DP28",
+      "pin": false
+    },
+    {
+      "layout": "\\$52",
+      "reference": "DP29",
+      "pin": false
+    },
+    {
+      "layout": "\\$26",
+      "reference": "DP3",
+      "pin": false
+    },
+    {
+      "layout": "\\$53",
+      "reference": "DP30",
+      "pin": false
+    },
+    {
+      "layout": "\\$54",
+      "reference": "DP31",
+      "pin": false
+    },
+    {
+      "layout": "\\$55",
+      "reference": "DP32",
+      "pin": false
+    },
+    {
+      "layout": "\\$56",
+      "reference": "DP33",
+      "pin": false
+    },
+    {
+      "layout": "\\$57",
+      "reference": "DP34",
+      "pin": false
+    },
+    {
+      "layout": "\\$41",
+      "reference": "DP4",
+      "pin": false
+    },
+    {
+      "layout": "\\$27",
+      "reference": "DP5",
+      "pin": false
+    },
+    {
+      "layout": "\\$28",
+      "reference": "DP6",
+      "pin": false
+    },
+    {
+      "layout": "\\$29",
+      "reference": "DP7",
+      "pin": false
+    },
+    {
+      "layout": "\\$30",
+      "reference": "DP8",
+      "pin": false
+    },
+    {
+      "layout": "\\$31",
+      "reference": "DP9",
+      "pin": false
+    },
+    {
+      "layout": "\\$19",
+      "reference": "DQ1",
+      "pin": false
+    },
+    {
+      "layout": "\\$20",
+      "reference": "DQ2",
+      "pin": false
+    },
+    {
+      "layout": "\\$21",
+      "reference": "DQ3",
+      "pin": false
+    },
+    {
+      "layout": "\\$78",
+      "reference": "EN_Q",
+      "pin": false
+    },
+    {
+      "layout": "GWEN",
+      "reference": "GWEN",
+      "pin": true
+    },
+    {
+      "layout": "\\$86",
+      "reference": "GWQ",
+      "pin": false
+    },
+    {
+      "layout": "\\$79",
+      "reference": "GWQB",
+      "pin": false
+    },
+    {
+      "layout": "\\$6",
+      "reference": "P",
+      "pin": false
+    },
+    {
+      "layout": "\\$12",
+      "reference": "P_D",
+      "pin": false
+    },
+    {
+      "layout": "\\$71",
+      "reference": "P_N",
+      "pin": false
+    },
+    {
+      "layout": "q_clk",
+      "reference": "Q_CLK",
+      "pin": true
+    },
+    {
+      "layout": "\\$64",
+      "reference": "Q_CLK_I",
+      "pin": false
+    },
+    {
+      "layout": "\\$83",
+      "reference": "RD_Q",
+      "pin": false
+    },
+    {
+      "layout": "\\$23",
+      "reference": "S_D",
+      "pin": false
+    },
+    {
+      "layout": "s_en",
+      "reference": "S_EN",
+      "pin": true
+    },
+    {
+      "layout": "\\$80",
+      "reference": "S_EN_I",
+      "pin": false
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
+      "pin": true
+    },
+    {
+      "layout": "VSS",
+      "reference": "VSS",
+      "pin": true
+    },
+    {
+      "layout": "\\$77",
+      "reference": "WL_D2",
+      "pin": false
+    },
+    {
+      "layout": "wl_en",
+      "reference": "WL_EN",
+      "pin": true
+    },
+    {
+      "layout": "\\$65",
+      "reference": "WL_EN_I",
+      "pin": false
+    },
+    {
+      "layout": "wl_en_n",
+      "reference": "WL_EN_N",
+      "pin": true
+    },
+    {
+      "layout": "wpn",
+      "reference": "WPN",
+      "pin": true
+    },
+    {
+      "layout": "\\$70",
+      "reference": "WR_Q",
+      "pin": false
+    },
+    {
+      "layout": "\\$67",
+      "reference": "W_N",
+      "pin": false
+    },
+    {
+      "layout": "\\$61",
+      "reference": "W_P",
+      "pin": false
+    },
+    {
+      "layout": "\\$89",
+      "reference": "XFA0_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$90",
+      "reference": "XFA0_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$92",
+      "reference": "XFA0_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$93",
+      "reference": "XFA0_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$94",
+      "reference": "XFA0_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$95",
+      "reference": "XFA0_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$98",
+      "reference": "XFA1_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$99",
+      "reference": "XFA1_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$100",
+      "reference": "XFA1_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$101",
+      "reference": "XFA1_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$102",
+      "reference": "XFA1_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$103",
+      "reference": "XFA1_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$107",
+      "reference": "XFA2_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$108",
+      "reference": "XFA2_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$110",
+      "reference": "XFA2_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$111",
+      "reference": "XFA2_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$112",
+      "reference": "XFA2_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$113",
+      "reference": "XFA2_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$116",
+      "reference": "XFA3_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$117",
+      "reference": "XFA3_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$118",
+      "reference": "XFA3_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$119",
+      "reference": "XFA3_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$106",
+      "reference": "XFA3_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$120",
+      "reference": "XFA3_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$125",
+      "reference": "XFA4_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$126",
+      "reference": "XFA4_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$127",
+      "reference": "XFA4_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$128",
+      "reference": "XFA4_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$129",
+      "reference": "XFA4_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$130",
+      "reference": "XFA4_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$133",
+      "reference": "XFA5_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$134",
+      "reference": "XFA5_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$135",
+      "reference": "XFA5_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$136",
+      "reference": "XFA5_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$124",
+      "reference": "XFA5_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$137",
+      "reference": "XFA5_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$142",
+      "reference": "XFA6_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$144",
+      "reference": "XFA6_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$147",
+      "reference": "XFA6_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$145",
+      "reference": "XFA6_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$146",
+      "reference": "XFA6_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$148",
+      "reference": "XFA6_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$151",
+      "reference": "XFA7_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$152",
+      "reference": "XFA7_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$153",
+      "reference": "XFA7_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$154",
+      "reference": "XFA7_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$141",
+      "reference": "XFA7_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$140",
+      "reference": "XFA7_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$161",
+      "reference": "XFCEN_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$162",
+      "reference": "XFCEN_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$163",
+      "reference": "XFCEN_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$164",
+      "reference": "XFCEN_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$158",
+      "reference": "XFCEN_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$165",
+      "reference": "XFCEN_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$167",
+      "reference": "XFGW_CKB",
+      "pin": false
+    },
+    {
+      "layout": "\\$169",
+      "reference": "XFGW_CKP",
+      "pin": false
+    },
+    {
+      "layout": "\\$170",
+      "reference": "XFGW_M",
+      "pin": false
+    },
+    {
+      "layout": "\\$171",
+      "reference": "XFGW_MF",
+      "pin": false
+    },
+    {
+      "layout": "\\$159",
+      "reference": "XFGW_NM",
+      "pin": false
+    },
+    {
+      "layout": "\\$160",
+      "reference": "XFGW_S",
+      "pin": false
+    },
+    {
+      "layout": "\\$72",
+      "reference": "XPN_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$73",
+      "reference": "XQN_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$84",
+      "reference": "XRD_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$85",
+      "reference": "XRD_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$81",
+      "reference": "XSN_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$82",
+      "reference": "XSN_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$75",
+      "reference": "XWEN_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$76",
+      "reference": "XWEN_S2",
+      "pin": false
+    },
+    {
+      "layout": "\\$74",
+      "reference": "XWN_S1",
+      "pin": false
+    },
+    {
+      "layout": "\\$87",
+      "reference": "XWR_NB",
+      "pin": false
+    },
+    {
+      "layout": "\\$88",
+      "reference": "XWR_S1",
+      "pin": false
+    }
+  ]
+}

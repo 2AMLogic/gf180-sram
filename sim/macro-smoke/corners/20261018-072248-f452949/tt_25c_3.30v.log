@@ -1,0 +1,225 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * control-block pulse widths -- sram_ctrl, one write cycle then one read cycle.
+
+Doing analysis at TEMP = 25.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        3.3
+clk                                          0
+cen                                        3.3
+gwen                                       3.3
+a0                                           0
+a1                                         3.3
+a2                                           0
+a3                                           0
+a4                                           0
+a5                                           0
+a6                                           0
+a7                                         3.3
+xc.clkb                                    3.3
+clk_buf                             8.5232e-10
+xc.xxfa0.ckb                               3.3
+xc.xxfa0.ckp                       1.01584e-08
+xc.xxfa0.m                         2.00789e-08
+xc.xxfa0.nm                                3.3
+xc.xxfa0.mf                         2.0288e-08
+xc.xxfa0.s                         6.27565e-08
+aq0                                        3.3
+aqb0                               4.14322e-08
+xc.xxfa1.ckb                               3.3
+xc.xxfa1.ckp                       1.01584e-08
+xc.xxfa1.m                                 3.3
+xc.xxfa1.nm                         2.0288e-08
+xc.xxfa1.mf                                3.3
+xc.xxfa1.s                         6.02657e-08
+aq1                                        3.3
+aqb1                               4.01867e-08
+xc.xxfa2.ckb                               3.3
+xc.xxfa2.ckp                       1.01584e-08
+xc.xxfa2.m                         2.00789e-08
+xc.xxfa2.nm                                3.3
+xc.xxfa2.mf                         2.0288e-08
+xc.xxfa2.s                         6.27565e-08
+aq2                                        3.3
+aqb2                               4.14322e-08
+xc.xxfa3.ckb                               3.3
+xc.xxfa3.ckp                       1.01584e-08
+xc.xxfa3.m                         2.00789e-08
+xc.xxfa3.nm                                3.3
+xc.xxfa3.mf                         2.0288e-08
+xc.xxfa3.s                         6.27565e-08
+aq3                                        3.3
+aqb3                               4.14322e-08
+xc.xxfa4.ckb                               3.3
+xc.xxfa4.ckp                       1.01584e-08
+xc.xxfa4.m                         2.00789e-08
+xc.xxfa4.nm                                3.3
+xc.xxfa4.mf                         2.0288e-08
+xc.xxfa4.s                         6.27565e-08
+aq4                                        3.3
+aqb4                               4.14322e-08
+xc.xxfa5.ckb                               3.3
+xc.xxfa5.ckp                       1.01584e-08
+xc.xxfa5.m                         2.00789e-08
+xc.xxfa5.nm                                3.3
+xc.xxfa5.mf                         2.0288e-08
+xc.xxfa5.s                         6.27565e-08
+aq5                                        3.3
+aqb5                               4.14322e-08
+xc.xxfa6.ckb                               3.3
+xc.xxfa6.ckp                       1.01584e-08
+xc.xxfa6.m                         2.00789e-08
+xc.xxfa6.nm                                3.3
+xc.xxfa6.mf                         2.0288e-08
+xc.xxfa6.s                         6.27565e-08
+aq6                                        3.3
+aqb6                               4.14322e-08
+xc.xxfa7.ckb                               3.3
+xc.xxfa7.ckp                       1.01584e-08
+xc.xxfa7.m                                 3.3
+xc.xxfa7.nm                         2.0288e-08
+xc.xxfa7.mf                                3.3
+xc.xxfa7.s                         6.02657e-08
+aq7                                        3.3
+aqb7                               4.01867e-08
+xc.xxfcen.ckb                              3.3
+xc.xxfcen.ckp                      1.01584e-08
+xc.xxfcen.m                                3.3
+xc.xxfcen.nm                        2.0288e-08
+xc.xxfcen.mf                               3.3
+xc.xxfcen.s                        6.02657e-08
+xc.cenq                                    3.3
+xc.en_q                            4.01867e-08
+xc.xxfgw.ckb                               3.3
+xc.xxfgw.ckp                       1.01584e-08
+xc.xxfgw.m                                 3.3
+xc.xxfgw.nm                         2.0288e-08
+xc.xxfgw.mf                                3.3
+xc.xxfgw.s                         6.02657e-08
+xc.gwq                                     3.3
+xc.gwqb                            4.01867e-08
+xc.xxrd.nb                                 3.3
+xc.xxrd.s1                         8.23664e-10
+xc.rd_q                            1.01584e-08
+xc.xxwr.nb                                 3.3
+xc.xxwr.s1                           0.0432052
+xc.wr_q                            1.01584e-08
+xc.dp1                                     3.3
+xc.dp2                             1.80928e-08
+xc.dp3                                     3.3
+xc.dp4                             1.80928e-08
+xc.dp5                                     3.3
+xc.dp6                             1.80928e-08
+xc.dp7                                     3.3
+xc.dp8                             1.80928e-08
+xc.dp9                                     3.3
+xc.dp10                            1.80928e-08
+xc.dp11                                    3.3
+xc.dp12                            1.80928e-08
+xc.dp13                                    3.3
+xc.dp14                            1.80928e-08
+xc.dp15                                    3.3
+xc.dp16                            1.80928e-08
+xc.dp17                                    3.3
+xc.dp18                            1.80928e-08
+xc.dp19                                    3.3
+xc.dp20                            1.80928e-08
+xc.dp21                                    3.3
+xc.dp22                            1.80928e-08
+xc.dp23                                    3.3
+xc.dp24                            1.80928e-08
+xc.dp25                                    3.3
+xc.dp26                            1.80928e-08
+xc.dp27                                    3.3
+xc.dp28                            1.80928e-08
+xc.dp29                                    3.3
+xc.dp30                            1.80928e-08
+xc.dp31                                    3.3
+xc.dp32                            1.80928e-08
+xc.dp33                                    3.3
+xc.dp34                            1.80928e-08
+xc.dn                                      3.3
+xc.p_n                                     3.3
+xc.xxpn.s1                         8.23663e-10
+xc.p                               1.01584e-08
+xc.dd1                                     3.3
+xc.dd2                             1.80928e-08
+xc.dd3                                     3.3
+xc.dd4                             1.80928e-08
+xc.dd5                                     3.3
+xc.p_d                             1.80928e-08
+xc.wl_en_i                                 3.3
+xc.xxwen.s1                          0.0506405
+xc.xxwen.s2                          0.0078465
+wl_en                              1.49858e-09
+wl_en_n                                    3.3
+xc.db1                                     3.3
+xc.db2                             1.80928e-08
+xc.db3                                     3.3
+xc.db4                             1.80928e-08
+xc.db5                                     3.3
+xc.wl_d2                           1.80928e-08
+xc.s_en_i                                  3.3
+xc.xxsn.s1                           0.0506411
+xc.xxsn.s2                          0.00784654
+s_en                               1.49858e-09
+xc.dq1                                     3.3
+xc.dq2                             1.80928e-08
+xc.dq3                                     3.3
+xc.s_d                             1.80928e-08
+xc.q_clk_i                                 3.3
+xc.xxqn.s1                           0.0432054
+q_clk                              1.49858e-09
+xc.w_n                                     3.3
+xc.xxwn.s1                           0.0432054
+xc.w_p                              2.8027e-09
+wpn                                        3.3
+va7#branch                        -9.90097e-12
+va6#branch                         9.96859e-12
+va5#branch                         9.96859e-12
+va4#branch                         9.96859e-12
+va3#branch                         9.96859e-12
+va2#branch                         9.96859e-12
+va1#branch                        -9.90052e-12
+va0#branch                         9.96859e-12
+vgw#branch                        -9.90097e-12
+vcen#branch                       -9.90097e-12
+vclk#branch                                  0
+vdd#branch                        -6.82527e-10
+
+
+No. of Data Rows : 6306
+
+  Measurements for Transient Analysis
+
+wr_wl_en_width      =  3.630160e-09 targ=  5.036785e-08 trig=  4.673769e-08
+wr_wpn_width        =  3.693544e-09 targ=  5.102053e-08 trig=  4.732698e-08
+wr_clk_to_wl_en     =  1.153538e-09 targ=  4.673769e-08 trig=  4.558415e-08
+rd_sen_after_wl_en  =  1.205280e-09 targ=  8.794257e-08 trig=  8.673729e-08
+rd_qclk_after_sen   =  9.740772e-10 targ=  8.891665e-08 trig=  8.794257e-08
+rd_sen_width        =  2.994233e-09 targ=  9.093680e-08 trig=  8.794257e-08
+
+
+Total analysis time (seconds) = 3.972
+
+Total elapsed time (seconds) = 4.115 
+
+Total DRAM available = 31552.184 MB.
+DRAM currently available = 2964.789 MB.
+Maximum ngspice program size =   36.461 MB.
+Current ngspice program size =   20.242 MB.
+
+Shared ngspice pages =   11.148 MB.
+Text (code) pages =    6.156 MB.
+Stack = 0 bytes.
+Library pages =   17.199 MB.
+

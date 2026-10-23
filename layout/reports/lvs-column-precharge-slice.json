@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "engine": "klayout",
+  "layout": "layout/periphery/column/precharge_slice.gds",
+  "reference": "design/netlist/precharge_slice.spice",
+  "top": "precharge_slice",
+  "reference_top": "PRECHARGE_SLICE",
+  "reference_conversion": {
+    "form": "subckt-call",
+    "deck": null,
+    "device_map": null
+  },
+  "parameter_tolerance": null,
+  "options": {
+    "combine_devices": false,
+    "combine_devices_per_circuit": null,
+    "combine_devices_max_attempts": 5,
+    "flatten_layout": false,
+    "flatten_reference": true,
+    "netgen_setup": null,
+    "parameter_tolerance": null,
+    "compare_parameters": null,
+    "power_connectivity": null,
+    "anchor_top_level_pins": null,
+    "strict_top_level_pin_count": false,
+    "compare_mos_flavour": false,
+    "supply_nets": [
+      "GND",
+      "VCC",
+      "VDD",
+      "VGND",
+      "VPWR",
+      "VSS"
+    ],
+    "finfet_bulk": null
+  },
+  "hints_applied": null,
+  "constant_nets_applied": null,
+  "status": "match",
+  "power_connectivity": {
+    "status": "unchecked",
+    "reason": "reference.form is 'subckt-call', whose reference netlist carries its own power/ground pins and nets -- they take part in the ordinary compare, so this check (which exists to cover the signal-only 'gate-level-verilog' form) does not apply",
+    "power_pins": [],
+    "power_pins_derivation": null,
+    "instance_count": 0,
+    "expected_nets": null,
+    "unchecked_expected_pins": [],
+    "findings": [],
+    "finding_count": 0
+  },
+  "body_verification": {
+    "status": "verified",
+    "reason": null,
+    "device_classes": [],
+    "device_count": 0,
+    "findings": [],
+    "finding_count": 0
+  },
+  "device_parameter_coverage": [],
+  "mismatch_count": 2,
+  "error_count": 0,
+  "category_counts": {
+    "topology": 2
+  },
+  "category_error_counts": {},
+  "counts": {
+    "nets": {
+      "layout": 14,
+      "reference": 14,
+      "matched": 14
+    },
+    "devices": {
+      "layout": 12,
+      "reference": 12,
+      "matched": 12
+    },
+    "pins": {
+      "layout": 14,
+      "reference": 14,
+      "matched": 14
+    }
+  },
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "bjt",
+    "cap_mim_2f0_m4m5_noshield",
+    "resistor",
+    "diode_nd2ps_06v0",
+    "diode_pd2nw_06v0"
+  ],
+  "environment": {
+    "engine": "klayout",
+    "engine_version": "0.30.12",
+    "netgen_binary": null,
+    "layout_sha256": "83a9fdb408642618d6f94db669ef2e6492a0fedf8eb7c2581fb182ad33b08675",
+    "reference_sha256": "8227b14f2290d5c2dd308b9af937c81d279008dc43a0f27b377d454c52bd2c68",
+    "extracted_netlist": null
+  },
+  "provenance": {
+    "klt_version": "0.7.1.dev1911+g02c9f6b8ebab",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": {
+      "name": "gf180mcu",
+      "content_hash": "sha256:46a68344acc0c5244cb708b89a8e4fd2cbc519f815dbea4d2b819f6fb9e81104",
+      "released": false,
+      "options": {
+        "metal_top": "9K",
+        "mim_cap": "cap_mim_2f0_m4m5_noshield",
+        "poly_res": "1k"
+      },
+      "options_explicit": {
+        "metal_top": false,
+        "mim_cap": false,
+        "poly_res": false
+      },
+      "options_hash": "sha256:6a7dc7660a470994263c5ca8ace6d8ac8c605d77e6876a9c5490949de6e7cb05"
+    },
+    "input": {
+      "content_hash": "sha256:83a9fdb408642618d6f94db669ef2e6492a0fedf8eb7c2581fb182ad33b08675",
+      "role": "layout"
+    },
+    "klayout_version_mismatch": false
+  },
+  "mismatches": [
+    {
+      "category": "topology",
+      "severity": "warning",
+      "description": "device class has no counterpart on the other side, but no devices of this class were extracted either -- not a real topology mismatch: 'nfet'",
+      "side": "layout",
+      "net": null,
+      "device": {
+        "layout": null,
+        "reference": null,
+        "class": "nfet"
+      },
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    },
+    {
+      "category": "topology",
+      "severity": "warning",
+      "description": "device class has no counterpart on the other side, but no devices of this class were extracted either -- not a real topology mismatch: 'bjt'",
+      "side": "layout",
+      "net": null,
+      "device": {
+        "layout": null,
+        "reference": null,
+        "class": "bjt"
+      },
+      "property": null,
+      "details": null,
+      "circuit": null,
+      "instance": null,
+      "subcircuit": null
+    }
+  ],
+  "net_correspondence": [
+    {
+      "layout": "bl0",
+      "reference": "BL0",
+      "pin": true
+    },
+    {
+      "layout": "bl1",
+      "reference": "BL1",
+      "pin": true
+    },
+    {
+      "layout": "bl2",
+      "reference": "BL2",
+      "pin": true
+    },
+    {
+      "layout": "bl3",
+      "reference": "BL3",
+      "pin": true
+    },
+    {
+      "layout": "blb0",
+      "reference": "BLB0",
+      "pin": true
+    },
+    {
+      "layout": "blb1",
+      "reference": "BLB1",
+      "pin": true
+    },
+    {
+      "layout": "blb2",
+      "reference": "BLB2",
+      "pin": true
+    },
+    {
+      "layout": "blb3",
+      "reference": "BLB3",
+      "pin": true
+    },
+    {
+      "layout": "csel0",
+      "reference": "CSEL0",
+      "pin": true
+    },
+    {
+      "layout": "csel1",
+      "reference": "CSEL1",
+      "pin": true
+    },
+    {
+      "layout": "csel2",
+      "reference": "CSEL2",
+      "pin": true
+    },
+    {
+      "layout": "csel3",
+      "reference": "CSEL3",
+      "pin": true
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
+      "pin": true
+    },
+    {
+      "layout": "VSS",
+      "reference": "VSS",
+      "pin": true
+    }
+  ]
+}

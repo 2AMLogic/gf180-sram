@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import os
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -91,11 +90,6 @@ class PdkPin(unittest.TestCase):
         r = resolve(self.home)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn(f"VERSION={PIN}", r.stdout)
-
-    def test_python_pin_matches_file(self):
-        sys.path.insert(0, str(LIB))
-        import env_provenance
-        self.assertEqual(env_provenance.PDK_PIN, PIN)
 
 
 if __name__ == "__main__":

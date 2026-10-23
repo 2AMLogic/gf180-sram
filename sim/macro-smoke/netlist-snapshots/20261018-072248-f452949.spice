@@ -1,0 +1,48 @@
+* Control-block pulse widths -- sram_ctrl, one write cycle then one read cycle.
+*
+* Measures the self-timed pulses the periphery record (rows 11-12) asks about:
+* the internal write pulse (`wpn` low) and the wordline-enable pulse, plus the
+* read-path strobes (`s_en`, `q_clk`) relative to the wordline enable. The
+* control block alone, with capacitor stand-ins for the loads it drives
+* (wl_en: 4 predecoder gates + 4 column NAND3s; wl_en_n/s_en/q_clk/wpn: 32
+* slices each). Values are SCHEMATIC-level (no wire RC, no layout parasitics)
+* at whatever single corner ./corner.inc selects. Single corner is NOT a PVT
+* claim: periphery record row 12 needs the pulse >= 2 ns at EVERY corner, and
+* no sweep of this testbench is recorded yet (see design/README.md).
+*
+* `@@REPO_ROOT@@` is substituted by run.sh, as in the other testbenches.
+.include './corner.inc'
+.include '@@REPO_ROOT@@/design/netlist/sram_ctrl.spice'
+
+VDD VDD 0 DC VDDC
+* edge1 @5ns (idle init), edge2 @45ns write, edge3 @85ns read; CLK high 30 ns
+* so the pulse chain, not the clock, ends each pulse
+VCLK CLK 0 PWL(0 0 5n 0 5.1n VDDC 35n VDDC 35.1n 0 45n 0 45.1n VDDC 75n VDDC 75.1n 0 85n 0 85.1n VDDC 115n VDDC 115.1n 0)
+VCEN CEN 0 PWL(0 VDDC 38n VDDC 38.1n 0)
+VGW GWEN 0 PWL(0 VDDC 38n VDDC 38.1n 0 78n 0 78.1n VDDC)
+VA0 A0 0 DC 0
+VA1 A1 0 DC VDDC
+VA2 A2 0 DC 0
+VA3 A3 0 DC 0
+VA4 A4 0 DC 0
+VA5 A5 0 DC 0
+VA6 A6 0 DC 0
+VA7 A7 0 DC VDDC
+XC A0 A1 A2 A3 A4 A5 A6 A7 CEN GWEN CLK aq0 aq1 aq2 aq3 aq4 aq5 aq6 aq7 aqb0 aqb1 aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 clk_buf wl_en wl_en_n s_en q_clk wpn VDD 0 sram_ctrl
+Cwl wl_en 0 100f
+Cwn wl_en_n 0 500f
+Csen s_en 0 300f
+Cqc q_clk 0 300f
+Cwp wpn 0 800f
+Ccb clk_buf 0 400f
+
+.tran 0.02n 125n
+* write cycle (edge2)
+.meas tran wr_wl_en_width trig v(wl_en) val='VDDC/2' rise=1 targ v(wl_en) val='VDDC/2' fall=1
+.meas tran wr_wpn_width trig v(wpn) val='VDDC/2' fall=1 targ v(wpn) val='VDDC/2' rise=1
+.meas tran wr_clk_to_wl_en trig v(clk_buf) val='VDDC/2' rise=2 targ v(wl_en) val='VDDC/2' rise=1
+* read cycle (edge3): s_en and q_clk are read-only strobes
+.meas tran rd_sen_after_wl_en trig v(wl_en) val='VDDC/2' rise=2 targ v(s_en) val='VDDC/2' rise=1
+.meas tran rd_qclk_after_sen trig v(s_en) val='VDDC/2' rise=1 targ v(q_clk) val='VDDC/2' rise=1
+.meas tran rd_sen_width trig v(s_en) val='VDDC/2' rise=1 targ v(s_en) val='VDDC/2' fall=1
+.end

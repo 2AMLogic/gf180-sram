@@ -140,6 +140,76 @@ def test_signed_margin_is_continuous_through_the_bifurcation() -> None:
           f"the margin should pass *through* zero, not jump across it, got {margins[1:3]}")
 
 
+def largest_square(vm1: float, k1: float, vm2: float, k2: float, lobe: str,
+                   vdd: float = VDD) -> float:
+    """Brute-force side of the largest axis-aligned square in one butterfly lobe.
+
+    Independent of snm_extract: curve A is y = f1(x), curve B is the mirror of
+    curve 2 about y = x, i.e. y = f2^-1(x), both analytic. In the low lobe A
+    lies above B, so a square [a, a+s] x [b, b+s] fits iff b >= B(a) (B falls,
+    so its worst point is the left edge) and b + s <= A(a+s) (A falls, so its
+    worst point is the right edge): feasible iff A(a+s) - B(a) >= s. That
+    left side minus s falls in s, so the best s for each `a` is a bisection
+    root; the answer is the maximum over a fine grid of `a`. The high lobe
+    swaps the roles of A and B.
+    """
+    def fwd(x: float, vm: float, k: float) -> float:
+        return vdd / (1.0 + math.exp((x - vm) / k))
+
+    def inv(x: float, vm: float, k: float) -> float:
+        y = min(max(x, 1e-12), vdd - 1e-12)
+        return vm + k * math.log((vdd - y) / y)
+
+    def upper(x: float) -> float:
+        return fwd(x, vm1, k1) if lobe == "low" else inv(x, vm2, k2)
+
+    def lower(x: float) -> float:
+        return inv(x, vm2, k2) if lobe == "low" else fwd(x, vm1, k1)
+
+    best = 0.0
+    n = 3000
+    for i in range(n + 1):
+        a = vdd * i / n
+        lo, hi = 0.0, vdd - a
+        for _ in range(50):
+            s = (lo + hi) / 2
+            if upper(a + s) - lower(a) >= s:
+                lo = s
+            else:
+                hi = s
+        best = max(best, lo)
+    return best
+
+
+def test_steep_vtc_matches_brute_force_square() -> None:
+    """SNM is the inscribed square's side, not the vertical gap between curves.
+
+    The vertical gap at fixed x over-reads wherever the VTC is steep; the
+    side is the gap along y = x divided by sqrt(2). Compare against an
+    independent brute-force largest-square search, for a steep and a gentle
+    symmetric VTC and for an asymmetric pair.
+    """
+    cases = [
+        (VDD / 2, 0.05, VDD / 2, 0.05),
+        (VDD / 2, 0.15, VDD / 2, 0.15),
+        (VDD / 2 - 0.10, 0.08, VDD / 2 + 0.10, 0.08),
+    ]
+    for vm1, k1, vm2, k2 in cases:
+        lo, hi = snm_extract.snm(vtc(vm1, k1), vtc(vm2, k2))
+        want_lo = largest_square(vm1, k1, vm2, k2, "low")
+        want_hi = largest_square(vm1, k1, vm2, k2, "high")
+        check(abs(lo - want_lo) < 0.01 and abs(hi - want_hi) < 0.01,
+              f"vm=({vm1},{vm2}) k=({k1},{k2}): got ({lo:.4f}, {hi:.4f}), "
+              f"brute-force square ({want_lo:.4f}, {want_hi:.4f})")
+
+
+def test_steep_symmetric_curve_has_equal_lobes() -> None:
+    """A self-composed (mirror-symmetric) curve must give equal lobes at any steepness."""
+    for k in (0.03, 0.05, 0.08):
+        lo, hi = snm_extract.snm(vtc(VDD / 2, k))
+        check(abs(lo - hi) < 1e-3, f"k={k}: lobes should match, got {lo} vs {hi}")
+
+
 def test_interp_and_solve_inverse_round_trip() -> None:
     """solve_inverse must invert interp on a monotone curve, both rails included."""
     curve = vtc(VDD / 2, 0.15)
@@ -166,6 +236,8 @@ TESTS = [
     test_asymmetry_reduces_the_margin,
     test_monostable_pair_reports_a_negative_margin,
     test_signed_margin_is_continuous_through_the_bifurcation,
+    test_steep_vtc_matches_brute_force_square,
+    test_steep_symmetric_curve_has_equal_lobes,
     test_interp_and_solve_inverse_round_trip,
     test_read_xy_skips_comments_and_short_rows,
 ]

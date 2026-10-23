@@ -13,23 +13,33 @@ sufficient to detect staleness").
 Regenerate everything here with `./layout/reports/generate.sh` (from the
 repo root). It re-runs `klt drc`/`klt extract`/`klt lvs`/`klt erc` against
 whatever `layout/*.gds` and `design/netlist/*.spice` are currently checked
-out and overwrites the files below in place.
+out and overwrites the files below in place. `./layout/reports/generate.sh
+--column-path` regenerates only the column-path reports (~2 min), and adding
+`--native` also runs them against the PDK's native DRC deck (~3 min more);
+the full run's `klt erc` step alone is ~26 min.
 
-## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124)
+## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205)
 
 | Report | Command | Result |
 |---|---|---|
 | `drc-bitcell.json` | `klt drc --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds` | `status: clean`, 0 violations |
 | `drc-array.json` | `klt drc --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | `status: clean`, 0 violations |
 | `extract-bitcell.json` | `klt extract --deck gf180mcu layout/bitcell/sram_bitcell_6t.gds` | 6 devices (4 nfet + 2 pfet), 7 nets |
-| `lvs-bitcell.json` | `klt lvs` vs. `design/netlist/bitcell_6t.spice` (via `layout/lvs_reference.py`) | `status: match`, 0 mismatches, 6/6 devices, 7/7 nets |
+| `lvs-bitcell.json` | `klt lvs` vs. `design/netlist/bitcell_6t.spice` | `status: match`, 0 mismatches, 6/6 devices, 7/7 nets |
 | `extract-array.json` | `klt extract --deck gf180mcu layout/sram_256x32/sram_256x32_array.gds` | 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins -- `devices[]`/`nets[]` omitted from the committed file (~18 MB unabridged; every other field, including counts and provenance, is kept in full) |
 | `lvs-array.json` | `klt lvs` vs. `design/netlist/sram_256x32_array.spice` (`options.flatten_reference: true`, see below) | `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins matched -- the sole `mismatches[]` entry is a `severity: warning` `topology.flattened` disclosure, not a defect (see "Known gap: array-level LVS" below) |
 | `drc-foundry-bitcell.json` | `klt drc --deck gf180mcu` vs. the foundry's own `gf180mcu_fd_ip_sram__sram64x8m8wm1.gds` | `status: violations`, 2010 violations, all `comp.enclosing.contact.1` -- **expected**, see `sram-rule-survey.md` (issue #8) |
 | `erc-array-supply.json` | `klt erc layout/sram_256x32/sram_256x32_array.gds layout/sram_256x32/erc-supply-spec.json --format json` | `erc_finding_count: 0` -- declared supplies VDD/VSS each resolve to exactly one electrical island and both declared ties (`nwell_tie`, `substrate_tie`) are checked, none skipped; `status: not_checked` is the antenna half's rollup, not the supply verdict (see "Item 11" below) |
+| `drc-column-precharge-slice.json`, `drc-column-io-slice.json`, `drc-column-band.json` | `klt drc --deck gf180mcu` on `layout/periphery/column/{precharge_slice,io_slice,column_band}.gds` (issue #205) | `status: clean`, 0 violations each |
+| `drc-column-abut.json` | `klt drc --deck gf180mcu` on the scratch composite `periphery/column/generate.py --abut` builds: the committed 64 x 128 array with `io_band` below and `precharge_band` above (the composite is not committed; `file` says so) | `status: clean`, 0 violations -- the bit-line seam and the first/last slice against the array's edges |
+| `drc-native-column-precharge-slice.json`, `drc-native-column-io-slice.json`, `drc-native-column-abut.json` | `klt drc --engine klayout` with the PDK's native deck (`generate.sh --column-path --native`) | `status: clean`, 0 violations, `coverage_assertion` 640 expected = 640 observed rule categories |
+| `drc-row-path.json`, `extract-row-path.json`, `lvs-row-path.json` | `klt drc --deck gf180mcu`, `klt extract`, and `klt lvs` (inline extraction, `options.flatten_reference: true`) on `layout/periphery/row/row_path.gds` vs. `design/netlist/row_path.spice` (issue #204; `generate.sh --row-path`) | DRC `status: clean`, 0 violations; 528 devices (264 nfet + 264 pfet), 279 nets, 79 pins; LVS `status: match`, 528/528 devices, 279/279 nets, 79/79 pins, `mismatches[]` only the `topology.flattened` disclosure and the "no bjt" note. Strip only -- no physical-fit, parasitic or wordline-RC claim; PDK-native deck not run (not installed on the generating host) |
+| `drc-sram-ctrl.json`, `extract-sram-ctrl.json`, `lvs-sram-ctrl.json`, `drc-col-decode.json`, `extract-col-decode.json`, `lvs-col-decode.json` | `klt drc --deck gf180mcu`, `klt extract`, and `klt lvs` (inline extraction, `options.flatten_reference: true`) on `layout/periphery/control/{sram_ctrl,col_decode}.gds` vs. `design/netlist/{sram_ctrl,col_decode}.spice` (issue #246; `generate.sh --control`) | DRC `status: clean`, 0 violations on both; `sram_ctrl` 356 devices, 171 nets, 35 pins and `col_decode` 40 devices, 27 nets, 15 pins, each LVS `status: match` with everything matched and `mismatches[]` only the `topology.flattened` disclosure and the "no bjt" note. Block level only -- no timing, delay-calibration, parasitic or physical-fit claim; PDK-native deck not run |
+| `extract-column-precharge-slice.json`, `extract-column-io-slice.json` | `klt extract --deck gf180mcu` on the slices | 12 devices (pfet), 14 nets, 14 pins; 99 devices (50 nfet + 49 pfet), 59 nets, 26 pins |
+| `lvs-column-precharge-slice.json`, `lvs-column-io-slice.json` | `klt lvs` (inline `layout.file` + `deck`, `options.flatten_reference: true`) vs. `design/netlist/{precharge,io}_slice.spice` | `status: match`; 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins. `mismatches[]` holds only `severity: warning` entries: the `topology.flattened` disclosure and "device class absent on both sides" notes -- no `net.supply_fragmented` |
 
 `drc-foundry-bitcell.json` is generated and maintained separately from the
-five reports above -- it checks the *foundry's* macro, not this repo's own
+reports above -- it checks the *foundry's* macro, not this repo's own
 layout, so it is not part of `generate.sh`'s regeneration loop (nothing in
 `design/`/`layout/` changing would ever change it). See
 [`sram-rule-survey.md`](sram-rule-survey.md) (issue #8) for the full survey
@@ -68,10 +78,9 @@ list in prose).
 ## Item 4 (LVS clean): bitcell only, by design
 
 `lvs-bitcell.json` is a full, clean LVS: 6/6 devices, 7/7 nets, 0
-mismatches, against the actual schematic-derived reference netlist (with
-`layout/lvs_reference.py`'s bulk-terminal rewrite applied -- see
-`layout/README.md` "Known tool gaps" #1 for why that rewrite exists and why
-it is currently a no-op).
+mismatches, directly against the schematic-derived reference netlist, with no
+rewrite of the reference (see `layout/README.md` "Known tool gaps" #1 for
+the bulk-net history).
 
 ## Item 11 (power delivery, structural): the array supply read
 

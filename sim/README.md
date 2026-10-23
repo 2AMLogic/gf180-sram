@@ -16,6 +16,8 @@ append-only evidence."
 | `sim/write-margin/` | `testbench/tb_write_margin.spice` | Write margin, as write trip voltage (WTV): the weakest "0" a write driver can present on the losing bit line and still flip the cell within a fixed pulse width. WTV **is** the recorded margin — a real write driver presents 0 V, so WTV is exactly its head-room before the write stops working, and `spec/sram.md`'s "positive margin at every corner" applies to it verbatim. (`sim/signoff-summary.md` derives it the same way, as WTV directly; issue #59 fixed an earlier `VDD - WTV` inversion in that rollup that scored an unwritable cell as best-in-class.) | `.include`s `design/netlist/bitcell_6t.spice` directly |
 | `sim/access-time/` | `testbench/tb_read_access_time.spice` | Read access time: WL assertion to a defined bit-line sensing differential (3% of VDD) developing on the precharged-then-floated bit-line pair -- see "Read access time is a proxy metric" below | `.include`s `design/netlist/bitcell_6t.spice` directly |
 | `sim/access-time/` | `testbench/tb_write_access_time.spice` | Write access time: WL assertion to the internal storage node `Q` crossing VDD/2 | `.include`s `design/netlist/bitcell_6t.spice` directly |
+| `sim/macro-smoke/` | `testbench/tb_macro_write_read.klt.spice`, `testbench/tb_ctrl_pulse.klt.spice` | Functional write/read smoke of the macro top netlist (issue #203) and the control block's pulse widths, run with `klt sim` (27 corners, #217); the first records are single-corner local runs of the since-removed `tb_*.spice` flavor (#224). **Not a timing or margin result**. The macro testbench replaces the 8,192-cell array with a two-row reduced array and a 20 fF bit-line stand-in; see its records' "Limits" | `.include`s `design/netlist/sram_256x32.spice` (array subckt stripped into `sram_256x32.noarray.spice`) / `design/netlist/sram_ctrl.spice` |
+| `sim/wordline-rc/` | `testbench/tb_wl_rc_<topology>_<R>.klt.spice` | Far-end wordline delay of the extracted 128-cell row (left-fed), a centre-fed pair of 64-cell halves and a 64-cell row, driven by the real `rowdrv`, at `ss_125c_2.97v` (issue #204; the "Wordline RC gate" of `spec/periphery-architecture.md`). One corner only; see `sim/wordline-rc/README.md` and `spec/wordline-rc-decision.md` | Extracted netlists under `sim/wordline-rc/dut/` (`klt extract --parasitics --distributed-rc`), `.include`d via `.ported.spice` copies |
 
 Each experiment directory follows the same layout (adapted from
 [`2AMLogic/gf180-bandgap`](https://github.com/2AMLogic/gf180-bandgap)'s
@@ -81,8 +83,8 @@ vocabulary).
 
 `open_pdks` commit `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (issue #173; installed with
 [ciel](https://github.com/fossi-foundation/ciel) 2.6.1 under `~/.ciel`). The
-single machine-read definition is `sim/lib/pdk_pin.txt`; `sim/lib/pdk_env.sh`,
-`sim/lib/env_provenance.py` and `design/xschemrc` all read it. Records
+single machine-read definition is `sim/lib/pdk_pin.txt`; `sim/lib/pdk_env.sh`
+and `design/xschemrc` both read it. Records
 committed before #173 ran under the previous pin `c6d73a35f524070e85faff4a6a9eef49553ebc2b` (volare,
 `~/.volare`) and stay as they are -- append-only evidence; re-qualification
 under the new pin lands as new records. Variant `gf180mcuD` (`spec/pdk-variant-decision.md` -- the SPICE model files
@@ -99,6 +101,60 @@ a drifted install is visible rather than silent: `pdk_env.sh` also **fails**
 read from the `/versions/<sha>/` path component, else a `SOURCES` file -- is
 not the pin, so a leftover `~/.volare` tree cannot be used silently. Reuse this same pin for
 consistency unless a documented reason requires bumping it.
+
+## Staged migration to `klt sim` deck mode (#230, in progress)
+
+`run_corner_sweep.sh` and the `run_mc_campaign.py` process pool are a
+hand-launched local grid, which dispatch workers must not run (host policy:
+grids go through `klt sim`). The four characterization families carry their own
+`.control` blocks (`wrdata`, bisection) and must run unmodified for comparability
+with the append-only records, so the migration target is `klt sim`'s
+**precomposed-deck** transport (`decks` request), not reshaping the testbenches.
+
+**Ready (offline):** `sim/lib/deck_adapter.py`
+
+```bash
+sim/lib/deck_adapter.py families
+sim/lib/deck_adapter.py build read-snm --stage-dir /tmp/stage --request-out /tmp/stage/request.json
+sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned grading
+```
+
+* `build` stages the same per-corner scratch the launcher composes (testbench,
+  generated `corner.inc`, DUT netlist) and writes a deck-list request. The only
+  deck-byte change is `@@REPO_ROOT@@` -> `.` (deck mode refuses absolute includes);
+  source and composed sha256 are in the request's `x_gf180_sram_adapter` block.
+* `reduce` re-applies the launcher's grading (`RESULT:`/`RESULT-ERROR:`,
+  `snm_extract.py`). Deck mode reports process success only: exit 0 is never a
+  PASS, and missing corners, duplicate/unexpected ids, missing declared outputs
+  and timeouts all come back `OPEN`.
+* `mc-build` / `mc-reduce` are the Monte Carlo counterpart for the
+  `run_mc_campaign.py` pool: one deck per (corner, kind, sample) -- two (L/R)
+  per sample for the `snm-pair` SNM families -- with `corner.inc` bytes from
+  `run_mc_campaign.build_corner_inc` and seeds from its `derive_seed` (imported,
+  not re-derived; the request records every unit's seed and `mc-reduce` refuses
+  a request whose seeds drifted). `mc-reduce` regroups a deck report into the
+  per-seed `(index, results, errors)` tuples `run_batch`/`run_batch_pair`
+  return plus the `klt yield` sample-set measurement blocks. Same fail-closed
+  rules as `reduce`; exit 0 is never a PASS. Example:
+  `sim/lib/deck_adapter.py mc-build read-snm --corner tt:25:3.30 --corner ff:125:2.97 --seed 1 --stage-dir /tmp/mc --request-out /tmp/mc/request.json`
+* `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
+  reports. Stub results are contract checks, **not** physical evidence.
+
+**Blocked (named prerequisites; launchers stay, no campaign authorised):**
+
+1. *Executor capability.* No batch image build verified to accept deck-list
+   requests; the local `klt` source supports them, a deployed image is unverified.
+   Needed: the intended executor's installed klt/ngspice build identity (from a
+   report's `environment`), and confirmation that `$PDK_ROOT/...` includes in
+   `corner.inc` resolve on it (otherwise pass `build --pdk-dir`).
+2. *Measurement parity receipt.* Per family, one corner (or the full set) from
+   deck mode must match the committed record value for the same corner. No such
+   receipt exists yet, for the corner grid or the Monte Carlo adapter (which is
+   ready offline); `run_mc_campaign.py` and its pool are untouched.
+3. *Cutover.* Retiring `run_corner_sweep.sh`/the MC pool, switching defaults, and
+   updating the cold-start section below happen only after 1 and 2 are met.
+   Single-point probes stay local. Until then the cold-start section below is
+   the historical procedure and is not to be run on dispatch workers.
 
 ## Cold-start invocation
 
@@ -296,15 +352,10 @@ path) into a newly-generated record. This follows the model
 inside this repo, and *identity, never location* (name + version, no path
 at all) for anything genuinely external, like a PDK install:
 
-- **This host's installed `klt` does not yet ship `env-provenance`**
-  (verified 2026-08-25: `klt --version` reports `0.2.0`; neither
-  `klt env-provenance --help` nor `klayout_tools.env_provenance` resolve).
-  `sim/lib/env_provenance.py` reimplements just the piece these scripts
-  need by hand, matching the documented `{path, scope}` shape, so a record
-  written today reads the same way a record written once
-  `klt env-provenance` is available would. Prefer the real subcommand/module
-  directly once it is available on the host running these scripts, and
-  retire that file.
+- **No env-provenance shim**: `run_mc_campaign.py` builds the `pdk`
+  identity block inline. `klt env-provenance emit` (host/OS/tool-version
+  blocks, `--path` normalisation) does not pin PDK variant/version, so it
+  is not a drop-in for that block.
 - **PDK identity, not location**: every `**PDK**:`/`pdk` field records the
   PDK variant name and its resolved `open_pdks` version (e.g. `gf180mcuD`,
   `f6eeac7...`), never the absolute install path (`~/.ciel/gf180mcuD` on
@@ -481,6 +532,19 @@ Only a draw with no measurable structure at all is still an open result, and
 the campaign counts those separately (`errored` in the report, `n_errored` in
 `summary.json`). **A record with a non-zero errored count states a yield
 conditioned on a measurable draw** — read the two numbers together.
+
+### Earlier SNM values over-read (issue #213)
+
+Read/hold SNM values committed before issue #213 were extracted with a
+*vertical* gap between the butterfly curves (constant x) and treated that gap
+as the inscribed square's side. The side is the gap along y = x divided by
+sqrt(2) (Seevinck's 45-degree construction), so the vertical gap over-reads
+wherever the VTC is steep. `sim/lib/snm_extract.py` now measures the side
+correctly and `sim/lib/test_snm_extract.py` checks it against an independent
+brute-force largest-square search. The committed records are append-only
+evidence and were **not** edited: their SNM values (and anything derived from
+them, e.g. the read-SNM Cpk quoted in `spec/`) use the old, over-reading
+measure until the sweeps are re-run and new records are issued.
 
 The same episode is why `tb_write_margin.spice` now bisects instead of
 scanning 41 points: at VDD/40 resolution the trip point quantized onto one

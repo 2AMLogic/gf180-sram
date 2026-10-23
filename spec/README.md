@@ -79,3 +79,20 @@ Ratified spec and decision records for this block.
   item and is retained as the dated audit snapshot only) — see
   [`signoff/README.md`](../signoff/README.md).
   Informational only — no ratified spec value changes.
+- [`periphery-architecture.md`](periphery-architecture.md) — resolves #202:
+  fixes the periphery architecture (4:1 column mux, 64 x 128 physical array,
+  predecode + pitch-matched wordline drivers, per-I/O sense amp and write
+  driver, self-timed access pulse), the macro floorplan, and the pin
+  placement for the #198-ratified 1RW pins, each row cited against the
+  foundry `gf180mcu_fd_ip_sram` macro and OpenRAM (which has no gf180mcu SRAM
+  periphery). 4:1 is held conditional on an unmeasured far-end wordline RC
+  gate, with fallbacks named. No ratified item changes; no timing ratified.
+- [`wordline-rc-decision.md`](wordline-rc-decision.md) — resolves the
+  "Wordline RC gate" `periphery-architecture.md` assigned to #204: the
+  left-fed 128-cell wordline does not meet the drafting agent's G1 criterion at
+  `ss_125c_2.97v` (far end reaches 1.92 V of 2.97 V on a 2.0 ns pulse; a write
+  on the actual 5.88 ns pulse was not shown to fail), a centre decoder or 2:1
+  row meets it on the same bench. Proposed, not ratified: records the centre-fed 4:1 as the
+  operator's preferred candidate (2026-10-19), with its cost and its unresolved
+  write-waveform margin concern, and a later validation matrix. One corner, a
+  Builder-stated criterion, no timing qualified, no ratified value changed.
