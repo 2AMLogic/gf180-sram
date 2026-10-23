@@ -677,3 +677,7 @@ future `klt sim` release grows a way to host these methodologies natively,
 re-run the sweep under the verb and retire the mint in favor of a
 first-party envelope.
 
+
+## Stored evidence for new runs
+
+New run output is stored in the fleet artifact store; git keeps only a manifest and summary under `manifests/artifacts/`. See [`manifests/README.md`](../manifests/README.md).
