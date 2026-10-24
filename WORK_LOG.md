@@ -5,6 +5,7 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-23
 
+- **Issue #266** (closed): snm_extract.py over-reads SNM: vertical gap, not inscribed square
 - **PR #259**: ci: pin Node to 22.23.4 (Node 20 is end-of-life)
 - **Issue #258** (closed): security: pin CI Node to 22.23.4 (node-version 20 is end-of-life)
 
