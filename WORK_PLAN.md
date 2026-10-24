@@ -60,8 +60,6 @@ Issues carrying `loom:curated`.
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
-- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
-- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
