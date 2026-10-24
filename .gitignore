@@ -17,6 +17,9 @@ __pycache__/
 !sim/**/corners/**/*.log
 !sim/**/mc/raw-logs/**/*.log
 sim/build/
+# staging dir for evidence bytes on their way to the artifact store
+# (scripts/store_artifacts.py); bytes are never committed, see manifests/README.md
+.artifact-scratch/
 # synthesis / P&R scratch
 flow/build/
 # local klt install, created by the setup script

@@ -759,3 +759,7 @@ re-layout work.
   canary whose construction pattern (bespoke `klayout.db` generator,
   deterministic GDSII writer options, `uv run --with klayout` invocation)
   this directory follows.
+
+## Stored evidence for new runs
+
+New run output is stored in the fleet artifact store; git keeps only a manifest and summary under `manifests/artifacts/`. See [`manifests/README.md`](../manifests/README.md).
