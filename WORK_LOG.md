@@ -3,8 +3,17 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-23
+
+- **Issue #266** (closed): snm_extract.py over-reads SNM: vertical gap, not inscribed square
+- **PR #259**: ci: pin Node to 22.23.4 (Node 20 is end-of-life)
+- **Issue #258** (closed): security: pin CI Node to 22.23.4 (node-version 20 is end-of-life)
+
 ### 2026-10-21
 
+- **PR #251**: Bump Repo Skills 0.24.3 -> 0.24.7
+- **PR #249**: layout: draw sram_ctrl and col_decode, DRC clean and LVS-matched at block level
+- **Issue #246** (closed): Layout the sram_ctrl and col_decode blocks (block-level DRC and LVS)
 - **PR #244**: layout: draw the row decoder and wordline-driver strip
 - **Issue #204** (closed): Draw row decoder and wordline driver layout, pitch-matched to the array
 - **PR #228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision

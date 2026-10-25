@@ -10,8 +10,7 @@ hand-edit that region.
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
-- **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
-- **#228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
+_None._
 
 ## Very Important
 
@@ -24,46 +23,47 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
-- **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array
+- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
 
 ## Ready
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-_None._
+- **#264**: feat: store new evidence bytes in the artifact store, commit manifests only
 
 ## Approved (Awaiting Merge)
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
-- **#228**: sim: wordline RC gate fails for the left-fed 4:1 row; propose superseding decision
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
-- **#204**: Draw row decoder and wordline driver layout, pitch-matched to the array *(curated)*
-- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
 - **#160**: T1 item 6: make the klt yield report's samples path resolve from any working directory *(curated)*
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3 *(curated)*
+- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
+- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
-_None._
+- **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)*
 
 ## Epics
 
@@ -73,14 +73,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 2 |
+| Operator merge-risk holds | 0 |
 | Very important | 0 |
 | Important | 2 |
-| Ready (`loom:issue`) | 2 |
-| In Progress (`loom:building`) | 0 |
-| PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 2 |
-| Curated | 4 |
-| Architect / Hermit proposals | 0 |
+| Ready (`loom:issue`) | 1 |
+| In Progress (`loom:building`) | 2 |
+| PRs awaiting review | 1 |
+| Approved PRs awaiting merge | 1 |
+| Curated | 6 |
+| Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
