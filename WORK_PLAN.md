@@ -24,6 +24,7 @@ _None._
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS
 
 ## Ready
 
