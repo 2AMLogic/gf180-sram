@@ -137,7 +137,9 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned g
 
 1. *Executor capability.* No batch image build verified to accept deck-list
    requests; the local `klt` source supports them, a deployed image is unverified.
-   Needed: the intended executor's installed klt/ngspice build identity (from a
+   Tool-side tracking: `2AMLogic/klayout-tools#4109` (fleet runner image still
+   rejects `decks[]` requests and a `runner_compatibility: match` report does not
+   prove otherwise; the image rebuild is an operator/infra step). Needed: the intended executor's installed klt/ngspice build identity (from a
    report's `environment`), and confirmation that `$PDK_ROOT/...` includes in
    `corner.inc` resolve on it (otherwise pass `build --pdk-dir`).
 2. *Measurement parity receipt.* Per family, one corner (or the full set) from
