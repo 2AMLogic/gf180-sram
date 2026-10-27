@@ -507,7 +507,7 @@ Filed generically against `2AMLogic/klayout-tools` per `CLAUDE.md` (1–4 predat
    (`layout/lvs_reference.py`) was a no-op on current builds and was removed
    (gf180-sram#185): the bitcell LVS now compares against
    `design/netlist/bitcell_6t.spice` unmodified, verified on the CI-pinned
-   `klayout-tools==0.6.0`. If the bulk-net naming ever regresses, that
+   `klayout-tools==0.8.0`. If the bulk-net naming ever regresses, that
    compare fails loudly.
 2. **`klt extract` is flat-only**, by design ("Flat (not hierarchical)
    extraction, deliberately") — still true today, and not what closed this

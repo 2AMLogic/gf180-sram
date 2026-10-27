@@ -155,7 +155,7 @@ What the other report fields do and do not mean:
   spec is untouched). Command (run from the repo root, ~26 min):
 
   ```sh
-  uvx --from "klayout-tools==0.6.0" klt erc \
+  uvx --from "klayout-tools==0.8.0" klt erc \
       layout/sram_256x32/sram_256x32_array.gds spec-wrongnet.json --format json
   ```
 
