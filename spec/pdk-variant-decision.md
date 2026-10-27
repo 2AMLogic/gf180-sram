@@ -251,3 +251,16 @@ numbers exactly; only the citation was ever wrong.
   strings ("0.9um thick top metal" vs "1.1um thick top metal") this record's
   diffs above are drawn from, both at `open_pdks` commit
   `c6d73a35f524070e85faff4a6a9eef49553ebc2b`.
+
+## Addendum 2026-10-15 — open_pdks re-pin to `f6eeac7` (issue #173)
+
+A fleet-wide decision moves the open_pdks revision from
+`c6d73a35f524070e85faff4a6a9eef49553ebc2b` (volare, `~/.volare`) to
+`f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (ciel 2.6.1, `~/.ciel`). The text
+above is left as written: it is a true statement about the revision it
+verified against. Going forward the pin is the single file
+`sim/lib/pdk_pin.txt`, and `sim/lib/pdk_env.sh` refuses any resolved tree
+whose revision differs (`sim/lib/test_pdk_pin.py`). The variant decision
+(`gf180mcuD`) is unchanged. Re-qualification of the records that cite the old
+revision is tracked on #173 and lands as new records; none have been re-run
+under the new pin yet, so every existing record still reads as `c6d73a3`.

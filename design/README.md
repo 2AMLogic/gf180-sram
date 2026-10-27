@@ -240,7 +240,7 @@ the existing ones.
 ## Regenerating the netlists
 
 ```bash
-export PDK_ROOT="$HOME/.volare"     # parent of gf180mcuD/ -- adjust to your install
+export PDK_ROOT="$HOME/.ciel"       # parent of gf180mcuD/ -- adjust to your install
 export PDK=gf180mcuD
 
 # 1. (Only if sram_256x32_array.sch needs to change) regenerate the array
@@ -256,7 +256,7 @@ xschem -n -x -q -r --rcfile design/xschemrc -o design/netlist design/sram_256x32
 ```
 
 `design/xschemrc` resolves the gf180mcu PDK from `GF180_PDK_PATH`, then
-`PDK_ROOT`+`PDK`, then the usual install-prefix search (volare first,
+`PDK_ROOT`+`PDK`, then the usual install-prefix search (ciel first,
 matching the convention `gf180-bandgap`'s `design/xschemrc` established for
 this org's gf180mcu canary blocks), sources the PDK's own xschemrc so the
 `nfet_03v3`/`pfet_03v3` device symbols are on the library path, and adds
@@ -306,9 +306,8 @@ schematic — regenerate and re-commit both together.
 - Python 3.14 (`generate_array.py`; stdlib only, no third-party
   dependencies)
 - PDK: `gf180mcuD`, `open_pdks` commit
-  `c6d73a35f524070e85faff4a6a9eef49553ebc2b` (same commit
-  `spec/bitcell-decision.md` verified against), installed via
-  [volare](https://github.com/efabless/volare) under `~/.volare/gf180mcuD`
+  `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (pin: `sim/lib/pdk_pin.txt`; re-pinned from `c6d73a35f524070e85faff4a6a9eef49553ebc2b` by
+  issue #173), installed via ciel 2.6.1 under `~/.ciel/gf180mcuD`
   — see `spec/pdk-variant-decision.md` for why `gf180mcuD`, not the
   `gf180mcuC` this section cited before, and why nothing above needed to be
   re-run as a result (SPICE device models are byte-identical between the
