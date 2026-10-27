@@ -26,22 +26,32 @@ refreshed report.
 ## Grader distribution discipline
 
 Regeneration and CI grade with the **released PyPI registry wheel** of
-`klayout-tools==0.7.0`, never the `klt` already on this host. Under the same
+`klayout-tools==0.8.0`, never the `klt` already on this host. Under the same
 version string, a `uv tool install git+...` snapshot or a full-checkout
 install of the klayout-tools repo can grade differently. This was observed
 live under the previous 0.5.0 pin: an 11-item-era full-repo install under
 the name "0.5.0", and the v0.5.0 tag snapshot whose bundled checklist
 predated item 11 entirely (filed upstream as klayout-tools#2216). The
 released wheel reports the git tag it was built from. For the active pin,
-`klt version --format json` reports `package_version: 0.7.0`,
-`git_tag: v0.7.0`, `is_release: true` (git commit
-`0e2362bda7309829398a35d54efaa989d5806065`, `grading_ruleset_id`
-`sha256:eb8d2ba54d1700c78f1139ac111aee598fd7bc48688ab9654fca22995b6ac25e`;
+`klt version --format json` reports `package_version: 0.8.0`,
+`git_tag: v0.8.0`, `is_release: true` (git commit
+`c572046be644e0407f693f2410f3abb799d68a3a`, `grading_ruleset_id`
+`sha256:46c446d84423b7399ee1cf957b3d49801ae4f42a0bda53da92f435776cf977c4`;
 the report's own `build` block echoes the same identity). `regenerate.sh`
 and `scripts/ci/check_signoff_freshness.py` both assert that identity
 before grading. Keep the version pin in `regenerate.sh`, the CI job,
 `check_signoff_freshness.py`, and the install hint in
-`scripts/ci/check-signoff-freshness.sh` in sync (all say `0.7.0` today).
+`scripts/ci/check-signoff-freshness.sh` in sync (all say `0.8.0` today).
+
+Re-grade on 0.8.0 (issue #275): the pin moved from 0.7.0 to 0.8.0 and the
+record was regenerated with no evidence artifact or manifest edited. **The
+verdict changed: 11/11 -> 8/11 met.** Items 1 (Design sources), 9 (Testbenches
+shipped) and 10 (Repo hygiene) now grade `unmet` / `wrong_kind`: the 0.8.0
+grader no longer accepts the placeholder citations (the native envelopes
+issue #126 cited there) for those rows. Items 2-8 and 11 stay `met`, with
+citation fields re-rendered. The spec was not relaxed and no citation was
+swapped to restore 11/11; choosing evidence of the right kind for items 1, 9
+and 10 is tracked as a follow-up issue.
 
 Re-grade on 0.7.0 (issue #194): the pin moved from 0.6.0 to 0.7.0 and the
 record was regenerated with no evidence artifact edited. **No row changed
@@ -86,7 +96,7 @@ is amended.
 
 `klt signoff` renders every T1 item either `met` (a cited, freshly-pinned,
 passing check backs it) or `unmet` with a `reason`. Today's committed
-verdict is **11/11 met, tier T1** (graded by the released `klt` 0.7.0). Read it with its caveats: four of those eleven rows
+verdict is **8/11 met, tier T1** (graded by the released `klt` 0.8.0; see "Re-grade on 0.8.0" below -- the 11/11 below was the 0.7.0 verdict). Read it with its caveats: four of those eleven rows
 (items 1, 2, 9, 10) are `met` only because issue #126 re-cited them on
 operator direction -- they are still placeholder citations: the grader accepts a citation there without checking
 that it bears on the item, so those four rows are *not* evidence for their

@@ -18,7 +18,7 @@ trap 'rm -rf "$WORK"' EXIT
 PY="uv run --with klayout python3"
 # Released klt pinned the same way signoff/regenerate.sh pins it -- never the
 # klt already on the host.
-KLT_VERSION="0.6.0"
+KLT_VERSION="0.8.0"
 KLT="uvx --from klayout-tools==$KLT_VERSION klt"
 
 ARRAY_GDS=layout/sram_256x32/sram_256x32_array.gds
