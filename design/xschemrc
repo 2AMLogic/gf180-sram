@@ -35,7 +35,7 @@ if {[info exists env(PDK)]} {
 #### established for this org's other gf180mcu canary blocks:
 ####   1. GF180_PDK_PATH (variant dir, e.g. .../gf180mcuD), if set
 ####   2. PDK_ROOT + PDK (default variant gf180mcuD if PDK unset)
-####   3. the usual install prefixes, volare first
+####   3. the usual install prefixes, ciel first
 #### Nothing here hardcodes a PDK path.
 
 if { [info exists env(GF180_PDK_PATH)] && $env(GF180_PDK_PATH) ne {} } {
@@ -47,8 +47,8 @@ if { [info exists env(GF180_PDK_PATH)] && $env(GF180_PDK_PATH) ne {} } {
 } else {
     set GF180_VARIANT {gf180mcuD}
     set GF180_ROOT {}
-    foreach candidate [list [file join $env(HOME) .volare] \
-                            [file join $env(HOME) .ciel] \
+    foreach candidate [list [file join $env(HOME) .ciel] \
+                            [file join $env(HOME) .volare] \
                             /usr/share/pdk /usr/local/share/pdk \
                             [file join $env(HOME) share pdk] /opt/pdk] {
         if { [file isdir [file join $candidate $GF180_VARIANT libs.tech xschem]] } {
@@ -65,6 +65,18 @@ if { $GF180_ROOT eq {} } {
     # The PDK ships its own xschemrc; it sets XSCHEM_LIBRARY_PATH and the
     # device symbol libraries (nfet_03v3.sym, pfet_03v3.sym, etc. -- see
     # design/README.md).
+    # Revision check (issue #173): same pin file as sim/lib/pdk_env.sh. A
+    # mismatch is reported loudly on stderr (xschem still opens, so the
+    # schematic stays editable) -- netlisting/sim go through pdk_env.sh,
+    # which refuses a mismatched tree outright.
+    set pin_file [file join [file dirname [file dirname [file normalize [info script]]]] sim lib pdk_pin.txt]
+    set fh [open $pin_file r]; set GF180_PIN [string trim [read $fh]]; close $fh
+    set resolved [file normalize [file join $GF180_ROOT $GF180_VARIANT]]
+    set GF180_FOUND {}
+    if { [regexp {/versions/([0-9a-f]{40})(/|$)} $resolved -> found] } { set GF180_FOUND $found }
+    if { $GF180_FOUND ne $GF180_PIN } {
+        puts stderr "xschemrc: PDK revision mismatch for $resolved: found '[expr {$GF180_FOUND eq {} ? {<undeterminable>} : $GF180_FOUND}]', pinned $GF180_PIN (sim/lib/pdk_pin.txt)."
+    }
     set env(PDK_ROOT) $GF180_ROOT
     set PDK_ROOT $GF180_ROOT
     set pdk_xschemrc [file join $GF180_ROOT $GF180_VARIANT libs.tech xschem xschemrc]

@@ -10,7 +10,7 @@ hand-edit that region.
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
-- **#174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+_None._
 
 ## Very Important
 
@@ -24,24 +24,26 @@ _None._
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS
 
 ## Ready
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
+_None._
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-_None._
+- **#264**: feat: store new evidence bytes in the artifact store, commit manifests only
 
 ## Approved (Awaiting Merge)
 
@@ -58,6 +60,7 @@ Issues carrying `loom:curated`.
 - **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -71,14 +74,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 0 |
 | Very important | 0 |
-| Important | 2 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 1 |
-| PRs awaiting review | 0 |
+| Important | 3 |
+| Ready (`loom:issue`) | 0 |
+| In Progress (`loom:building`) | 2 |
+| PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 1 |
-| Curated | 5 |
+| Curated | 6 |
 | Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
