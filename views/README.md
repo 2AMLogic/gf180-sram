@@ -133,7 +133,7 @@ core still has no periphery.
 `spec/sram.md` "Corner set" already takes a comparison-not-copy stance for
 Liberty; the same applies here. Read directly from the PDK's shipped
 `libs.ref/gf180mcu_fd_ip_sram/lef/gf180mcu_fd_ip_sram__sram256x8m8wm1.lef`
-(`~/.volare/gf180mcuD`) against this repo's own generated abstract:
+(`~/.ciel/gf180mcuD`) against this repo's own generated abstract:
 
 | | Foundry `sram256x8m8wm1` | This repo's `sram_256x32_array` (core) |
 |---|---|---|
@@ -178,6 +178,9 @@ macro is periphery-dominated and this array has none.
   **byte-identical** `sram_256x32_array.lef`. `views/verify.sh` deliberately
   does not pin a `--pdk-root`, so it keeps reproducing whatever this host
   actually has.
+  *Note 2026-10-27 (issue #173):* the repo pin is now `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7`
+  (`sim/lib/pdk_pin.txt`, ciel, `~/.ciel`), so the drift described above is
+  resolved going forward; the paragraph is left as the historical disclosure it was.
 - No absolute host paths in any committed artifact (the #109 rule):
   `views/reports/sram_256x32_array.socket-check.json` has no PDK-derived
   field at all (`klt socket-check` never resolves one); `views/reports/

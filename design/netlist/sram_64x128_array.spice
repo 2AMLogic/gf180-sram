@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sram_64x128_array.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/sram_64x128_array.sch
 .subckt sram_64x128_array WL0 WL1 WL2 WL3 WL4 WL5 WL6 WL7 WL8 WL9 WL10 WL11 WL12 WL13 WL14 WL15 WL16
 + WL17 WL18 WL19 WL20 WL21 WL22 WL23 WL24 WL25 WL26 WL27 WL28 WL29 WL30 WL31 WL32 WL33 WL34 WL35 WL36 WL37
 + WL38 WL39 WL40 WL41 WL42 WL43 WL44 WL45 WL46 WL47 WL48 WL49 WL50 WL51 WL52 WL53 WL54 WL55 WL56 WL57 WL58
@@ -8236,8 +8236,8 @@ XXr63c127 BL127 BLB127 WL63 VDD VSS bitcell_6t
 .ends
 
 * expanding   symbol:  bitcell_6t.sym # of pins=5
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/bitcell_6t.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/bitcell_6t.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/bitcell_6t.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/bitcell_6t.sch
 .subckt bitcell_6t BL BLB WL VDD VSS
 
 *.PININFO BL:B BLB:B WL:I VDD:B VSS:B

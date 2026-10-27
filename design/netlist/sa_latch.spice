@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sa_latch.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/sa_latch.sch
 .subckt sa_latch s_en eqn bl blb VDD VSS
 *.PININFO s_en:I eqn:I bl:B blb:B VDD:B VSS:B
 XMPA bl blb VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'
