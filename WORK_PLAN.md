@@ -30,7 +30,7 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
+_None._
 
 ## In Progress
 
@@ -76,8 +76,8 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
-| Important | 2 |
-| Ready (`loom:issue`) | 1 |
+| Important | 3 |
+| Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 1 |

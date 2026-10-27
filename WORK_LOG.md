@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-26
+
+- **PR #270**: docs(sim): cite the tool-side tracker for the deck-mode executor blocker
+
 ### 2026-10-23
 
 - **Issue #266** (closed): snm_extract.py over-reads SNM: vertical gap, not inscribed square
