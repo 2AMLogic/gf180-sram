@@ -7,7 +7,7 @@
       "content_hash": "sha256:9e550e5253f4e9729c4a86f515b0ba3392bcf1b0bbe46e093a0d5d915bc844ff"
     },
     "2": {
-      "file": "layout/reports/drc-array.json",
+      "file": "layout/layout.signoff.json",
       "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
     },
     "3": {
@@ -40,7 +40,7 @@
     },
     "10": {
       "file": "repo-hygiene.signoff.json",
-      "content_hash": "sha256:f1f66f25b1173d5ddf05e5cfe66cb9a33468c42ddb3774555f1f2261763056e9"
+      "content_hash": "sha256:b472184afc729bac4e737374ec9a28eaa53208cb8c1f9c292ff995b1b0b522c8"
     },
     "11": [
       {

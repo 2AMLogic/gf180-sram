@@ -88,53 +88,24 @@
       "reason": null,
       "graded_by_build": true,
       "citation": {
-        "file": "layout/reports/drc-array.json",
+        "file": "layout/layout.signoff.json",
         "command": null,
-        "kind": "drc",
-        "check_status": "clean",
+        "kind": "generic",
+        "check_status": "pass",
         "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925",
         "input_verified": true,
         "exit_status": 0,
-        "coverage": {
-          "layers_in_stream_without_rules": [
-            "31/0",
-            "32/0",
-            "34/10",
-            "42/10"
-          ],
-          "rules_skipped": [
-            "bjt.separation.comp.1",
-            "comp.space.mv.1",
-            "comp.width.mv.1",
-            "metal3.enclosing.via3.1",
-            "metal4.enclosing.via3.1",
-            "metal4.enclosing.via4.1",
-            "metal5.enclosing.via4.1",
-            "metal5.space.1",
-            "metal5.width.1",
-            "metaltop.space.1",
-            "metaltop.width.1",
-            "mim.enclosing.fusetop.1",
-            "mim.enclosing.via4.1",
-            "mim.space.1",
-            "pad.enclosing.metal5.1",
-            "via3.space.1",
-            "via3.width.1",
-            "via4.space.1",
-            "via4.width.1"
-          ],
-          "deck_scope": [
-            "10.4.2 MIM Option B",
-            "10.7 DRC_BJT Mark Layer",
-            "7.12 Contact",
-            "7.13 Metaln",
-            "7.14 Vian",
-            "7.15 MetalTop",
-            "7.4 Nwell",
-            "7.5 Comp",
-            "7.7 Poly2",
-            "9.1 Bond Pad"
-          ]
+        "artifact_binding": {
+          "t1_item": 2,
+          "path": "layout/sram_256x32/sram_256x32_array.gds",
+          "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925",
+          "input_verified": true,
+          "summary": "Layout attestation: the committed 256x32 array GDS stream (layout/sram_256x32/sram_256x32_array.gds), bound by path and content hash. The regeneration claim records the generator command and the hash of a fresh scratch-directory regeneration, minted by signoff/regenerate.sh; the grader compares that hash to the bound stream and echoes the generator without running it. Not proven by this envelope: that the layout is DRC- or LVS-clean (items 3 and 4 cite those reports) or that the bitcell and periphery GDS are current.",
+          "regeneration": {
+            "generator": "python3 layout/sram_256x32/generate.py",
+            "regenerated_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925",
+            "executed_by_klt": false
+          }
         }
       }
     },
@@ -434,18 +405,18 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:f1f66f25b1173d5ddf05e5cfe66cb9a33468c42ddb3774555f1f2261763056e9",
+        "content_hash": "sha256:b472184afc729bac4e737374ec9a28eaa53208cb8c1f9c292ff995b1b0b522c8",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 10,
           "path": null,
-          "content_hash": "sha256:f1f66f25b1173d5ddf05e5cfe66cb9a33468c42ddb3774555f1f2261763056e9",
+          "content_hash": "sha256:b472184afc729bac4e737374ec9a28eaa53208cb8c1f9c292ff995b1b0b522c8",
           "input_verified": true,
           "members": [
             {
               "path": "README.md",
-              "content_hash": "sha256:257118cf1dfa2c5534a69fec09c4411797b4dff09b3d00ce3049d84c579dd4a8",
+              "content_hash": "sha256:166f57e43093f67ca38aed17a5c2d87b66ef7f789f16ec3e5a81db8953b6a002",
               "status": "verified"
             },
             {
