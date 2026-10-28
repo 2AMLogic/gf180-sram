@@ -33,19 +33,52 @@ cd "$ROOT"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-# 1. Refresh the generic-evidence wrapper's pinned hash of the aggregated
-#    characterization report (T1 item 8 cites this wrapper; its pin is a
-#    pure derivation from the report it wraps, so refreshing is mechanical).
-CHAR_HASH="$(sha256sum measurements/characterization-report.md | cut -d' ' -f1)"
-python3 - "$CHAR_HASH" <<'EOF'
+# 1. Refresh the generic-evidence wrappers' pinned hashes (T1 items 1, 8, 9
+#    and 10 cite these wrappers; each pin is a pure derivation from the file
+#    or file set the wrapper names, so refreshing is mechanical). A wrapper
+#    names either one `source` file (item 8) or an anchored
+#    `provenance.input.paths` set (items 1, 9, 10), whose combined digest is
+#    klt's input_set_digest: sha256 over "<hex>  <path>\n" lines sorted
+#    bytewise by path. The block manifest pins the same hash (the wrapper's
+#    own provenance.input.content_hash).
+python3 - <<'EOF'
+import hashlib
 import json
 import pathlib
-import sys
 
-path = pathlib.Path("measurements/characterization.signoff.json")
-doc = json.loads(path.read_text())
-doc["provenance"]["input"]["content_hash"] = f"sha256:{sys.argv[1]}"
-path.write_text(json.dumps(doc, indent=2) + "\n")
+wrappers = {
+    "1": "design/design.signoff.json",
+    "8": "measurements/characterization.signoff.json",
+    "9": "sim/testbenches.signoff.json",
+    "10": "repo-hygiene.signoff.json",
+}
+
+
+def sha(path):
+    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+manifest_path = pathlib.Path("signoff/block-manifest.json")
+manifest = json.loads(manifest_path.read_text())
+for item, wrapper in wrappers.items():
+    path = pathlib.Path(wrapper)
+    doc = json.loads(path.read_text())
+    input_block = doc["provenance"]["input"]
+    if "paths" in input_block:
+        for member in input_block["paths"]:
+            member["content_hash"] = f"sha256:{sha(member['path'])}"
+        lines = "".join(
+            f"{m['content_hash'].removeprefix('sha256:')}  {m['path']}\n"
+            for m in sorted(input_block["paths"], key=lambda m: m["path"].encode())
+        )
+        digest = hashlib.sha256(lines.encode()).hexdigest()
+    else:
+        digest = sha(doc["source"])
+    input_block["content_hash"] = f"sha256:{digest}"
+    path.write_text(json.dumps(doc, indent=2) + "\n")
+    assert manifest["evidence"][item]["file"] == wrapper
+    manifest["evidence"][item]["content_hash"] = f"sha256:{digest}"
+manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 EOF
 
 # 2. Grade the block manifest with the pinned registry wheel. Exit code 3 is

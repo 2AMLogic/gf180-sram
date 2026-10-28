@@ -11,8 +11,9 @@ closed (#103, #108, #109, #110), plus the passing item-11 power-delivery ERC
 (#124). **Disclosed exception:** item 7's read/hold-SNM post-layout (PEX)
 gap (`sim/pex/README.md`). The machine grader now reads 11/11, tier T1 (`signoff/`; issue #159
 closed the item-11 tooling gap with `ties[]` and a compound ERC + LVS
-citation under the released klt 0.6.0). Items 1, 2, 9 and 10 remain
-placeholder citations.
+citation under the released klt 0.6.0; items 1, 9 and 10 cite artifact-anchored
+generic wrappers since the 0.8.0 re-grade, issue #277). Item 2 remains a
+placeholder citation.
 
 **Status: spec ratified; bitcell and 256 x 32 array are DRC-clean and
 LVS-clean (`status: match` for both — see `layout/README.md`'s "Status
@@ -116,6 +117,35 @@ labelled, and the bank-select/mux cost flagged as not yet modeled. It also
 notes, in one sentence, that the open kit has no dense NVM macro (an
 `efuse_cell` primitive only) — code storage for an MCU-class chip on this
 kit is an architecture decision, not a part the PDK provides.
+
+## Spec at a glance
+
+The ratified source is [`spec/sram.md`](spec/sram.md); this table only
+summarizes it.
+
+| Item | Target |
+|---|---|
+| Organization | 1 kB, 256 words × 32 bits, single fixed instance (a parameterized generator is a stretch goal) |
+| Ports | 1RW synchronous single port (1RW1R is a stretch goal); pin interface in `spec/macro-interface-decision.md` |
+| Deliverables | GDS, LEF abstract, Liberty timing |
+| Corner set | 27 corners: process `ff`/`tt`/`ss` × temperature -40/25/125 °C × supply 2.97/3.30/3.63 V |
+| Measured per corner | read SNM, hold SNM, write margin, read/write access time |
+| Signoff | DRC and LVS clean on the full array, and a recorded, strictly positive read SNM, hold SNM and write margin at all 27 corners |
+
+## Reproducing every result
+
+Each result class has one documented entry point. Prerequisites (ngspice, the
+pinned PDK revision, a released `klt`) are stated in the linked section.
+
+| Result | How to reproduce | Documented in |
+|---|---|---|
+| Schematics and netlists | `design/generate_array.py`, then `xschem` batch netlisting | [`design/README.md`](design/README.md) § "Regenerating the netlists" |
+| PVT corner simulations | `sim/lib/run_corner_sweep.sh` per testbench | [`sim/README.md`](sim/README.md) § "Cold-start invocation" |
+| Monte Carlo / yield | `sim/lib/run_mc_campaign.py` | [`sim/README.md`](sim/README.md) § "Running a campaign" |
+| Layout, DRC, LVS, extraction | `./layout/verify.sh` (`--quick` for a subset) | [`layout/README.md`](layout/README.md) § "Reproducing and re-checking" |
+| LEF abstract | `./views/verify.sh` | [`views/README.md`](views/README.md) § "Reproducing and re-checking" |
+| Characterization report | `python3 measurements/generate_report.py > measurements/characterization-report.md` | [`measurements/README.md`](measurements/README.md) |
+| Signoff tier verdict | `./signoff/regenerate.sh` | [`signoff/README.md`](signoff/README.md) |
 
 ## Repo layout
 
