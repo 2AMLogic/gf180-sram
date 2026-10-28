@@ -3,6 +3,16 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-28
+
+- **Issue #278** (closed): Publish full-macro LEF/GDS (and Liberty) for the 1RW 256x32 pin list
+
+### 2026-10-27
+
+- **PR #276**: chore: bump pinned klayout-tools to 0.8.0 and re-grade signoff
+- **Issue #275** (closed): Bump klayout-tools pin 0.6.0, 0.7.0 → 0.8.0
+- **PR #174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+
 ### 2026-10-26
 
 - **PR #270**: docs(sim): cite the tool-side tracker for the deck-mode executor blocker
