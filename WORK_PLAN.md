@@ -32,6 +32,7 @@ _None._
 Human-approved issues ready for implementation (`loom:issue`).
 
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
+- **#287**: Signoff scripts default repo root to parents[2], wrong if relocated deeper than sim/lib/
 
 ## In Progress
 
@@ -39,7 +40,8 @@ Issues currently being built (`loom:building`).
 
 - **#173**: Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
-- **#277**: Signoff items 1, 9, 10 unmet (wrong_kind) under klt 0.8.0
+- **#274**: Stop tracking generated array schematics (sram_256x32_array.sch, sram_64x128_array.sch): ~180k lines of regenerable output
+- **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null)
 
 ## PRs Awaiting Review
 
@@ -53,7 +55,6 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#264**: feat: store new evidence bytes in the artifact store, commit manifests only
 - **#273**: chore(pdk): default remaining scripts to ~/.ciel and add dated re-pin entries
-- **#280**: signoff: cite artifact-anchored generic wrappers for T1 items 1, 9, 10
 
 ## Proposed
 
@@ -66,6 +67,8 @@ Issues carrying `loom:curated`.
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 - **#277**: Signoff items 1, 9, 10 unmet (wrong_kind) under klt 0.8.0 *(curated)*
+- **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)*
+- **#287**: Signoff scripts default repo root to parents[2], wrong if relocated deeper than sim/lib/ *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -83,11 +86,11 @@ _None._
 | Operator merge-risk holds | 2 |
 | Very important | 0 |
 | Important | 3 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 3 |
+| Ready (`loom:issue`) | 2 |
+| In Progress (`loom:building`) | 4 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 3 |
-| Curated | 7 |
+| Approved PRs awaiting merge | 2 |
+| Curated | 8 |
 | Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
