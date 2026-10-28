@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-10-28
 
+- **PR #286**: feat(signoff): bind array GDS to T1 item 2 via generic layout envelope
+- **Issue #284** (closed): T1 item 2 (layout): replace the DRC-report placeholder with an artifact-anchored envelope binding sram_256x32_array.gds
 - **PR #280**: signoff: cite artifact-anchored generic wrappers for T1 items 1, 9, 10
 - **Issue #277** (closed): Signoff items 1, 9, 10 unmet (wrong_kind) under klt 0.8.0
 - **Issue #278** (closed): Publish full-macro LEF/GDS (and Liberty) for the 1RW 256x32 pin list
