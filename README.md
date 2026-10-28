@@ -12,8 +12,9 @@ closed (#103, #108, #109, #110), plus the passing item-11 power-delivery ERC
 gap (`sim/pex/README.md`). The machine grader now reads 11/11, tier T1 (`signoff/`; issue #159
 closed the item-11 tooling gap with `ties[]` and a compound ERC + LVS
 citation under the released klt 0.6.0; items 1, 9 and 10 cite artifact-anchored
-generic wrappers since the 0.8.0 re-grade, issue #277). Item 2 remains a
-placeholder citation.
+generic wrappers since the 0.8.0 re-grade, issue #277; item 2 cites
+`layout/layout.signoff.json`, an artifact-anchored envelope binding the array
+GDS with a regeneration claim, issue #284).
 
 **Status: spec ratified; bitcell and 256 x 32 array are DRC-clean and
 LVS-clean (`status: match` for both — see `layout/README.md`'s "Status

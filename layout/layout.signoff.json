@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "kind": "generic",
+  "t1_item": 2,
+  "status": "pass",
+  "summary": "Layout attestation: the committed 256x32 array GDS stream (layout/sram_256x32/sram_256x32_array.gds), bound by path and content hash. The regeneration claim records the generator command and the hash of a fresh scratch-directory regeneration, minted by signoff/regenerate.sh; the grader compares that hash to the bound stream and echoes the generator without running it. Not proven by this envelope: that the layout is DRC- or LVS-clean (items 3 and 4 cite those reports) or that the bitcell and periphery GDS are current.",
+  "provenance": {
+    "input": {
+      "path": "layout/sram_256x32/sram_256x32_array.gds",
+      "content_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
+    },
+    "regeneration": {
+      "generator": "python3 layout/sram_256x32/generate.py",
+      "regenerated_hash": "sha256:c566b0152f77299960486de393785470ab81e1a8d0fa5df9ec87fd5ad8d6d925"
+    }
+  }
+}

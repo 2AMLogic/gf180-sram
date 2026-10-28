@@ -33,6 +33,12 @@ cd "$ROOT"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
+# 0. The grading venv (the pinned registry wheel, which also brings the
+#    `klayout` module the layout generator needs). Created first because
+#    step 1b regenerates the array GDS with it.
+python3 -m venv "$WORK/venv"
+"$WORK/venv/bin/pip" install --quiet "klayout-tools==$KLT_VERSION"
+
 # 1. Refresh the generic-evidence wrappers' pinned hashes (T1 items 1, 8, 9
 #    and 10 cite these wrappers; each pin is a pure derivation from the file
 #    or file set the wrapper names, so refreshing is mechanical). A wrapper
@@ -81,12 +87,45 @@ for item, wrapper in wrappers.items():
 manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 EOF
 
+# 1b. Item 2 (Layout) cites layout/layout.signoff.json, an artifact-anchored
+#     generic envelope binding the committed array GDS. Its regeneration claim
+#     is minted here from a real run: the generator writes into the $WORK
+#     scratch dir and the *regenerated* output is what gets hashed, never the
+#     committed file, so the claim cannot be self-fulfilling. If the generator
+#     stops reproducing the committed stream byte-for-byte, regenerated_hash
+#     differs from the bound input hash and the grader reports stale_artifact.
+#     `generator` is echoed by klt, never executed by it.
+"$WORK/venv/bin/python" layout/sram_256x32/generate.py -o "$WORK/regen_array.gds" >/dev/null
+python3 - "$WORK/regen_array.gds" <<'EOF'
+import hashlib
+import json
+import pathlib
+import sys
+
+regen = f"sha256:{hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest()}"
+gds = "layout/sram_256x32/sram_256x32_array.gds"
+committed = f"sha256:{hashlib.sha256(pathlib.Path(gds).read_bytes()).hexdigest()}"
+
+path = pathlib.Path("layout/layout.signoff.json")
+doc = json.loads(path.read_text())
+doc["provenance"]["input"] = {"path": gds, "content_hash": committed}
+doc["provenance"]["regeneration"] = {
+    "generator": "python3 layout/sram_256x32/generate.py",
+    "regenerated_hash": regen,
+}
+path.write_text(json.dumps(doc, indent=2) + "\n")
+
+manifest_path = pathlib.Path("signoff/block-manifest.json")
+manifest = json.loads(manifest_path.read_text())
+assert manifest["evidence"]["2"]["file"] == "layout/layout.signoff.json"
+manifest["evidence"]["2"]["content_hash"] = committed
+manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+EOF
+
 # 2. Grade the block manifest with the pinned registry wheel. Exit code 3 is
 #    `klt signoff`'s documented "ran successfully, but at least one T1 item
 #    is unmet" -- expected for this block today -- so only the other exit
 #    codes (1 = bad manifest/unparseable doc, 2 = usage error) are failures.
-python3 -m venv "$WORK/venv"
-"$WORK/venv/bin/pip" install --quiet "klayout-tools==$KLT_VERSION"
 
 # The *identity* of the grading build matters as much as its version string:
 # a `uv tool install git+...` snapshot or a full-checkout install of the
