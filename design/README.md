@@ -294,6 +294,12 @@ device-sizing change to `bitcell_6t.sch`, or a `--rows`/`--cols` change),
 that means the committed netlist is stale relative to the committed
 schematic — regenerate and re-commit both together.
 
+The committed `sram_256x32_array.sch` and `sram_64x128_array.sch` are kept
+tracked deliberately (so the derivation is visible without running anything)
+but are not hand-maintained: CI's `array-schematics` job runs
+`scripts/ci/check-array-schematics.sh`, which regenerates both from
+`generate_array.py` and fails on any byte difference.
+
 ## Tool / PDK versions used
 
 - `xschem` V3.4.7 (Homebrew, macOS) for the bitcell and 256 x 32 array

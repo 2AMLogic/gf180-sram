@@ -33,18 +33,18 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:9e550e5253f4e9729c4a86f515b0ba3392bcf1b0bbe46e093a0d5d915bc844ff",
+        "content_hash": "sha256:b9dbc06a7a686e65c2a99823b988c35c2e68576e9b1ae55278a47ef98dd28478",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 1,
           "path": null,
-          "content_hash": "sha256:9e550e5253f4e9729c4a86f515b0ba3392bcf1b0bbe46e093a0d5d915bc844ff",
+          "content_hash": "sha256:b9dbc06a7a686e65c2a99823b988c35c2e68576e9b1ae55278a47ef98dd28478",
           "input_verified": true,
           "members": [
             {
               "path": "design/README.md",
-              "content_hash": "sha256:e04a3c5753568948927ab0f3cc6abebdb116433eab3a0b5ced782435fd008c79",
+              "content_hash": "sha256:4310968588023634947802bb93cbd38afeb0d4678cfdd3cbecd82e884f0120d4",
               "status": "verified"
             },
             {
@@ -405,13 +405,13 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:b472184afc729bac4e737374ec9a28eaa53208cb8c1f9c292ff995b1b0b522c8",
+        "content_hash": "sha256:0fdda06caa72a7e13e88c782e4b7d0cf30d86d50b7b0a1cd4f5c0eb4da5f8481",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 10,
           "path": null,
-          "content_hash": "sha256:b472184afc729bac4e737374ec9a28eaa53208cb8c1f9c292ff995b1b0b522c8",
+          "content_hash": "sha256:0fdda06caa72a7e13e88c782e4b7d0cf30d86d50b7b0a1cd4f5c0eb4da5f8481",
           "input_verified": true,
           "members": [
             {
@@ -426,7 +426,7 @@
             },
             {
               "path": ".github/workflows/ci.yml",
-              "content_hash": "sha256:1624200a2c97064ffdfa3ca98eaca479c9d91cd50b8e4fa496dde9efc9f9b703",
+              "content_hash": "sha256:2e8d207f42c9022e75b341b0f4bbf4b5f3d9033a68ff9ec93f942b2ff12db143",
               "status": "verified"
             }
           ],
