@@ -3,6 +3,25 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-29
+
+- **PR #283**: ci: add drift check for tracked generated array schematics
+- **Issue #274** (closed): Stop tracking generated array schematics (sram_256x32_array.sch, sram_64x128_array.sch): ~180k lines of regenerable output
+
+### 2026-10-28
+
+- **PR #286**: feat(signoff): bind array GDS to T1 item 2 via generic layout envelope
+- **Issue #284** (closed): T1 item 2 (layout): replace the DRC-report placeholder with an artifact-anchored envelope binding sram_256x32_array.gds
+- **PR #280**: signoff: cite artifact-anchored generic wrappers for T1 items 1, 9, 10
+- **Issue #277** (closed): Signoff items 1, 9, 10 unmet (wrong_kind) under klt 0.8.0
+- **Issue #278** (closed): Publish full-macro LEF/GDS (and Liberty) for the 1RW 256x32 pin list
+
+### 2026-10-27
+
+- **PR #276**: chore: bump pinned klayout-tools to 0.8.0 and re-grade signoff
+- **Issue #275** (closed): Bump klayout-tools pin 0.6.0, 0.7.0 → 0.8.0
+- **PR #174**: feat(sim): pin open_pdks f6eeac7 and reject mismatched PDK trees
+
 ### 2026-10-26
 
 - **PR #270**: docs(sim): cite the tool-side tracker for the deck-mode executor blocker

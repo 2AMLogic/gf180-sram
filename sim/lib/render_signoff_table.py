@@ -46,6 +46,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from repo_root import find_repo_root  # noqa: E402 (path-injected sibling import)
+
 # Ratified PVT matrix, spec/sram.md "Corner set" -- process x temperature x
 # voltage, 3x3x3 = 27 points. Same order sim/lib/run_corner_sweep.sh
 # iterates so every record's corner ordering already matches this.
@@ -122,8 +125,12 @@ def verdict_recorded(value: float | None) -> str:
     return "RECORDED"
 
 
+def default_repo_root() -> Path:
+    return find_repo_root(Path(__file__))
+
+
 def main() -> int:
-    repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2]
+    repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else default_repo_root()
     sim_dir = repo_root / "sim"
 
     read_snm_record = latest_record_for_claim(sim_dir / "read-snm" / "records", "read SNM")

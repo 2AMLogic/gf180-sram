@@ -26,22 +26,49 @@ refreshed report.
 ## Grader distribution discipline
 
 Regeneration and CI grade with the **released PyPI registry wheel** of
-`klayout-tools==0.7.0`, never the `klt` already on this host. Under the same
+`klayout-tools==0.8.0`, never the `klt` already on this host. Under the same
 version string, a `uv tool install git+...` snapshot or a full-checkout
 install of the klayout-tools repo can grade differently. This was observed
 live under the previous 0.5.0 pin: an 11-item-era full-repo install under
 the name "0.5.0", and the v0.5.0 tag snapshot whose bundled checklist
 predated item 11 entirely (filed upstream as klayout-tools#2216). The
 released wheel reports the git tag it was built from. For the active pin,
-`klt version --format json` reports `package_version: 0.7.0`,
-`git_tag: v0.7.0`, `is_release: true` (git commit
-`0e2362bda7309829398a35d54efaa989d5806065`, `grading_ruleset_id`
-`sha256:eb8d2ba54d1700c78f1139ac111aee598fd7bc48688ab9654fca22995b6ac25e`;
+`klt version --format json` reports `package_version: 0.8.0`,
+`git_tag: v0.8.0`, `is_release: true` (git commit
+`c572046be644e0407f693f2410f3abb799d68a3a`, `grading_ruleset_id`
+`sha256:46c446d84423b7399ee1cf957b3d49801ae4f42a0bda53da92f435776cf977c4`;
 the report's own `build` block echoes the same identity). `regenerate.sh`
 and `scripts/ci/check_signoff_freshness.py` both assert that identity
 before grading. Keep the version pin in `regenerate.sh`, the CI job,
 `check_signoff_freshness.py`, and the install hint in
-`scripts/ci/check-signoff-freshness.sh` in sync (all say `0.7.0` today).
+`scripts/ci/check-signoff-freshness.sh` in sync (all say `0.8.0` today).
+
+Re-grade on 0.8.0 (issue #275): the pin moved from 0.7.0 to 0.8.0 and the
+record was regenerated with no evidence artifact or manifest edited. **The
+verdict changed: 11/11 -> 8/11 met.** Items 1 (Design sources), 9 (Testbenches
+shipped) and 10 (Repo hygiene) now grade `unmet` / `wrong_kind`: the 0.8.0
+grader no longer accepts the placeholder citations (the native envelopes
+issue #126 cited there) for those rows. Items 2-8 and 11 stay `met`, with
+citation fields re-rendered. The spec was not relaxed and no citation was
+swapped to restore 11/11; choosing evidence of the right kind for items 1, 9
+and 10 is tracked as a follow-up issue.
+
+Re-cite on 0.8.0 (issue #277): items 1, 9 and 10 now cite artifact-anchored
+`kind: generic` wrappers (`design/design.signoff.json`,
+`sim/testbenches.signoff.json`, `repo-hygiene.signoff.json`), each declaring
+its `t1_item` and pinning a named file set through `provenance.input.paths`;
+`./signoff/regenerate.sh` refreshes those pins. The verdict is back to 11/11
+met, tier T1. Item 2 was re-cited by issue #284 (see below).
+
+Re-cite item 2 (issue #284): item 2 now cites `layout/layout.signoff.json`, a
+`kind: generic`, `t1_item: 2` envelope binding
+`layout/sram_256x32/sram_256x32_array.gds` by path and content hash, with a
+`provenance.regeneration` claim (`generator` plus `regenerated_hash`).
+`./signoff/regenerate.sh` mints the claim from a real run: it regenerates the
+array GDS into its scratch dir and hashes that output, never the committed
+file. The report row now carries `artifact_binding.input_verified: true` and a
+`regeneration` disclosure with `executed_by_klt: false` (klt echoes the
+generator, it does not run it). Item 3 keeps citing `layout/reports/drc-array.json`.
 
 Re-grade on 0.7.0 (issue #194): the pin moved from 0.6.0 to 0.7.0 and the
 record was regenerated with no evidence artifact edited. **No row changed
@@ -86,45 +113,37 @@ is amended.
 
 `klt signoff` renders every T1 item either `met` (a cited, freshly-pinned,
 passing check backs it) or `unmet` with a `reason`. Today's committed
-verdict is **11/11 met, tier T1** (graded by the released `klt` 0.7.0). Read it with its caveats: four of those eleven rows
-(items 1, 2, 9, 10) are `met` only because issue #126 re-cited them on
-operator direction -- they are still placeholder citations: the grader accepts a citation there without checking
-that it bears on the item, so those four rows are *not* evidence for their
-items (see the note after the table). Item 11 became `met` with issue #159 (the `ties[]` re-mint and the
-compound ERC + LVS citation, see its row). Without the
-operator-directed re-citations the reading is 7/11. (Historical: when this
+verdict is **11/11 met, tier T1** (graded by the released `klt` 0.8.0; see "Re-grade on 0.8.0" and "Re-cite on 0.8.0" above). Read it with its caveats: item 2 is `met` through an artifact-anchored generic envelope (issue #284): the grader checks that the array GDS re-hashes to the pin and that the regeneration claim equals it; it does not run the generator, and CI does not either. Items 1, 9 and 10 are `met` through
+artifact-anchored generic wrappers (issue #277): the grader checks that the
+named files re-hash to the pins, not that their content bears on the item, so
+the wrapper summaries state only what the files are and what the pins do not
+prove. Item 11 became `met` with issue #159 (the `ties[]` re-mint and the
+compound ERC + LVS citation, see its row). (Historical: when this
 directory was created, a mostly-`unmet` mechanical reading was the expected
 and accepted outcome, because the checklist moved on 2026-09-17 and no
 hand-read survived that change.)
 
 | Item | Verdict today | Why — and what would change it |
 |---|---|---|
-| 1 — Design sources | **met** (cited by issue #126, operator-directed) | Cites `layout/reports/lvs-array.json` (`status: match`), the one native envelope whose reference side is this item's derived netlist `design/netlist/sram_256x32_array.spice`. `klt signoff` (0.5.0, and still 0.6.0) grades this item on *some* passing native envelope being cited, not on topical relevance, and rejects `kind: generic` here (only item 8 accepts it) — so the citation satisfies the grader and does not itself prove the item; the substance is the human audit: [`design/README.md`](../design/README.md) (bitcell + array schematics, generator, byte-identical regeneration) and [`layout/README.md`](../layout/README.md). |
-| 2 — Layout | **met** (cited by issue #126, operator-directed) | Cites `layout/reports/drc-array.json`, whose `provenance.input.content_hash` pins the committed array GDS. `klt signoff` (0.5.0, and still 0.6.0) grades this item on *some* passing native envelope being cited, not on topical relevance, and rejects `kind: generic` here (only item 8 accepts it) — so the citation satisfies the grader and does not itself prove the item; the substance is the human audit: committed bitcell + array GDS, deterministically regenerated by `./layout/verify.sh` step 1. |
+| 1 — Design sources | **met** (issue #277) | Cites `design/design.signoff.json`, a `kind: generic`, `t1_item: 1` wrapper whose `provenance.input.paths` pins `design/README.md`, `design/generate_array.py`, the bitcell and 256×32 array schematics, and the netlists derived from them (`design/netlist/bitcell_6t.spice`, `sram_256x32_array.spice`). Not proven by the grader or CI: that the netlists were regenerated from the schematics -- `design/README.md` documents the commands and a hand-verified freshness check; CI does not re-run xschem. |
+| 2 — Layout | **met** (issue #284) | Cites `layout/layout.signoff.json`, a `kind: generic`, `t1_item: 2` envelope whose `provenance.input` pins `layout/sram_256x32/sram_256x32_array.gds` and whose `provenance.regeneration` records the generator (`python3 layout/sram_256x32/generate.py`) and the hash of a fresh scratch-directory regeneration, minted by `./signoff/regenerate.sh`. The grader checks that the stream re-hashes to the pin and that `regenerated_hash` equals it (`stale_artifact` otherwise); it echoes the generator without running it, and CI does not re-run the generator (`./layout/verify.sh` step 1 does). Not proven: DRC/LVS cleanliness (items 3 and 4) or the currency of the bitcell and periphery GDS. |
 | 3 — DRC clean | **met** | Cites `layout/reports/drc-array.json` — `status: clean` over the full 256×32 array, its `provenance.input.content_hash` pinning the committed array GDS byte-for-byte. Coverage disclosure, read from the report rather than assumed: the curated deck checked 9 of its 18 layers against this layout; 4 in-stream layers carry no rules (`31/0`, `32/0`, `34/10`, `42/10`) and 19 rules were skipped — and the curated deck cannot see the 5 rule families the PDK's native deck flags on the foundry's own bitcell (issue #103, `layout/reports/sram-rule-survey.md`). A "clean" from a deck with disclosed holes is disclosed here, not hidden. |
 | 4 — LVS clean | **met** | Cites `layout/reports/lvs-array.json` re-minted by issue #128 under a post-klayout-tools#1969 `klt` (that records LVS `provenance.input`): `status: match`, 49,152/49,152 devices, 16,706/16,706 nets against the committed array netlist, with the manifest's pin now the report's own `provenance.input.content_hash` (the extracted layout side's digest — the same content `environment.layout_sha256` records, which the reference netlist's `environment.reference_sha256` corroborates independently). The bitcell LVS report was re-minted the same way (`layout/reports/lvs-bitcell.json`, `status: match`). Disclosed: the pin is recorded by the minting run, not re-derived by the grader, and `klt lvs --check` cannot re-hash the layout side of a committed report whose layout netlist lived in the mint's scratch dir — same class as the DRC deck-hash pin; the extract + compare are reproducible via `layout/reports/generate.sh` steps 3-4. |
 | 5 — Full corner verification | **met** | Cites `sim/signoff-sim-envelope.json` — the minted `klt sim`-shaped envelope issue #128 asked for, transcribed verbatim from the same five append-only corner records [`sim/signoff-summary.md`](../sim/signoff-summary.md) rolls up: `status: pass` over all 27 corners, per-row worst-case (binding) corner recorded, the manifest pin equal to its `provenance.input.content_hash` (the sha256 of those five record files). It is **a minted envelope, not a live `klt sim` run** — the envelope's own `mint` block discloses this, names its five sources by path and sha256, and states the structural reason: this block's SNM and write-trip methodologies cannot be expressed as ngspice `.meas` cards over a bare circuit body, so the ratified sweep runner cannot be hosted by the verb. A mint is weaker evidence than a first-party sweep would be; the disclosure cost is paid in `sim/README.md` § "The minted `klt sim` envelope" and in CI check 6, which keeps the envelope byte-identical to `sim/lib/mint_sim_envelope.py`'s output. If a `klt sim` release ever hosts these methodologies, re-run under the verb and retire the mint. |
 | 6 — Monte Carlo evidence | **met** | Cites the read-SNM `klt yield` report re-minted by issue #128 with the #109-fixed harness (`sim/read-snm/mc/yield-reports/20260921-124232-cf5e975.json`, `status: reported` — still no `target_yield`, per `spec/target-yield-decision.md`). Its `samples` field is now repo-relative (`sim/read-snm/mc/samples/20260921-124232-cf5e975.json`), so the grader re-locates and re-hashes the samples document and the manifest pin verifies. Read SNM is cited as the most binding of the three statistical rows (its worst-case corner holds the smallest margin, 0.215 V vs hold SNM's 0.930 V and write margin's 1.641 V); the manifest's evidence shape holds one citation per item until `klt signoff` accepts compound per-item citations. All three campaigns were re-run with the same seeds, sample counts, negative controls, and corner subsets as their committed 2026-08-17 predecessors — per-instance mismatch draws differ (host ngspice RNG), and the harness-fidelity control pins each campaign to the deterministic 27-corner records exactly (`PINNED (identical)` at every corner, reproducibility preserved by recorded seeds): `sim/read-snm/mc/records/20260921-124232-cf5e975.md`, `sim/hold-snm/mc/records/20260921-124534-cf5e975.md`, `sim/write-margin/mc/records/20260921-124804-cf5e975.md`. The old yield reports stay committed (append-only) with their superseded, still-correct statistics. |
 | 7 — Post-layout verification | **met** | Cites `sim/pex/access-time/reports/read-access-time.pex.json` — `klt pex`, `status: pass`, 27/27 corners, read access time schematic-vs-extracted, `provenance.input.content_hash` pinning the committed bitcell GDS byte-for-byte. Item 7 accepts a `klt pex` report and nothing else. Disclosed: the envelope predates `klt pex`'s `body_bias` block, so the citation reports no body-bias statement at all (never "every device body was biased"); and read/hold SNM have no PEX-compatible path for a structural reason Seevinck's method imposes — fully investigated and disclosed in [`sim/pex/README.md`](../sim/pex/README.md), needing a new isolated-inverter layout deliverable rather than a re-verification. |
 | 8 — Characterization report | **met** | Cites `measurements/characterization.signoff.json` — a hand-rolled `kind: generic` envelope (the one item this wrapper is allowed to satisfy) asserting the aggregated [`characterization-report.md`](../measurements/characterization-report.md): per-spec-row values across all 27 corners plus the MC/yield summaries, with the envelope's `provenance.input.content_hash` pinning that report and CI's existing check 5 keeping it byte-identical to `measurements/generate_report.py`'s output. |
-| 9 — Testbenches shipped | **met** (cited by issue #126, operator-directed) | Cites `sim/signoff-sim-envelope.json`, minted from the committed testbenches' corner records. `klt signoff` (0.5.0, and still 0.6.0) grades this item on *some* passing native envelope being cited, not on topical relevance, and rejects `kind: generic` here (only item 8 accepts it) — so the citation satisfies the grader and does not itself prove the item; the substance is the human audit: [`sim/README.md`](../sim/README.md) inventories all five committed testbenches with the pinned PDK revision and cold-start invocation. |
-| 10 — Repo hygiene | **met** (cited by issue #126, operator-directed) | Cites `layout/reports/lvs-bitcell.json` (`status: match`), which has **no topical bearing** on hygiene — no `klt` envelope does; it is cited only so the grader renders a verdict. `klt signoff` (0.5.0, and still 0.6.0) grades this item on *some* passing native envelope being cited, not on topical relevance, and rejects `kind: generic` here (only item 8 accepts it) — so the citation satisfies the grader and does not itself prove the item; the substance is the human audit: this README, the root README, `LICENSE`, and `.github/workflows/ci.yml` running on every PR and push. |
+| 9 — Testbenches shipped | **met** (issue #277) | Cites `sim/testbenches.signoff.json`, a `kind: generic`, `t1_item: 9` wrapper pinning `sim/README.md` (inventory, pinned PDK revision, cold-start invocation), `sim/lib/pdk_pin.txt`, `sim/lib/run_corner_sweep.sh` and the committed ngspice testbenches. Not proven: that the testbenches run -- that needs ngspice and the pinned PDK, which CI does not install. |
+| 10 — Repo hygiene | **met** (issue #277) | Cites `repo-hygiene.signoff.json`, a `kind: generic`, `t1_item: 10` wrapper pinning the root `README.md` (what the block is, a spec table, a how-to-reproduce index), `LICENSE` (Apache-2.0) and `.github/workflows/ci.yml`. Not proven: that CI is green -- the pins only fix which files were attested. |
 | 11 — Power delivery (structural) | **met** (issue #159; `graded_by_build: true`) | Compound citation, a list of two reports: (a) `layout/reports/erc-array-supply.json`, a `klt erc` 0.6.0 run over the committed array GDS against `layout/sram_256x32/erc-supply-spec.json` with both ties declared -- `erc_finding_count: 0` (zero `erc.unconnected_net`, `erc.supply_short`, `erc.missing_tie`); `erc_coverage` lists `erc.missing_tie` for `nwell_tie` (Nwell 21/0, net VDD) and `substrate_tie` (`well_layer: null` + `well_boxes`, net VSS) as checked, `skipped: []`, and the substrate tie is graded `checked_by_well_assertion` (the well itself is the spec's assertion -- disclosed, falsifiable, see `layout/reports/README.md`); input `content_hash` equals the committed array GDS; the tie check was proven able to fail by a negative control (wrong tie net fires `erc.missing_tie`, recorded in `layout/reports/README.md` § "Item 11"); and (b) `layout/reports/lvs-array.json` (`status: match`, VDD/VSS paired in `net_correspondence`), pinned exactly as item 4 pins it. The ERC report is an abridged envelope that stays recognizable to the grader: it keeps a top-level `gates` list (first 4 of 16,640 entries, verbatim, `gate_count` the true total) plus `gate_role`, and keeps `erc_coverage`, `erc_findings`, `erc_finding_count` and provenance in full. Reading the rendered `power_delivery` block: `ties_checked_by_well_assertion` names the substrate tie. Full reading in `layout/reports/README.md` § "Item 11". |
 
-**Items 1, 2, 9 and 10: what `met` means here.** Until 2026-10-02 these
-items were deliberately left uncited. No `klt` verb binds to them, and
-`klt signoff` 0.5.0 accepts *any* passing native envelope for them without
-checking topical relevance, and 0.6.0 still does (the same citations still grade `met` under 0.7.0). It also rejects `kind: generic` for them (only
-item 8 accepts it). So the only way to turn them green was to cite something
-the grader cannot judge, and this directory declined to do that. On
-2026-10-02 the operator granted bronze (T1) on the human-audited record
-([`spec/t1-grant-2026-10-02.md`](../spec/t1-grant-2026-10-02.md)) and, in
-issue #126, directed that these four items be re-cited so the mechanical
-verdict tracks the granted tier. They are now cited. For these four rows,
-`met` means only that "a passing native envelope is cited". **It is not
-evidence for the item.** Items 1, 2 and 9 cite related envelopes. Item 10's
-citation (`lvs-bitcell.json`) has **no topical bearing** on repo hygiene and
-is a placeholder. For all four, the substance is still the human audit
-named in each row. When a released `klt` offers a kind that can actually
-evidence these items, re-cite them to that and retire these placeholder
-citations. The tool gap is tracked upstream at klayout-tools#2718.
+**Item 2: what `met` means here.** Until 2026-10-02 items 1, 2, 9 and 10
+were deliberately left uncited. On 2026-10-02 the operator granted bronze (T1)
+on the human-audited record ([`spec/t1-grant-2026-10-02.md`](../spec/t1-grant-2026-10-02.md))
+and, in issue #126, directed that they be re-cited. Under 0.8.0 the native
+placeholder citations stopped grading for items 1, 9 and 10 and were replaced
+by artifact-anchored generic wrappers (issue #277); item 2 followed in issue
+#284 with `layout/layout.signoff.json`. `met` there means the committed array
+GDS re-hashes to the pin and a regeneration run (minted by `regenerate.sh`)
+reproduced it byte-for-byte; the substance beyond that remains the human audit
+(`./layout/verify.sh` step 1).

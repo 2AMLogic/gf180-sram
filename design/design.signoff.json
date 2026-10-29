@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "kind": "generic",
+  "t1_item": 1,
+  "status": "pass",
+  "summary": "Design-sources attestation: the pinned set is design/README.md (which documents the regeneration commands and freshness check), the generator design/generate_array.py, the committed bitcell and 256x32 array schematics, and the netlists derived from them under design/netlist/. The pins prove these files are the ones attested; they do not prove the netlists were regenerated from the schematics -- that is documented in design/README.md and was verified by hand, CI does not re-run xschem.",
+  "provenance": {
+    "input": {
+      "content_hash": "sha256:b9dbc06a7a686e65c2a99823b988c35c2e68576e9b1ae55278a47ef98dd28478",
+      "paths": [
+        {
+          "path": "design/README.md",
+          "content_hash": "sha256:4310968588023634947802bb93cbd38afeb0d4678cfdd3cbecd82e884f0120d4"
+        },
+        {
+          "path": "design/generate_array.py",
+          "content_hash": "sha256:846e699578b6fd4eb52dbc09606095972fc0a2d5de40b9900433287d4b2be53c"
+        },
+        {
+          "path": "design/bitcell_6t.sch",
+          "content_hash": "sha256:d8eeeffae7ecc8dc244b10b2bf163edbc6a816660568ca873b5399d3385a1cea"
+        },
+        {
+          "path": "design/sram_256x32_array.sch",
+          "content_hash": "sha256:9974a9875b656b7b93a600c4ee33ab24af1d2bc5a44922a2e632e70e02c29ef7"
+        },
+        {
+          "path": "design/netlist/bitcell_6t.spice",
+          "content_hash": "sha256:0aacf0fabbf45867a1add8ff520e44d941375e817262096bbced81fa92a4948c"
+        },
+        {
+          "path": "design/netlist/sram_256x32_array.spice",
+          "content_hash": "sha256:552a097641dbe9aba0010a96d57cb601a0c9b9212a4b0e22bf0b877fcb27ba12"
+        }
+      ]
+    }
+  }
+}

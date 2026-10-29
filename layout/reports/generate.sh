@@ -306,7 +306,7 @@ hr "5. ERC: array supply + tie read vs erc-supply-spec.json (klt erc, T1 item 11
 # reported degenerate lands in erc_coverage.skipped[] and is NOT evidence.
 # Needs the released klt 0.6.0 (ties[].well_layer:null + well_boxes,
 # klayout-tools#2255; tie fix klayout-tools#2186), e.g. put
-#     uvx --from "klayout-tools==0.6.0" klt
+#     uvx --from "klayout-tools==0.8.0" klt
 # in place of `klt` below.
 ERC_SPEC=layout/sram_256x32/erc-supply-spec.json
 klt erc "$ARRAY_GDS" "$ERC_SPEC" --format json > "$WORK/erc-array-full.json" || test $? -eq 4
