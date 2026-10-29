@@ -57,8 +57,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import run_mc_campaign as mc  # noqa: E402
 import snm_extract  # noqa: E402
+from repo_root import find_repo_root  # noqa: E402
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = find_repo_root(Path(__file__))
 
 # Ratified corner matrix (spec/sram.md "Corner set"); same order as
 # run_corner_sweep.sh so unit order matches the launcher's corner order.

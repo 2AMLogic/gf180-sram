@@ -74,6 +74,7 @@ from render_signoff_table import (  # noqa: E402 (path-injected sibling import)
     latest_record_for_claim,
     parse_record,
 )
+from repo_root import find_repo_root  # noqa: E402
 
 # The five append-only corner records, in this fixed order: (response
 # measurement name, records dir under sim/, Claim substring that finds the
@@ -125,7 +126,7 @@ def _corner_parts(corner_id: str) -> dict[str, object]:
 
 
 def main() -> int:
-    repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2]
+    repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else find_repo_root(Path(__file__))
     sim_dir = repo_root / "sim"
 
     records: list[dict[str, str]] = []
