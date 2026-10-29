@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-29
+
+- **PR #283**: ci: add drift check for tracked generated array schematics
+- **Issue #274** (closed): Stop tracking generated array schematics (sram_256x32_array.sch, sram_64x128_array.sch): ~180k lines of regenerable output
+
 ### 2026-10-28
 
 - **PR #286**: feat(signoff): bind array GDS to T1 item 2 via generic layout envelope
