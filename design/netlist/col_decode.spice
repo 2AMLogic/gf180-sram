@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/col_decode.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/col_decode.sch
 .subckt col_decode aq0 aqb0 aq1 aqb1 wl_en csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 VDD
 + VSS
 *.PININFO aq0:I aqb0:I aq1:I aqb1:I wl_en:I csel0:O csel1:O csel2:O csel3:O cseln0:O cseln1:O
@@ -18,8 +18,8 @@ XXcn3 csel3 cseln3 VDD VSS inv_x16
 .ends
 
 * expanding   symbol:  nand3.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand3.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nand3.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/nand3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/nand3.sch
 .subckt nand3 a0 a1 a2 y VDD VSS
 
 *.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
@@ -45,8 +45,8 @@ XMN2 s2 a2 VSS VSS nfet_03v3 L=0.28u W=1.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18
 
 
 * expanding   symbol:  inv_x16.sym # of pins=4
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x16.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv_x16.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/inv_x16.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/inv_x16.sch
 .subckt inv_x16 a y VDD VSS
 
 *.PININFO a:I y:O VDD:B VSS:B

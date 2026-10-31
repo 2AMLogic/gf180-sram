@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/precharge_slice.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/precharge_slice.sch
 .subckt precharge_slice csel0 csel1 csel2 csel3 bl0 bl1 bl2 bl3 blb0 blb1 blb2 blb3 VDD VSS
 *.PININFO csel0:I csel1:I csel2:I csel3:I bl0:B bl1:B bl2:B bl3:B blb0:B blb1:B blb2:B blb3:B VDD:B
 *+ VSS:B
