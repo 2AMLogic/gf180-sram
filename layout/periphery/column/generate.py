@@ -362,16 +362,22 @@ class Router:
         return not (near and (near - {net}))
 
     # -- search --------------------------------------------------------
-    def _search(self, net, sources, targets):
+    def _heuristic(self, targets):
+        """A* bound: ``h(node)`` = minimum Manhattan distance to any target."""
         tl = list(targets)
-        heap: list = []
-        counter = itertools.count()
-        dist: dict[tuple, float] = {}
-        prev: dict[tuple, tuple] = {}
 
         def h(node):
             _, c, r = node
             return min(abs(c - tc) + abs(r - tr) for (_, tc, tr) in tl)
+
+        return h
+
+    def _search(self, net, sources, targets):
+        heap: list = []
+        counter = itertools.count()
+        dist: dict[tuple, float] = {}
+        prev: dict[tuple, tuple] = {}
+        h = self._heuristic(targets)
 
         for s in sorted(sources):
             st = (s, 0)
