@@ -28,9 +28,9 @@ measured". None is a Signoff criterion and no numeric target is ratified.
 | Quantity | Form | Status as of `68654da` (2026-10-29) |
 |---|---|---|
 | Bitcell area | recorded, no pass threshold | 4.46 × 5.40 µm = **24.08 µm²** (`klt stats` bbox of `layout/bitcell/sram_bitcell_6t.gds`; `layout/README.md` § "Area" reports 24.1 µm²) |
-| Per-bit area | recorded, no pass threshold | **24.16 µm²/bit**, storage-array core only (143.15 × 1382.4 µm = 197,890.6 µm² over 8192 bits) |
-| Macro area | recorded, no pass threshold | **not yet measured** for the full 1RW macro. The only LEF, `views/sram_256x32_array.lef` (`SIZE 143.1500 BY 1382.4000`, ≈ 0.198 mm²), is the storage-array core with no periphery (322 pins, not the 37-pin macro interface; `views/README.md` § "Scope"), so it is not the macro's area |
-| Minimum clock pulse | recorded, no pass threshold | **not yet measured** — shortest `CLK` high/low width at which the macro still completes a correct read/write, per corner. No testbench exists |
+| Per-bit area | recorded, no pass threshold | **24.16 µm²/bit**, storage-array core only (143.15 × 1382.4 µm = 197,890.6 µm² over 8192 bits), from the 256 × 32 tiling (`views/sram_256x32_array.lef` / `layout/sram_256x32/`). The floorplanned 64 × 128 array (`layout/sram_64x128/sram_64x128_array.gds`, 571.31 × 345.60 µm, 24.10 µm²/bit) also exists; both are core-only |
+| Macro area | recorded, no pass threshold | **not yet measured** for the full 1RW macro. The only LEF, `views/sram_256x32_array.lef` (`SIZE 143.1500 BY 1382.4000`, ≈ 0.198 mm²), is the storage-array core with no periphery (322 core pins — 256 `WL`, 32 `BL`, 32 `BLB`, `VDD`, `VSS` — and no periphery; `views/README.md` § "Scope"), so it is not the macro's area. This repo's macro interface is 109 pins (107 signals + `VDD`/`VSS`; `spec/periphery-architecture.md` § pin placement, `spec/macro-interface-decision.md`) |
+| Minimum clock pulse | recorded, no pass threshold | **not yet measured** — shortest `CLK` high/low width at which the macro still completes a correct read/write, per corner. No minimum-pulse testbench exists; the one demonstrated operating point is `CLK` 10 ns high / 10 ns low, passing at 27 corners (`sim/macro-smoke`), which is not a minimum-pulse measurement |
 | Power (leakage; dynamic per access) | recorded, no pass threshold | **not yet measured** — per corner. No power testbench exists |
 
 Area figures above are arithmetic on the cited bbox/`SIZE` values (not
@@ -92,6 +92,6 @@ itself.
   "recorded, no number" precedent followed here.
 - `views/sram_256x32_array.lef`, `layout/bitcell/sram_bitcell_6t.gds`,
   `layout/README.md` § "Area" and § "Tool / PDK versions" — area sources
-  (both files last changed at `2408c71`; figures read at `68654da`).
+  (`views/sram_256x32_array.lef` last changed at `2408c71`; `layout/bitcell/sram_bitcell_6t.gds` last changed at `c9faa82`, 2026-08-22; both unchanged through `68654da`, where the figures were read).
 - `spec/periphery-architecture.md` — the periphery absent from the LEF core.
 - `ratification/market-key/comps/sram.md` — foundry comparison rows.
