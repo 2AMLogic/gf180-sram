@@ -262,3 +262,14 @@ tooling, not a competing deliverable.
   `klt pdk list`, `klt pdk cells --pdk gf180mcuC`.
 - gf180mcu-pdk (Google/GlobalFoundries open PDK), Apache License 2.0 header
   in `gf180mcu_fd_ip_sram__sram64x8m8wm1.spice`.
+
+
+## Addendum 2026-10-27 — open_pdks re-pin to `f6eeac7` (issue #173)
+
+The PDK revision cited in the PDK listing and references above (`c6d73a35f524070e85faff4a6a9eef49553ebc2b`,
+`~/.volare`) is left as written; it is a true statement about the tree it was
+read from. The repo pin is now `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7`
+(ciel 2.6.1, `~/.ciel`), defined once in `sim/lib/pdk_pin.txt` and enforced by
+`sim/lib/pdk_env.sh`; see the addendum in `spec/pdk-variant-decision.md`.
+Anything here read from `~/.volare` should be re-read from `~/.ciel`
+when next relied on. Re-qualification of the records is tracked on #272.

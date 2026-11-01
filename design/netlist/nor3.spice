@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/nor3.sch
 .subckt nor3 a0 a1 a2 y VDD VSS
 *.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
 XMP0 t1 a0 VDD VDD pfet_03v3 L=0.28u W=2u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as='int((nf+2)/2) * W/nf * 0.18u'

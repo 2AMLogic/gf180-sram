@@ -196,13 +196,36 @@ if [ "${2:-}" = "--native" ]; then
   # failure mode klayout-tools#1302 documented).
   hr "0n. column path vs the PDK's native DRC deck (klt drc --engine klayout)"
   RUN_DRC=""
-  for root in "${PDK_ROOT:-}" "$HOME/.volare" "$HOME/.ciel"; do
+  PDK_PIN="$(tr -d '[:space:]' < sim/lib/pdk_pin.txt)"
+  for root in "${PDK_ROOT:-}" "$HOME/.ciel" "$HOME/.volare"; do
     if [ -n "$root" ] && [ -f "$root/gf180mcuD/libs.tech/klayout/tech/drc/run_drc.py" ]; then
       RUN_DRC="$root/gf180mcuD/libs.tech/klayout/tech/drc/run_drc.py"
+      PDK_FOUND_ROOT="$root"
       break
     fi
   done
-  [ -n "$RUN_DRC" ] || { echo "no gf180mcuD tech/drc/run_drc.py under \$PDK_ROOT, ~/.volare or ~/.ciel" >&2; exit 1; }
+  [ -n "$RUN_DRC" ] || { echo "no gf180mcuD tech/drc/run_drc.py under \$PDK_ROOT, ~/.ciel or ~/.volare" >&2; exit 1; }
+  # Same revision check as sim/lib/pdk_env.sh: the tree's open_pdks revision
+  # (a /versions/<sha>/ path component, else its SOURCES file) must be the pin.
+  PDK_RESOLVED="$(cd "$PDK_FOUND_ROOT/gf180mcuD" && pwd -P)"
+  PDK_FOUND_REV=""
+  case "$PDK_RESOLVED" in
+    */versions/*) PDK_FOUND_REV="${PDK_RESOLVED#*/versions/}"; PDK_FOUND_REV="${PDK_FOUND_REV%%/*}" ;;
+  esac
+  if ! [[ "$PDK_FOUND_REV" =~ ^[0-9a-f]{40}$ ]]; then
+    PDK_FOUND_REV=""
+    for src in "$PDK_FOUND_ROOT/gf180mcuD/SOURCES" "$PDK_RESOLVED/../SOURCES"; do
+      if [ -f "$src" ]; then
+        PDK_FOUND_REV="$(grep -Eo '[0-9a-f]{40}' "$src" | head -n1 || true)"
+        [ -n "$PDK_FOUND_REV" ] && break
+      fi
+    done
+  fi
+  if [ "$PDK_FOUND_REV" != "$PDK_PIN" ]; then
+    echo "PDK revision mismatch for $PDK_FOUND_ROOT/gf180mcuD: found open_pdks '${PDK_FOUND_REV:-<undeterminable>}', pinned $PDK_PIN (sim/lib/pdk_pin.txt)." >&2
+    echo "install the pin with: ciel enable --pdk-family gf180mcu -l gf180mcu_fd_pr $PDK_PIN (PDK root ~/.ciel)" >&2
+    exit 1
+  fi
   mkdir -p "$WORK/native"
   uv run --with docopt --with klayout python3 "$RUN_DRC" --macro_gen --variant=D \
     --run_dir="$WORK/native" --path="$COLUMN_DIR/io_slice.gds" > "$WORK/native/macro_gen.log" 2>&1 \

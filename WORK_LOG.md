@@ -3,8 +3,14 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-31
+
+- **PR #296**: Bump Repo Skills 0.24.7 -> 0.25.1
+
 ### 2026-10-29
 
+- **PR #289**: fix(sim): find repo root by .git marker instead of parents[2]
+- **Issue #287** (closed): Signoff scripts default repo root to parents[2], wrong if relocated deeper than sim/lib/
 - **PR #283**: ci: add drift check for tracked generated array schematics
 - **Issue #274** (closed): Stop tracking generated array schematics (sram_256x32_array.sch, sram_64x128_array.sch): ~180k lines of regenerable output
 

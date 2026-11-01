@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/io_slice.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/io_slice.sch
 .subckt io_slice csel0 csel1 csel2 csel3 cseln0 cseln1 cseln2 cseln3 d_in wen_in clk q_clk s_en
 + wl_en_n wpn q_out bl0 bl1 bl2 bl3 blb0 blb1 blb2 blb3 VDD VSS
 *.PININFO csel0:I csel1:I csel2:I csel3:I cseln0:I cseln1:I cseln2:I cseln3:I d_in:I wen_in:I clk:I
@@ -19,8 +19,8 @@ XXfq mbl q_clk q_out qnc VDD VSS dff
 .ends
 
 * expanding   symbol:  tg_mux.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_mux.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_mux.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/tg_mux.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/tg_mux.sch
 .subckt tg_mux a en enb b VDD VSS
 
 *.PININFO a:I en:I enb:I b:B VDD:B VSS:B
@@ -34,8 +34,8 @@ XMP a enb b VDD pfet_03v3 L=0.28u W=3u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as
 
 
 * expanding   symbol:  dff.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/dff.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/dff.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/dff.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/dff.sch
 .subckt dff d clk q qb VDD VSS
 
 *.PININFO d:I clk:I q:O qb:O VDD:B VSS:B
@@ -53,8 +53,8 @@ XXtsf qb ckb ckp s VDD VSS tg_s
 
 
 * expanding   symbol:  wdrv.sym # of pins=7
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/wdrv.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/wdrv.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/wdrv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/wdrv.sch
 .subckt wdrv d wen wpn bl blb VDD VSS
 
 *.PININFO d:I wen:I wpn:I bl:B blb:B VDD:B VSS:B
@@ -71,8 +71,8 @@ XXpr wen wpn dn pr VDD VSS nor3
 
 
 * expanding   symbol:  sa_latch.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sa_latch.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/sa_latch.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/sa_latch.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/sa_latch.sch
 .subckt sa_latch s_en eqn bl blb VDD VSS
 
 *.PININFO s_en:I eqn:I bl:B blb:B VDD:B VSS:B
@@ -101,8 +101,8 @@ XMPE2 blb eqn VDD VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.1
 
 
 * expanding   symbol:  inv.sym # of pins=4
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/inv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/inv.sch
 .subckt inv a y VDD VSS
 
 *.PININFO a:I y:O VDD:B VSS:B
@@ -116,8 +116,8 @@ XMN y a VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' 
 
 
 * expanding   symbol:  tg_s.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_s.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_s.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/tg_s.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/tg_s.sch
 .subckt tg_s a en enb b VDD VSS
 
 *.PININFO a:I en:I enb:I b:B VDD:B VSS:B
@@ -131,8 +131,8 @@ XMP a enb b VDD pfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' as
 
 
 * expanding   symbol:  nor3.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/nor3.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/nor3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/nor3.sch
 .subckt nor3 a0 a1 a2 y VDD VSS
 
 *.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B

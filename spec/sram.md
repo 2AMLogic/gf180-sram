@@ -241,3 +241,14 @@ to make a failing corner disappear.
   `spec/bitcell-decision.md`) — the foundry IP's pin list, view set, and
   15-corner Liberty characterization used above as comparison points, not
   copied targets.
+
+
+## Addendum 2026-10-27 — open_pdks re-pin to `f6eeac7` (issue #173)
+
+The PDK revision cited in the PDK-reference list above (`c6d73a35f524070e85faff4a6a9eef49553ebc2b`,
+`~/.volare`) is left as written; it is a true statement about the tree it was
+read from. The repo pin is now `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7`
+(ciel 2.6.1, `~/.ciel`), defined once in `sim/lib/pdk_pin.txt` and enforced by
+`sim/lib/pdk_env.sh`; see the addendum in `spec/pdk-variant-decision.md`.
+Anything here read from `~/.volare` should be re-read from `~/.ciel`
+when next relied on. Re-qualification of the records is tracked on #272.
