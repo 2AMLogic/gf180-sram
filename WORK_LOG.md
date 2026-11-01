@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-01
+
+- **PR #273**: chore(pdk): default remaining scripts to ~/.ciel and add dated re-pin entries
+- **Issue #173** (closed): Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
+
 ### 2026-10-31
 
 - **PR #296**: Bump Repo Skills 0.24.7 -> 0.25.1
