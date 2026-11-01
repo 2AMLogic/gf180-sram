@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/dff.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/dff.sch
 .subckt dff d clk q qb VDD VSS
 *.PININFO d:I clk:I q:O qb:O VDD:B VSS:B
 XXckb clk ckb VDD VSS inv
@@ -14,8 +14,8 @@ XXtsf qb ckb ckp s VDD VSS tg_s
 .ends
 
 * expanding   symbol:  inv.sym # of pins=4
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/inv.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/inv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/inv.sch
 .subckt inv a y VDD VSS
 
 *.PININFO a:I y:O VDD:B VSS:B
@@ -29,8 +29,8 @@ XMN y a VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' 
 
 
 * expanding   symbol:  tg_s.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_s.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/tg_s.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/tg_s.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/tg_s.sch
 .subckt tg_s a en enb b VDD VSS
 
 *.PININFO a:I en:I enb:I b:B VDD:B VSS:B

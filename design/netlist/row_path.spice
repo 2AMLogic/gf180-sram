@@ -1,4 +1,4 @@
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/row_path.sch
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/row_path.sch
 .subckt row_path aq2 aq3 aq4 aq5 aq6 aq7 aqb2 aqb3 aqb4 aqb5 aqb6 aqb7 wl_en wl0 wl1 wl2 wl3 wl4 wl5
 + wl6 wl7 wl8 wl9 wl10 wl11 wl12 wl13 wl14 wl15 wl16 wl17 wl18 wl19 wl20 wl21 wl22 wl23 wl24 wl25 wl26
 + wl27 wl28 wl29 wl30 wl31 wl32 wl33 wl34 wl35 wl36 wl37 wl38 wl39 wl40 wl41 wl42 wl43 wl44 wl45 wl46 wl47
@@ -92,8 +92,8 @@ XXrow63 ph7 pl7 wl63 VDD VSS rowdrv
 .ends
 
 * expanding   symbol:  and4.sym # of pins=7
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and4.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and4.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/and4.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/and4.sch
 .subckt and4 a0 a1 a2 a3 y VDD VSS
 
 *.PININFO a0:I a1:I a2:I a3:I y:O VDD:B VSS:B
@@ -131,8 +131,8 @@ XMNO y nb VSS VSS nfet_03v3 L=0.28u W=1u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u' 
 
 
 * expanding   symbol:  and3.sym # of pins=6
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and3.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/and3.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/and3.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/and3.sch
 .subckt and3 a0 a1 a2 y VDD VSS
 
 *.PININFO a0:I a1:I a2:I y:O VDD:B VSS:B
@@ -164,8 +164,8 @@ XMNO y nb VSS VSS nfet_03v3 L=0.28u W=0.5u nf=1 ad='int((nf+1)/2) * W/nf * 0.18u
 
 
 * expanding   symbol:  rowdrv.sym # of pins=5
-** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/rowdrv.sym
-** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-203/design/rowdrv.sch
+** sym_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/rowdrv.sym
+** sch_path: /home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-173/design/rowdrv.sch
 .subckt rowdrv a0 a1 y VDD VSS
 
 *.PININFO a0:I a1:I y:O VDD:B VSS:B

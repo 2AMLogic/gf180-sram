@@ -11,7 +11,7 @@
 # pin list keeps its '+' continuation lines.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export PDK_ROOT="${PDK_ROOT:-$HOME/.volare}" PDK="${PDK:-gf180mcuD}"
+export PDK_ROOT="${PDK_ROOT:-$HOME/.ciel}" PDK="${PDK:-gf180mcuD}"
 
 python3 design/generate_array.py --rows 64 --cols 128 --out design/sram_64x128_array.sch
 python3 design/generate_periphery.py --outdir design
