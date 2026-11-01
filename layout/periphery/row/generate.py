@@ -64,9 +64,7 @@ from __future__ import annotations
 
 import argparse
 import bisect
-import heapq
 import importlib.util
-import itertools
 import os
 import sys
 
@@ -137,7 +135,7 @@ def X(c):
 # node, which is quadratic once a net owns a 500-node trunk)
 # ---------------------------------------------------------------------------
 class FastRouter(col.Router):
-    def _search(self, net, sources, targets):
+    def _heuristic(self, targets):
         bycol: dict[int, list[int]] = {}
         for (_, c, r) in targets:
             bycol.setdefault(c, []).append(r)
@@ -162,56 +160,7 @@ class FastRouter(col.Router):
                 best = min(best, dc + dr)
             return best
 
-        heap: list = []
-        counter = itertools.count()
-        dist: dict[tuple, float] = {}
-        prev: dict[tuple, tuple] = {}
-        for s in sorted(sources):
-            st = (s, 0)
-            dist[st] = 0.0
-            heapq.heappush(heap, (h(s), next(counter), 0.0, st))
-        while heap:
-            _, _, g, st = heapq.heappop(heap)
-            if g > dist.get(st, 1e18) + 1e-12:
-                continue
-            node, vflag = st
-            if node in targets:
-                path = [node]
-                cur = st
-                while cur in prev:
-                    cur = prev[cur]
-                    path.append(cur[0])
-                path.reverse()
-                return path
-            l, c, r = node
-            moves = []
-            for dc, dr in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                nb = (l, c + dc, r + dr)
-                if self.node_ok(nb, net) and self.edge_ok(node, nb, net):
-                    moves.append((nb, col._STEP[(l, dr == 0)], 0))
-            if not vflag:
-                for dl in (1, -1):
-                    nl = l + dl
-                    if nl < 0 or nl > 2:
-                        continue
-                    lo = min(l, nl)
-                    if lo == col.M1 and (c, r) in self.noviablock:
-                        continue
-                    if lo == col.M1 and (c, r) in self.via2:
-                        continue
-                    if lo == col.M2 and (c, r) in self.via1:
-                        continue
-                    nb = (nl, c, r)
-                    if self.node_ok(nb, net):
-                        moves.append((nb, col.VIA_COST, 1))
-            for nb, cost, nf in moves:
-                ns = (nb, nf)
-                ng = g + cost
-                if ng < dist.get(ns, 1e18) - 1e-12:
-                    dist[ns] = ng
-                    prev[ns] = st
-                    heapq.heappush(heap, (ng + h(nb), next(counter), ng, ns))
-        return None
+        return h
 
 
 # ---------------------------------------------------------------------------
