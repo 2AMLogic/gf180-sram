@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-10-31
+
+- **PR #296**: Bump Repo Skills 0.24.7 -> 0.25.1
+
 ### 2026-10-29
 
 - **PR #289**: fix(sim): find repo root by .git marker instead of parents[2]
