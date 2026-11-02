@@ -16,13 +16,12 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 `loom:very-important` (one counts per workspace); every stage takes these first.
 
-_None._
+- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
 
 ## Important
 
 `loom:important`; taken before unlabelled work.
 
-- **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS
 
 ## Ready
@@ -75,8 +74,8 @@ _None._
 | Bucket | Count |
 |------|-------|
 | Operator merge-risk holds | 1 |
-| Very important | 0 |
-| Important | 2 |
+| Very important | 1 |
+| Important | 1 |
 | Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 1 |
