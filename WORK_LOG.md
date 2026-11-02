@@ -5,6 +5,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-01
 
+- **PR #300**: refactor: share router A* search, override only the heuristic in FastRouter
+- **Issue #299** (closed): Dedupe FastRouter._search: ~50-line copy of the column A* router differing only in heuristic
 - **PR #273**: chore(pdk): default remaining scripts to ~/.ciel and add dated re-pin entries
 - **Issue #173** (closed): Re-pin open_pdks to f6eeac7 (ciel) — fleet retires volare c6d73a3
 
