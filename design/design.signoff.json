@@ -6,11 +6,11 @@
   "summary": "Design-sources attestation: the pinned set is design/README.md (which documents the regeneration commands and freshness check), the generator design/generate_array.py, the committed bitcell and 256x32 array schematics, and the netlists derived from them under design/netlist/. The pins prove these files are the ones attested; they do not prove the netlists were regenerated from the schematics -- that is documented in design/README.md and was verified by hand, CI does not re-run xschem.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:b9dbc06a7a686e65c2a99823b988c35c2e68576e9b1ae55278a47ef98dd28478",
+      "content_hash": "sha256:1156d4d978470aa0951e111e25ce87cb5b452595326cdb8380cebfede54dd60c",
       "paths": [
         {
           "path": "design/README.md",
-          "content_hash": "sha256:4310968588023634947802bb93cbd38afeb0d4678cfdd3cbecd82e884f0120d4"
+          "content_hash": "sha256:6adf0cc18130abaa88fa05acc9aedc7a5152fb4b7dcae29b46bcb2ef25f6d5e5"
         },
         {
           "path": "design/generate_array.py",

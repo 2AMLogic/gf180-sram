@@ -4,7 +4,7 @@
   "evidence": {
     "1": {
       "file": "design/design.signoff.json",
-      "content_hash": "sha256:b9dbc06a7a686e65c2a99823b988c35c2e68576e9b1ae55278a47ef98dd28478"
+      "content_hash": "sha256:1156d4d978470aa0951e111e25ce87cb5b452595326cdb8380cebfede54dd60c"
     },
     "2": {
       "file": "layout/layout.signoff.json",
