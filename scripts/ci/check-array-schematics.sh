@@ -10,6 +10,10 @@
 # the committed copy trustworthy: it regenerates each one into a temp dir and
 # fails on any byte difference. Needs only python3 (no xschem, no klt).
 # Keep the rows/cols below in step with design/regen_periphery.sh.
+#
+# It also runs design/check_macro_pins.py against the committed macro netlist
+# (design/netlist/sram_256x32.spice), so the macro-boundary pin list that
+# design/README.md relies on is actually asserted in CI (stdlib python only).
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
@@ -31,6 +35,11 @@ for spec in "sram_256x32_array 256 32" "sram_64x128_array 64 128"; do
         status=1
     fi
 done
+
+if ! python3 design/check_macro_pins.py; then
+    echo "PIN LIST: design/netlist/sram_256x32.spice does not match the #198 macro pin list" >&2
+    status=1
+fi
 
 if [[ $status -ne 0 ]]; then
     echo "Regenerate and commit: python3 design/generate_array.py --rows R --cols C --out design/<name>.sch" >&2

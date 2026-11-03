@@ -132,7 +132,7 @@ chosen by this issue (the record sizes nothing); none is optimised.
 design/
   generate_periphery.py     generator for everything below (stdlib only)
   regen_periphery.sh        generator + `klt netlist` for every block (--check = drift gate)
-  check_macro_pins.py       asserts the macro netlist's ports == the #198 pin list
+  check_macro_pins.py       asserts macro netlist ports == #198 pin list (CI: check-array-schematics.sh)
   xschemrc.lvs              xschemrc + `lvs_netlist 1` (live top-level .subckt)
   sram_64x128_array.sch/.sym  the 4:1 physical array (generate_array.py --rows 64 --cols 128)
   sram_256x32.sch           macro top (LVS reference): netlist/sram_256x32.spice
