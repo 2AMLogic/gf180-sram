@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-03
+
+- **PR #306**: ci: run check_macro_pins.py from the array-schematics drift gate
+- **Issue #304** (closed): check_macro_pins.py is documented as a guard but never runs: wire it into CI or delete it
+
 ### 2026-11-01
 
 - **PR #300**: refactor: share router A* search, override only the heuristic in FastRouter
