@@ -64,6 +64,7 @@ Issues carrying `loom:curated`.
 ## Proposed (Architect / Hermit)
 
 - **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)*
+- **#304**: check_macro_pins.py is documented as a guard but never runs: wire it into CI or delete it *(hermit)*
 
 ## Epics
 
@@ -81,6 +82,6 @@ _None._
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 7 |
-| Architect / Hermit proposals | 1 |
+| Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
