@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-04
+
+- **PR #294**: docs(spec): record area, min clock pulse and power as no-threshold rows
+- **Issue #293** (closed): spec: no area, min-clock-pulse or power rows in spec/sram.md
+
 ### 2026-11-03
 
 - **PR #306**: ci: run check_macro_pins.py from the array-schematics drift gate
