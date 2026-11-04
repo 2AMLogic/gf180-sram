@@ -192,6 +192,15 @@ count. The foundry IP's per-corner Liberty data remains the
 reference/comparison dataset this repo's own results are checked against, per
 `spec/bitcell-decision.md`'s "Consequence for spec."
 
+### Recorded quantities (no pass threshold)
+
+Area (bitcell, per bit, macro), minimum clock pulse, and power (leakage,
+dynamic per access) are **recorded, not gated**: each is reported with its
+source file and commit, or stated as "not yet measured", and none is a Signoff
+criterion or a ratified target. Current figures and their status are in
+`spec/area-clock-pulse-power-decision.md`. Proposed for ratification via PR
+approval; this paragraph does not claim ratification of itself.
+
 ### Signoff definition
 
 Combining with the existing DRAFT table's Signoff row: this macro is
@@ -220,6 +229,11 @@ to make a failing corner disappear.
   write-pulse width with no independent macro timing target. Amends only
   the write-margin bullet above; no re-run of any committed write-margin
   evidence was required.
+- `spec/area-clock-pulse-power-decision.md` — resolves #293, the decision
+  record (proposed) carrying area, minimum clock pulse and power as
+  "recorded, no pass threshold" rows. Additive only: it adds the "Recorded
+  quantities" subsection above and changes no corner, axis, or Signoff
+  threshold.
 - `README.md`, "Target specification (DRAFT...)" section — the pre-existing
   draft table this record ratifies and supersedes.
 - `libs.ref/gf180mcu_fd_ip_sram/` under `~/.volare/gf180mcu{A,B,C,D}`

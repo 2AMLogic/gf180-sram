@@ -96,3 +96,9 @@ Ratified spec and decision records for this block.
   operator's preferred candidate (2026-10-19), with its cost and its unresolved
   write-waveform margin concern, and a later validation matrix. One corner, a
   Builder-stated criterion, no timing qualified, no ratified value changed.
+- [`area-clock-pulse-power-decision.md`](area-clock-pulse-power-decision.md) —
+  resolves #293: carries bitcell/per-bit/macro area, minimum clock pulse and
+  power as "recorded, no pass threshold" rows. Array-core area is derived from
+  the LEF/GDS (24.08 µm² bitcell, 24.16 µm²/bit core, no periphery); macro
+  area, minimum pulse and power are "not yet measured". Proposed, not
+  ratified; no existing row, corner or Signoff threshold changes.
