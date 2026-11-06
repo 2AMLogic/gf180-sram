@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-06
+
+- **PR #311**: sim: add bitcell standby-leakage bench with 27-corner klt sim record
+- **Issue #310** (closed): sim: add a klt sim bitcell standby-leakage bench over the 27 corners (recorded Power row)
+
 ### 2026-11-04
 
 - **PR #294**: docs(spec): record area, min clock pulse and power as no-threshold rows
