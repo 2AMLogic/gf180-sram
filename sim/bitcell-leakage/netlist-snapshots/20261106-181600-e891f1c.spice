@@ -1,0 +1,30 @@
+* Bitcell standby leakage -- klt sim circuit BODY (issue #310).
+*
+* One bitcell_6t in precharged standby: WL = 0 V, BL = BLB = VDD, stored
+* Q=1/QB=0. bitcell_6t.spice is `.include`d flat (its .subckt wrapper is
+* commented out by xschem's netlister, see sim/write-margin/testbench/
+* tb_write_margin.spice), so the cell hangs directly on nodes VDD/VSS/BL/BLB/WL
+* and its internal nodes are Q/QB. The bit lines are driven by separate B
+* sources, so -I(VVDD) is the cell's VDD-rail leakage only (bit-line / access
+* transistor leakage is supplied by the B sources and is NOT in that figure).
+* Process/temperature come from the request's corners, the supply from its
+* corners.supply_v.vvdd axis (alters VVDD). Request: requests/bitcell_leakage.json.
+.include '../../../design/netlist/bitcell_6t.spice'
+
+* PDK default params normally supplied by design.ngspice (via corner.inc)
+.param sw_stat_global=0
+.param sw_stat_mismatch=0
+.param mc_skew=3
+.param res_mc_skew=3
+.param cap_mc_skew=3
+.param fnoicor=0
+
+VVDD VDD 0 DC 3.3
+* VSS is the flat netlist's ground pin: tie it to node 0
+VVSS VSS 0 DC 0
+VWL WL 0 DC 0
+BBL BL 0 V='v(VDD)'
+BBLB BLB 0 V='v(VDD)'
+* .nodeset (not .ic) selects the Q=1 state of the bistable cell for the .op solve;
+* the v_q / v_qb measurements confirm the cell actually settled there.
+.nodeset v(Q)=3.3 v(QB)=0

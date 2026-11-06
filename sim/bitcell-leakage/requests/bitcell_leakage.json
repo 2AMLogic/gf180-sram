@@ -1,0 +1,66 @@
+{
+  "netlist": "../testbench/tb_bitcell_leakage.klt.spice",
+  "engine": "ngspice",
+  "models": {
+    "lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+  },
+  "corners": {
+    "process": [
+      {
+        "name": "ff",
+        "sections": [
+          "ff"
+        ]
+      },
+      {
+        "name": "tt",
+        "sections": [
+          "typical"
+        ]
+      },
+      {
+        "name": "ss",
+        "sections": [
+          "ss"
+        ]
+      }
+    ],
+    "supply_v": {
+      "vvdd": [
+        2.97,
+        3.3,
+        3.63
+      ]
+    },
+    "temperature_c": [
+      -40,
+      25,
+      125
+    ]
+  },
+  "analysis": {
+    "kind": "op",
+    "args": ""
+  },
+  "measurements": [
+    {
+      "name": "i_leak_vdd",
+      "expr": "-i(vvdd)",
+      "unit": "A"
+    },
+    {
+      "name": "v_q",
+      "expr": "v(q)",
+      "unit": "V"
+    },
+    {
+      "name": "v_qb",
+      "expr": "v(qb)",
+      "unit": "V"
+    }
+  ],
+  "netlist_source": "schematic",
+  "options": {
+    "timeout_s": 120
+  }
+}
