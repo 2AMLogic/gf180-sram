@@ -50,6 +50,9 @@ jobs:
       - name: Validate sim/ layout/ measurements/ evidence-record format
         run: ./scripts/ci/check-evidence-format.sh
 
+      - name: Validate stored-evidence manifests (artifact: URIs, no committed bytes)
+        run: ./scripts/ci/check-artifact-manifests.sh
+
   signoff:
     name: klt signoff (T1 tier-verdict freshness)
     runs-on: ubuntu-latest
