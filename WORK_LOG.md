@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-07
+
+- **PR #313**: Bump Repo Skills 0.25.1 -> 0.25.10
+
 ### 2026-11-06
 
 - **PR #311**: sim: add bitcell standby-leakage bench with 27-corner klt sim record
