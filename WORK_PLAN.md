@@ -52,7 +52,6 @@ _None._
 
 Issues carrying `loom:curated`.
 
-- **#160**: T1 item 6: make the klt yield report's samples path resolve from any working directory *(curated)*
 - **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
 - **#230**: Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim *(curated)*
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
@@ -78,7 +77,7 @@ _None._
 | In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 6 |
+| Curated | 5 |
 | Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
