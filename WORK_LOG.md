@@ -3,6 +3,11 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-08
+
+- **PR #317**: fix(sim): record report-relative samples path in klt yield reports
+- **Issue #160** (closed): T1 item 6: make the klt yield report's samples path resolve from any working directory
+
 ### 2026-11-07
 
 - **PR #313**: Bump Repo Skills 0.25.1 -> 0.25.10
