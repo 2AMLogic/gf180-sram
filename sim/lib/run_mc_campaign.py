@@ -548,6 +548,30 @@ def render_record(summary: dict, sample_doc: dict, json_report_text: str, text_r
     return "\n".join(lines)
 
 
+def run_klt_yield(klt: str, samples_path: Path, reports_dir: Path):
+    """Run `klt yield` (JSON then text) on `samples_path`, from `reports_dir`.
+
+    Issue #109 / #160: `klt yield` echoes its input path argument verbatim
+    into both its JSON (`samples`) and text (`samples: ...`) report output,
+    and the `klt signoff` grader re-locates that path beside the report first
+    and then in its own working directory (klayout-tools#2197). Passing the
+    path relative to the report's own directory (`../samples/<id>.json`, with
+    cwd=`reports_dir` so `klt` can still open it) makes the committed report
+    resolve from any grader working directory, with no absolute checkout path
+    in it. Arguments go as an argv list (never a shell), so paths containing
+    spaces stay valid.
+    """
+    samples_rel = Path(os.path.relpath(samples_path, reports_dir))
+    procs = [
+        subprocess.run(
+            [klt, "yield", str(samples_rel), "--format", fmt],
+            cwd=reports_dir, capture_output=True, text=True, check=False,
+        )
+        for fmt in ("json", "text")
+    ]
+    return procs[0], procs[1]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--experiment", required=True, help="experiment dir name under sim/, e.g. read-snm")
@@ -837,22 +861,7 @@ def main() -> int:
 
     json_report_path = reports_dir / f"{record_id}.json"
     text_report_path = reports_dir / f"{record_id}.txt"
-    # Issue #109: `klt yield` echoes its input path argument verbatim into
-    # both its JSON (`samples`) and text (`samples: ...`) report output.
-    # `samples_path` above is always absolute (derived from REPO_ROOT); pass
-    # a repo-relative path instead (with cwd=REPO_ROOT so `klt` can still
-    # resolve it) so that echoed field is repo-relative in the committed
-    # report too, rather than embedding this host's absolute checkout path
-    # (previously e.g. `.loom/worktrees/issue-26/...`).
-    samples_rel = samples_path.relative_to(REPO_ROOT)
-    json_proc = subprocess.run(
-        [klt, "yield", str(samples_rel), "--format", "json"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=False,
-    )
-    text_proc = subprocess.run(
-        [klt, "yield", str(samples_rel), "--format", "text"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=False,
-    )
+    json_proc, text_proc = run_klt_yield(klt, samples_path, reports_dir)
     json_report_path.write_text(json_proc.stdout, encoding="utf-8")
     text_report_path.write_text(text_proc.stdout + ("\n" + text_proc.stderr if text_proc.returncode != 0 else ""), encoding="utf-8")
     if json_proc.returncode != 0:

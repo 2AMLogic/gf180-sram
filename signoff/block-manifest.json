@@ -23,7 +23,7 @@
       "content_hash": "sha256:cd76812bf96c97ab6151a0dbf6a7d344fb0aeb2cb2c6ff3e356075945da8d597"
     },
     "6": {
-      "file": "sim/read-snm/mc/yield-reports/20260921-124232-cf5e975.json",
+      "file": "sim/read-snm/mc/yield-reports/20260921-124232-cf5e975.relpath.json",
       "content_hash": "sha256:d4b9192d41c569cb6283886ede1a26285c4b554b785ecf299868ac7ba98f255a"
     },
     "7": {
@@ -36,7 +36,7 @@
     },
     "9": {
       "file": "sim/testbenches.signoff.json",
-      "content_hash": "sha256:56bafa359c97a455bf4375e26e5b963ba621774856b1741f37b7488782c0a2f8"
+      "content_hash": "sha256:dafcf07faffa6fb11b04ab28a04228980f3e0283bdcbed57ab9ebc6f8639772c"
     },
     "10": {
       "file": "repo-hygiene.signoff.json",
