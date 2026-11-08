@@ -223,7 +223,7 @@
       "reason": null,
       "graded_by_build": true,
       "citation": {
-        "file": "sim/read-snm/mc/yield-reports/20260921-124232-cf5e975.json",
+        "file": "sim/read-snm/mc/yield-reports/20260921-124232-cf5e975.relpath.json",
         "command": null,
         "kind": "yield",
         "check_status": "reported",
@@ -296,18 +296,18 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:56bafa359c97a455bf4375e26e5b963ba621774856b1741f37b7488782c0a2f8",
+        "content_hash": "sha256:dafcf07faffa6fb11b04ab28a04228980f3e0283bdcbed57ab9ebc6f8639772c",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 9,
           "path": null,
-          "content_hash": "sha256:56bafa359c97a455bf4375e26e5b963ba621774856b1741f37b7488782c0a2f8",
+          "content_hash": "sha256:dafcf07faffa6fb11b04ab28a04228980f3e0283bdcbed57ab9ebc6f8639772c",
           "input_verified": true,
           "members": [
             {
               "path": "sim/README.md",
-              "content_hash": "sha256:faddb833468b715386f7dc679a86360eb96e1e191e01153d190216f62390f680",
+              "content_hash": "sha256:6338caddd61f865445b008c3be8d6e24cf78f30c9d6d09acf1e7b30dd959e563",
               "status": "verified"
             },
             {

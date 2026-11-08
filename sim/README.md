@@ -365,10 +365,15 @@ at all) for anything genuinely external, like a PDK install:
   one host, something else on another) -- the same `{name, source, version}`
   shape `klt extract`/`klt pex`'s own `provenance.pdk` block already uses.
 - **`klt yield`'s echoed `samples` field**: `run_mc_campaign.py` invokes
-  `klt yield` with a repo-relative sample-set path (and `cwd=REPO_ROOT`, so
-  `klt` can still resolve it), not the absolute one it constructs
-  internally, so the `samples: ...` line `klt yield` echoes into its own
-  JSON/text report is repo-relative too.
+  `klt yield` from inside the `yield-reports/` directory (`cwd`) with a
+  report-relative sample-set path (`../samples/<id>.json`), so the
+  `samples: ...` line `klt yield` echoes into its own JSON/text report is
+  relative to the report itself. The `klt signoff` grader (0.6.0+) resolves
+  that path beside the report before its own working directory, so the
+  cited report verifies from any grader working directory (issue #160).
+  Reports minted earlier carry a repo-relative form and are kept
+  append-only; the `<id>.relpath.{json,txt}` pairs are re-renders of the
+  same sample documents in the report-relative form.
 - **Documented exceptions** (absolute by necessity, never committed as a
   recorded value): the `@@REPO_ROOT@@` substitution above (used only inside
   a `mktemp -d` scratch directory outside the repo, never written into a
