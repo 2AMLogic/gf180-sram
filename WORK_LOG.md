@@ -3,6 +3,10 @@
 Chronological record of merged PRs and closed issues, maintained automatically
 by the Guide role's document maintenance phase. Newest entries first.
 
+### 2026-11-12
+
+- **PR #321**: Bump Repo Skills 0.25.10 -> 0.26.1
+
 ### 2026-11-08
 
 - **PR #317**: fix(sim): record report-relative samples path in klt yield reports
