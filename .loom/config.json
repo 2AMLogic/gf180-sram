@@ -104,6 +104,12 @@
       "theme": "midnight"
     }
   ],
+  "guide": {
+    "docsMaintenance": {
+      "workLogDebounceSecs": 21600,
+      "workPlanDebounceSecs": 43200
+    }
+  },
   "champion": {
     "standingAuthorizations": [
       {
