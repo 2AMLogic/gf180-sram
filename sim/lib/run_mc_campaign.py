@@ -134,10 +134,13 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
-# gf180mcu process-corner label -> the model file's own bare `.LIB` section
-# name (same mapping sim/lib/run_corner_sweep.sh uses -- "tt" is this
-# repo's/spec's label for gf180mcu's "typical" section).
-LIB_SECTION = {"ff": "ff", "tt": "typical", "ss": "ss"}
+sys.path.insert(0, str(SCRIPT_DIR))
+# The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
+# (#331): the `tt -> typical` model-section mapping and the corner-id format
+# are imported, never re-derived here. Re-exported under this module's own
+# names because callers (sim/lib/deck_adapter.py) already reach them as
+# `mc.LIB_SECTION` / `mc.corner_id`.
+from corner_matrix import LIB_SECTION, corner_id  # noqa: E402,F401
 
 # design.ngspice's own defaults for every name its combined `.param` card
 # sets, reproduced verbatim here (see module docstring, "Known ngspice/
@@ -190,10 +193,6 @@ def derive_seed(base_seed: int, corner_id: str, kind: str, sample_index: int) ->
     digest = hashlib.sha256(f"{base_seed}:{corner_id}:{kind}:{sample_index}".encode()).hexdigest()
     # ngspice seeds are plain positive integers; keep well under 2**31.
     return (int(digest[:8], 16) % 2_000_000_000) + 1
-
-
-def corner_id(process: str, temp: str, vdd: str) -> str:
-    return f"{process}_{temp}c_{vdd}v"
 
 
 def build_corner_inc(pdk: dict[str, str], process: str, temp: str, vdd: str, seed: int, sw_stat_mismatch: float) -> str:
