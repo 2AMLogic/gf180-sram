@@ -18,7 +18,10 @@ out and overwrites the files below in place. `./layout/reports/generate.sh
 `--native` also runs them against the PDK's native DRC deck (~3 min more);
 `./layout/reports/generate.sh --macro` regenerates only
 [`drc-macro.json`](drc-macro.json) (~1 min); the full run's `klt erc` step alone
-is ~26 min.
+is ~26 min. Every report it writes goes through one scrub-and-lint path --
+see "Provenance hygiene: one scrub path" below -- and that path refuses to
+write a report carrying a host-absolute path, so a run that would leak one
+fails rather than committing it.
 
 ## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205; `drc-macro.json` added 2026-11-14, issue #326)
 
@@ -260,6 +263,83 @@ Not resolved here: item 4's LVS provenance/freshness for the array report
 (the `stale_evidence` grading reason, issue #128) is a separate, still-open
 gap and stays tracked there.
 
+## Provenance hygiene: one scrub path
+
+Every report in this directory is written by exactly one piece of code --
+[`commit_report.py`](commit_report.py), called from `generate.sh` as
+`commit_report <raw-json> <out-json> [--set F=V] [--drop F] [--print FMT]`.
+There is no second path, and that is the point. It does three things to every
+report, in order:
+
+1. **Rewrite.** The generating checkout's root (`$ROOT`) and the run's scratch
+   directory (`$WORK`) are stripped out of *every string in the document* --
+   any nesting depth, any field, including fields `klt` has not invented yet.
+   A `$ROOT`-rooted path becomes its repo-relative form
+   (`layout/periphery/row/row_path.gds`); a `$WORK`-rooted path collapses to
+   its basename (`row_path.spice`), because the scratch directory does not
+   survive the run and `netlist_sha256` / `provenance.input.content_hash` are
+   what actually pin that file's content. **No field is named anywhere in the
+   script**, so no field can be left off a list.
+2. **Check, with the tool's own linter.** The rewritten report is handed to
+   `klt env-provenance lint-envelope` *before* it is moved into place. A report
+   that still holds any absolute path is **not written** -- the run fails, with
+   the offending field named. Two fields are deliberate prose rather than paths
+   and are set explicitly with `--set`: the scratch abutted composite's `file`
+   (`drc-column-abut.json`, `drc-native-column-abut.json`) and the PDK-native
+   `deck` (`drc-native-column-*.json`).
+3. **Re-dump** with `indent=2` and a trailing newline, then print the status
+   line (`--print` is a `str.format` template over the report's top-level
+   fields).
+
+Before issue #340 this was ten inline `python3 -c` blocks in `generate.sh`,
+each with its own hand-picked list of fields to rewrite. The lists drifted, as
+hand-maintained lists do, and the three reports named in the baseline below are
+what that drift left behind. `python3 layout/reports/test_commit_report.py`
+asserts the two properties that matter: that the rewrite reaches fields nobody
+listed, and that the guard refuses to commit a leak.
+
+This implements issue #109's ratified rule -- repo-relative paths in committed
+evidence, and existing records never rewritten retroactively -- with one
+implementation instead of one per block.
+
+### The CI half, and what is grandfathered
+
+[`scripts/ci/check-provenance-hygiene.sh`](../../scripts/ci/check-provenance-hygiene.sh)
+runs `klt env-provenance scan` over the tracked JSON reports under
+`layout/reports/` and `views/reports/` on every PR (the `provenance-hygiene`
+job, on the same pinned `klayout-tools==0.8.0` as the `signoff` job).
+
+It asks a **narrower** question than the mint-time guard above: `scan` reports
+home-directory-shaped paths ("does this record name a person"), while
+`lint-envelope` reports *any* absolute path ("does every reference still
+resolve on another checkout"). Mint time can afford the stricter question
+because nothing is grandfathered there -- the report does not exist yet. PR
+time cannot, because three reports were already leaking when the check landed
+and #109 forbids rewriting them:
+
+| Report | Field | Why it is still there |
+|---|---|---|
+| `drc-foundry-bitcell.json` | `file` | The foundry's own macro GDS, read from the generating host's PDK install (`~/.volare`). Not produced by `generate.sh` at all -- it checks the foundry macro, not this repo's layout -- so no generator change covers it. |
+| `extract-array.json` | `file` | Minted by issue #128 from an agent worktree, before `klt` emitted a repo-relative `file` and before the #109 rule existed. |
+| `extract-bitcell.json` | `file` | Same vintage, same cause. |
+
+Those three are named in
+[`scripts/ci/provenance-leak-baseline.txt`](../../scripts/ci/provenance-leak-baseline.txt)
+and **printed on every run, pass or fail**, so a green build still shows that
+three known leaks exist rather than hiding them in a narrowed glob. Anything
+not in that file fails the build; a baseline entry that no longer matches a
+real finding *also* fails it, so the list cannot rot into a blanket exemption.
+Whether to re-mint the three is an operator call, not a cleanup -- and when it
+is made, the fix is to re-run `generate.sh` (the first two) and delete the
+corresponding baseline lines.
+
+Two more absolute paths survive in committed reports that `scan` does not
+flag, because they name no user: `lvs-array.json`'s `layout` and
+`lvs-bitcell.json`'s `layout`/`reference` hold `/tmp/tmp.<random>/...` scratch
+paths from the run that minted them. `commit_report` collapses those today
+(they are `$WORK`-rooted), so the next legitimate re-mint clears them; they are
+left as-is here for the same append-only reason.
+
 ## Freshness note: snapshot, not append-only
 
 Unlike `sim/*/records/` (append-only per `sim/README.md`), the files in this
@@ -281,3 +361,9 @@ directory-naming convention.
 - Issue #23 -- the acceptance criteria this directory satisfies (items 3, 4;
   item 7, post-layout PEX, is `sim/pex/`'s job, not this directory's -- see
   `sim/pex/README.md`).
+- [`commit_report.py`](commit_report.py) -- the single scrub-and-lint path
+  every report here is written by, and
+  [`test_commit_report.py`](test_commit_report.py) its tests (issue #340).
+- Issues #109 and #340 -- the provenance-hygiene rule these reports follow
+  (#109 ratified it; #340 gave it one implementation and the CI guard
+  described in "Provenance hygiene: one scrub path" above).

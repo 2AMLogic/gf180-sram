@@ -93,6 +93,13 @@ jobs:
       - name: Install the pinned klt (klayout-tools)
         run: pip install klayout-tools==0.8.0
 
+      # The mint-time half of the same rule: layout/reports/commit_report.py
+      # is the single path by which generate.sh writes a report. Run here
+      # rather than under `npm run test` because three of its cases need klt,
+      # and a skipped case must not look like a passing one.
+      - name: Test the report scrub/lint helper
+        run: python3 layout/reports/test_commit_report.py
+
       # The guard is only worth a status check if it can go red: this asserts
       # on synthetic fixtures that a new leak fails, a baselined one passes,
       # and a stale baseline entry fails (issue #340).
