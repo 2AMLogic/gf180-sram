@@ -105,12 +105,98 @@ def test_klt_accepts_requests():
             check(f"{family} planner", len(units) == 27)
 
 
-def _stub_report(family, outdir, *, drop=(), dup=None, timeouts=(), stdout=None, sweep=True, exit_code=0):
+def test_bounded_corner_selection():
+    """`--corner` bounds the request to ratified corners, in the launcher's order."""
+    cli = ["ss:125:3.63", "tt:25:3.30"]  # deliberately out of loop order
+    with tempfile.TemporaryDirectory() as td:
+        req = da.build_request("read-snm", td, corner_specs=cli)
+        ids = [d["id"] for d in req["decks"]]
+        check("bounded count", len(ids) == 2, str(ids))
+        check("bounded loop order", ids == ["tt_25c_3.30v", "ss_125c_3.63v"], str(ids))
+        meta = req["x_gf180_sram_adapter"]
+        check("bounded corners recorded", meta["corners"] == ids, str(meta.get("corners")))
+        check("bounded not full grid", meta["full_grid"] is False)
+        check("bounded corner_count", meta["corner_count"] == 2)
+        for cid in ids:
+            check(f"bounded staged {cid}", (Path(td) / "units" / cid / "corner.inc").is_file())
+        check("bounded stages nothing else",
+              sorted(q.name for q in (Path(td) / "units").iterdir()) == sorted(ids))
+        # byte-identical decks and corner.inc to the full-grid build
+        full = da.build_request("read-snm", td + "-full", corner_specs=None)
+        check("full grid default", len(full["decks"]) == 27 and full["x_gf180_sram_adapter"]["full_grid"] is True)
+        check("same composed deck",
+              meta["composed_deck_sha256"] == full["x_gf180_sram_adapter"]["composed_deck_sha256"])
+        for cid in ids:
+            a = (Path(td) / "units" / cid / "corner.inc").read_bytes()
+            b = (Path(td + "-full") / "units" / cid / "corner.inc").read_bytes()
+            check(f"same corner.inc {cid}", a == b)
+    for bad in ("tt:25", "xx:25:3.30", "tt:30:3.30", "tt:25:3.31", "tt:q:3.30"):
+        try:
+            da.select_corners([bad])
+        except ValueError:
+            continue
+        check(f"refuse {bad}", False, "accepted an unratified corner spec")
+    try:
+        da.select_corners(["tt:25:3.30", "tt:25:3.30"])
+        check("refuse duplicate corner", False, "accepted a duplicate")
+    except ValueError:
+        pass
+
+
+def test_bounded_reduce_scopes_coverage():
+    """A one-corner report grades `recorded` only when the request pins coverage."""
+    cid = "tt_25c_3.30v"
+    with tempfile.TemporaryDirectory() as bd, tempfile.TemporaryDirectory() as rd:
+        req = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30"])
+        exp_ids, exp_sha = da.expected_from_request("write-margin", req)
+        check("expected_from_request ids", exp_ids == [cid], str(exp_ids))
+        check("expected_from_request sha", exp_sha == req["x_gf180_sram_adapter"]["composed_deck_sha256"])
+        rep = _stub_report("write-margin", rd, keep=(cid,), deck_sha256=exp_sha)
+        bounded = da.reduce_report("write-margin", rep, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("bounded recorded", bounded["overall"] == "recorded", json.dumps(bounded["coverage_errors"]))
+        check("bounded one corner", [c["id"] for c in bounded["corners"]] == [cid])
+        unbounded = da.reduce_report("write-margin", rep)
+        check("unbounded sees 26 missing", unbounded["overall"] == "OPEN"
+              and any("missing corners" in e for e in unbounded["coverage_errors"]),
+              str(unbounded["coverage_errors"]))
+        # an extra corner the request did not ask for is still a coverage error
+        rep2 = _stub_report("write-margin", rd, keep=(cid, "ff_25c_3.30v"), deck_sha256=exp_sha)
+        r2 = da.reduce_report("write-margin", rep2, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("bounded extra id => OPEN", r2["overall"] == "OPEN"
+              and any("unexpected unit ids" in e for e in r2["coverage_errors"]), str(r2["coverage_errors"]))
+        # deck bytes that differ from the composed deck are refused
+        rep3 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256="f" * 64)
+        r3 = da.reduce_report("write-margin", rep3, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("deck sha drift => OPEN", r3["overall"] == "OPEN"
+              and any("deck bytes differ" in e for e in r3["coverage_errors"]), str(r3["coverage_errors"]))
+        # guards
+        for args, why in (((["bogus_corner"],), "unratified id"), (([],), "empty list")):
+            try:
+                da.reduce_report("write-margin", rep, expected_ids=args[0])
+                check(f"reduce refuses {why}", False, "accepted")
+            except ValueError:
+                pass
+        try:
+            da.expected_from_request("read-snm", req)
+            check("expected_from_request family mismatch", False, "accepted another family's request")
+        except ValueError:
+            pass
+    with tempfile.TemporaryDirectory() as bd:
+        mcreq = da.build_mc_request("read-snm", bd, MC_CORNERS, n=1, n_control=0, n_nc=0, seed=1)
+        try:
+            da.expected_from_request("read-snm", mcreq)
+            check("expected_from_request refuses MC request", False, "accepted an MC request")
+        except ValueError:
+            pass
+
+
+def _stub_report(family, outdir, *, drop=(), keep=None, dup=None, timeouts=(), stdout=None,
+                 sweep=True, exit_code=0, deck_sha256="0" * 64):
     """Hand-built stub deck report + unit dirs. NOT a measurement."""
     kind, datafile, label = da.parse_mode(da.FAMILIES[family][2])
     units = []
     for cid in da.corner_ids():
-        if cid in drop:
+        if cid in drop or (keep is not None and cid not in keep):
             continue
         ud = Path(outdir) / cid
         ud.mkdir(parents=True, exist_ok=True)
@@ -131,7 +217,7 @@ def _stub_report(family, outdir, *, drop=(), dup=None, timeouts=(), stdout=None,
             "exit_code": None if timed else exit_code, "timed_out": timed,
             "stdout": f"{cid}/stdout.bin", "stderr": f"{cid}/stderr.bin",
             "outputs": [] if missing else ([datafile] if datafile else []),
-            "missing_outputs": missing, "deck_sha256": "0" * 64,
+            "missing_outputs": missing, "deck_sha256": deck_sha256,
         })
     if dup:
         units.append(dict(units[0], id=dup))
@@ -348,6 +434,7 @@ def test_mc_reduce_fails_closed():
 def main():
     for t in (test_corner_matrix, test_corner_inc_matches_launcher, test_launcher_loop_axes_match,
               test_build_all_families, test_klt_accepts_requests, test_reducer_direct, test_reducer_snm,
+              test_bounded_corner_selection, test_bounded_reduce_scopes_coverage,
               test_mc_seed_pins, test_mc_build_identity, test_mc_n1_and_guard,
               test_mc_reduce_shapes, test_mc_reduce_fails_closed):
         t()

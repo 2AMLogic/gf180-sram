@@ -1,0 +1,28 @@
+{
+  "engine": "ngspice",
+  "decks": [
+    {
+      "id": "tt_25c_3.30v",
+      "deck": "units/tt_25c_3.30v/tb_read_snm.spice",
+      "timeout_s": 300,
+      "outputs": [
+        "read_snm_sweep.txt"
+      ]
+    }
+  ],
+  "options": {
+    "timeout_s": 300
+  },
+  "x_gf180_sram_adapter": {
+    "family": "read-snm",
+    "mode": "snm:read_snm_sweep.txt:read_snm",
+    "testbench": "sim/read-snm/testbench/tb_read_snm.spice",
+    "testbench_sha256": "48a5909be69179051802f794b2ad7c5049506d197224295fb25d8e3f9bf2aebe",
+    "composed_deck_sha256": "48a5909be69179051802f794b2ad7c5049506d197224295fb25d8e3f9bf2aebe",
+    "corners": [
+      "tt_25c_3.30v"
+    ],
+    "corner_count": 1,
+    "full_grid": false
+  }
+}
