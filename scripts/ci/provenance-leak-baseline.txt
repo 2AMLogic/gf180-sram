@@ -1,0 +1,31 @@
+# Grandfathered host-path leaks in committed evidence reports (issue #340).
+#
+# scripts/ci/check_provenance_hygiene.py runs `klt env-provenance scan` over
+# the tracked JSON reports under layout/reports/ and views/reports/ and fails
+# on any finding that is not listed here. The entries below are the leaks that
+# were already committed when the check landed. They are NOT allowed because
+# they are acceptable -- they are not -- but because issue #109's ratified
+# rule is that committed evidence records are never rewritten retroactively
+# (its own regression check requires that no pre-existing file under
+# layout/reports/ be modified). Re-minting them is an operator call, tracked
+# separately; until that call is made the honest state of the repo is "three
+# known leaks, named, and no new ones."
+#
+# Format, one per line:    <repo-relative path>:<line>:<kind>    # why
+#
+# Deliberately NO leaking text: `klt env-provenance scan --help` warns that
+# its findings quote the leaked path, so scan output must not be committed to
+# the repo it scanned. The path/line/kind triple is enough to match a finding
+# without re-committing the leak itself.
+#
+# Adding a line here is a decision, not a fix. A new report must come out of
+# `layout/reports/generate.sh`, which routes every report through
+# `commit_report` and will not write a file that still carries an absolute
+# path -- so a NEW leak means something bypassed that path, and the fix is the
+# generator, not this file. An entry that no longer matches a real finding is
+# also a failure: the check tells you to delete the line, so the allow-list
+# cannot rot into a blanket exemption.
+
+layout/reports/drc-foundry-bitcell.json:3:home-path   # `file` -- the foundry's own macro GDS, read from the generating host's PDK install (~/.volare). Not produced by generate.sh (it checks the foundry macro, not this repo's layout), so no generator change covers it; see layout/reports/README.md.
+layout/reports/extract-array.json:3:home-path         # `file` -- minted by issue #128 from an agent worktree, before klt emitted repo-relative `file` (schema_version 3+ `{path, scope}`) and before the #109 rule existed.
+layout/reports/extract-bitcell.json:3:home-path       # `file` -- same vintage and same cause as extract-array.json above.

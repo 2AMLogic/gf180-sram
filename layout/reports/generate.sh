@@ -46,6 +46,25 @@ trap 'rm -rf "$WORK"' EXIT
 
 hr() { printf '\n=== %s ===\n' "$1"; }
 
+# --- the one path by which every report in this directory gets committed ----
+# `commit_report <raw-json> <out-json> [--set F=V] [--drop F] [--print FMT]`
+# rewrites this checkout's root and this run's scratch dir out of EVERY string
+# in the report (any depth, any field -- no field list to keep in step), lints
+# the result with `klt env-provenance lint-envelope` and refuses to commit a
+# report that still carries an absolute path, then re-dumps with indent=2 + a
+# trailing newline and prints the status line. Issue #340 collapsed ten inline
+# `python3 -c` blocks -- each with its own hand-picked field list, which had
+# already drifted apart -- into this. Issue #109 is the rule it implements;
+# layout/reports/commit_report.py is the implementation and
+# layout/reports/README.md "Provenance hygiene: one scrub path" the contract.
+# `report_status <out-json> --print FMT` is the read-only half, for a status
+# line printed from a report some earlier call already committed.
+REPORT_PY="$OUT/commit_report.py"
+commit_report() {
+  python3 "$REPORT_PY" commit "$1" "$2" --root "$ROOT" --work "$WORK" "${@:3}"
+}
+report_status() { python3 "$REPORT_PY" status "$@"; }
+
 # --- 0. column path (issue #205) -------------------------------------------
 # precharge_slice / io_slice are checked per cell (DRC, extract, LVS against
 # design/netlist/<cell>.spice), the 32-slice bands for DRC, and the bands
@@ -54,6 +73,11 @@ hr() { printf '\n=== %s ===\n' "$1"; }
 # `./layout/reports/generate.sh --column-path` runs only this block (~2 min);
 # adding `--native` also runs it against the PDK's own DRC deck (~3 min more).
 COLUMN_DIR=layout/periphery/column
+# Said once instead of twice: the abutted composite is a scratch file that is
+# never committed, so both DRC reports over it carry prose in `file`, not a
+# path -- the one case where `commit_report --set` deliberately overrides the
+# $ROOT/$WORK rewrite rather than letting it produce a bare basename.
+ABUT_FILE_NOTE="(scratch composite) committed 64x128 array + io_band + precharge_band, $COLUMN_DIR/generate.py --abut"
 
 # --- 0r. row decoder / wordline-driver strip (issue #204) -------------------
 # One flat cell (16 predecoders + 64 rowdrv), checked against
@@ -75,45 +99,28 @@ ROW_GDS=layout/periphery/row/row_path.gds
 MACRO_GDS=layout/macro/sram_256x32.gds
 run_macro() {
 hr "0m. macro (issue #326): DRC"
-klt drc --deck gf180mcu --format json "$MACRO_GDS" | tee "$OUT/drc-macro.json" >/dev/null
-python3 -c "
-import json
-d = json.load(open('$OUT/drc-macro.json'))
-print('drc-macro:', d['status'], '| violations:', d['violation_count'])
-"
+klt drc --deck gf180mcu --format json "$MACRO_GDS" > "$WORK/drc-macro-raw.json"
+commit_report "$WORK/drc-macro-raw.json" "$OUT/drc-macro.json" \
+  --print 'drc-macro: {status} | violations: {violation_count}'
 }
 if [ "${1:-}" = "--macro" ]; then run_macro; exit 0; fi
 
 if [ "${1:-}" != "--control" ]; then
 hr "0r. row path (issue #204): DRC, extract, LVS"
-klt drc --deck gf180mcu --format json "$ROW_GDS" | tee "$OUT/drc-row-path.json" >/dev/null
+klt drc --deck gf180mcu --format json "$ROW_GDS" > "$WORK/drc-row-raw.json"
+commit_report "$WORK/drc-row-raw.json" "$OUT/drc-row-path.json"
 klt extract --deck gf180mcu --format json "$ROW_GDS" -o "$WORK/row_path.spice" > "$WORK/extract-row-raw.json"
-python3 -c "
-import json
-d = json.load(open('$WORK/extract-row-raw.json'))
-d['netlist_path'] = 'row_path.spice'  # a temp dir at generation time
-json.dump(d, open('$OUT/extract-row-path.json', 'w'), indent=2)
-open('$OUT/extract-row-path.json', 'a').write('\n')
-"
+commit_report "$WORK/extract-row-raw.json" "$OUT/extract-row-path.json"
 cat > "$WORK/lvs-row-request.json" <<EOF
 {"layout":{"file":"$ROOT/$ROW_GDS","deck":"gf180mcu","top":"row_path"},
  "reference":{"netlist":"$ROOT/design/netlist/row_path.spice","form":"subckt-call"},
  "options":{"flatten_reference":true}}
 EOF
 klt lvs "$WORK/lvs-row-request.json" --format json > "$WORK/lvs-row-raw.json"
-python3 -c "
-import json
-d = json.load(open('$WORK/lvs-row-raw.json'))
-if d.get('layout') == '$ROOT/$ROW_GDS':
-    d['layout'] = '$ROW_GDS'
-if d.get('reference') == '$ROOT/design/netlist/row_path.spice':
-    d['reference'] = 'design/netlist/row_path.spice'
-json.dump(d, open('$OUT/lvs-row-path.json', 'w'), indent=2)
-open('$OUT/lvs-row-path.json', 'a').write('\n')
-print('row_path LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
-d = json.load(open('$OUT/drc-row-path.json'))
-print('drc-row-path:', d['status'], '| violations:', d['violation_count'])
-"
+commit_report "$WORK/lvs-row-raw.json" "$OUT/lvs-row-path.json" \
+  --print 'row_path LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}'
+report_status "$OUT/drc-row-path.json" \
+  --print 'drc-row-path: {status} | violations: {violation_count}'
 fi
 if [ "${1:-}" = "--row-path" ]; then exit 0; fi
 
@@ -126,34 +133,20 @@ CTRL_DIR=layout/periphery/control
 hr "0c. control block + column decoder (issue #246): DRC, extract, LVS"
 for cell in sram_ctrl col_decode; do
   name="${cell//_/-}"
-  klt drc --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" | tee "$OUT/drc-$name.json" >/dev/null
+  klt drc --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" > "$WORK/drc-$cell-raw.json"
+  commit_report "$WORK/drc-$cell-raw.json" "$OUT/drc-$name.json"
   klt extract --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
-  python3 -c "
-import json
-d = json.load(open('$WORK/extract-$cell-raw.json'))
-d['netlist_path'] = '$cell.spice'  # a temp dir at generation time
-json.dump(d, open('$OUT/extract-$name.json', 'w'), indent=2)
-open('$OUT/extract-$name.json', 'a').write('\n')
-"
+  commit_report "$WORK/extract-$cell-raw.json" "$OUT/extract-$name.json"
   cat > "$WORK/lvs-$cell-request.json" <<EOF
 {"layout":{"file":"$ROOT/$CTRL_DIR/$cell.gds","deck":"gf180mcu","top":"$cell"},
  "reference":{"netlist":"$ROOT/design/netlist/$cell.spice","form":"subckt-call"},
  "options":{"flatten_reference":true}}
 EOF
   klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
-  python3 -c "
-import json
-d = json.load(open('$WORK/lvs-$cell-raw.json'))
-if d.get('layout') == '$ROOT/$CTRL_DIR/$cell.gds':
-    d['layout'] = '$CTRL_DIR/$cell.gds'
-if d.get('reference') == '$ROOT/design/netlist/$cell.spice':
-    d['reference'] = 'design/netlist/$cell.spice'
-json.dump(d, open('$OUT/lvs-$name.json', 'w'), indent=2)
-open('$OUT/lvs-$name.json', 'a').write('\n')
-print('$cell LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
-d = json.load(open('$OUT/drc-$name.json'))
-print('drc-$name:', d['status'], '| violations:', d['violation_count'])
-"
+  commit_report "$WORK/lvs-$cell-raw.json" "$OUT/lvs-$name.json" \
+    --print "$cell LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}"
+  report_status "$OUT/drc-$name.json" \
+    --print "drc-$name: {status} | violations: {violation_count}"
 done
 if [ "${1:-}" = "--control" ]; then exit 0; fi
 
@@ -161,15 +154,10 @@ if [ "${1:-}" != "--row-path" ]; then
 hr "0. column path (issue #205): DRC, extract, LVS, bit-line seam"
 for cell in precharge_slice io_slice; do
   name="${cell//_/-}"
-  klt drc --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" | tee "$OUT/drc-column-$name.json" >/dev/null
+  klt drc --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" > "$WORK/drc-column-$cell-raw.json"
+  commit_report "$WORK/drc-column-$cell-raw.json" "$OUT/drc-column-$name.json"
   klt extract --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
-  python3 -c "
-import json
-d = json.load(open('$WORK/extract-$cell-raw.json'))
-d['netlist_path'] = '$cell.spice'  # a temp dir at generation time
-json.dump(d, open('$OUT/extract-column-$name.json', 'w'), indent=2)
-open('$OUT/extract-column-$name.json', 'a').write('\n')
-"
+  commit_report "$WORK/extract-$cell-raw.json" "$OUT/extract-column-$name.json"
   # LVS from the GDS (inline extraction, `layout.file` + `deck`), not from a
   # pre-extracted netlist: only the inline form carries the drawn labels that
   # `net.supply_fragmented` and the body-tie verification need (a pre-extracted
@@ -181,34 +169,21 @@ open('$OUT/extract-column-$name.json', 'a').write('\n')
  "options":{"flatten_reference":true}}
 EOF
   klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
-  # The echoed `layout`/`reference` paths are host-specific (this checkout):
-  # rewrite them to stable repo-relative names before committing, as the array
-  # LVS block below does for `reference`.
-  python3 -c "
-import json
-d = json.load(open('$WORK/lvs-$cell-raw.json'))
-if d.get('layout') == '$ROOT/$COLUMN_DIR/$cell.gds':
-    d['layout'] = '$COLUMN_DIR/$cell.gds'
-if d.get('reference') == '$ROOT/design/netlist/$cell.spice':
-    d['reference'] = 'design/netlist/$cell.spice'
-json.dump(d, open('$OUT/lvs-column-$name.json', 'w'), indent=2)
-open('$OUT/lvs-column-$name.json', 'a').write('\n')
-print('$cell LVS status:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
-"
+  # The echoed `layout`/`reference` paths are host-specific (this checkout);
+  # commit_report rewrites them to stable repo-relative names, as it does for
+  # every other path-bearing field in the report.
+  commit_report "$WORK/lvs-$cell-raw.json" "$OUT/lvs-column-$name.json" \
+    --print "$cell LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}"
 done
-klt drc --deck gf180mcu --format json "$COLUMN_DIR/column_band.gds" | tee "$OUT/drc-column-band.json" >/dev/null
+klt drc --deck gf180mcu --format json "$COLUMN_DIR/column_band.gds" > "$WORK/drc-column-band-raw.json"
+commit_report "$WORK/drc-column-band-raw.json" "$OUT/drc-column-band.json"
 uv run --with klayout python3 "$COLUMN_DIR/generate.py" --abut layout/sram_64x128/sram_64x128_array.gds -o "$WORK/column_abut.gds"
 klt drc --deck gf180mcu --format json "$WORK/column_abut.gds" > "$WORK/drc-column-abut-raw.json"
-python3 -c "
-import json
-d = json.load(open('$WORK/drc-column-abut-raw.json'))
-d['file'] = ('(scratch composite) committed 64x128 array + io_band + precharge_band, '
-             '$COLUMN_DIR/generate.py --abut')
-json.dump(d, open('$OUT/drc-column-abut.json', 'w'), indent=2)
-open('$OUT/drc-column-abut.json', 'a').write('\n')
-"
+commit_report "$WORK/drc-column-abut-raw.json" "$OUT/drc-column-abut.json" \
+  --set "file=$ABUT_FILE_NOTE"
 for f in precharge-slice io-slice band abut; do
-  python3 -c "import json; d=json.load(open('$OUT/drc-column-$f.json')); print('drc-column-$f:', d['status'], '| violations:', d['violation_count'])"
+  report_status "$OUT/drc-column-$f.json" \
+    --print "drc-column-$f: {status} | violations: {violation_count}"
 done
 if [ "${2:-}" = "--native" ]; then
   # The PDK's own native KLayout deck (all FEOL+BEOL rule tables), driven by
@@ -263,53 +238,50 @@ if [ "${2:-}" = "--native" ]; then
     name="${target%%:*}"
     gds="${target#*:}"
     klt drc "${NATIVE[@]}" --format json "$gds" > "$WORK/native-$name-raw.json"
-    python3 -c "
-import json
-d = json.load(open('$WORK/native-$name-raw.json'))
-d['deck'] = 'main.drc (gf180mcuD tech/drc/run_drc.py --macro_gen --variant=D)'
-if '$name' == 'abut':
-    d['file'] = ('(scratch composite) committed 64x128 array + io_band + precharge_band, '
-                 '$COLUMN_DIR/generate.py --abut')
-json.dump(d, open('$OUT/drc-native-column-$name.json', 'w'), indent=2)
-open('$OUT/drc-native-column-$name.json', 'a').write('\n')
-print('drc-native-column-$name:', d['status'], '| violations:', d['violation_count'])
-"
+    # `deck` names the materialized deck script, which lives under $WORK; the
+    # honest value is which PDK invocation produced it, not a scratch path.
+    NATIVE_SET=(--set 'deck=main.drc (gf180mcuD tech/drc/run_drc.py --macro_gen --variant=D)')
+    if [ "$name" = abut ]; then
+      NATIVE_SET+=(--set "file=$ABUT_FILE_NOTE")
+    fi
+    commit_report "$WORK/native-$name-raw.json" "$OUT/drc-native-column-$name.json" \
+      "${NATIVE_SET[@]}" \
+      --print "drc-native-column-$name: {status} | violations: {violation_count}"
   done
 fi
 fi
 if [ "${1:-}" = "--column-path" ]; then exit 0; fi
 
 hr "1. DRC: bitcell (klt drc --deck gf180mcu)"
-klt drc --deck gf180mcu --format json "$BITCELL_GDS" | tee "$OUT/drc-bitcell.json" >/dev/null
-python3 -c "import json,sys; d=json.load(open('$OUT/drc-bitcell.json')); print('status:', d['status'], '| violations:', d['violation_count'])"
+klt drc --deck gf180mcu --format json "$BITCELL_GDS" > "$WORK/drc-bitcell-raw.json"
+commit_report "$WORK/drc-bitcell-raw.json" "$OUT/drc-bitcell.json" \
+  --print 'status: {status} | violations: {violation_count}'
 
 hr "2. DRC: full 256x32 array (klt drc --deck gf180mcu, ~30-60s)"
-klt drc --deck gf180mcu --format json "$ARRAY_GDS" | tee "$OUT/drc-array.json" >/dev/null
-python3 -c "import json,sys; d=json.load(open('$OUT/drc-array.json')); print('status:', d['status'], '| violations:', d['violation_count'])"
+klt drc --deck gf180mcu --format json "$ARRAY_GDS" > "$WORK/drc-array-raw.json"
+commit_report "$WORK/drc-array-raw.json" "$OUT/drc-array.json" \
+  --print 'status: {status} | violations: {violation_count}'
 
 hr "3. Extract + LVS: bitcell vs $BITCELL_REF"
-klt extract --deck gf180mcu --format json "$BITCELL_GDS" -o "$WORK/bitcell.spice" | tee "$OUT/extract-bitcell.json" >/dev/null
+klt extract --deck gf180mcu --format json "$BITCELL_GDS" -o "$WORK/bitcell.spice" > "$WORK/extract-bitcell-raw.json"
+commit_report "$WORK/extract-bitcell-raw.json" "$OUT/extract-bitcell.json"
 cat > "$WORK/lvs-bitcell-request.json" <<EOF
 {"layout":{"netlist":"$WORK/bitcell.spice","top":"sram_bitcell_6t"},
  "reference":{"netlist":"$ROOT/$BITCELL_REF","form":"subckt-call"}}
 EOF
-klt lvs "$WORK/lvs-bitcell-request.json" --format json | tee "$OUT/lvs-bitcell.json" >/dev/null
-python3 -c "import json,sys; d=json.load(open('$OUT/lvs-bitcell.json')); print('status:', d['status'], '| mismatches:', d['mismatch_count'])"
+klt lvs "$WORK/lvs-bitcell-request.json" --format json > "$WORK/lvs-bitcell-raw.json"
+commit_report "$WORK/lvs-bitcell-raw.json" "$OUT/lvs-bitcell.json" \
+  --print 'status: {status} | mismatches: {mismatch_count}'
 
 hr "4. Extract + LVS: full array vs $ARRAY_REF (flatten_reference -- klayout-tools#1085)"
 klt extract --deck gf180mcu --format json "$ARRAY_GDS" -o "$WORK/array.spice" > "$WORK/extract-array-full.json"
 # The full per-device/per-net report is ~18 MB (49,152 devices) -- not
 # useful to commit verbatim. Keep every field except the two bulk arrays;
 # device_count/net_count/pin_count (still present) already summarize them.
-python3 -c "
-import json
-d = json.load(open('$WORK/extract-array-full.json'))
-d.pop('devices', None)
-d.pop('nets', None)
-d['_note'] = 'devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh'
-json.dump(d, open('$OUT/extract-array.json', 'w'), indent=2)
-print('status:', d['status'], '| devices:', d['device_count'], '| nets:', d['net_count'], '| pins:', d['pin_count'])
-"
+commit_report "$WORK/extract-array-full.json" "$OUT/extract-array.json" \
+  --drop devices --drop nets \
+  --set '_note=devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh' \
+  --print 'status: {status} | devices: {device_count} | nets: {net_count} | pins: {pin_count}'
 # `klt lvs` resolves a request document's "reference.netlist" relative to
 # the *request document's own directory* (verified empirically -- a
 # repo-cwd-relative path here fails with "reference netlist not found",
@@ -329,15 +301,8 @@ cat > "$WORK/lvs-array-request.json" <<EOF
  "options":{"flatten_reference":true}}
 EOF
 klt lvs "$WORK/lvs-array-request.json" --format json > "$WORK/lvs-array-raw.json"
-python3 -c "
-import json
-d = json.load(open('$WORK/lvs-array-raw.json'))
-if d.get('reference') == '$ROOT/$ARRAY_REF':
-    d['reference'] = '$ARRAY_REF'
-json.dump(d, open('$OUT/lvs-array.json', 'w'), indent=2)
-open('$OUT/lvs-array.json', 'a').write('\n')
-print('status:', d['status'], '| mismatches:', d['mismatch_count'])
-"
+commit_report "$WORK/lvs-array-raw.json" "$OUT/lvs-array.json" \
+  --print 'status: {status} | mismatches: {mismatch_count}'
 
 hr "5. ERC: array supply + tie read vs erc-supply-spec.json (klt erc, T1 item 11, ~26 min)"
 # T1 item 11 (power delivery, structural), issues #124 and #159. The declared
@@ -369,7 +334,10 @@ klt erc "$ARRAY_GDS" "$ERC_SPEC" --format json > "$WORK/erc-array-full.json" || 
 #  * erc_coverage (connectivity -- the tie-check evidence) is kept IN FULL,
 #    as are erc_status, erc_findings, erc_finding_count, ties_disclosure and
 #    provenance.
-ERC_WORK="$WORK" ERC_OUT="$OUT" python3 - <<'PYEOF'
+#  * the abridged file is written into $WORK and committed by commit_report
+#    below, so it passes the same rewrite + lint-envelope guard as every other
+#    report here (issue #340) -- hence ERC_WORK, and no ERC_OUT.
+ERC_WORK="$WORK" python3 - <<'PYEOF'
 import json, os
 
 GATES_KEPT = 4
@@ -407,7 +375,7 @@ ordered = {k: d[k] for k in ['schema_version', 'status', 'erc_status', 'file',
                              'erc_findings', 'coverage', 'erc_coverage',
                              'ties_disclosure', 'provenance', '_note']
            if k in d}
-out_path = os.path.join(os.environ['ERC_OUT'], 'erc-array-supply.json')
+out_path = os.path.join(os.environ['ERC_WORK'], 'erc-array-supply-abridged.json')
 with open(out_path, 'w') as f:
     json.dump(ordered, f, indent=2)
     f.write('\n')
@@ -416,6 +384,11 @@ print('status:', d['status'], '| gates:', d['gate_count'],
       '| erc_checked:', len(d['erc_coverage']['checked']),
       '| erc_skipped:', len(d['erc_coverage']['skipped']))
 PYEOF
+# The abridgement above is bespoke (its own key ordering and _note), so it
+# stays python -- but the file it produces is still committed through the one
+# guarded path, which is what makes README.md's "every report in this
+# directory is scrubbed and linted, without exception" true.
+commit_report "$WORK/erc-array-supply-abridged.json" "$OUT/erc-array-supply.json"
 
 run_macro
 
