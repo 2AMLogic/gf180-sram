@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Validate repo-hygiene and evidence-record format invariants for gf180-sram.
 
-This is intentionally thin scaffolding (see issue #28): this repo has not yet
-landed design sources, testbenches, or a ratified evidence-record grammar
-(#21, #24), so there is nothing to validate at the *content* level yet. What
-this script enforces instead is the structural convention that already
-exists today:
+Added for issue #28 (T1 checklist item 10) and run by the `evidence-record
+format` CI job. It is pure Python over committed files -- it never runs
+ngspice and needs no PDK -- and it covers two kinds of invariant: the
+structural conventions that keep the repo's evidence findable and clean
+(checks 1-3), and the freshness of every artifact derived from the
+append-only records (checks 4-6). It does not pass judgement on the
+measurements themselves: the spec tier verdict over that evidence is graded
+by `klt signoff`, via scripts/ci/check-signoff-freshness.sh.
 
   1. Every top-level "deliverable" directory (design/, sim/, layout/,
      views/, measurements/) carries a README.md, so the repo layout
@@ -45,9 +48,12 @@ exists today:
       naming the regeneration command rather than silently pinning
       transcribed values that no longer match the committed records.
 
-As the harness and evidence-record grammar land (#21, #24), this script is
-the place to grow real per-record field validation -- it does not invent
-that grammar itself.
+Checks 4-6 share one shape: re-render a committed derived artifact from the
+records it is derived from, byte-compare, and fail with the regeneration
+command attached. That is what makes a new corner-sweep record that
+supersedes an older one a CI failure rather than a silently stale rollup
+nobody notices. A new derived artifact under sim/, layout/ or measurements/
+belongs here as another check of the same shape.
 """
 
 from __future__ import annotations

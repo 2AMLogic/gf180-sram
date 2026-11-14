@@ -1,15 +1,36 @@
 name: CI
 
-# Validates the design harness and the evidence-record format on every PR
-# (T1 checklist item 10, issue #28). This is intentionally thin scaffolding:
-# no design sources or testbenches have landed yet (#21, #24), so today the
-# `harness` job runs whatever the project's standard `npm run lint` / `npm
-# run test` entry points do (currently a structural evidence-format check
-# and a stub, respectively), and `evidence-format` runs the same lint
-# directly so it is visible as its own status check. Both jobs are meant to
-# grow real content as the design/testbench issues land, per the issue's
-# "Notes" section — they are not meant to invent the eventual evidence
-# grammar themselves.
+# Validates the design harness, the evidence-record format, and the freshness
+# of every committed derived artifact on each PR and each push to `main`
+# (T1 checklist item 10, issue #28). Four jobs run here:
+#
+#   harness                    -- `npm run check:ci`: the pure-Python unit
+#                                 tests under sim/lib/ (the extraction and
+#                                 campaign math the ngspice testbenches feed)
+#                                 plus the Loom guard-hook tests
+#                                 (`npm run test:guards`).
+#   evidence-record format     -- scripts/ci/check-evidence-format.sh: repo
+#                                 hygiene (per-directory READMEs, no raw
+#                                 simulation artifacts, resolvable markdown
+#                                 links) and freshness of the derived
+#                                 evidence rollups under sim/ and
+#                                 measurements/.
+#   klt signoff                -- re-grades the T1 block manifest with the
+#                                 pinned grading klt and requires the
+#                                 committed signoff report to match.
+#   generated array schematics -- regenerates the array schematics and
+#                                 requires the committed copies to match.
+#
+# The evidence-format check runs in `evidence-format` ONLY, so it is visible
+# as its own named status check. It is deliberately NOT also invoked from
+# `npm run check:ci`: that second leg ran the repo's heaviest check twice per
+# PR for no extra signal and was removed in #332. `npm run lint` remains the
+# local entry point for the same check -- please do not re-add it to
+# `check:ci`.
+#
+# The ngspice testbenches themselves are not run here: they need the pinned
+# gf180mcu PDK, which CI does not install. See sim/README.md for the
+# cold-start invocation.
 
 on:
   pull_request:
@@ -31,7 +52,7 @@ jobs:
         with:
           node-version: "22.23.4"
 
-      - name: Run harness checks (lint + testbenches)
+      - name: Run harness checks (Python unit tests + Loom guard tests)
         run: npm run check:ci
 
   evidence-format:
