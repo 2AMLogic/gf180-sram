@@ -1,0 +1,224 @@
+{
+  "netlist": "../testbench/tb_access_power.klt.spice",
+  "engine": "ngspice",
+  "models": {
+    "lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+  },
+  "corners": {
+    "process": [
+      {
+        "name": "ff",
+        "sections": [
+          "ff"
+        ]
+      },
+      {
+        "name": "tt",
+        "sections": [
+          "typical"
+        ]
+      },
+      {
+        "name": "ss",
+        "sections": [
+          "ss"
+        ]
+      }
+    ],
+    "supply_v": {
+      "vvdd": [
+        2.97,
+        3.3,
+        3.63
+      ]
+    },
+    "temperature_c": [
+      -40,
+      25,
+      125
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "0.02n 205n"
+  },
+  "measurements": [
+    {
+      "name": "q_write",
+      "spice": ".meas tran q_write INTEG i(vvdd) FROM=25n TO=45n",
+      "unit": "C"
+    },
+    {
+      "name": "q_read",
+      "spice": ".meas tran q_read INTEG i(vvdd) FROM=65n TO=85n",
+      "unit": "C"
+    },
+    {
+      "name": "q0_rd",
+      "spice": ".meas tran q0_rd FIND v(Q[0]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q1_rd",
+      "spice": ".meas tran q1_rd FIND v(Q[1]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q2_rd",
+      "spice": ".meas tran q2_rd FIND v(Q[2]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q3_rd",
+      "spice": ".meas tran q3_rd FIND v(Q[3]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q4_rd",
+      "spice": ".meas tran q4_rd FIND v(Q[4]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q5_rd",
+      "spice": ".meas tran q5_rd FIND v(Q[5]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q6_rd",
+      "spice": ".meas tran q6_rd FIND v(Q[6]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q7_rd",
+      "spice": ".meas tran q7_rd FIND v(Q[7]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q8_rd",
+      "spice": ".meas tran q8_rd FIND v(Q[8]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q9_rd",
+      "spice": ".meas tran q9_rd FIND v(Q[9]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q10_rd",
+      "spice": ".meas tran q10_rd FIND v(Q[10]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q11_rd",
+      "spice": ".meas tran q11_rd FIND v(Q[11]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q12_rd",
+      "spice": ".meas tran q12_rd FIND v(Q[12]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q13_rd",
+      "spice": ".meas tran q13_rd FIND v(Q[13]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q14_rd",
+      "spice": ".meas tran q14_rd FIND v(Q[14]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q15_rd",
+      "spice": ".meas tran q15_rd FIND v(Q[15]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q16_rd",
+      "spice": ".meas tran q16_rd FIND v(Q[16]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q17_rd",
+      "spice": ".meas tran q17_rd FIND v(Q[17]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q18_rd",
+      "spice": ".meas tran q18_rd FIND v(Q[18]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q19_rd",
+      "spice": ".meas tran q19_rd FIND v(Q[19]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q20_rd",
+      "spice": ".meas tran q20_rd FIND v(Q[20]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q21_rd",
+      "spice": ".meas tran q21_rd FIND v(Q[21]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q22_rd",
+      "spice": ".meas tran q22_rd FIND v(Q[22]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q23_rd",
+      "spice": ".meas tran q23_rd FIND v(Q[23]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q24_rd",
+      "spice": ".meas tran q24_rd FIND v(Q[24]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q25_rd",
+      "spice": ".meas tran q25_rd FIND v(Q[25]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q26_rd",
+      "spice": ".meas tran q26_rd FIND v(Q[26]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q27_rd",
+      "spice": ".meas tran q27_rd FIND v(Q[27]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q28_rd",
+      "spice": ".meas tran q28_rd FIND v(Q[28]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q29_rd",
+      "spice": ".meas tran q29_rd FIND v(Q[29]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q30_rd",
+      "spice": ".meas tran q30_rd FIND v(Q[30]) AT=74n",
+      "unit": "V"
+    },
+    {
+      "name": "q31_rd",
+      "spice": ".meas tran q31_rd FIND v(Q[31]) AT=74n",
+      "unit": "V"
+    }
+  ],
+  "netlist_source": "schematic",
+  "options": {
+    "timeout_s": 1500
+  },
+  "remote": {
+    "hosts": 14
+  }
+}
