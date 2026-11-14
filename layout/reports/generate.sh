@@ -12,6 +12,7 @@
 #     ./layout/reports/generate.sh --column-path --native   # ... plus the PDK-native DRC deck
 #     ./layout/reports/generate.sh --row-path       # only the row decoder strip (#204)
 #     ./layout/reports/generate.sh --control        # only sram_ctrl + col_decode (#246)
+#     ./layout/reports/generate.sh --macro          # only the assembled macro, DRC (#326)
 #
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
@@ -60,6 +61,28 @@ COLUMN_DIR=layout/periphery/column
 # wordline-RC claim (layout/README.md "Row path").
 # `./layout/reports/generate.sh --row-path` runs only this block (~10 s).
 ROW_GDS=layout/periphery/row/row_path.gds
+
+# --- 0m. the assembled macro (issue #326) -----------------------------------
+# One hierarchical top cell, `sram_256x32` (layout/macro/sram_256x32.gds), checked
+# with the curated gf180mcu deck. Macro-level DRC only: no timing, parasitic,
+# wordline-RC or area claim (layout/README.md).
+# `./layout/reports/generate.sh --macro` runs only this block (~1 min).
+#
+# There is deliberately no macro extract/LVS counterpart here. Hierarchical macro
+# LVS is blocked on klayout-tools#5322 and stays on issue #247, so this block mints
+# drc-macro.json and nothing else -- neither extraction nor LVS runs, and no stub
+# stands in for either.
+MACRO_GDS=layout/macro/sram_256x32.gds
+run_macro() {
+hr "0m. macro (issue #326): DRC"
+klt drc --deck gf180mcu --format json "$MACRO_GDS" | tee "$OUT/drc-macro.json" >/dev/null
+python3 -c "
+import json
+d = json.load(open('$OUT/drc-macro.json'))
+print('drc-macro:', d['status'], '| violations:', d['violation_count'])
+"
+}
+if [ "${1:-}" = "--macro" ]; then run_macro; exit 0; fi
 
 if [ "${1:-}" != "--control" ]; then
 hr "0r. row path (issue #204): DRC, extract, LVS"
@@ -393,5 +416,7 @@ print('status:', d['status'], '| gates:', d['gate_count'],
       '| erc_checked:', len(d['erc_coverage']['checked']),
       '| erc_skipped:', len(d['erc_coverage']['skipped']))
 PYEOF
+
+run_macro
 
 hr "done -- reports written under $OUT/"

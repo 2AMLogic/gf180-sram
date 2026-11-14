@@ -16,9 +16,11 @@ whatever `layout/*.gds` and `design/netlist/*.spice` are currently checked
 out and overwrites the files below in place. `./layout/reports/generate.sh
 --column-path` regenerates only the column-path reports (~2 min), and adding
 `--native` also runs them against the PDK's native DRC deck (~3 min more);
-the full run's `klt erc` step alone is ~26 min.
+`./layout/reports/generate.sh --macro` regenerates only
+[`drc-macro.json`](drc-macro.json) (~1 min); the full run's `klt erc` step alone
+is ~26 min.
 
-## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205)
+## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205; `drc-macro.json` added 2026-11-14, issue #326)
 
 | Report | Command | Result |
 |---|---|---|
@@ -35,6 +37,7 @@ the full run's `klt erc` step alone is ~26 min.
 | `drc-native-column-precharge-slice.json`, `drc-native-column-io-slice.json`, `drc-native-column-abut.json` | `klt drc --engine klayout` with the PDK's native deck (`generate.sh --column-path --native`) | `status: clean`, 0 violations, `coverage_assertion` 640 expected = 640 observed rule categories |
 | `drc-row-path.json`, `extract-row-path.json`, `lvs-row-path.json` | `klt drc --deck gf180mcu`, `klt extract`, and `klt lvs` (inline extraction, `options.flatten_reference: true`) on `layout/periphery/row/row_path.gds` vs. `design/netlist/row_path.spice` (issue #204; `generate.sh --row-path`) | DRC `status: clean`, 0 violations; 528 devices (264 nfet + 264 pfet), 279 nets, 79 pins; LVS `status: match`, 528/528 devices, 279/279 nets, 79/79 pins, `mismatches[]` only the `topology.flattened` disclosure and the "no bjt" note. Strip only -- no physical-fit, parasitic or wordline-RC claim; PDK-native deck not run (not installed on the generating host) |
 | `drc-sram-ctrl.json`, `extract-sram-ctrl.json`, `lvs-sram-ctrl.json`, `drc-col-decode.json`, `extract-col-decode.json`, `lvs-col-decode.json` | `klt drc --deck gf180mcu`, `klt extract`, and `klt lvs` (inline extraction, `options.flatten_reference: true`) on `layout/periphery/control/{sram_ctrl,col_decode}.gds` vs. `design/netlist/{sram_ctrl,col_decode}.spice` (issue #246; `generate.sh --control`) | DRC `status: clean`, 0 violations on both; `sram_ctrl` 356 devices, 171 nets, 35 pins and `col_decode` 40 devices, 27 nets, 15 pins, each LVS `status: match` with everything matched and `mismatches[]` only the `topology.flattened` disclosure and the "no bjt" note. Block level only -- no timing, delay-calibration, parasitic or physical-fit claim; PDK-native deck not run |
+| [`drc-macro.json`](drc-macro.json) | `klt drc --deck gf180mcu --format json layout/macro/sram_256x32.gds` on the assembled macro, hierarchical top cell `sram_256x32` (issue #326; `generate.sh --macro`) | `status: clean`, 0 violations -- 51 rules checked, 63 inapplicable, 97 unmodeled, 11 layers. **No macro LVS or extract counterpart exists** (see "Known gap: macro-level LVS" below): macro-level DRC and the pin check are the only macro verdicts in this repo. First report here minted under the pinned released `klayout-tools==0.8.0` with `klayout==0.30.12`, so it carries `schema_version: 3` and an object-valued `file` where the older rows carry `schema_version: 1`/`2` and a string |
 | `extract-column-precharge-slice.json`, `extract-column-io-slice.json` | `klt extract --deck gf180mcu` on the slices | 12 devices (pfet), 14 nets, 14 pins; 99 devices (50 nfet + 49 pfet), 59 nets, 26 pins |
 | `lvs-column-precharge-slice.json`, `lvs-column-io-slice.json` | `klt lvs` (inline `layout.file` + `deck`, `options.flatten_reference: true`) vs. `design/netlist/{precharge,io}_slice.spice` | `status: match`; 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins. `mismatches[]` holds only `severity: warning` entries: the `topology.flattened` disclosure and "device class absent on both sides" notes -- no `net.supply_fragmented` |
 
@@ -176,6 +179,24 @@ What the other report fields do and do not mean:
   the released klt 0.6.0 (klayout 0.30.12); the ~26-minute runtime is what
   this 16,640-gate array costs `klt erc`.
 
+
+## Known gap: macro-level LVS (no `lvs-macro.json`)
+
+`drc-macro.json` has **no LVS or extract counterpart, deliberately**. There is no
+`lvs-macro.json` and no `extract-macro.json` in this directory, and no stub stands
+in for either -- so **no macro-level connectivity claim is made anywhere in this
+repo**, in either direction. The assembled macro is DRC-clean and its 109 pins are
+checked (`layout/macro/check_pins.py`, `layout/verify.sh` step 5f); whether the
+blocks' abutted pins actually *connect* is unverified.
+
+The blocker is hierarchical LVS compare in the tool:
+[2AMLogic/klayout-tools#5322](https://github.com/2AMLogic/klayout-tools/issues/5322)
+is open, and the macro LVS deliverable is tracked in issue #247 (which stays open
+for exactly that). The per-block LVS rows in the table above each prove one cell
+against its own netlist and do **not** compose into a macro-level verdict.
+
+When #5322 lands, the macro LVS report belongs here as `lvs-macro.json`, added by
+#247 -- with its own row in the table above and this section retired.
 
 ## Known gap: array-level LVS (`lvs-array.json`)
 

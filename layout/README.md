@@ -50,6 +50,10 @@ layout/
     generate.py                         draws the control block + column decoder (issue #246)
     sram_ctrl.gds                       committed: 10 dff + 51 inv_dly + gates/drivers, one flat cell
     col_decode.gds                      committed: 4 nand3 + 12 inv_x16, one flat cell
+  macro/
+    generate.py                         assembles every block below into the macro (issue #326)
+    check_pins.py                       macro GDS labels vs the 109-name #198 pin list
+    sram_256x32.gds                     committed: top cell sram_256x32, 669.330 x 611.625 um
   reports/                              machine-readable DRC/LVS/extract evidence (README inside)
   sram_64x128/
     sram_64x128_array.gds               64 x 128 array (4:1 organization), emitted by
@@ -305,6 +309,58 @@ edge, and moving a pin is a one-line change in `SRAM_CTRL_PINS` / `COL_DECODE_PI
   physical fit with the array, the bands or the row path. The blocks are
   area-naive (single-finger devices, 0.65 um grid, one rail pair per strip).
 
+### The macro (issue #326)
+
+`macro/generate.py` places every committed block above into one hierarchical top
+cell, `sram_256x32` (`macro/sram_256x32.gds`): two `sram_64x64_half` array halves,
+the `row_path` strip, `sram_ctrl`, `col_decode`, and the `precharge_slice` /
+`io_slice` column bands. Regeneration is byte-for-byte deterministic
+(`verify.sh` step 1).
+
+**Measured from the committed GDS** (top cell `sram_256x32`, 7 child cells):
+
+| | |
+| --- | --- |
+| bounding box | `(0.000, -252.525)` to `(669.330, 359.100)` um |
+| width x height | **669.330 x 611.625 um** |
+| area | **0.409379 mm^2** |
+
+This is the drawn bounding box of the assembled macro, nothing more: it is not a
+sign-off area number, and no floorplan, utilisation or routability claim follows
+from it. (`spec/area-clock-pulse-power-decision.md`'s "Macro area" row is left at
+`not yet measured` — that row needs a decision record, which this does not touch.)
+
+**Pins.** `macro/check_pins.py` checks the GDS labels against the 109-name list
+`design/check_macro_pins.py` derives from
+[`spec/macro-interface-decision.md`](../spec/macro-interface-decision.md): 107
+signals (`A[7:0]`, `D[31:0]`, `Q[31:0]`, `WEN[31:0]`, `CEN`, `GWEN`, `CLK`) on the
+`Metal2` label layer along the bottom edge, plus `VDD` / `VSS` `Metal3` straps on
+the top edge. It fails on any missing, extra or duplicated label, on a label that
+is not over drawn metal of the right layer, on a label off its expected edge, and
+on `D[i]`/`WEN[i]`/`Q[i]` not increasing along x with `i`. `verify.sh` step 5f
+runs it.
+
+**Findings.**
+
+* `klt drc --deck gf180mcu` on the hierarchical top cell: **`status: clean`, 0
+  violations** (51 rules checked, 63 inapplicable, 97 unmodeled, 11 layers).
+  Report: `reports/drc-macro.json`, minted under the pinned
+  `klayout-tools==0.8.0` with `klayout==0.30.12` (`reports/generate.sh --macro`,
+  ~1 min). `verify.sh` step 11 re-runs the same check.
+* **Macro LVS has no verdict yet — neither match nor mismatch is claimed.** The
+  macro is *not* compared against `design/netlist/sram_256x32.spice` anywhere in
+  this repo: there is no `reports/lvs-macro.json`, no `reports/extract-macro.json`,
+  and no stub standing in for either. Hierarchical macro LVS is blocked on
+  [2AMLogic/klayout-tools#5322](https://github.com/2AMLogic/klayout-tools/issues/5322)
+  and is tracked in issue #247. Until that lands, the macro's DRC cleanliness and
+  its pin list are the only verified macro-level properties; **connectivity
+  between the assembled blocks is unverified.**
+* Not claimed: timing, parasitics, wordline RC, power, routability, or that the
+  blocks' abutted pins actually connect. The per-block LVS results above
+  (`sram_ctrl`, `col_decode`, `row_path`, the column cells, the arrays) each prove
+  their own cell against its own netlist; none of them covers the macro's
+  block-to-block wiring.
+
 ### Scope: the storage-array core, matching `design/`
 
 Like the schematic side (see `design/README.md`), this is the bitcell-array
@@ -324,11 +380,14 @@ proposes a 4:1 column mux, i.e. a 64 x 128 physical array rather than the
 same bitcell and landing-pad strip) is `sram_64x128/sram_64x128_array.gds`
 (issue #204), emitted by the same generator and checked by `verify.sh` steps 1,
 2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`).
-The 256 x 32 files are left untouched until macro assembly (#206) retires them.
+The 256 x 32 files are left untouched: the macro (#326) assembles the 64 x 128
+halves, and whether to retire the 256 x 32 pair is still an open decision on
+issue #247.
 Of the periphery, the **column path** (precharge, 4:1 mux, sense amp, write
 driver, input/`Q` flops) and the **row decode / wordline-driver strip** are
-drawn so far -- see "The column path" and "The row path" above; control and
-macro assembly and pins (#206) are not.
+drawn so far -- see "The column path" and "The row path" above; the control
+block and column decoder (#246) and the macro assembly and pins (#326) are drawn
+too -- see "Control block and column decoder" and "The macro".
 
 ## What this does and does not prove
 
@@ -366,6 +425,13 @@ macro assembly and pins (#206) are not.
   rather than in place of a tie check. Full field-by-field reading:
   `layout/reports/README.md` § "Item 11".
 * Geometry is on a 5 nm grid and passes `klt precheck`'s hygiene battery.
+* The assembled macro (`macro/sram_256x32.gds`, top cell `sram_256x32`) is
+  DRC-clean against the same curated deck -- `reports/drc-macro.json`,
+  `status: clean`, 0 violations -- and carries exactly the 109 pins
+  `spec/macro-interface-decision.md` ratifies, on the right layers and edges
+  (`macro/check_pins.py`). Its drawn bounding box is 669.330 x 611.625 um
+  (0.409379 mm^2). **Macro-level LVS is not among these proofs** -- see
+  "The macro" and "Does not prove" below.
 
 **Does not prove**:
 
@@ -423,8 +489,12 @@ macro assembly and pins (#206) are not.
   the cycle — those need `klt pex` of these cells against the ratified
   testbenches, and the `io_slice` reference is compared *flattened* (the layout
   is drawn flat per slice), so no per-subcircuit hierarchy is verified.
-* **A routed macro.** There is still no control logic or macro
-  assembly (#206), and the row strip is drawn but not placed against the array. The LEF abstract
+* **A routed macro.** The control logic (`sram_ctrl`, `col_decode`, issue #246)
+  and the macro assembly (`macro/sram_256x32.gds`, issue #326) are now drawn, and
+  the row strip *is* placed against the array inside that macro -- but the macro is
+  only DRC-clean and pin-checked, never LVS'd (see "The macro" above:
+  klayout-tools#5322 / #247), so block-to-block connectivity is unverified and
+  nothing here is routed. The LEF abstract
   (`views/sram_256x32_array.lef`, issues #120/#182) is generated by the
   released klt 0.6.0 and all 322 pins carry real drawn `PORT` geometry
   (klayout-tools#1614 fixed; the wordlines reach Metal1 since issue #121), but
@@ -618,13 +688,13 @@ primitives — no KLayout GUI/application binary, no `DISPLAY`, no Qt.
 Everything in one command, from the repo root:
 
 ```bash
-./layout/verify.sh            # ~5 min: adds the full-array DRC + extraction and the column seam DRC
-./layout/verify.sh --quick    # ~1 min: bitcell, 3x3 tile, the column path (slices, bands, LVS) and the row strip
+./layout/verify.sh            # ~6 min: adds the macro DRC, the full-array DRC + extraction and the column seam DRC
+./layout/verify.sh --quick    # ~1 min: bitcell, 3x3 tile, the column path (slices, bands, LVS), the row strip and the macro pin check
 ```
 
-It regenerates all GDS files (bitcell, array, column path), fails if any
-differs from the committed bytes, then runs `klt precheck`, `klt drc`, `klt extract` and `klt lvs` and
-prints each verdict. Individually:
+It regenerates all GDS files (bitcell, array, column path, row strip, control,
+macro), fails if any differs from the committed bytes, then runs `klt precheck`,
+`klt drc`, `klt extract` and `klt lvs` and prints each verdict. Individually:
 
 ```bash
 # 1. bitcell (byte-for-byte deterministic -- git diff stays empty)
@@ -655,6 +725,18 @@ uv run --with klayout python3 layout/periphery/column/generate.py --abut /tmp/a.
 klt drc --deck gf180mcu /tmp/abut.gds
 #    the PDK-native deck too (writes layout/reports/drc-native-column-*.json):
 ./layout/reports/generate.sh --column-path --native
+
+# 3c. the macro (issue #326): assemble, check pins, DRC the top cell
+uv run --with klayout python3 layout/macro/generate.py
+uv run --with klayout python3 layout/macro/check_pins.py      # 107 signals + VDD/VSS
+klt drc --deck gf180mcu layout/macro/sram_256x32.gds          # ~1 min
+#    re-mint the committed report with the engine pinned on both sides:
+uvx --from "klayout-tools==0.8.0" --with "klayout==0.30.12" \
+    klt drc --deck gf180mcu --format json layout/macro/sram_256x32.gds \
+    > layout/reports/drc-macro.json
+#    or, equivalently, the block alone:
+./layout/reports/generate.sh --macro
+#    (no macro LVS: blocked on klayout-tools#5322, tracked in #247)
 
 # 4. inspection
 klt stats layout/bitcell/sram_bitcell_6t.gds
