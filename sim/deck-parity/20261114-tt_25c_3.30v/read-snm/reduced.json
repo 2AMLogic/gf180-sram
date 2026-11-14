@@ -1,0 +1,24 @@
+{
+  "family": "read-snm",
+  "mode": "snm:read_snm_sweep.txt:read_snm",
+  "expected": [
+    "tt_25c_3.30v"
+  ],
+  "expected_deck_sha256": "48a5909be69179051802f794b2ad7c5049506d197224295fb25d8e3f9bf2aebe",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_snm_lobe_low_v": 0.289121,
+        "read_snm_lobe_high_v": 0.28912,
+        "read_snm_v": 0.28912
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "48a5909be69179051802f794b2ad7c5049506d197224295fb25d8e3f9bf2aebe"
+    }
+  ],
+  "overall": "recorded"
+}

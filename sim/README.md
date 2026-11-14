@@ -49,6 +49,12 @@ sim/
 - **`<corner-id>`** = `<process>_<temp>c_<supply>v`, e.g. `ff_-40c_2.97v`,
   `tt_25c_3.30v`, `ss_125c_3.63v` -- one per point in the ratified 27-corner
   matrix below.
+- **`sim/deck-parity/`** sits beside the experiment directories and is *not* a
+  record directory: it holds parity receipts for the staged `klt sim` deck-mode
+  migration (#230) -- evidence that the migrated generator reproduces a
+  committed number, never a new claim about the cell. See
+  `sim/deck-parity/README.md` and "Staged migration to `klt sim` deck mode"
+  below.
 
 ## The ratified 27-corner PVT matrix
 
@@ -117,17 +123,26 @@ with the append-only records, so the migration target is `klt sim`'s
 ```bash
 sim/lib/deck_adapter.py families
 sim/lib/deck_adapter.py build read-snm --stage-dir /tmp/stage --request-out /tmp/stage/request.json
-sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned grading
+sim/lib/deck_adapter.py build read-snm --corner tt:25:3.30 ...  # bounded: one corner
+sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
+  --request /tmp/stage/request.json                             # caller-owned grading
 ```
 
 * `build` stages the same per-corner scratch the launcher composes (testbench,
   generated `corner.inc`, DUT netlist) and writes a deck-list request. The only
   deck-byte change is `@@REPO_ROOT@@` -> `.` (deck mode refuses absolute includes);
   source and composed sha256 are in the request's `x_gf180_sram_adapter` block.
+  `--corner process:temp:vdd` (repeatable) bounds the request to those ratified
+  corners instead of all 27 -- how a parity run is kept to one corner. Only a
+  corner the spec already ratifies can be named, and the selection is recorded
+  in the request so `reduce` expects exactly it.
 * `reduce` re-applies the launcher's grading (`RESULT:`/`RESULT-ERROR:`,
   `snm_extract.py`). Deck mode reports process success only: exit 0 is never a
   PASS, and missing corners, duplicate/unexpected ids, missing declared outputs
-  and timeouts all come back `OPEN`.
+  and timeouts all come back `OPEN`. Pass `--request <the file build wrote>` to
+  grade a bounded run: it pins the expected corner set and checks every
+  executed `units[].deck_sha256` against the composed deck, so deck drift is a
+  coverage error rather than a silent pass.
 * `mc-build` / `mc-reduce` are the Monte Carlo counterpart for the
   `run_mc_campaign.py` pool: one deck per (corner, kind, sample) -- two (L/R)
   per sample for the `snm-pair` SNM families -- with `corner.inc` bytes from
@@ -141,23 +156,49 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned g
 * `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
   reports. Stub results are contract checks, **not** physical evidence.
 
-**Blocked (named prerequisites; launchers stay, no campaign authorised):**
+**Corner grid, one corner, verified live (2026-11-14):**
+`sim/deck-parity/20261114-tt_25c_3.30v.md` is the parity receipt the operator
+ruling of 2026-11-14 authorised: `tt_25c_3.30v` for all five families through
+`klt sim` deck mode on the batch fleet. It settles prerequisites 1 and 2 below
+*for that corner*, and nothing more.
 
-1. *Executor capability.* No batch image build verified to accept deck-list
-   requests; the local `klt` source supports them, a deployed image is unverified.
-   Tool-side tracking: `2AMLogic/klayout-tools#4109` (fleet runner image still
-   rejects `decks[]` requests and a `runner_compatibility: match` report does not
-   prove otherwise; the image rebuild is an operator/infra step). Needed: the intended executor's installed klt/ngspice build identity (from a
-   report's `environment`), and confirmation that `$PDK_ROOT/...` includes in
-   `corner.inc` resolve on it (otherwise pass `build --pdk-dir`).
-2. *Measurement parity receipt.* Per family, one corner (or the full set) from
-   deck mode must match the committed record value for the same corner. No such
-   receipt exists yet, for the corner grid or the Monte Carlo adapter (which is
-   ready offline); `run_mc_campaign.py` and its pool are untouched.
-3. *Cutover.* Retiring `run_corner_sweep.sh`/the MC pool, switching defaults, and
-   updating the cold-start section below happen only after 1 and 2 are met.
-   Single-point probes stay local. Until then the cold-start section below is
-   the historical procedure and is not to be run on dispatch workers.
+1. *Executor capability* -- **met.** A `decks[]` request from this repo was
+   accepted and executed end to end: runner `klt 0.9.0` on AMI
+   `ami-09c14f55df4958cbd` (`c7i.4xlarge` spot, `us-east-1`), `ngspice 47`,
+   `runner_compatibility: match`, `runner_request_features: {required:
+   ["decks"], missing: [], status: "supported"}`. The `$PDK_ROOT/gf180mcuD/...`
+   includes in `corner.inc` resolved on the worker (`units[].host_resolved`),
+   so `build --pdk-dir` is not needed. Caveat: the worker publishes no PDK
+   stamp (`PDK_ROOT=/opt/pdk`, `variant: null`), so `pdk_stamp_comparison` and
+   `models_lib_comparison` come back `not_comparable` -- the measurement
+   agreement is the only evidence the worker resolved equivalent models.
+   (`2AMLogic/klayout-tools#4109` closed COMPLETED 2026-10-27, but its proof
+   run was a sky130 `matrix-batch` request, which did not establish this.)
+2. *Measurement parity receipt* -- **met at `tt_25c_3.30v`, open elsewhere.**
+   `write-margin`, `read-access` and `write-access` reproduce the committed
+   record value exactly. `read-snm`/`hold-snm` differ against the record only
+   through the documented #213 extractor change (see "Earlier SNM values
+   over-read" below): with the pre-#213 extractor applied to the fleet's own
+   sweep data, they match to <= 3 uV on the recorded metric. Still open: the
+   other 26 corners, and the Monte Carlo adapter (`mc-build`/`mc-reduce`),
+   which has had no live run of any kind. `run_mc_campaign.py` and its pool are
+   untouched.
+3. *Cutover* -- **still blocked.** Retiring `run_corner_sweep.sh`/the MC pool,
+   switching defaults, and updating the cold-start section below happen only
+   after 2 is satisfied for the corners a cutover would rely on (the ruling
+   leaves scheduling the follow-up corners to the Curator) and the MC path has
+   its own receipt. Single-point probes stay local. Until then the cold-start
+   section below is the historical procedure and is not to be run on dispatch
+   workers.
+
+One known environmental difference, measured rather than assumed: the committed
+2026-08 corner logs carry `Note: Compatibility modes selected: hs a`, this
+run's worker stdout carries `Note: No compatibility mode selected!`. ngspice
+reads compatibility mode from the executing host's `.spiceinit`, which deck
+mode does not transport; at this corner it is worth a few microvolts on the two
+geometric SNM metrics and nothing on the three `RESULT:`-emitting families.
+Pinning it explicitly in the request (`options.ngspice_init`) is tracked in
+#338.
 
 ## Cold-start invocation
 

@@ -1,0 +1,22 @@
+{
+  "family": "write-access",
+  "mode": "direct",
+  "expected": [
+    "tt_25c_3.30v"
+  ],
+  "expected_deck_sha256": "183e364ab3947a37c236134c3f54ee386bdc9c8bca5f424cf0c6ee83eb57bd36",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_access_time_s": 5.67636e-11
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "183e364ab3947a37c236134c3f54ee386bdc9c8bca5f424cf0c6ee83eb57bd36"
+    }
+  ],
+  "overall": "recorded"
+}

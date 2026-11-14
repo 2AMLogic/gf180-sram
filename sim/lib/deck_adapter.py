@@ -2,7 +2,9 @@
 """Deck-mode adapter: the 27-corner characterization grid as a `klt sim` deck request (#230).
 
     deck_adapter.py build  <family> --stage-dir DIR --request-out FILE [--pdk-dir DIR]
-    deck_adapter.py reduce <family> <klt-sim-report.json> [--outdir DIR] [--json-out FILE]
+                           [--corner P:T:V ...]
+    deck_adapter.py reduce <family> <klt-sim-report.json> [--request FILE]
+                           [--outdir DIR] [--json-out FILE]
     deck_adapter.py mc-build  <family> --corner P:T:V ... --seed N --stage-dir DIR --request-out FILE
     deck_adapter.py mc-reduce <family> <request.json> <klt-sim-report.json> [--outdir DIR]
     deck_adapter.py families
@@ -10,7 +12,8 @@
 This is the *offline preparation* half of retiring `run_corner_sweep.sh`. It
 does NOT run ngspice, submit anything, or mint a record:
 
-* `build` composes, for each of the 27 ratified corners, exactly the scratch
+* `build` composes, for each of the 27 ratified corners (or the subset
+  `--corner` names, for a bounded parity run), exactly the scratch
   directory `run_corner_sweep.sh` composes (the testbench, a generated
   `corner.inc`, the staged DUT netlist) and writes a `klt sim` *deck-list*
   request that transports those decks unchanged (`klayout_tools.sim_decks`).
@@ -20,7 +23,9 @@ does NOT run ngspice, submit anything, or mint a record:
   launcher's grading -- `RESULT:` / `RESULT-ERROR:` lines, `snm_extract.py`
   for the DC-sweep families -- to a deck report and fails closed on missing
   coverage, missing declared outputs and timeouts. Exit 0 from the engine is
-  never read as a measurement PASS.
+  never read as a measurement PASS. Pass `--request` (the file `build` wrote)
+  so a bounded run is graded against exactly the corners it asked for, and
+  the executed decks' `deck_sha256` is checked against the composed bytes.
 
 The only byte-level difference from the launcher's scratch deck is the
 `@@REPO_ROOT@@` token, which becomes `.` (the DUT netlist is staged at
@@ -99,6 +104,46 @@ def corner_ids():
     return [corner_id(*c) for c in corners()]
 
 
+def parse_corner_spec(spec):
+    """'tt:25:3.30' -> ('tt', 25, '3.30'), restricted to the ratified matrix.
+
+    Only a corner the spec already ratifies can be named: a bounded run is a
+    subset of the committed grid, never a new corner.
+    """
+    parts = str(spec).split(":")
+    if len(parts) != 3:
+        raise ValueError(f"corner {spec!r} must be process:temp:vdd (e.g. tt:25:3.30)")
+    process, temp_s, vdd = parts
+    if process not in PROCESSES:
+        raise ValueError(f"corner {spec!r}: process must be one of {list(PROCESSES)}")
+    try:
+        temp = int(temp_s)
+    except ValueError:
+        raise ValueError(f"corner {spec!r}: temperature must be an integer") from None
+    if temp not in TEMPS:
+        raise ValueError(f"corner {spec!r}: temperature must be one of {list(TEMPS)} (spec/sram.md corner set)")
+    if vdd not in VDDS:
+        raise ValueError(f"corner {spec!r}: vdd must be one of {list(VDDS)} (spec/sram.md corner set)")
+    return process, temp, vdd
+
+
+def select_corners(corner_specs=None):
+    """The ratified corners named by `corner_specs`, in the launcher's order.
+
+    `None`/empty selects the full 27-corner grid (the default, unchanged).
+    Any subset keeps the launcher's loop order so unit order never depends on
+    the order the corners were named on the command line.
+    """
+    if not corner_specs:
+        return corners()
+    wanted = [parse_corner_spec(s) for s in corner_specs]
+    ids = [corner_id(*c) for c in wanted]
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    if dupes:
+        raise ValueError(f"duplicate corners: {dupes}")
+    return [c for c in corners() if c in wanted]
+
+
 def compose_corner_inc(process, temp, vdd, design_inc, model_file):
     """Text identical to the heredoc in run_corner_sweep.sh."""
     return (
@@ -130,13 +175,19 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
+def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corner_specs=None):
     """Write per-corner unit dirs under `stage_dir` and return the request dict.
 
     `pdk_dir` (absolute path to the gf180mcuD variant dir) is written into
     corner.inc verbatim and `models.pdk_root` is set to its parent; by default
     the includes use the literal `$PDK_ROOT/gf180mcuD/...` form, which the
     executing host resolves.
+
+    `corner_specs` (e.g. `["tt:25:3.30"]`) bounds the request to those ratified
+    corners -- the bounded parity run the migration needs before cutover. The
+    default is the full 27-corner grid. The deck bytes are identical either
+    way; only which corners are staged changes, and the selection is recorded
+    in `x_gf180_sram_adapter.corners` so `reduce` expects exactly that set.
     """
     exp_dir, tb_name, mode = FAMILIES[family]
     kind, datafile, _label = parse_mode(mode)
@@ -157,8 +208,9 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
         model_file = f"$PDK_ROOT/{MODEL_REL}"
 
     stage = Path(stage_dir)
+    selected = select_corners(corner_specs)
     units = []
-    for process, temp, vdd in corners():
+    for process, temp, vdd in selected:
         cid = corner_id(process, temp, vdd)
         unit = stage / "units" / cid
         unit.mkdir(parents=True, exist_ok=True)
@@ -188,7 +240,9 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
         "testbench": f"{exp_dir}/testbench/{tb_name}",
         "testbench_sha256": _sha256(tb_bytes),
         "composed_deck_sha256": _sha256(deck_bytes),
+        "corners": [corner_id(*c) for c in selected],
         "corner_count": len(units),
+        "full_grid": len(selected) == len(corners()),
     }
     return request
 
@@ -217,16 +271,46 @@ def _snm_lines(datafile_path, label):
     return out.getvalue() + err.getvalue()
 
 
-def reduce_report(family, report, *, outdir=None):
+def expected_from_request(family, request):
+    """(expected corner ids, composed deck sha256) for a request `build` wrote.
+
+    Pinning coverage to the request is what lets a *bounded* run grade as
+    `recorded`: without it the reducer expects all 27 corners and a one-corner
+    parity run is indistinguishable from a 26-corner loss.
+    """
+    meta = request.get("x_gf180_sram_adapter") or {}
+    if meta.get("campaign") == "monte-carlo":
+        raise ValueError("request is a Monte Carlo deck request -- use mc-reduce")
+    if meta.get("family") != family:
+        raise ValueError(f"request is for family {meta.get('family')!r}, not {family!r}")
+    ids = list(meta.get("corners") or corner_ids())
+    return ids, meta.get("composed_deck_sha256")
+
+
+def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_deck_sha256=None):
     """Grade a `klt sim` deck report with the launcher's rules.
 
     Returns {"family", "expected", "coverage_errors", "corners": [...],
     "overall"}; overall is "recorded" only if coverage is exact and every
     corner produced a RESULT with no RESULT-ERROR, else "OPEN".
+
+    `expected_ids` (from `expected_from_request`) bounds the expected coverage
+    to the corners the request actually asked for; the default is the full
+    27-corner grid. `expected_deck_sha256`, when given, must equal every
+    unit's reported `deck_sha256` -- the deck-bytes-unchanged claim, checked
+    rather than assumed.
     """
     _exp, _tb, mode = FAMILIES[family]
     kind, datafile, label = parse_mode(mode)
-    expected = corner_ids()
+    if expected_ids is None:
+        expected = corner_ids()
+    else:
+        expected = list(expected_ids)
+        if not expected:
+            raise ValueError("expected corner list is empty")
+        unknown = [c for c in expected if c not in corner_ids()]
+        if unknown:
+            raise ValueError(f"not ratified corner ids: {unknown}")
     base = Path(outdir or report.get("outdir") or ".")
 
     coverage_errors = []
@@ -245,6 +329,13 @@ def reduce_report(family, report, *, outdir=None):
         coverage_errors.append(f"missing corners: {missing}")
     if extra:
         coverage_errors.append(f"unexpected unit ids: {extra}")
+    if expected_deck_sha256 is not None:
+        drifted = sorted(
+            u.get("id") for u in units
+            if u.get("deck_sha256") is not None and u.get("deck_sha256") != expected_deck_sha256
+        )
+        if drifted:
+            coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
 
     by_id = {}
     for u in units:
@@ -300,6 +391,7 @@ def reduce_report(family, report, *, outdir=None):
         "family": family,
         "mode": mode,
         "expected": expected,
+        "expected_deck_sha256": expected_deck_sha256,
         "coverage_errors": coverage_errors,
         "corners": graded,
         "overall": "recorded" if ok else "OPEN",
@@ -638,11 +730,16 @@ def main(argv=None):
     b.add_argument("--stage-dir", required=True)
     b.add_argument("--request-out", required=True)
     b.add_argument("--pdk-dir")
+    b.add_argument("--corner", action="append", dest="corners", metavar="process:temp:vdd",
+                   help="bound the request to this ratified corner (repeatable; default: all 27)")
     r = sub.add_parser("reduce")
     r.add_argument("family", choices=sorted(FAMILIES))
     r.add_argument("report")
     r.add_argument("--outdir")
     r.add_argument("--json-out")
+    r.add_argument("--request",
+                   help="the request `build` wrote: expect exactly its corners and deck sha256 "
+                        "(required to grade a bounded run; without it all 27 corners are expected)")
     mb = sub.add_parser("mc-build")
     mb.add_argument("family", choices=sorted(MC_FAMILIES))
     mb.add_argument("--corner", action="append", required=True, dest="corners", metavar="process:temp:vdd")
@@ -695,12 +792,19 @@ def main(argv=None):
             print(f"{name}\t{d}/testbench/{tb}\t{mode}")
         return 0
     if args.cmd == "build":
-        req = build_request(args.family, args.stage_dir, pdk_dir=args.pdk_dir)
+        req = build_request(args.family, args.stage_dir, pdk_dir=args.pdk_dir,
+                            corner_specs=args.corners)
         Path(args.request_out).write_text(json.dumps(req, indent=2) + "\n")
         print(f"wrote {len(req['decks'])} decks; request: {args.request_out}")
         return 0
     report = json.loads(Path(args.report).read_text())
-    result = reduce_report(args.family, report, outdir=args.outdir)
+    expected_ids = expected_sha = None
+    if args.request:
+        expected_ids, expected_sha = expected_from_request(
+            args.family, json.loads(Path(args.request).read_text())
+        )
+    result = reduce_report(args.family, report, outdir=args.outdir,
+                           expected_ids=expected_ids, expected_deck_sha256=expected_sha)
     if args.json_out:
         Path(args.json_out).write_text(json.dumps(result, indent=2) + "\n")
     for c in result["corners"]:

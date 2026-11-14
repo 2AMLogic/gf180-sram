@@ -1,0 +1,25 @@
+{
+  "engine": "ngspice",
+  "decks": [
+    {
+      "id": "tt_25c_3.30v",
+      "deck": "units/tt_25c_3.30v/tb_write_access_time.spice",
+      "timeout_s": 300
+    }
+  ],
+  "options": {
+    "timeout_s": 300
+  },
+  "x_gf180_sram_adapter": {
+    "family": "write-access",
+    "mode": "direct",
+    "testbench": "sim/access-time/testbench/tb_write_access_time.spice",
+    "testbench_sha256": "6cab512ce6a6ed1d32afabe959991679f7944c1716f45d0490674e3e65041961",
+    "composed_deck_sha256": "183e364ab3947a37c236134c3f54ee386bdc9c8bca5f424cf0c6ee83eb57bd36",
+    "corners": [
+      "tt_25c_3.30v"
+    ],
+    "corner_count": 1,
+    "full_grid": false
+  }
+}

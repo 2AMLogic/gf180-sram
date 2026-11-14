@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "requests": [
+    {
+      "index": 0,
+      "request": "/tmp/deck-parity-230/stage/read-snm/read-snm.json",
+      "dir": "/tmp/deck-parity-230/batch-out/read-snm",
+      "status": "pass",
+      "job_id": "klt-sim-36c95347518e",
+      "job_ids": [
+        "klt-sim-36c95347518e"
+      ],
+      "attempts": 1
+    },
+    {
+      "index": 1,
+      "request": "/tmp/deck-parity-230/stage/hold-snm/hold-snm.json",
+      "dir": "/tmp/deck-parity-230/batch-out/hold-snm",
+      "status": "pass",
+      "job_id": "klt-sim-dd8663bd8444",
+      "job_ids": [
+        "klt-sim-dd8663bd8444"
+      ],
+      "attempts": 1
+    },
+    {
+      "index": 2,
+      "request": "/tmp/deck-parity-230/stage/write-margin/write-margin.json",
+      "dir": "/tmp/deck-parity-230/batch-out/write-margin",
+      "status": "pass",
+      "job_id": "klt-sim-9747e26bea88",
+      "job_ids": [
+        "klt-sim-9747e26bea88"
+      ],
+      "attempts": 1
+    },
+    {
+      "index": 3,
+      "request": "/tmp/deck-parity-230/stage/read-access/read-access.json",
+      "dir": "/tmp/deck-parity-230/batch-out/read-access",
+      "status": "pass",
+      "job_id": "klt-sim-6f2e85d87345",
+      "job_ids": [
+        "klt-sim-6f2e85d87345"
+      ],
+      "attempts": 1
+    },
+    {
+      "index": 4,
+      "request": "/tmp/deck-parity-230/stage/write-access/write-access.json",
+      "dir": "/tmp/deck-parity-230/batch-out/write-access",
+      "status": "pass",
+      "job_id": "klt-sim-d897c498868b",
+      "job_ids": [
+        "klt-sim-d897c498868b"
+      ],
+      "attempts": 1
+    }
+  ]
+}

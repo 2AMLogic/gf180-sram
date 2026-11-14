@@ -72,11 +72,13 @@ EVIDENCE_DIRS = ["sim", "layout", "measurements"]
 # committed, mirroring the *.raw / *.log / *.vcd / *.vvp rules in .gitignore.
 RAW_ARTIFACT_EXTENSIONS = {".raw", ".log", ".vcd", ".vvp"}
 
-# The documented exceptions (see .gitignore): per-corner ngspice logs and
-# per-sample Monte Carlo logs are committed append-only evidence.
+# The documented exceptions (see .gitignore): per-corner ngspice logs,
+# per-sample Monte Carlo logs, and a deck-mode parity receipt's engine streams
+# are committed append-only evidence.
 RAW_ARTIFACT_ALLOW_GLOBS = [
     "sim/*/corners/**/*.log",
     "sim/*/mc/raw-logs/**/*.log",
+    "sim/deck-parity/**/*.log",
 ]
 
 # Markdown/doc files to link-check. Kept to design-relevant docs (not the
