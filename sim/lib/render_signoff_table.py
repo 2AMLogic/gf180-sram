@@ -47,17 +47,17 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Ratified PVT matrix, spec/sram.md "Corner set" -- process x temperature x
+# voltage. Imported from its single owner (#331), never re-derived here: the
+# "Note on corner count" paragraph below renders the axis product into the
+# committed sim/signoff-summary.md, so a private copy would let that artifact
+# keep asserting a stale product after an axis change. Same order
+# sim/lib/run_corner_sweep.sh iterates, so every record's corner ordering
+# already matches this.
+from corner_matrix import PROCESSES, TEMPS, VDDS, corner_ids  # noqa: E402
 from repo_root import find_repo_root  # noqa: E402 (path-injected sibling import)
 
-# Ratified PVT matrix, spec/sram.md "Corner set" -- process x temperature x
-# voltage, 3x3x3 = 27 points. Same order sim/lib/run_corner_sweep.sh
-# iterates so every record's corner ordering already matches this.
-PROCESSES = ["ff", "tt", "ss"]
-TEMPS = ["-40", "25", "125"]
-VDDS = ["2.97", "3.30", "3.63"]
-CORNER_ORDER = [
-    f"{p}_{t}c_{v}v" for p in PROCESSES for t in TEMPS for v in VDDS
-]
+CORNER_ORDER = corner_ids()
 
 RESULT_RE = re.compile(r"RESULT:\s*(\w+)\s*=\s*([-+0-9.eE]+)\s*;?")
 ROW_RE = re.compile(r"^\s*-\s*\*\*(\S+)\*\*:\s*(.*)$")

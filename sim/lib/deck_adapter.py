@@ -45,7 +45,6 @@ import argparse
 import contextlib
 import hashlib
 import io
-import itertools
 import json
 import os
 import re
@@ -57,16 +56,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import run_mc_campaign as mc  # noqa: E402
 import snm_extract  # noqa: E402
+from corner_matrix import (  # noqa: E402
+    LIB_SECTION,
+    corner_id,
+    corner_ids,
+    corners,
+)
+
+# Re-exported, not used directly in this module: the ratified corner matrix
+# has a single owner (sim/lib/corner_matrix.py, #331), but
+# test_deck_adapter.py's launcher-equality guards read them as
+# `da.PROCESSES` / `da.TEMPS` / `da.VDDS`. Keep them bound here so that
+# guard keeps comparing this module's view of the axes against
+# run_corner_sweep.sh's own arrays.
+from corner_matrix import PROCESSES, TEMPS, VDDS  # noqa: E402,F401
 from repo_root import find_repo_root  # noqa: E402
 
 REPO_ROOT = find_repo_root(Path(__file__))
-
-# Ratified corner matrix (spec/sram.md "Corner set"); same order as
-# run_corner_sweep.sh so unit order matches the launcher's corner order.
-PROCESSES = ("ff", "tt", "ss")
-TEMPS = (-40, 25, 125)
-VDDS = ("2.97", "3.30", "3.63")
-LIB_SECTION = {"ff": "ff", "tt": "typical", "ss": "ss"}
 
 REPO_ROOT_TOKEN = "@@REPO_ROOT@@"
 DUT_NETLIST = "design/netlist/bitcell_6t.spice"
@@ -84,19 +90,6 @@ FAMILIES = {
     "read-access": ("sim/access-time", "tb_read_access_time.spice", "direct"),
     "write-access": ("sim/access-time", "tb_write_access_time.spice", "direct"),
 }
-
-
-def corners():
-    """(process, temp_c, vdd) in the launcher's loop order."""
-    return list(itertools.product(PROCESSES, TEMPS, VDDS))
-
-
-def corner_id(process, temp, vdd):
-    return f"{process}_{temp}c_{vdd}v"
-
-
-def corner_ids():
-    return [corner_id(*c) for c in corners()]
 
 
 def compose_corner_inc(process, temp, vdd, design_inc, model_file):
