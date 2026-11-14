@@ -35,9 +35,11 @@
 #                        the older record stays committed (append-only) but
 #                        stops being the current answer.
 #
-# Requires: ngspice on PATH; python3 on PATH (snm mode only); PDK resolvable
-# per sim/lib/pdk_env.sh (PDK_ROOT+PDK, GF180_PDK_PATH, or a standard
-# install prefix).
+# Requires: ngspice on PATH; python3 on PATH (every mode: the pinned
+# run-directory .spiceinit (#338) is written by sim/lib/deck_adapter.py's
+# `spiceinit` verb; snm mode additionally uses it for snm_extract.py); PDK
+# resolvable per sim/lib/pdk_env.sh (PDK_ROOT+PDK, GF180_PDK_PATH, or a
+# standard install prefix).
 #
 # Output: one <record-id> = <YYYYMMDD>-<HHMMSS>-<short-git-sha> per
 # invocation, with per-corner logs under
@@ -136,6 +138,14 @@ for process in "${PROCESSES[@]}"; do
 .temp $temp
 .param VDDC=$vdd
 EOF
+
+      # Pin the ngspice environment for this corner's run directory (#338):
+      # ngspice reads .spiceinit from its cwd, and a run-directory one
+      # REPLACES $HOME/.spiceinit, so without this the mode in force would
+      # depend on whoever's machine runs the sweep. The single source of
+      # truth is deck_adapter.py's SPICEINIT_TEXT; deck mode stages the same
+      # bytes as a deck input, and the test suite asserts byte-identity.
+      python3 "$SCRIPT_DIR/deck_adapter.py" spiceinit > "$scratch/.spiceinit"
 
       set +e
       (cd "$scratch" && ngspice -b -o "$log_file" "$tb_base") >/dev/null 2>&1

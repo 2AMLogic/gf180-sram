@@ -159,6 +159,52 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json>   # caller-owned g
    Single-point probes stay local. Until then the cold-start section below is
    the historical procedure and is not to be run on dispatch workers.
 
+## The pinned ngspice environment (`.spiceinit`, issue #338)
+
+Every ngspice invocation in this repo -- the `klt sim` deck-mode path
+(`sim/lib/deck_adapter.py`), `sim/lib/run_corner_sweep.sh`, and the
+`sim/lib/run_mc_campaign.py` pool -- stages the same `.spiceinit` into the
+run directory before the engine starts, so the environment a measurement ran
+under is a property of the repo rather than of whichever host executes it.
+ngspice reads `.spiceinit` from its current working directory, and all three
+paths set that cwd to a per-unit scratch directory; without the staged file
+the mode in force came from the executing host's `~/.spiceinit` -- the
+committed 2026-08 corpus's corner logs carry
+`Note: Compatibility modes selected: hs a`, while a 2026-11 fleet deck-mode
+run of the same corner carried `Note: No compatibility mode selected!`
+(see `sim/deck-parity/`).
+
+Two facts make the staged file load-bearing:
+
+- **A run-directory `.spiceinit` *replaces* `$HOME/.spiceinit`** -- it does
+  not merge with it (verified 2026-11-14, #338: a setting from the host's
+  home file was not visible inside a deck that staged a `.spiceinit`). The
+  staged file therefore carries every line the run needs, not just the mode.
+- **`options.ngspice_init` is not a substitute on the deck path.** `klt sim`
+  accepts it in a deck-list request and silently drops it
+  (`2AMLogic/klayout-tools#5738`), so setting it would record a pinned mode
+  that was never in force. The staged deck input is the mechanism; the
+  option stays unset in every request this repo emits.
+
+The pinned lines -- single source of truth `SPICEINIT_TEXT` in
+`sim/lib/deck_adapter.py`; `run_corner_sweep.sh` writes the same bytes via
+`deck_adapter.py spiceinit`, the MC pool imports the constant, and
+`sim/lib/test_deck_adapter.py` asserts the three paths stay byte-identical
+(the launcher path is executed against a fake ngspice shim, the MC scratch
+dirs captured at call time):
+
+| Line | Why |
+|---|---|
+| `set ngbehavior=hsa` | the mode the committed corpus ran under (`hs a`), so the committed records stay reproducible, and the mode the gf180mcu ngspice model decks are written against (a distro-packaged ngspice supplies it via its own `spinit`; a locally built one does not) |
+| `set num_threads=1` | fleet workers run units in parallel and rely on per-worker single-threaded ngspice; a run-directory `.spiceinit` would otherwise drop the host's setting and oversubscribe a shared worker |
+| `set wnflag=1` | per-finger model binning (`W/NF`); **not** implied by `ngbehavior=hsa` (verified 2026-11-14, #338). Inert today -- every device in this repo is `nf=1`, so `W/nf == W` and bin selection cannot change -- but pinned so a future multi-finger device cannot silently change model-bin selection |
+
+Evidence that the pin reaches the fleet and what it does to the numbers:
+[deck-parity/20261114-tt_25c_3.30v-spiceinit-pin.md](deck-parity/20261114-tt_25c_3.30v-spiceinit-pin.md)
+(bounded one-corner-per-family deck-mode run on the batch fleet, all five
+families, worker stdout carrying the pinned mode; every committed record
+value reproduced exactly).
+
 ## Cold-start invocation
 
 Prerequisites: `ngspice` and `python3` on `PATH`; a gf180mcu PDK install
