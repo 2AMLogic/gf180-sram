@@ -407,9 +407,11 @@ def grade_set(reports) -> int:
     Exit 0 if every corner is bracketed on both axes; 2 if any corner carries
     a sentinel (OPEN / >= max) -- recorded evidence, not a crash; 1 on a
     structural problem (unreadable report, variant off the grid, an axis
-    missing a variant)."""
+    missing or repeating a variant)."""
     by_axis = {}  # corner_id -> {"high": {width: status}, "low": {...}}
-    seen_axes = {}  # corner_id -> {"high": set(tags), "low": set(tags)}
+    seen_axes = {}  # corner_id -> {"high": [tags], "low": [tags]}: one append
+    # per report-axis visit; completeness counts the DISTINCT tags, not the
+    # occurrences, so a repeated report cannot mask an omitted one (#365).
     sentinels = 0
     for path in reports:
         tag, verdicts = grade_report(path)
@@ -428,14 +430,28 @@ def grade_set(reports) -> int:
         cells = {}
         for axis, grid in (("high", CLK_HIGH_GRID), ("low", CLK_LOW_GRID)):
             expected = len(grid)
-            got = len(seen_axes[cid][axis])
+            seen = seen_axes[cid][axis]
+            got = len(set(seen))  # distinct variants, not occurrences (#365)
             if got != expected:
-                missing = sorted(set(grid_tags(axis)) - set(seen_axes[cid][axis]))
+                missing = sorted(set(grid_tags(axis)) - set(seen))
+                if missing:
+                    detail = f"missing: {missing}"
+                else:  # extras: a variant off this axis's grid
+                    detail = f"unexpected: {sorted(set(seen) - set(grid_tags(axis)))}"
                 print(
                     f"ERROR: {cid}: {axis} axis has {got} of {expected} variants"
-                    f" (missing: {missing})",
+                    f" ({detail})",
                     file=sys.stderr,
                 )
+                return 1
+            repeated = sorted(t for t in set(seen) if seen.count(t) > 1)
+            if repeated:
+                for tag in repeated:
+                    print(
+                        f"ERROR: {cid}: {axis} axis has {tag} more than once"
+                        " (one report per variant)",
+                        file=sys.stderr,
+                    )
                 return 1
             display, note = fold_axis(by_axis[cid][axis], grid)
             cells[axis] = (display, note, by_axis[cid][axis])
