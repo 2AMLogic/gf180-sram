@@ -1,0 +1,24 @@
+{
+  "family": "hold-snm",
+  "mode": "snm:hold_snm_sweep.txt:hold_snm",
+  "expected": [
+    "tt_25c_3.30v"
+  ],
+  "expected_deck_sha256": "44cbfec1f71e84bcc0c8a5845ddb6de7f4962d8f83e7d650e1238b58c2c9170f",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "hold_snm_lobe_low_v": 0.942795,
+        "hold_snm_lobe_high_v": 0.942796,
+        "hold_snm_v": 0.942795
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "44cbfec1f71e84bcc0c8a5845ddb6de7f4962d8f83e7d650e1238b58c2c9170f"
+    }
+  ],
+  "overall": "recorded"
+}

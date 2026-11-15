@@ -1,0 +1,335 @@
+{
+  "family": "write-margin",
+  "mode": "direct",
+  "expected": [
+    "ff_-40c_2.97v",
+    "ff_-40c_3.30v",
+    "ff_-40c_3.63v",
+    "ff_25c_2.97v",
+    "ff_25c_3.30v",
+    "ff_25c_3.63v",
+    "ff_125c_2.97v",
+    "ff_125c_3.30v",
+    "ff_125c_3.63v",
+    "tt_-40c_2.97v",
+    "tt_-40c_3.30v",
+    "tt_-40c_3.63v",
+    "tt_25c_2.97v",
+    "tt_25c_3.30v",
+    "tt_25c_3.63v",
+    "tt_125c_2.97v",
+    "tt_125c_3.30v",
+    "tt_125c_3.63v",
+    "ss_-40c_2.97v",
+    "ss_-40c_3.30v",
+    "ss_-40c_3.63v",
+    "ss_25c_2.97v",
+    "ss_25c_3.30v",
+    "ss_25c_3.63v",
+    "ss_125c_2.97v",
+    "ss_125c_3.30v",
+    "ss_125c_3.63v"
+  ],
+  "expected_deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "ff_-40c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.69546,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_-40c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.8915,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_-40c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.08796,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_25c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.67298,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.87075,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_25c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.06891,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_125c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.64053,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_125c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.83812,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ff_125c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.03611,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_-40c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.73824,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_-40c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.93581,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_-40c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.13271,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_25c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.71105,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.91003,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_25c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.10923,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_125c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.67751,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_125c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.8774,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "tt_125c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.07777,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_-40c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.76978,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_-40c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.97247,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_-40c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.17259,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_25c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.74241,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.94366,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_25c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.14423,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_125c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.70634,
+        "write_vdd_v": 2.97
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_125c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.90822,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    },
+    {
+      "id": "ss_125c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 2.10967,
+        "write_vdd_v": 3.63
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    }
+  ],
+  "overall": "recorded"
+}

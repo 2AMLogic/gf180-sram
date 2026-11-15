@@ -1,0 +1,25 @@
+{
+  "engine": "ngspice",
+  "decks": [
+    {
+      "id": "tt_25c_3.30v",
+      "deck": "units/tt_25c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    }
+  ],
+  "options": {
+    "timeout_s": 300
+  },
+  "x_gf180_sram_adapter": {
+    "family": "write-margin",
+    "mode": "direct",
+    "testbench": "sim/write-margin/testbench/tb_write_margin.spice",
+    "testbench_sha256": "318b50cc771f8608c571174736142d7a09b33fee2b7ba50f85c12825f8714a77",
+    "composed_deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3",
+    "corners": [
+      "tt_25c_3.30v"
+    ],
+    "corner_count": 1,
+    "full_grid": false
+  }
+}
