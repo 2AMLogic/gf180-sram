@@ -59,7 +59,13 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+# sys.path bootstrap only (#337): the fixed depth survives just here, where a
+# wrong depth is a loud ImportError instead of a silently wrong tree.
+SIM_LIB = Path(__file__).resolve().parents[2] / "sim" / "lib"
+sys.path.insert(0, str(SIM_LIB))
+from repo_root import find_repo_root  # noqa: E402  (path-injected import)
+
+REPO_ROOT = find_repo_root(Path(__file__))
 
 # Top-level directories that must always carry a README.md describing scope.
 DELIVERABLE_DIRS = ["design", "sim", "layout", "views", "measurements", "signoff"]

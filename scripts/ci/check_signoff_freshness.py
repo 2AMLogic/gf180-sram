@@ -31,7 +31,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+# sys.path bootstrap only (#337): the fixed depth survives just here, where a
+# wrong depth is a loud ImportError instead of a silently wrong tree.
+SIM_LIB = Path(__file__).resolve().parents[2] / "sim" / "lib"
+sys.path.insert(0, str(SIM_LIB))
+from repo_root import find_repo_root  # noqa: E402  (path-injected import)
+
+REPO_ROOT = find_repo_root(Path(__file__))
 MANIFEST = REPO_ROOT / "signoff" / "block-manifest.json"
 COMMITTED_REPORT = REPO_ROOT / "signoff" / "signoff-report.json"
 
