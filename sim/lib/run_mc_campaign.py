@@ -132,7 +132,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent.parent
 
 sys.path.insert(0, str(SCRIPT_DIR))
 # The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
@@ -141,6 +140,9 @@ sys.path.insert(0, str(SCRIPT_DIR))
 # names because callers (sim/lib/deck_adapter.py) already reach them as
 # `mc.LIB_SECTION` / `mc.corner_id`.
 from corner_matrix import LIB_SECTION, corner_id  # noqa: E402,F401
+from repo_root import find_repo_root  # noqa: E402  (#337: imported, never re-derived)
+
+REPO_ROOT = find_repo_root(Path(__file__))
 
 # design.ngspice's own defaults for every name its combined `.param` card
 # sets, reproduced verbatim here (see module docstring, "Known ngspice/

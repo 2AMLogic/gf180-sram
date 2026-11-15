@@ -197,9 +197,12 @@ why the pitch is not 0.62 or 0.60.
   `./layout/reports/generate.sh --column-path --native`.
 * The 64 x 128 array this seam is checked against is the committed
   `sram_64x128/sram_64x128_array.gds` (issue #204); its own DRC and LVS are
-  `verify.sh` steps 8 and 9. `verify.sh` step 10 and
-  `reports/drc-column-abut.json` check the bands abutted to it (the composite
-  itself is a scratch file built by `periphery/column/generate.py --abut`).
+  `verify.sh` steps 8 and 9, with the committed reports
+  `reports/drc-array-64x128.json`, `reports/extract-array-64x128.json` and
+  `reports/lvs-array-64x128.json` (issue #327) behind them. `verify.sh`
+  step 10 and `reports/drc-column-abut.json` check the bands abutted to it
+  (the composite itself is a scratch file built by
+  `periphery/column/generate.py --abut`).
 * Rails: strap columns 1 and 24 of the 26 are reserved for `Metal2`. Other
   columns are free.
 
@@ -379,7 +382,11 @@ proposes a 4:1 column mux, i.e. a 64 x 128 physical array rather than the
 256 x 32 drawn here. The 64 x 128 re-tiling (571.31 x 345.60 um, `WL0..WL63`,
 same bitcell and landing-pad strip) is `sram_64x128/sram_64x128_array.gds`
 (issue #204), emitted by the same generator and checked by `verify.sh` steps 1,
-2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`).
+2, 8 and 9 (DRC clean; LVS against `design/netlist/sram_64x128_array.spice`) --
+committed evidence: `reports/drc-array-64x128.json`,
+`reports/extract-array-64x128.json` and `reports/lvs-array-64x128.json`
+(issue #327; the LVS input is a scratch extract of the committed GDS, see
+#285).
 The 256 x 32 files are left untouched: the macro (#326) assembles the 64 x 128
 halves, and whether to retire the 256 x 32 pair is still an open decision on
 issue #247.
