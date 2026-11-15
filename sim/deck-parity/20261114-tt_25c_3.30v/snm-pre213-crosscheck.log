@@ -1,0 +1,13 @@
+# sim/lib/snm_extract.py as of e140796^ (the commit before the #213 fix),
+# applied to this run's fleet-produced sweep data files.
+# Reproduce: git show e140796^:sim/lib/snm_extract.py > /tmp/snm_pre213.py
+
+$ python3 /tmp/snm_pre213.py sim/deck-parity/20261114-tt_25c_3.30v/read-snm/read_snm_sweep.txt read_snm
+RESULT: read_snm_lobe_low_v = 0.857683
+RESULT: read_snm_lobe_high_v = 0.381267
+RESULT: read_snm_v = 0.381267
+
+$ python3 /tmp/snm_pre213.py sim/deck-parity/20261114-tt_25c_3.30v/hold-snm/hold_snm_sweep.txt hold_snm
+RESULT: hold_snm_lobe_low_v = 2.035546
+RESULT: hold_snm_lobe_high_v = 1.110810
+RESULT: hold_snm_v = 1.110810

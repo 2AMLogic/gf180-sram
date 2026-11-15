@@ -1,0 +1,25 @@
+{
+  "engine": "ngspice",
+  "decks": [
+    {
+      "id": "tt_25c_3.30v",
+      "deck": "units/tt_25c_3.30v/tb_read_access_time.spice",
+      "timeout_s": 300
+    }
+  ],
+  "options": {
+    "timeout_s": 300
+  },
+  "x_gf180_sram_adapter": {
+    "family": "read-access",
+    "mode": "direct",
+    "testbench": "sim/access-time/testbench/tb_read_access_time.spice",
+    "testbench_sha256": "5b39d250f47908dfa5bf618c5ea120d140bdea77eca2e4d602bfa9d3006a698a",
+    "composed_deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4",
+    "corners": [
+      "tt_25c_3.30v"
+    ],
+    "corner_count": 1,
+    "full_grid": false
+  }
+}

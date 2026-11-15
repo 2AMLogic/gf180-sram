@@ -36,7 +36,7 @@
     },
     "9": {
       "file": "sim/testbenches.signoff.json",
-      "content_hash": "sha256:2c8f434027b332146332793718bdb86eb57d0b4711cb26a6f21bbba250c4c14f"
+      "content_hash": "sha256:595acc46bf041c0a538318511d039fb6b9f99648f1a5aa832418f9c69013b33e"
     },
     "10": {
       "file": "repo-hygiene.signoff.json",
