@@ -3,7 +3,6 @@
   "description": "Loom-managed workspace with AI development orchestration",
   "private": true,
   "scripts": {
-    "worktree:return": "./.loom/scripts/worktree-return.sh",
     "check:ci": "npm run lint && npm run test && npm run test:guards",
     "check:all": "npm run check:ci",
     "test:guards": "./.loom/hooks/tests/test-guard-write-confinement-loopvar.sh && ./.loom/hooks/tests/test-guard-destructive-sed-branch.sh && ./.loom/hooks/tests/test-guard-write-confinement-keyword.sh && ./.loom/hooks/tests/test-guard-write-confinement-redir-cd.sh && ./.loom/hooks/tests/test-guard-worktree-unresolved-var-pdk-env.sh && ./.loom/hooks/tests/test-guard-rm-scope-unresolved-var-pdk-env.sh && ./.loom/hooks/tests/test-guard-worktree-unresolved-var-layout-klt.sh && ./.loom/hooks/tests/test-guard-rm-scope-unresolved-var-layout-klt.sh && ./.loom/hooks/tests/test-guard-worktree-unresolved-var-quoted.sh",

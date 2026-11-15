@@ -143,8 +143,10 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
   PASS, and missing corners, duplicate/unexpected ids, missing declared outputs
   and timeouts all come back `OPEN`. Pass `--request <the file build wrote>` to
   grade a bounded run: it pins the expected corner set and checks every
-  executed `units[].deck_sha256` against the composed deck, so deck drift is a
-  coverage error rather than a silent pass.
+  executed `units[].deck_sha256` against the composed deck -- a unit that
+  reports no `deck_sha256` is itself a coverage error -- so deck drift, or a
+  deck whose bytes cannot be checked, is a coverage error rather than a
+  silent pass.
 * `mc-build` / `mc-reduce` are the Monte Carlo counterpart for the
   `run_mc_campaign.py` pool: one deck per (corner, kind, sample) -- two (L/R)
   per sample for the `snm-pair` SNM families -- with `corner.inc` bytes from
