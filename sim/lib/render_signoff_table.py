@@ -76,6 +76,18 @@ RECORD_CLAIMS = {
 RESULT_RE = re.compile(r"RESULT:\s*(\w+)\s*=\s*([-+0-9.eE]+)\s*;?")
 ROW_RE = re.compile(r"^\s*-\s*\*\*(\S+)\*\*:\s*(.*)$")
 
+# The committed Monte Carlo sample-sets, one per family that has one (family
+# -> path relative to sim/). One owner, same rule as RECORD_CLAIMS above:
+# sim/lib/parity_compare.py's MC mode (#230) compares the deck-mode run's
+# per-sample values against exactly these documents, so the binding lives
+# here beside the record bindings rather than inline in the comparator.
+# read-access/write-access have no committed MC record, so no binding.
+MC_SAMPLE_SETS = {
+    "read-snm": "read-snm/mc/samples/20260921-124232-cf5e975.json",
+    "hold-snm": "hold-snm/mc/samples/20260921-124534-cf5e975.json",
+    "write-margin": "write-margin/mc/samples/20260921-124804-cf5e975.json",
+}
+
 
 def latest_record_for_claim(records_dir: Path, claim_substring: str) -> Path:
     """Return the most recent record file (by <record-id> filename, which
