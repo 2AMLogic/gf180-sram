@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "request_count": 5,
+  "max_in_flight": 5,
+  "submitted": 5,
+  "refused": 0,
+  "refused_codes": [],
+  "requests": [
+    {
+      "index": 0,
+      "request": "/tmp/deck-parity-230/stage/read-snm/read-snm.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-36c95347518e",
+      "job_ids": [
+        "klt-sim-36c95347518e"
+      ],
+      "report": "/tmp/deck-parity-230/batch-out/read-snm/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 1,
+      "request": "/tmp/deck-parity-230/stage/hold-snm/hold-snm.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-dd8663bd8444",
+      "job_ids": [
+        "klt-sim-dd8663bd8444"
+      ],
+      "report": "/tmp/deck-parity-230/batch-out/hold-snm/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 2,
+      "request": "/tmp/deck-parity-230/stage/write-margin/write-margin.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-9747e26bea88",
+      "job_ids": [
+        "klt-sim-9747e26bea88"
+      ],
+      "report": "/tmp/deck-parity-230/batch-out/write-margin/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 3,
+      "request": "/tmp/deck-parity-230/stage/read-access/read-access.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-6f2e85d87345",
+      "job_ids": [
+        "klt-sim-6f2e85d87345"
+      ],
+      "report": "/tmp/deck-parity-230/batch-out/read-access/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 4,
+      "request": "/tmp/deck-parity-230/stage/write-access/write-access.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-d897c498868b",
+      "job_ids": [
+        "klt-sim-d897c498868b"
+      ],
+      "report": "/tmp/deck-parity-230/batch-out/write-access/report.json",
+      "error": null,
+      "shards": []
+    }
+  ]
+}

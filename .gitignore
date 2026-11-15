@@ -16,6 +16,11 @@ __pycache__/
 # layout every other experiment directory uses.
 !sim/**/corners/**/*.log
 !sim/**/mc/raw-logs/**/*.log
+# Same reasoning for sim/deck-parity/: a parity receipt's evidence IS the
+# engine's own stdout from the fleet run (and the extractor cross-check
+# output), committed alongside the klt sim report it is read with -- see
+# sim/deck-parity/README.md.
+!sim/deck-parity/**/*.log
 sim/build/
 # synthesis / P&R scratch
 flow/build/
