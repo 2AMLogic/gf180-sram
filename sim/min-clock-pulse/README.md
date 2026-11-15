@@ -89,5 +89,5 @@ match, `undefined_bits=0`) — that equivalence is also pinned offline by
 
 | Record | Result |
 |---|---|
-| `records/20261115-010427-185a422.md` | 243/243 corner-runs pass (9 variants x 27 corners, two-phase collection: batch-set + 51 re-collected `lost_shard` corners); min CLK high = 4 ns at the two `ff`/−40 C/fast-supply corners (grid floor), 6 ns typical, 8 ns at the slow 125 C corners; min CLK low = 4 ns (grid floor) at 26 of 27 corners, 6 ns at `ss_125c_2.97v` |
+| `records/20261115-010427-185a422.md` | collection complete: 243/243 corner-runs ran (`klt sim` status `pass`; two-phase: batch-set + 51 re-collected `lost_shard` corners), functional grading 212/243 PASS, 31 FAIL -- the fails are the sub-minimum widths the sweep exists to find (9 variants x 27 corners); min CLK high = 4 ns at the two `ff`/−40 C/fast-supply corners (grid floor), 6 ns at 20 corners, 8 ns at 5 corners (`ss` 125 C at every supply, `tt/2.970V/125C`, `ss/2.970V/25C`); min CLK low = 4 ns (grid floor) at 26 of 27 corners, 6 ns at `ss_125c_2.97v` |
 
