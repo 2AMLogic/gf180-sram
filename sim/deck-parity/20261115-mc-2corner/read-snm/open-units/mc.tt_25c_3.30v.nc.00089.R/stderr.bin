@@ -1,0 +1,15 @@
+
+Checking parameters for BSIM 4.5 model nfet_03v3.0
+Fatal: u0 at current temperature = -0.00438753 is not positive.
+Fatal error: detected during BSIM4v5.5.0 parameter checking for 
+    model nfet_03v3.0 of device instance m.xma.m0
+
+doAnalyses: no such parameter on this device or parameter is missing
+
+run simulation(s) aborted
+Error: no such vector OUT
+  in term: v(OUT)
+
+Error: incomplete or empty netlist
+       or no ".plot", ".print", or ".fourier" lines in batch mode;
+no simulations run!

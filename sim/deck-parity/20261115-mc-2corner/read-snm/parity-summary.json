@@ -1,0 +1,211 @@
+{
+ "kind": "mc",
+ "family": "read-snm",
+ "mode": "snm-pair:read_snm_sweep.txt:read_snm",
+ "recorded_metric": "read_snm_v",
+ "comparison": "pre213-tolerance",
+ "tolerance_v": 3e-05,
+ "record": "sim/read-snm/records/20260817-011523-4448966.md",
+ "sample_set": "sim/read-snm/mc/samples/20260921-124232-cf5e975.json",
+ "coverage": {
+  "corners": 2,
+  "units": {
+   "expected": 1216,
+   "reported": 1216
+  },
+  "missing_in_report": [],
+  "missing_in_samples": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "seed_identity": {
+  "checked": true,
+  "errors": []
+ },
+ "reduce_grading": {
+  "coverage_errors": [],
+  "overall": "OPEN",
+  "infra_failures": [
+   {
+    "id": "mc.tt_25c_3.30v.nc.00089.R",
+    "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+   },
+   {
+    "id": "mc.ff_125c_2.97v.nc.00043.L",
+    "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+   },
+   {
+    "id": "mc.ff_125c_2.97v.nc.00068.R",
+    "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+   },
+   {
+    "id": "mc.ff_125c_2.97v.nc.00096.L",
+    "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+   },
+   {
+    "id": "mc.ff_125c_2.97v.nc.00097.R",
+    "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+   }
+  ]
+ },
+ "corners": [
+  {
+   "id": "tt_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "read_snm_lobe_low_v": {
+      "record": 0.857685,
+      "fleet": 0.857683,
+      "delta": -2.0000000000575113e-06,
+      "verdict": "WITHIN-TOL"
+     },
+     "read_snm_lobe_high_v": {
+      "record": 0.381267,
+      "fleet": 0.381267,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "read_snm_v": {
+      "record": 0.381267,
+      "fleet": 0.381267,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 99,
+    "n_open": 0,
+    "errored_fleet": 1,
+    "errored_committed": 1,
+    "deltas": {
+     "n": 99,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "open_units": [
+     {
+      "id": "mc.tt_25c_3.30v.nc.00089.R",
+      "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "tt_25c_3.30v nc sample 89",
+      "reason": "R: declared outputs missing: ['read_snm_sweep.txt']"
+     }
+    ]
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "read_snm_lobe_low_v": {
+      "record": 0.472848,
+      "fleet": 0.472848,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "read_snm_lobe_high_v": {
+      "record": 0.214599,
+      "fleet": 0.214599,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "read_snm_v": {
+      "record": 0.214599,
+      "fleet": 0.214599,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 96,
+    "n_open": 0,
+    "errored_fleet": 4,
+    "errored_committed": 4,
+    "deltas": {
+     "n": 96,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "open_units": [
+     {
+      "id": "mc.ff_125c_2.97v.nc.00043.L",
+      "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "mc.ff_125c_2.97v.nc.00068.R",
+      "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "mc.ff_125c_2.97v.nc.00096.L",
+      "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "mc.ff_125c_2.97v.nc.00097.R",
+      "reason": "declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "ff_125c_2.97v nc sample 43",
+      "reason": "L: declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "ff_125c_2.97v nc sample 68",
+      "reason": "R: declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "ff_125c_2.97v nc sample 96",
+      "reason": "L: declared outputs missing: ['read_snm_sweep.txt']"
+     },
+     {
+      "id": "ff_125c_2.97v nc sample 97",
+      "reason": "R: declared outputs missing: ['read_snm_sweep.txt']"
+     }
+    ]
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "parity"
+}
