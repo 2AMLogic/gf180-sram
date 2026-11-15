@@ -1,0 +1,308 @@
+{
+  "family": "read-access",
+  "mode": "direct",
+  "expected": [
+    "ff_-40c_2.97v",
+    "ff_-40c_3.30v",
+    "ff_-40c_3.63v",
+    "ff_25c_2.97v",
+    "ff_25c_3.30v",
+    "ff_25c_3.63v",
+    "ff_125c_2.97v",
+    "ff_125c_3.30v",
+    "ff_125c_3.63v",
+    "tt_-40c_2.97v",
+    "tt_-40c_3.30v",
+    "tt_-40c_3.63v",
+    "tt_25c_2.97v",
+    "tt_25c_3.30v",
+    "tt_25c_3.63v",
+    "tt_125c_2.97v",
+    "tt_125c_3.30v",
+    "tt_125c_3.63v",
+    "ss_-40c_2.97v",
+    "ss_-40c_3.30v",
+    "ss_-40c_3.63v",
+    "ss_25c_2.97v",
+    "ss_25c_3.30v",
+    "ss_25c_3.63v",
+    "ss_125c_2.97v",
+    "ss_125c_3.30v",
+    "ss_125c_3.63v"
+  ],
+  "expected_deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "ff_-40c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.40945e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_-40c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.17907e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_-40c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.03569e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_25c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.47853e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.26101e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_25c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.11953e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_125c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.5703e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_125c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.37607e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ff_125c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.23889e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_-40c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.08985e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_-40c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.61165e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_-40c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.34291e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_25c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.12295e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.70142e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_25c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.44853e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_125c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.18195e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_125c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.82935e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "tt_125c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.59475e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_-40c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 3.57176e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_-40c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.40389e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_-40c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.85324e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_25c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 3.35812e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.45853e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_25c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.97169e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_125c_2.97v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 3.2326e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_125c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.55254e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    },
+    {
+      "id": "ss_125c_3.63v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 2.13463e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    }
+  ],
+  "overall": "recorded"
+}

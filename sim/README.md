@@ -20,6 +20,7 @@ append-only evidence."
 | `sim/wordline-rc/` | `testbench/tb_wl_rc_<topology>_<R>.klt.spice` | Far-end wordline delay of the extracted 128-cell row (left-fed), a centre-fed pair of 64-cell halves and a 64-cell row, driven by the real `rowdrv`, at `ss_125c_2.97v` (issue #204; the "Wordline RC gate" of `spec/periphery-architecture.md`). One corner only; see `sim/wordline-rc/README.md` and `spec/wordline-rc-decision.md` | Extracted netlists under `sim/wordline-rc/dut/` (`klt extract --parasitics --distributed-rc`), `.include`d via `.ported.spice` copies |
 | `sim/bitcell-leakage/` | `testbench/tb_bitcell_leakage.klt.spice` | Standby (hold-state) VDD-rail leakage of one `bitcell_6t` at the DC operating point (WL=0, BL=BLB=VDD, Q=1), run with `klt sim` over the 27 corners (issue #310); arithmetic x8192 array-core bound is core-only, not macro leakage. A recorded quantity, **no threshold**; cold-corner values sit at the simulator `gmin` floor, see the record's Limits | `.include`s `design/netlist/bitcell_6t.spice` directly (flat) |
 | `sim/min-clock-pulse/` | `testbench/tb_min_clk_<h><l>.klt.spice` (one generated body per swept grid point) | Minimum clock pulse width: shortest `CLK` high and low width at which the macro still completes a correct write/read, per corner of the 27-corner set, over two 1-D sweeps (high ∈ {4…14} ns at low = 10 ns; low ∈ {4…10} ns at high = 10 ns; 2 ns grid; issue #328). **No pass threshold**; the stimulus constants are derived per variant so the bench, not the macro, sets the schedule | Same reduced array as `sim/macro-smoke`: `sram_256x32.noarray.spice` copy with the array subckt replaced by the two addressed rows + 20 fF bit-line stand-ins |
+| `sim/access-power/` | `testbench/tb_access_power.klt.spice` | Dynamic supply charge drawn from `VDD` over one full write cycle and one full read cycle of the macro top netlist, converted to energy per access at each corner's own supply (`E = Q x VDD`), run with `klt sim` over the 27 corners (issue #329). The circuit and stimulus are `sim/macro-smoke`'s generated body unchanged (imported from `smoke.py`, not forked), so the energy is attributable to the operating point that testbench already grades functionally. A recorded quantity, **no threshold**; the reduced array, the 20 fF bit-line stand-ins **and** the 32 x 20 fF `Q[*]` output load are all inside the number -- see the record's Limits | `.include`s `sim/macro-smoke/testbench/sram_256x32.noarray.spice` (the one checked-in array-stripped copy of `design/netlist/sram_256x32.spice`) |
 
 Each experiment directory follows the same layout (adapted from
 [`2AMLogic/gf180-bandgap`](https://github.com/2AMLogic/gf180-bandgap)'s
@@ -157,11 +158,15 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
 * `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
   reports. Stub results are contract checks, **not** physical evidence.
 
-**Corner grid, one corner, verified live (2026-11-14):**
-`sim/deck-parity/20261114-tt_25c_3.30v.md` is the parity receipt the operator
-ruling of 2026-11-14 authorised: `tt_25c_3.30v` for all five families through
-`klt sim` deck mode on the batch fleet. It settles prerequisites 1 and 2 below
-*for that corner*, and nothing more.
+**Corner grid, verified live (2026-11-14 one corner, 2026-11-15 the full
+matrix):** `sim/deck-parity/20261114-tt_25c_3.30v.md` and
+`sim/deck-parity/20261115-full-grid.md` are the parity receipts the operator
+ruling of 2026-11-14 authorised (the 2026-11-15 one under the Curator's
+delegation to schedule the follow-up corners): first `tt_25c_3.30v`, then all
+five families over **all 27 ratified corners** (one `klt sim --batch-set`,
+135 units), through `klt sim` deck mode on the batch fleet. Together they
+settle prerequisites 1 and 2 below for the deterministic corner grid; the
+Monte Carlo path remains open.
 
 1. *Executor capability* -- **met.** A `decks[]` request from this repo was
    accepted and executed end to end: runner `klt 0.9.0` on AMI
@@ -175,31 +180,39 @@ ruling of 2026-11-14 authorised: `tt_25c_3.30v` for all five families through
    agreement is the only evidence the worker resolved equivalent models.
    (`2AMLogic/klayout-tools#4109` closed COMPLETED 2026-10-27, but its proof
    run was a sky130 `matrix-batch` request, which did not establish this.)
-2. *Measurement parity receipt* -- **met at `tt_25c_3.30v`, open elsewhere.**
-   `write-margin`, `read-access` and `write-access` reproduce the committed
-   record value exactly. `read-snm`/`hold-snm` differ against the record only
-   through the documented #213 extractor change (see "Earlier SNM values
-   over-read" below): with the pre-#213 extractor applied to the fleet's own
-   sweep data, they match to <= 3 uV on the recorded metric. Still open: the
-   other 26 corners, and the Monte Carlo adapter (`mc-build`/`mc-reduce`),
-   which has had no live run of any kind. `run_mc_campaign.py` and its pool are
-   untouched.
+2. *Measurement parity receipt* -- **met for the full 27-corner deterministic
+   matrix (2026-11-15); the Monte Carlo path is still open.** At every corner
+   of the matrix, `write-margin`, `read-access` and `write-access` reproduce
+   the committed record value exactly (108/108 record metrics, zero delta),
+   and `read-snm`/`hold-snm` differ against the record only through the
+   documented #213 extractor change (see "Earlier SNM values over-read"
+   below): with the pre-#213 extractor applied to the fleet's own sweep data
+   they match to <= 1 uV (read SNM) / <= 7 uV (hold SNM) on the recorded
+   metric -- no metric on any corner exceeded the 30 uV gate `parity_compare.py`
+   enforces. Still open: the Monte Carlo adapter (`mc-build`/`mc-reduce`),
+   which has had no live run of any kind. `run_mc_campaign.py` and its pool
+   are untouched. The mechanical comparison lives in
+   `sim/lib/parity_compare.py` (+ `test_parity_compare.py` offline fixtures),
+   driven per family with the record bindings from `RECORD_CLAIMS` in
+   `render_signoff_table.py`.
 3. *Cutover* -- **still blocked.** Retiring `run_corner_sweep.sh`/the MC pool,
    switching defaults, and updating the cold-start section below happen only
-   after 2 is satisfied for the corners a cutover would rely on (the ruling
-   leaves scheduling the follow-up corners to the Curator) and the MC path has
-   its own receipt. Single-point probes stay local. Until then the cold-start
+   after the MC path has its own receipt (2 is now satisfied for the full
+   deterministic matrix). Single-point probes stay local. Until then the
+   cold-start
    section below is the historical procedure and is not to be run on dispatch
    workers.
 
 One known environmental difference, measured rather than assumed: the committed
-2026-08 corner logs carry `Note: Compatibility modes selected: hs a`, this
-run's worker stdout carries `Note: No compatibility mode selected!`. ngspice
+2026-08 corner logs carry `Note: Compatibility modes selected: hs a`, the
+fleet worker's stdout carries `Note: No compatibility mode selected!`. ngspice
 reads compatibility mode from the executing host's `.spiceinit`, which deck
-mode does not transport; at this corner it is worth a few microvolts on the two
-geometric SNM metrics and nothing on the three `RESULT:`-emitting families.
-Pinning it explicitly in the request (`options.ngspice_init`) is tracked in
-#338.
+mode does not transport. It is worth a few microvolts on the two geometric SNM
+metrics and nothing on the three `RESULT:`-emitting families -- now quantified
+across the whole matrix by the 2026-11-15 full-grid receipt, not just at the
+nominal corner: worst recorded-metric delta 1 uV (read SNM) / 7 uV (hold SNM),
+worst lobe intermediate 20 uV, over all 27 corners. Pinning it explicitly in
+the request (`options.ngspice_init`) is tracked in #338.
 
 ## Cold-start invocation
 

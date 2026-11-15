@@ -1,0 +1,534 @@
+{
+ "family": "write-margin",
+ "mode": "direct",
+ "recorded_metric": "write_trip_voltage_v",
+ "comparison": "exact",
+ "tolerance_v": 3e-05,
+ "record": "sim/write-margin/records/20260817-105029-ce56f59.md",
+ "coverage": {
+  "corners": 27,
+  "missing_in_record": [],
+  "missing_in_fleet": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "corners": [
+  {
+   "id": "ff_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.69546,
+     "fleet": 1.69546,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.8915,
+     "fleet": 1.8915,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.08796,
+     "fleet": 2.08796,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.67298,
+     "fleet": 1.67298,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.87075,
+     "fleet": 1.87075,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.06891,
+     "fleet": 2.06891,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.64053,
+     "fleet": 1.64053,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.83812,
+     "fleet": 1.83812,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.03611,
+     "fleet": 2.03611,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.73824,
+     "fleet": 1.73824,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.93581,
+     "fleet": 1.93581,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.13271,
+     "fleet": 2.13271,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.71105,
+     "fleet": 1.71105,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.91003,
+     "fleet": 1.91003,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.10923,
+     "fleet": 2.10923,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.67751,
+     "fleet": 1.67751,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.8774,
+     "fleet": 1.8774,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.07777,
+     "fleet": 2.07777,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.76978,
+     "fleet": 1.76978,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.97247,
+     "fleet": 1.97247,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.17259,
+     "fleet": 2.17259,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.74241,
+     "fleet": 1.74241,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.94366,
+     "fleet": 1.94366,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.14423,
+     "fleet": 2.14423,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.70634,
+     "fleet": 1.70634,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 2.97,
+     "fleet": 2.97,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 1.90822,
+     "fleet": 1.90822,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.3,
+     "fleet": 3.3,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "write_trip_voltage_v": {
+     "record": 2.10967,
+     "fleet": 2.10967,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "write_vdd_v": {
+     "record": 3.63,
+     "fleet": 3.63,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "parity"
+}
