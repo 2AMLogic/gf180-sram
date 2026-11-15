@@ -156,11 +156,15 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
 * `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
   reports. Stub results are contract checks, **not** physical evidence.
 
-**Corner grid, one corner, verified live (2026-11-14):**
-`sim/deck-parity/20261114-tt_25c_3.30v.md` is the parity receipt the operator
-ruling of 2026-11-14 authorised: `tt_25c_3.30v` for all five families through
-`klt sim` deck mode on the batch fleet. It settles prerequisites 1 and 2 below
-*for that corner*, and nothing more.
+**Corner grid, verified live (2026-11-14 one corner, 2026-11-15 the full
+matrix):** `sim/deck-parity/20261114-tt_25c_3.30v.md` and
+`sim/deck-parity/20261115-full-grid.md` are the parity receipts the operator
+ruling of 2026-11-14 authorised (the 2026-11-15 one under the Curator's
+delegation to schedule the follow-up corners): first `tt_25c_3.30v`, then all
+five families over **all 27 ratified corners** (one `klt sim --batch-set`,
+135 units), through `klt sim` deck mode on the batch fleet. Together they
+settle prerequisites 1 and 2 below for the deterministic corner grid; the
+Monte Carlo path remains open.
 
 1. *Executor capability* -- **met.** A `decks[]` request from this repo was
    accepted and executed end to end: runner `klt 0.9.0` on AMI
@@ -174,31 +178,39 @@ ruling of 2026-11-14 authorised: `tt_25c_3.30v` for all five families through
    agreement is the only evidence the worker resolved equivalent models.
    (`2AMLogic/klayout-tools#4109` closed COMPLETED 2026-10-27, but its proof
    run was a sky130 `matrix-batch` request, which did not establish this.)
-2. *Measurement parity receipt* -- **met at `tt_25c_3.30v`, open elsewhere.**
-   `write-margin`, `read-access` and `write-access` reproduce the committed
-   record value exactly. `read-snm`/`hold-snm` differ against the record only
-   through the documented #213 extractor change (see "Earlier SNM values
-   over-read" below): with the pre-#213 extractor applied to the fleet's own
-   sweep data, they match to <= 3 uV on the recorded metric. Still open: the
-   other 26 corners, and the Monte Carlo adapter (`mc-build`/`mc-reduce`),
-   which has had no live run of any kind. `run_mc_campaign.py` and its pool are
-   untouched.
+2. *Measurement parity receipt* -- **met for the full 27-corner deterministic
+   matrix (2026-11-15); the Monte Carlo path is still open.** At every corner
+   of the matrix, `write-margin`, `read-access` and `write-access` reproduce
+   the committed record value exactly (108/108 record metrics, zero delta),
+   and `read-snm`/`hold-snm` differ against the record only through the
+   documented #213 extractor change (see "Earlier SNM values over-read"
+   below): with the pre-#213 extractor applied to the fleet's own sweep data
+   they match to <= 1 uV (read SNM) / <= 7 uV (hold SNM) on the recorded
+   metric -- no metric on any corner exceeded the 30 uV gate `parity_compare.py`
+   enforces. Still open: the Monte Carlo adapter (`mc-build`/`mc-reduce`),
+   which has had no live run of any kind. `run_mc_campaign.py` and its pool
+   are untouched. The mechanical comparison lives in
+   `sim/lib/parity_compare.py` (+ `test_parity_compare.py` offline fixtures),
+   driven per family with the record bindings from `RECORD_CLAIMS` in
+   `render_signoff_table.py`.
 3. *Cutover* -- **still blocked.** Retiring `run_corner_sweep.sh`/the MC pool,
    switching defaults, and updating the cold-start section below happen only
-   after 2 is satisfied for the corners a cutover would rely on (the ruling
-   leaves scheduling the follow-up corners to the Curator) and the MC path has
-   its own receipt. Single-point probes stay local. Until then the cold-start
+   after the MC path has its own receipt (2 is now satisfied for the full
+   deterministic matrix). Single-point probes stay local. Until then the
+   cold-start
    section below is the historical procedure and is not to be run on dispatch
    workers.
 
 One known environmental difference, measured rather than assumed: the committed
-2026-08 corner logs carry `Note: Compatibility modes selected: hs a`, this
-run's worker stdout carries `Note: No compatibility mode selected!`. ngspice
+2026-08 corner logs carry `Note: Compatibility modes selected: hs a`, the
+fleet worker's stdout carries `Note: No compatibility mode selected!`. ngspice
 reads compatibility mode from the executing host's `.spiceinit`, which deck
-mode does not transport; at this corner it is worth a few microvolts on the two
-geometric SNM metrics and nothing on the three `RESULT:`-emitting families.
-Pinning it explicitly in the request (`options.ngspice_init`) is tracked in
-#338.
+mode does not transport. It is worth a few microvolts on the two geometric SNM
+metrics and nothing on the three `RESULT:`-emitting families -- now quantified
+across the whole matrix by the 2026-11-15 full-grid receipt, not just at the
+nominal corner: worst recorded-metric delta 1 uV (read SNM) / 7 uV (hold SNM),
+worst lobe intermediate 20 uV, over all 27 corners. Pinning it explicitly in
+the request (`options.ngspice_init`) is tracked in #338.
 
 ## Cold-start invocation
 

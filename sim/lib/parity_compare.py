@@ -380,7 +380,10 @@ def main() -> int:
         request=request, sweep_dir=args.sweep_dir, pre213=args.pre213,
         tolerance_v=args.tolerance_v,
     )
-    summary["record"] = str(record_path)
+    try:
+        summary["record"] = str(record_path.relative_to(REPO_ROOT))
+    except ValueError:
+        summary["record"] = str(record_path)
     sys.stdout.write(render_markdown(summary))
     if args.json_out:
         Path(args.json_out).write_text(json.dumps(summary, indent=1) + "\n")
