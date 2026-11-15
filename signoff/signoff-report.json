@@ -405,13 +405,13 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:0fdda06caa72a7e13e88c782e4b7d0cf30d86d50b7b0a1cd4f5c0eb4da5f8481",
+        "content_hash": "sha256:965a71968bfd1805c25ec6df21055d65b3f4c0857068d1ca87285f07a99bb7c6",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 10,
           "path": null,
-          "content_hash": "sha256:0fdda06caa72a7e13e88c782e4b7d0cf30d86d50b7b0a1cd4f5c0eb4da5f8481",
+          "content_hash": "sha256:965a71968bfd1805c25ec6df21055d65b3f4c0857068d1ca87285f07a99bb7c6",
           "input_verified": true,
           "members": [
             {
@@ -426,7 +426,7 @@
             },
             {
               "path": ".github/workflows/ci.yml",
-              "content_hash": "sha256:2e8d207f42c9022e75b341b0f4bbf4b5f3d9033a68ff9ec93f942b2ff12db143",
+              "content_hash": "sha256:898a146c73d867365dcf2028d1011111fc5cfb2d8019aba100ea2f6752b6bed7",
               "status": "verified"
             }
           ],
