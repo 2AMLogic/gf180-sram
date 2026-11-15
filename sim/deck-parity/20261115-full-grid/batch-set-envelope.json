@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "request_count": 5,
+  "max_in_flight": 5,
+  "submitted": 5,
+  "refused": 0,
+  "refused_codes": [],
+  "requests": [
+    {
+      "index": 0,
+      "request": "/tmp/gf180-full-grid/stage/read-snm/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-666c66b322c4",
+      "job_ids": [
+        "klt-sim-666c66b322c4"
+      ],
+      "report": "/tmp/gf180-full-grid/out/request/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 1,
+      "request": "/tmp/gf180-full-grid/stage/hold-snm/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-44e2b607f97a",
+      "job_ids": [
+        "klt-sim-44e2b607f97a"
+      ],
+      "report": "/tmp/gf180-full-grid/out/request-1/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 2,
+      "request": "/tmp/gf180-full-grid/stage/write-margin/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-7c801659c5a1",
+      "job_ids": [
+        "klt-sim-7c801659c5a1"
+      ],
+      "report": "/tmp/gf180-full-grid/out/request-2/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 3,
+      "request": "/tmp/gf180-full-grid/stage/read-access/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-a7672da8b98d",
+      "job_ids": [
+        "klt-sim-a7672da8b98d"
+      ],
+      "report": "/tmp/gf180-full-grid/out/request-3/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 4,
+      "request": "/tmp/gf180-full-grid/stage/write-access/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-9c0097cf7d34",
+      "job_ids": [
+        "klt-sim-9c0097cf7d34"
+      ],
+      "report": "/tmp/gf180-full-grid/out/request-4/report.json",
+      "error": null,
+      "shards": []
+    }
+  ]
+}
