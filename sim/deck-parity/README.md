@@ -49,6 +49,17 @@ receipt (2026-11-14) predates this rule and committed each family's single
 because committing all 135 engine stdout streams would add ~2 MB of raw stream
 that the graded `reduced.json` already summarises.
 
+A receipt's `## Files in` table -- whose heading names the receipt directory
+the table's paths live under -- is gated by CI
+(`scripts/ci/check-evidence-format.sh`): every backticked path in the table's
+File column must resolve to at least one committed file under the receipt
+directory, with `<...>` placeholders matched as per-segment globs (so
+`<family>/<corner-id>/stdout.log` demands a committed `stdout.log` under some
+family/corner pair). A row that documents artifacts deliberately **not**
+committed -- today, the full-grid `stdout.log` row above -- must carry the
+literal token `(none committed)` in its What cell; the gate skips such a row.
+This keeps a receipt from citing evidence it does not commit (issue #356).
+
 ## Receipts
 
 | Receipt | Corner(s) | Families | Result |

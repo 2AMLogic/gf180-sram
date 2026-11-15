@@ -33,7 +33,7 @@ exists today:
      is byte-identical to what `measurements/generate_report.py` renders
      today, the same freshness enforcement as check 4 above, applied to the
      report that depends on both the corner records and the MC/yield records.
-   6. `sim/signoff-sim-envelope.json` -- the minted `klt sim`-shaped evidence
+  6. `sim/signoff-sim-envelope.json` -- the minted `klt sim`-shaped evidence
       envelope for T1 item 5 (issue #128), transcribed by
       `sim/lib/mint_sim_envelope.py` from the same five corner records
       check 4 rolls up and pinned by the signoff manifest's item-5
@@ -44,6 +44,18 @@ exists today:
       it, so this check turns a stale item-5 citation into a CI failure
       naming the regeneration command rather than silently pinning
       transcribed values that no longer match the committed records.
+   7. A receipt's "Files in `<dir>/`" table names bytes that are actually
+      committed: every backticked path in the table's first (File) column
+      must resolve to at least one tracked file under `<dir>/`, with
+      `<...>` placeholders glob-expanded (`<family>/<corner-id>/stdout.log`
+      demands a stdout.log under some family/corner directory, not a
+      literal file of that name). A row whose What cell carries the
+      literal `(none committed)` token is exempt -- the documented way to
+      say a row describes artifacts deliberately not committed. Like
+      check 3, this closes the gap where a receipt cites evidence as
+      inline code in a table rather than as a markdown link, so a receipt
+      asserting evidence it does not commit fails CI naming the row
+      instead of reporting green (issue #356).
 
 As the harness and evidence-record grammar land (#21, #24), this script is
 the place to grow real per-record field validation -- it does not invent
@@ -57,7 +69,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import NamedTuple
+from typing import Iterable, NamedTuple
 
 # sys.path bootstrap only (#337): the fixed depth survives just here, where a
 # wrong depth is a loud ImportError instead of a silently wrong tree.
@@ -108,6 +120,34 @@ LINK_CHECK_GLOBS = [
 ]
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+
+# --- "Files in" receipt-table gate (issue #356) -------------------------
+# A receipt documents what a run committed via a "## Files in `<dir>/`"
+# markdown table whose first (File) column holds backticked paths. Those
+# are inline code, not markdown links, so LINK_RE never sees them; the
+# checks below resolve them directly against the tracked file list.
+
+# The heading pins the directory the table's paths live under, relative
+# to the receipt's own parent directory.
+FILES_TABLE_HEADING_RE = re.compile(
+    r"^##\s+Files in\s+`([^`]+?)/`\s*$", re.MULTILINE
+)
+# Every backticked token in the File column is a path (a cell may hold
+# more than one, comma-separated). The What column is prose full of
+# backticked non-paths (`klt sim`, `--batch-set`, `units/`) and is never
+# scanned for paths.
+BACKTICKED_TOKEN_RE = re.compile(r"`([^`]+)`")
+# A `<...>` placeholder in a File-column token stands for one path
+# segment of any name. Note `<family>` expands inconsistently across a
+# token (`hold-snm` the directory vs `hold_snm_sweep.txt` the file), so
+# placeholders are glob-matched per segment, never literally substituted.
+PLACEHOLDER_RE = re.compile(r"<[^<>]*>")
+# The exemption token: a row whose What cell contains it describes
+# artifacts deliberately not committed, and is accepted with zero
+# matches. Documented in sim/deck-parity/README.md's committed-bytes rule.
+NONE_COMMITTED_TOKEN = "(none committed)"
+# A markdown table separator row such as `|---|---|`.
+TABLE_SEPARATOR_RE = re.compile(r"^\|[\s:|-]*$")
 
 
 class DerivedFile(NamedTuple):
@@ -199,12 +239,16 @@ def resolve_glob(pattern: str, tracked: set[str]) -> list[str]:
     return matches
 
 
-def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
+def link_check_docs(tracked: set[str]) -> set[str]:
+    """Docs the markdown-link and receipt-table checks scan."""
     doc_paths: set[str] = set()
     for pattern in LINK_CHECK_GLOBS:
         doc_paths.update(resolve_glob(pattern, tracked))
+    return doc_paths
 
-    for doc in sorted(doc_paths):
+
+def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
+    for doc in sorted(link_check_docs(tracked)):
         full = REPO_ROOT / doc
         try:
             text = full.read_text(encoding="utf-8")
@@ -229,6 +273,115 @@ def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
                     f"broken relative link in {doc}: target {target!r} "
                     f"does not resolve to an existing file ({resolved})"
                 )
+
+
+def parse_files_tables(
+    doc_text: str,
+) -> list[tuple[str, list[tuple[list[str], bool]]]]:
+    """Parse every "## Files in `<dir>/`" section of a receipt.
+
+    Returns one ``(dir_name, rows)`` pair per heading. Each row is
+    ``(tokens, exempt)``: the backticked tokens of the File cell (the
+    table's first column -- the What column is never scanned, it is full
+    of backticked non-paths) and whether the What cell carries the
+    ``(none committed)`` exemption token. Skips prose between the heading
+    and the table, the ``| File | What |`` header and ``|---|---|``
+    separator rows; the table ends at the first non-table line or the
+    next heading.
+    """
+    headings = list(FILES_TABLE_HEADING_RE.finditer(doc_text))
+    tables: list[tuple[str, list[tuple[list[str], bool]]]] = []
+    for i, heading in enumerate(headings):
+        section_end = (
+            headings[i + 1].start() if i + 1 < len(headings) else len(doc_text)
+        )
+        rows: list[list[str]] = []
+        in_table = False
+        for line in doc_text[heading.end():section_end].splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("|"):
+                if in_table:
+                    break
+                continue
+            in_table = True
+            if TABLE_SEPARATOR_RE.match(stripped):
+                continue
+            rows.append([c.strip() for c in stripped.strip("|").split("|")])
+
+        parsed: list[tuple[list[str], bool]] = []
+        for cells in rows[1:]:  # rows[0] is the "| File | What |" header
+            file_cell = cells[0] if cells else ""
+            what_cell = cells[1] if len(cells) > 1 else ""
+            parsed.append(
+                (
+                    BACKTICKED_TOKEN_RE.findall(file_cell),
+                    NONE_COMMITTED_TOKEN in what_cell,
+                )
+            )
+        tables.append((heading.group(1), parsed))
+    return tables
+
+
+def glob_segment_match(pattern: str, path: str) -> bool:
+    """fnmatch per path segment, so `*` (a `<...>` placeholder) stays
+    inside one directory level -- `<a>/<b>/f.txt` must not be satisfied
+    by a deeper `a/b/c/f.txt` that happens to exist."""
+    pattern_parts = pattern.split("/")
+    path_parts = path.split("/")
+    if len(pattern_parts) != len(path_parts):
+        return False
+    return all(
+        fnmatch.fnmatch(segment, pattern_segment)
+        for segment, pattern_segment in zip(path_parts, pattern_parts)
+    )
+
+
+def unresolved_files_table_rows(
+    doc_text: str, base_dir: str, file_list: Iterable[str]
+) -> list[tuple[str, str]]:
+    """Resolve a receipt's "Files in" tables against committed files.
+
+    Pure helper: takes the receipt text, the repo-relative directory the
+    receipt lives in (its heading dirs resolve under it), and the tracked
+    file list, so it unit-tests without a git checkout. Returns
+    ``(token, glob_pattern)`` for every File-cell token that resolves to
+    zero committed files; exempt rows (What cell carries
+    ``(none committed)``) are skipped entirely.
+    """
+    findings: list[tuple[str, str]] = []
+    for dir_name, rows in parse_files_tables(doc_text):
+        prefix = f"{base_dir.rstrip('/')}/{dir_name}"
+        for tokens, exempt in rows:
+            if exempt:
+                continue
+            for token in tokens:
+                pattern = f"{prefix}/{PLACEHOLDER_RE.sub('*', token)}"
+                if not any(glob_segment_match(pattern, p) for p in file_list):
+                    findings.append((token, pattern))
+    return findings
+
+
+def files_table_error(doc: str, token: str, pattern: str) -> str:
+    return (
+        f'unresolved "Files in" table entry in {doc}: {token!r} '
+        f"matches no committed file (pattern {pattern!r} resolved "
+        f"to 0 files); commit the artifact, or annotate the row's "
+        f"What cell with {NONE_COMMITTED_TOKEN!r} if nothing is "
+        "intentionally committed for it"
+    )
+
+
+def check_receipt_files_tables(tracked: set[str], errors: list[str]) -> None:
+    for doc in sorted(link_check_docs(tracked)):
+        full = REPO_ROOT / doc
+        try:
+            text = full.read_text(encoding="utf-8")
+        except OSError:
+            # Already reported by check_markdown_links over the same set.
+            continue
+        base_dir = full.parent.relative_to(REPO_ROOT).as_posix()
+        for token, pattern in unresolved_files_table_rows(text, base_dir, tracked):
+            errors.append(files_table_error(doc, token, pattern))
 
 
 def check_derived_fresh(
@@ -273,6 +426,7 @@ def main() -> int:
     check_readmes(tracked, errors)
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
+    check_receipt_files_tables(tracked, errors)
     for spec in DERIVED_FILES:
         check_derived_fresh(tracked, errors, spec)
 
@@ -286,7 +440,8 @@ def main() -> int:
     print(
         f"evidence-format check passed: {len(tracked)} tracked files, "
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
-        "raw artifacts, no broken relative doc links, "
+        "raw artifacts, no broken relative doc links, every receipt "
+        '"Files in" table entry resolves to committed files, '
         + ", ".join(f"{d.committed} in sync with {d.generator}" for d in DERIVED_FILES)
         + "."
     )

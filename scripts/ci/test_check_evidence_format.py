@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+"""Offline tests for the receipt "Files in" gate in
+scripts/ci/check_evidence_format.py (issue #356).
+
+The gate resolves every backticked path in a receipt's "## Files in
+`<dir>/`" table against the committed file list. These tests exercise the
+pure helper in both directions -- a missing concrete path and a zero-match
+placeholder row fail; an exempt row and the repo's two real deck-parity
+receipts pass -- with no git, no PDK and no simulator.
+
+Run: python3 scripts/ci/test_check_evidence_format.py   (or via `npm run test`)
+"""
+from __future__ import annotations
+
+import inspect
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import check_evidence_format as cef  # noqa: E402
+
+REPO = cef.REPO_ROOT
+RECEIPT_DOCS = ("20261114-tt_25c_3.30v.md", "20261115-full-grid.md")
+
+
+def deck_parity_files() -> set[str]:
+    """Files committed under the two receipt dirs, as repo-relative paths."""
+    files: set[str] = set()
+    base = REPO / "sim" / "deck-parity"
+    for doc in RECEIPT_DOCS:
+        receipt_dir = base / doc.removesuffix(".md")
+        for p in receipt_dir.rglob("*"):
+            if p.is_file():
+                files.add(p.relative_to(REPO).as_posix())
+    return files
+
+
+def receipt(dir_name: str, file_cell: str, what_cell: str = "description") -> str:
+    """A minimal receipt: heading, header row, separator, one data row."""
+    return (
+        f"## Files in `{dir_name}/`\n\n"
+        "| File | What |\n"
+        "|---|---|\n"
+        f"| {file_cell} | {what_cell} |\n"
+        "\nTimestamp / author: test.\n"
+    )
+
+
+class ParseFilesTablesTest(unittest.TestCase):
+    def test_heading_dir_and_cells_parsed(self):
+        tables = cef.parse_files_tables(
+            receipt("run-a", "`ok.json`", "the `klt sim` envelope (none committed)")
+        )
+        self.assertEqual(tables, [("run-a", [(["ok.json"], True)])])
+
+    def test_multi_token_cell(self):
+        tables = cef.parse_files_tables(receipt("run-a", "`a.json`, `b.json`"))
+        self.assertEqual(tables[0][1], [(["a.json", "b.json"], False)])
+
+    def test_non_receipt_heading_ignored(self):
+        # .loom/README.md's "## Files in This Directory" must not parse
+        # (defense in depth; it is also outside LINK_CHECK_GLOBS).
+        text = (
+            "## Files in This Directory\n\n"
+            "| File | What |\n|---|---|\n| `nope.json` | x |\n"
+        )
+        self.assertEqual(cef.parse_files_tables(text), [])
+
+    def test_prose_before_table_and_after_it(self):
+        text = (
+            "## Files in `run-a/`\n\n"
+            "Committed per the bounded-bytes rule: `request.json`, prose...\n\n"
+            "| File | What |\n|---|---|\n| `a.json` | the `units/` scratch is not committed |\n"
+            "\nTimestamp.\n\n## Next section\n"
+        )
+        tables = cef.parse_files_tables(text)
+        self.assertEqual(tables[0][1], [(["a.json"], False)])
+
+
+class UnresolvedRowsTest(unittest.TestCase):
+    FILES = [
+        "sim/deck-parity/run-a/batch-set-envelope.json",
+        "sim/deck-parity/run-a/hold-snm/request.json",
+    ]
+
+    def test_missing_concrete_path_fails(self):
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-a", "`missing-artifact.json`"), "sim/deck-parity", self.FILES
+        )
+        self.assertEqual(
+            findings,
+            [
+                (
+                    "missing-artifact.json",
+                    "sim/deck-parity/run-a/missing-artifact.json",
+                )
+            ],
+        )
+
+    def test_zero_match_placeholder_fails(self):
+        # The #346 shape: <family>/stdout.log with no stdout.log under any
+        # family. Placeholders must be expanded, not skipped.
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-a", "`<family>/stdout.log`"), "sim/deck-parity", self.FILES
+        )
+        self.assertEqual(len(findings), 1)
+        token, pattern = findings[0]
+        self.assertEqual(token, "<family>/stdout.log")
+        self.assertEqual(pattern, "sim/deck-parity/run-a/*/stdout.log")
+
+    def test_none_committed_row_accepted_with_zero_matches(self):
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-a", "`<family>/stdout.log`", "engine stdout (none committed)"),
+            "sim/deck-parity",
+            self.FILES,
+        )
+        self.assertEqual(findings, [])
+
+    def test_placeholder_never_literal(self):
+        # <family> expands inconsistently across one token (`hold-snm` the
+        # directory vs `hold_snm_sweep.txt` the file), so each <...> is a
+        # glob, never a literal substitution.
+        files = ["receipts/run/hold-snm/c01/hold_snm_sweep.txt"]
+        findings = cef.unresolved_files_table_rows(
+            receipt("run", "`<family>/<corner-id>/<family>_sweep.txt`"),
+            "receipts",
+            files,
+        )
+        self.assertEqual(findings, [])
+
+    def test_placeholder_does_not_cross_directories(self):
+        # <family>/stdout.log is not satisfied by a deeper a/b/stdout.log.
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-a", "`<family>/stdout.log`"),
+            "sim/deck-parity",
+            ["sim/deck-parity/run-a/a/b/stdout.log"],
+        )
+        self.assertEqual(len(findings), 1)
+
+    def test_resolution_scoped_to_heading_dir(self):
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-b", "`request.json`"),
+            "sim/deck-parity",
+            ["sim/deck-parity/run-a/request.json"],
+        )
+        self.assertEqual(len(findings), 1)
+
+    def test_what_cell_tokens_never_scanned(self):
+        # Only the table's first column is parsed: the What cell is full of
+        # backticked non-paths that must never produce a finding.
+        what = "the `klt sim` envelope; its `units/` scratch, `--batch-set` flag and `x_gf180_sram_adapter` sha256 are not paths here"
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-a", "`batch-set-envelope.json`", what),
+            "sim/deck-parity",
+            ["sim/deck-parity/run-a/batch-set-envelope.json"],
+        )
+        self.assertEqual(findings, [])
+
+    def test_multi_token_cell_reports_only_missing(self):
+        findings = cef.unresolved_files_table_rows(
+            receipt("run-a", "`batch-set-envelope.json`, `gone.json`"),
+            "sim/deck-parity",
+            ["sim/deck-parity/run-a/batch-set-envelope.json"],
+        )
+        self.assertEqual([t for t, _ in findings], ["gone.json"])
+
+    def test_full_grid_row_shape_resolves(self):
+        files = [
+            "r/run/hold-snm/c01/corner.inc",
+            "r/run/read-snm/c02/corner.inc",
+            "r/run/hold-snm/c01/hold_snm_sweep.txt",
+        ]
+        for cell in (
+            "`<family>/<corner-id>/corner.inc`",
+            "`<family>/<corner-id>/<family>_sweep.txt`",
+        ):
+            self.assertEqual(
+                cef.unresolved_files_table_rows(receipt("run", cell), "r", files),
+                [],
+                cell,
+            )
+
+    def test_error_message_names_doc_row_and_pattern(self):
+        msg = cef.files_table_error(
+            "sim/deck-parity/20261115-full-grid.md",
+            "<family>/<corner-id>/stdout.log",
+            "sim/deck-parity/20261115-full-grid/*/stdout.log",
+        )
+        self.assertIn("20261115-full-grid.md", msg)
+        self.assertIn("<family>/<corner-id>/stdout.log", msg)
+        self.assertIn("(none committed)", msg)
+
+
+class RealReceiptsTest(unittest.TestCase):
+    def test_both_real_receipts_pass(self):
+        files = deck_parity_files()
+        self.assertTrue(files, "receipt artifact dirs missing from checkout")
+        for doc in RECEIPT_DOCS:
+            text = (REPO / "sim" / "deck-parity" / doc).read_text(encoding="utf-8")
+            self.assertEqual(
+                cef.unresolved_files_table_rows(text, "sim/deck-parity", files),
+                [],
+                f"{doc} must fully resolve",
+            )
+
+    def test_exemption_inventory(self):
+        # The only intentional zero-match row in the repo is the full-grid
+        # stdout row; the one-corner receipt has none.
+        base = REPO / "sim" / "deck-parity"
+        one = cef.parse_files_tables((base / RECEIPT_DOCS[0]).read_text(encoding="utf-8"))
+        grid = cef.parse_files_tables((base / RECEIPT_DOCS[1]).read_text(encoding="utf-8"))
+        self.assertEqual(sum(1 for _, ex in one[0][1] if ex), 0)
+        self.assertEqual(sum(1 for _, ex in grid[0][1] if ex), 1)
+
+    def test_full_grid_stdout_row_requires_exemption(self):
+        # Without the (none committed) token the intentional stdout row
+        # fails -- the exemption is what keeps main green.
+        path = REPO / "sim" / "deck-parity" / RECEIPT_DOCS[1]
+        text = path.read_text(encoding="utf-8")
+        self.assertIn(cef.NONE_COMMITTED_TOKEN, text)
+        stripped = text.replace(cef.NONE_COMMITTED_TOKEN, "(deliberately absent)")
+        findings = cef.unresolved_files_table_rows(
+            stripped, "sim/deck-parity", deck_parity_files()
+        )
+        self.assertEqual(
+            [t for t, _ in findings], ["<family>/<corner-id>/stdout.log"]
+        )
+
+
+class EnumerationTest(unittest.TestCase):
+    def test_docstring_and_success_message_enumerate_the_check(self):
+        self.assertIn("Files in", cef.__doc__ or "")
+        self.assertIn("Files in", inspect.getsource(cef.main))
+
+
+if __name__ == "__main__":
+    unittest.main()
