@@ -8,6 +8,18 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-15
+
+- **PR #339**: sim: record the fleet deck-mode parity receipt at tt_25c_3.30v and bound build/reduce to a corner subset
+
+### 2026-11-14
+
+- **PR #334**: feat(layout): land the sram_256x32 macro GDS, pin check and macro DRC report
+- **PR #333**: refactor(sim): give the ratified corner matrix a single owner in sim/lib
+- **PR #325**: docs: roadmap as of 2026-11-13
+- **Issue #331** (closed): Give the ratified 27-corner matrix a single owner: 4 copies, 3 unguarded
+- **Issue #326** (closed): Land the macro GDS, pin check and macro DRC report (split from #247; LVS stays there)
+
 ### 2026-11-13
 
 - **Issue #118** (closed): Champion: Merge-Risk Hold Digest
