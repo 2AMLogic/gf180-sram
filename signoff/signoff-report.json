@@ -296,18 +296,18 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:962bbf1ef1fd9ed05eebc00e308140b24ab8b44b7161fef53b0fbf9925911be1",
+        "content_hash": "sha256:9f048bb871e9b6bc5c7bf2021cf2ff2921fbe83a40ffc5d393f6f3abed4ece0a",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 9,
           "path": null,
-          "content_hash": "sha256:962bbf1ef1fd9ed05eebc00e308140b24ab8b44b7161fef53b0fbf9925911be1",
+          "content_hash": "sha256:9f048bb871e9b6bc5c7bf2021cf2ff2921fbe83a40ffc5d393f6f3abed4ece0a",
           "input_verified": true,
           "members": [
             {
               "path": "sim/README.md",
-              "content_hash": "sha256:f8fb2d54bd998f7d769a9760a39be9d1133346ce2d98cfc87c1266e244e3400e",
+              "content_hash": "sha256:3edca980c06e16e961e350ae7b4345f52cb7737018e5bdd8b94875fed3dc5c01",
               "status": "verified"
             },
             {
