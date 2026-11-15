@@ -303,10 +303,6 @@ def build() -> kdb.Layout:
     return m.ly
 
 
-def spacing_of(lp) -> float:
-    return 0.30
-
-
 def near_region(m: Macro, lp, x0, y0, x1, y1, pad) -> kdb.Region:
     li = m.ly.find_layer(*lp)
     if li is None:
