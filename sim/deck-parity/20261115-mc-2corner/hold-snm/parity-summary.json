@@ -1,0 +1,148 @@
+{
+ "kind": "mc",
+ "family": "hold-snm",
+ "mode": "snm-pair:hold_snm_sweep.txt:hold_snm",
+ "recorded_metric": "hold_snm_v",
+ "comparison": "pre213-tolerance",
+ "tolerance_v": 3e-05,
+ "record": "sim/hold-snm/records/20260817-011558-4448966.md",
+ "sample_set": "sim/hold-snm/mc/samples/20260921-124534-cf5e975.json",
+ "coverage": {
+  "corners": 2,
+  "units": {
+   "expected": 1216,
+   "reported": 1216
+  },
+  "missing_in_report": [],
+  "missing_in_samples": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "seed_identity": {
+  "checked": true,
+  "errors": []
+ },
+ "reduce_grading": {
+  "coverage_errors": [],
+  "overall": "recorded",
+  "infra_failures": []
+ },
+ "corners": [
+  {
+   "id": "tt_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 2.035532,
+      "fleet": 2.035546,
+      "delta": 1.4000000000180535e-05,
+      "verdict": "WITHIN-TOL"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.110807,
+      "fleet": 1.11081,
+      "delta": 2.9999999999752447e-06,
+      "verdict": "WITHIN-TOL"
+     },
+     "hold_snm_v": {
+      "record": 1.110807,
+      "fleet": 1.11081,
+      "delta": 2.9999999999752447e-06,
+      "verdict": "WITHIN-TOL"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 1.792025,
+      "fleet": 1.792026,
+      "delta": 9.999999999177334e-07,
+      "verdict": "WITHIN-TOL"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 0.930461,
+      "fleet": 0.930461,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 0.930461,
+      "fleet": 0.930461,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "open_units": []
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "parity"
+}
