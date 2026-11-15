@@ -84,3 +84,10 @@ Single-corner debug probe (the only local run this bench warrants): copy
 10/10 ns variant must reproduce the macro-smoke baseline verdict (all words
 match, `undefined_bits=0`) — that equivalence is also pinned offline by
 `sim/lib/test_min_clock_pulse.py`.
+
+## Records
+
+| Record | Result |
+|---|---|
+| `records/20261115-010427-185a422.md` | 243/243 corner-runs pass (9 variants x 27 corners, two-phase collection: batch-set + 51 re-collected `lost_shard` corners); min CLK high = 4 ns at the two `ff`/−40 C/fast-supply corners (grid floor), 6 ns typical, 8 ns at the slow 125 C corners; min CLK low = 4 ns (grid floor) at 26 of 27 corners, 6 ns at `ss_125c_2.97v` |
+
