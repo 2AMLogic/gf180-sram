@@ -4,7 +4,8 @@
 Builds synthetic `klt-sim-report.json`-shaped dicts -- no PDK, no ngspice, no
 batch fleet -- so they run in CI. Pins down the fail-closed contract the
 measured record depends on: 27/27 well-formed corners grade `PASS` and exit
-`0`; a corner missing from the report, a `null` measurement, a read cycle that
+`0`; a corner missing from the report, a duplicated corner, a `null`
+measurement, a repeated measurement name, a read cycle that
 returned the wrong word, or a corner outside the ratified matrix is reported
 `OPEN` (exit `2`) and never silently dropped; a non-physical charge is `FAIL`
 (exit `1`). Also pins the `E = Q x VDD` arithmetic and the sign convention,
@@ -178,6 +179,50 @@ class TestFailsClosed(unittest.TestCase):
             lines,
         )
 
+    def test_duplicate_corner_is_open_whichever_copy_is_last(self):
+        rep = full_report()
+        # Bad copy first, good copy last -- exactly the order in which a
+        # last-wins merge would silently keep the good one and exit 0.
+        dup = [i for i, c in enumerate(rep["corners"]) if c["corner_id"] == "tt/3.300V/25C"]
+        self.assertEqual(len(dup), 1)
+        rep["corners"][dup[0]] = corner("tt", 3.30, 25, word=0xDEADBEEE)
+        rep["corners"].append(corner("tt", 3.30, 25))
+        code, lines = grade(rep)
+        self.assertEqual(code, 2)
+        line = line_for(lines, "tt/3.300V/25C")
+        self.assertIn("OPEN", line)
+        self.assertIn("duplicate corner in report", line)
+        self.assertNotIn("e_write=", line)
+        self.assertIn("access_power = OPEN over 27 corners (1 open, 0 fail)", lines[-1])
+
+    def test_duplicate_unexpected_corner_reports_the_duplication(self):
+        rep = full_report()
+        rep["corners"].append(corner("tt", 3.00, 85))
+        rep["corners"].append(corner("tt", 3.00, 85))
+        code, lines = grade(rep)
+        self.assertEqual(code, 2)
+        self.assertIn("access_power = OPEN over 28 corners (1 open, 0 fail)", lines[-1])
+        self.assertTrue(
+            any("duplicate corner in report" in ln for ln in lines),
+            lines,
+        )
+
+    def test_repeated_measurement_name_is_open_whichever_copy_is_last(self):
+        rep = full_report()
+        c = corner("ff", 2.97, -40)
+        # A second q_write claim appended after the good one: a last-wins
+        # grader would keep the good copy and grade this corner PASS.
+        c["measurements"].append(
+            {"name": "q_write", "value": None, "unit": "C", "status": "pass"}
+        )
+        rep["corners"][0] = c
+        code, lines = grade(rep)
+        self.assertEqual(code, 2)
+        line = line_for(lines, "ff/2.970V/-40C")
+        self.assertIn("OPEN", line)
+        self.assertIn("q_write=unmeasured", line)
+        self.assertNotIn("e_write=", line)
+
     def test_empty_report_is_27_open_rows(self):
         code, lines = grade({"status": "pass", "corners": []})
         self.assertEqual(code, 2)
@@ -198,11 +243,27 @@ class TestGeneratorContract(unittest.TestCase):
             ap.op_index("no such operation")
 
     def test_request_declares_the_27_point_matrix_and_both_integrals(self):
+        import corner_matrix
+
         req = ap.klt_request()
         self.assertEqual(req["analysis"]["kind"], "tran")
-        self.assertEqual([p["name"] for p in req["corners"]["process"]], ["ff", "tt", "ss"])
-        self.assertEqual(req["corners"]["supply_v"]["vvdd"], [2.97, 3.30, 3.63])
-        self.assertEqual(req["corners"]["temperature_c"], [-40, 25, 125])
+        # The request's corners block is pinned against the matrix's single
+        # owner, not against re-asserted literals -- so this test catches the
+        # request drifting from the ratified matrix instead of pinning a
+        # private copy of it.
+        self.assertEqual(
+            req["corners"]["process"],
+            [
+                {"name": p, "sections": [corner_matrix.LIB_SECTION[p]]}
+                for p in corner_matrix.PROCESSES
+            ],
+        )
+        self.assertEqual(
+            req["corners"]["supply_v"]["vvdd"], [float(v) for v in corner_matrix.VDDS]
+        )
+        self.assertEqual(
+            req["corners"]["temperature_c"], [int(t) for t in corner_matrix.TEMPS]
+        )
         self.assertEqual(len(ap.expected_corners()), 27)
         names = [m["name"] for m in req["measurements"]]
         self.assertEqual(names[:2], ["q_write", "q_read"])
