@@ -23,12 +23,12 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
-EXPERIMENT_DIR = ROOT / "sim" / "pex" / "write-margin"
-
-SIM_LIB = ROOT / "sim" / "lib"
+SIM_LIB = Path(__file__).resolve().parents[3] / "sim" / "lib"
 sys.path.insert(0, str(SIM_LIB))
 import render_signoff_table as signoff  # noqa: E402  (path-injected import)
+
+ROOT = signoff.default_repo_root()  # (#337: via the tested helper, never a fixed depth)
+EXPERIMENT_DIR = ROOT / "sim" / "pex" / "write-margin"
 
 RESULT_RE = re.compile(r"RESULT:\s*write_trip_voltage_v\s*=\s*([-\d.eE]+)")
 

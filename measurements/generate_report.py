@@ -41,10 +41,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-SIM_LIB = REPO_ROOT / "sim" / "lib"
+SIM_LIB = Path(__file__).resolve().parents[1] / "sim" / "lib"
 sys.path.insert(0, str(SIM_LIB))
 import render_signoff_table as signoff  # noqa: E402  (path-injected import)
+
+REPO_ROOT = signoff.default_repo_root()  # (#337: via the tested helper, never a fixed depth)
 
 # The three stability-margin measurements that have Monte Carlo / yield
 # evidence (issue #26). Access time has no MC campaign -- it is not a
