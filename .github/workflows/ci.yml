@@ -87,3 +87,20 @@ jobs:
 
       - name: Regenerate array schematics; require the committed copies to match
         run: ./scripts/ci/check-array-schematics.sh
+
+  # Hygiene gate (issue #361): every job above checks that tracked content
+  # is *well formed*; this one bounds what may be tracked at all (blob
+  # size, binary type, venv-shaped paths). Pure git+bash over the
+  # checked-out tree — no language or PDK setup needed, and the default
+  # shallow checkout carries HEAD's full tree.
+  repo-hygiene:
+    name: repo hygiene (tracked-tree gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tracked tree (size cap / binary allowlist / venv shape)
+        run: ./scripts/ci/check-repo-hygiene.sh
+
+      - name: Gate self-tests (per-rule fixture repos)
+        run: ./scripts/ci/tests/test-check-repo-hygiene.sh

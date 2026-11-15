@@ -26,6 +26,14 @@ sim/build/
 flow/build/
 # local klt install, created by the setup script
 .venv/
+# Non-dot-prefixed virtualenv siblings (issue #361): the .venv/ line above
+# covers only the setup script's own name, so a hand-made
+# `python -m venv venv` (or `env`) lands in git status and can be swept
+# into a commit. Dot-prefixed siblings (.venv-klt080/ etc.) are handled by
+# the .venv*/ widening, which lands separately — do not re-widen the
+# .venv/ line here.
+venv/
+env/
 # >>> loom-managed (do not edit) >>>
 # Loom runtime state (don't commit these)
 .loom-in-use
