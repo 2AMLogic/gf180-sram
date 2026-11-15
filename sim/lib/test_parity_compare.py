@@ -11,6 +11,15 @@ Covers, per the curated acceptance criteria: exact match, a seeded mismatch,
 a corner present in one side only, an OPEN corner, the SNM tolerance
 boundary at 30 uV, and the deck_sha256 present-and-equal assertion.
 
+The MC-mode classes (`McDirectExactPerSample`, `McSnmPairPre213`) cover the
+Monte Carlo increment the same way: exact per-sample index-ordered
+comparison, the ctrl anchor against the deterministic record, a compacted
+negative-control array with a differing errored count, the deck_sha256
+absent/wrong/matching triple on the MC path, the 30 uV boundary per mm
+sample, a missing sweep pair, and a seed-drift rejection -- all on tiny
+hand-built fixtures. Stub results are contract checks, **not** physical
+evidence.
+
 Run: python3 sim/lib/test_parity_compare.py   (or via `npm run test`)
 """
 from __future__ import annotations
@@ -24,7 +33,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import deck_adapter as da  # noqa: E402
 import parity_compare as pc  # noqa: E402
+import run_mc_campaign as mc_mod  # noqa: E402
 
 REPO = pc.REPO_ROOT
 CMP = REPO / "sim/lib/parity_compare.py"
@@ -466,6 +477,644 @@ class Household(unittest.TestCase):
             tmp = Path(d)
             rc, out, _ = run_cmp(tmp, "no-such-family", tmp / "none.json")
             self.assertNotEqual(rc, 0)
+
+
+# --------------------------------------------------------------------------
+# MC mode (mc-build/mc-reduce parity) -- offline contract fixtures.
+# --------------------------------------------------------------------------
+
+MC_CORNERS = ["tt_25c_3.30v", "ff_125c_2.97v"]
+SEED = 20260817
+SIGMOID_SWEEP = """0.0 3.3e0
+0.2 3.29e0
+0.4 3.2e0
+0.6 2.6e0
+0.8 0.6e0
+1.0 0.1e0
+1.2 0.02e0
+"""
+
+
+def mc_request_dict(family, corners=MC_CORNERS, *, n=6, n_control=2, n_nc=3,
+                    seed=SEED, nc_mismatch_scale=20.0, nc_vdd=None):
+    """A stub mc-build request: same x_gf180_sram_adapter shape, tiny counts."""
+    mode, key = da.MC_FAMILIES[family]
+    kind, datafile, _label = da.parse_mc_mode(mode)
+    pair = kind == "snm-pair"
+    units = []
+    for cid in corners:
+        process, temp, vdd = cid.split("_")[0], cid.split("_")[1].rstrip("c"), cid.split("_")[2].rstrip("v")
+        for kind_name, sw in (("mm", 1), ("ctrl", 0), ("nc", nc_mismatch_scale)):
+            unit_vdd = nc_vdd if (kind_name == "nc" and nc_vdd is not None) else vdd
+            for i in range({"mm": n, "ctrl": n_control, "nc": n_nc}[kind_name]):
+                sides = ("L", "R") if pair else (None,)
+                for side in sides:
+                    k = f"{kind_name}-{side}" if side else kind_name
+                    units.append({
+                        "id": da.mc_unit_id(cid, kind_name, i, side),
+                        "corner_id": cid, "process": process, "temp": temp, "vdd": unit_vdd,
+                        "kind": kind_name, "index": i, "side": side,
+                        "seed": mc_mod.derive_seed(seed, cid, k, i),
+                        "sw_stat_mismatch": sw,
+                    })
+    composed = "c" * 64
+    return {
+        "engine": "ngspice", "decks": [], "options": {},
+        "x_gf180_sram_adapter": {
+            "campaign": "monte-carlo", "family": family, "mode": mode, "key": key,
+            "testbench": "tb", "testbench_sha256": "0" * 64, "composed_deck_sha256": composed,
+            "base_seed": seed, "corners": list(corners),
+            "n_mismatch": n, "n_determinism_control": n_control, "n_negative_control": n_nc,
+            "nc_mismatch_scale": nc_mismatch_scale, "nc_vdd": nc_vdd,
+            "units": units,
+        },
+    }, composed
+
+
+def write_mc_fixture_tree(tmp, request, composed, *, corner_inc_seeds=None,
+                          sweep_values=None, unit_overrides=None):
+    """Stage the returned-unit-tree side: corner.inc per unit (+ sweeps/stdout)."""
+    meta = request["x_gf180_sram_adapter"]
+    family = meta["family"]
+    mode = meta["mode"]
+    kind, datafile, label = da.parse_mc_mode(mode)
+    outdir = tmp / "out"
+    report_units = []
+    for m in meta["units"]:
+        uid = m["id"]
+        unit = outdir / uid
+        unit.mkdir(parents=True, exist_ok=True)
+        seed = m["seed"]
+        if corner_inc_seeds is not None and uid in corner_inc_seeds:
+            seed = corner_inc_seeds[uid]
+        (unit / "corner.inc").write_text(
+            f"* corner: process={m['process']} seed={seed}\n.options seed={seed}\n"
+        )
+        u = {"id": uid, "status": "pass", "exit_code": 0, "timed_out": False,
+             "duration_s": 0.1, "deck": "tb.spice", "deck_sha256": composed,
+             "stdout": f"{uid}/stdout.bin", "stderr": f"{uid}/stderr.bin",
+             "outputs": [datafile] if datafile else [], "missing_outputs": [],
+             "host_resolved": [], "diagnostics": []}
+        if unit_overrides:
+            u.update(unit_overrides.get(uid, {}))
+            if unit_overrides.get(uid, {}).get("deck_sha256", composed) is None:
+                del u["deck_sha256"]
+        report_units.append(u)
+        if datafile:
+            values = (sweep_values or {}).get(uid)
+            if values is None:
+                values = {"0.0 3.3\n0.5 2.6\n0.8 0.6\n1.2 0.02\n"}
+            (unit / datafile).write_text(next(iter(values)) if isinstance(values, set) else values)
+        (unit / "stdout.bin").write_text("")
+        (unit / "stderr.bin").write_text("")
+    report = {"mode": "decks", "units": report_units, "outdir": str(outdir),
+              "status": "pass", "engine": "ngspice"}
+    (tmp / "report.json").write_text(json.dumps(report))
+    return outdir, report
+
+
+def mc_results_for(family, m, *, ctrl_value=1.0):
+    """The per-sample results dict a stub mc-reduce grading carries."""
+    mode, key = da.MC_FAMILIES[family]
+    kind, _datafile, label = da.parse_mc_mode(mode)
+    if kind == "direct":
+        vals = {key: ctrl_value}
+        if key == "write_trip_voltage_v":
+            vals["write_vdd_v"] = 3.3  # the record row's second metric
+        return vals
+    return {f"{label}_lobe_low_v": ctrl_value, f"{label}_lobe_high_v": ctrl_value,
+            f"{label}_v": ctrl_value}
+
+
+def mc_reduced_dict(family, request, *, ctrl_value=1.0, mm_values=None, nc_errored_ids=(),
+                    mm_errored_indices=(), ctrl_values=None):
+    """A stub mc-reduce --json-out grading for the stub request."""
+    meta = request["x_gf180_sram_adapter"]
+    key = meta["key"]
+    n, n_ctrl, n_nc = meta["n_mismatch"], meta["n_determinism_control"], meta["n_negative_control"]
+    batches = {}
+    measurements = []
+    for cid in meta["corners"]:
+        per_kind = {}
+        for kind_name, count in (("mm", n), ("ctrl", n_ctrl), ("nc", n_nc)):
+            samples = []
+            for i in range(count):
+                units_for = [u for u in meta["units"]
+                             if u["corner_id"] == cid and u["kind"] == kind_name and u["index"] == i]
+                errs = []
+                if kind_name == "mm" and i in mm_errored_indices:
+                    errs = ["RESULT-ERROR: stub"]
+                value = ctrl_value
+                if kind_name == "mm" and mm_values:
+                    value = mm_values[cid][i]
+                if kind_name == "ctrl" and ctrl_values:
+                    value = ctrl_values[cid][i]
+                if kind_name == "nc" and any(u["index"] == i for u in units_for
+                                             if u["id"] in nc_errored_ids):
+                    errs = ["RESULT-ERROR: nc stub"]
+                samples.append((i, mc_results_for(family, units_for[0], ctrl_value=value), errs))
+            per_kind[kind_name] = {"seed_labels": [str(u["seed"]) for u in meta["units"]
+                                                   if u["corner_id"] == cid and u["kind"] == kind_name],
+                                   "samples": samples}
+        batches[cid] = per_kind
+        mm_tally = [v for i, v in enumerate((mm_values or {}).get(cid, [ctrl_value] * n))
+                    if i not in mm_errored_indices]
+        measurement = {"name": f"{key}@{cid}", "unit": "V", "samples": mm_tally,
+                       "errored": len(mm_errored_indices), "limits": {"min": 0.0},
+                       "source_corners": [cid]}
+        measurement["negative_control"] = {
+            "samples": [ctrl_value] * (n_nc - len([i for i in range(n_nc)
+                                                   if any(u["index"] == i for u in meta["units"]
+                                                          if u["corner_id"] == cid and u["kind"] == "nc"
+                                                          and u["id"] in nc_errored_ids)])),
+            "errored": len(nc_errored_ids) // len(meta["corners"]),
+            "description": "stub nc",
+        }
+        measurements.append(measurement)
+    return {"family": family, "mode": meta["mode"], "key": key,
+            "expected_units": len(meta["units"]), "coverage_errors": [],
+            "infra_failures": [], "batches": batches, "measurements": measurements,
+            "overall": "recorded"}
+
+
+def mc_sample_set_dict(family, request, *, mm_values=None, nc_errored=0,
+                       nc_samples=None, ctrl_note=None):
+    """The committed-sample-set side: klt yield document shape, tiny counts."""
+    meta = request["x_gf180_sram_adapter"]
+    key = meta["key"]
+    n, n_nc = meta["n_mismatch"], meta["n_negative_control"]
+    measurements = []
+    for cid in meta["corners"]:
+        measurements.append({
+            "name": f"{key}@{cid}", "unit": "V",
+            "samples": (mm_values or {}).get(cid, [1.0] * n),
+            "errored": 0, "limits": {"min": 0.0}, "source_corners": [cid],
+            "negative_control": {
+                "samples": nc_samples.get(cid, [1.0] * (n_nc - nc_errored)),
+                "errored": nc_errored, "description": ctrl_note or "stub nc",
+            },
+        })
+    return {"measurements": measurements, "provenance": {"seed": meta["base_seed"], "key": key}}
+
+
+def run_cmp_mc(tmp, family, reduced, *, request, report, samples, record,
+               sweep_dir=None, pre213=None, tolerance=None, unit_dir=None):
+    cmd = [sys.executable, str(CMP), "mc", family, str(reduced),
+           "--request", str(request), "--report", str(report),
+           "--samples", str(samples), "--record", str(record)]
+    if sweep_dir:
+        cmd += ["--sweep-dir", str(sweep_dir)]
+    if pre213:
+        cmd += ["--pre213", str(pre213)]
+    if unit_dir:
+        cmd += ["--unit-dir", str(unit_dir)]
+    if tolerance is not None:
+        cmd += ["--tolerance-v", str(tolerance)]
+    json_out = tmp / "summary.json"
+    cmd += ["--json-out", str(json_out)]
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    summary = json.loads(json_out.read_text()) if json_out.is_file() else None
+    return proc.returncode, proc.stdout + proc.stderr, summary
+
+
+class McDirectExactPerSample(unittest.TestCase):
+    """write-margin: deterministic per-sample exact comparison, in index order."""
+
+    def _fixture(self, tmp, mm_fleet=None, mm_committed=None, ctrl_value=1.91003,
+                 nc_errored_ids=(), nc_fleet_errored=0, nc_committed_errored=0):
+        family = "write-margin"
+        request, composed = mc_request_dict(family)
+        n = request["x_gf180_sram_adapter"]["n_mismatch"]
+        mm_committed = mm_committed if mm_committed is not None else [0.5 + 0.001 * i for i in range(n)]
+        mm_fleet = mm_fleet if mm_fleet is not None else list(mm_committed)
+        reduced = mc_reduced_dict(family, request, mm_values={
+            c: mm_fleet for c in request["x_gf180_sram_adapter"]["corners"]},
+            ctrl_values={c: [ctrl_value] * 2 for c in request["x_gf180_sram_adapter"]["corners"]},
+            nc_errored_ids=nc_errored_ids)
+        n_nc = request["x_gf180_sram_adapter"]["n_negative_control"]
+        ss = mc_sample_set_dict(family, request, mm_values={
+            c: mm_committed for c in request["x_gf180_sram_adapter"]["corners"]},
+            nc_samples={c: [0.9] * (n_nc - nc_committed_errored) for c in request["x_gf180_sram_adapter"]["corners"]},
+            nc_errored=nc_committed_errored)
+        write_mc_fixture_tree(tmp, request, composed)
+        # nc committed values must equal the stub reduced nc values (ctrl_value)
+        for m in ss["measurements"]:
+            m["negative_control"]["samples"] = [ctrl_value] * len(m["negative_control"]["samples"])
+        for cid, per in reduced["batches"].items():
+            per["nc"] = {"seed_labels": per["nc"]["seed_labels"],
+                         "samples": [(i, mc_results_for(family, {"id": ""}, ctrl_value=ctrl_value),
+                                      ["RESULT-ERROR: nc"] if i == 0 and nc_fleet_errored else [])
+                                     for i, _r, _e in per["nc"]["samples"]]}
+        (tmp / "request.json").write_text(json.dumps(request))
+        (tmp / "reduced.json").write_text(json.dumps(reduced))
+        (tmp / "samples.json").write_text(json.dumps(ss))
+        record = tmp / "record.md"
+        write_record(record, {c: {"write_trip_voltage_v": ctrl_value, "write_vdd_v": 3.3}
+                              for c in request["x_gf180_sram_adapter"]["corners"]})
+        return request, reduced, ss, record
+
+    def test_exact_match_passes(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            rc, out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                          request=tmp / "request.json", report=tmp / "report.json",
+                                          samples=tmp / "samples.json", record=record)
+            self.assertEqual(rc, 0, out)
+            self.assertEqual(summary["overall"], "parity")
+            self.assertEqual(summary["deck_sha256"]["errors"], [])
+            self.assertEqual(summary["seed_identity"]["errors"], [])
+            mm = summary["corners"][0]["mismatch"]
+            self.assertEqual(mm["n_compared"], mm["n_expected"])
+            self.assertEqual(mm["deltas"]["max"], 0.0)
+            self.assertIn("**Overall: parity**", out)
+
+    def test_wrong_value_at_one_index_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            n = request["x_gf180_sram_adapter"]["n_mismatch"]
+            mm_fleet = [0.5 + 0.001 * i for i in range(n)]
+            mm_fleet[3] += 1e-3
+            for c in request["x_gf180_sram_adapter"]["corners"]:
+                for i, (idx, results, errs) in enumerate(reduced["batches"][c]["mm"]["samples"]):
+                    reduced["batches"][c]["mm"]["samples"][i] = (idx, dict(results, write_trip_voltage_v=mm_fleet[idx]), errs)
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(summary["overall"], "MISMATCH")
+            self.assertTrue(any("mm sample 3" in r for c in summary["corners"] for r in c["reasons"]))
+
+    def test_reordered_samples_fail(self):
+        """Index order matters: a rotated array is not parity."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            n = request["x_gf180_sram_adapter"]["n_mismatch"]
+            rotated = [(0.5 + 0.001 * ((i + 1) % n)) for i in range(n)]
+            for c in request["x_gf180_sram_adapter"]["corners"]:
+                for i, (idx, results, errs) in enumerate(reduced["batches"][c]["mm"]["samples"]):
+                    reduced["batches"][c]["mm"]["samples"][i] = (idx, dict(results, write_trip_voltage_v=rotated[idx]), errs)
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+
+    def test_errored_mm_sample_is_open_not_parity(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            for c in request["x_gf180_sram_adapter"]["corners"]:
+                samples = reduced["batches"][c]["mm"]["samples"]
+                reduced["batches"][c]["mm"]["samples"][2] = (2, {}, ["RESULT-ERROR: bistable"])
+                reduced["measurements"][0 if c == request["x_gf180_sram_adapter"]["corners"][0] else 1]["errored"] = 1
+                reduced["measurements"][0 if c == request["x_gf180_sram_adapter"]["corners"][0] else 1]["samples"] = [
+                    v for (i, r, e) in samples if i != 2 for v in [r["write_trip_voltage_v"]]]
+            reduced["overall"] = "OPEN"
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(summary["overall"], "OPEN")
+            self.assertTrue(any("mm sample 2" in r for c in summary["corners"] for r in c["reasons"]))
+
+    def test_ctrl_not_pinned_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            for c in request["x_gf180_sram_adapter"]["corners"]:
+                samples = reduced["batches"][c]["ctrl"]["samples"]
+                reduced["batches"][c]["ctrl"]["samples"][1] = (
+                    samples[1][0], dict(samples[1][1], write_trip_voltage_v=1.5), samples[1][2])
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(summary["overall"], "MISMATCH")
+            self.assertTrue(any("not pinned" in r for c in summary["corners"] for r in c["reasons"]))
+
+    def test_ctrl_anchor_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp, ctrl_value=1.91003)
+            for c in request["x_gf180_sram_adapter"]["corners"]:
+                for i, (idx, results, errs) in enumerate(reduced["batches"][c]["ctrl"]["samples"]):
+                    reduced["batches"][c]["ctrl"]["samples"][i] = (
+                        idx, dict(results, write_trip_voltage_v=results["write_trip_voltage_v"] + 1e-3), errs)
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertTrue(any("ctrl write_trip_voltage_v" in r
+                                for c in summary["corners"] for r in c["reasons"]))
+
+    def test_negative_control_errored_count_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp, nc_errored_ids=(
+                "mc.tt_25c_3.30v.nc.00000",), nc_fleet_errored=1, nc_committed_errored=2)
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertTrue(any("errored-count mismatch" in r
+                                for c in summary["corners"] for r in c["reasons"]))
+
+    def test_deck_sha_absent_or_wrong_fails_on_mc_path(self):
+        for sha_value in (None, "d" * 64):
+            with tempfile.TemporaryDirectory() as d:
+                tmp = Path(d)
+                request, reduced, ss, record = self._fixture(tmp)
+                overrides = {}
+                if sha_value is None:
+                    overrides = {u["id"]: {"deck_sha256": None}
+                                 for u in request["x_gf180_sram_adapter"]["units"][:1]}
+                else:
+                    overrides = {u["id"]: {"deck_sha256": sha_value}
+                                 for u in request["x_gf180_sram_adapter"]["units"][:1]}
+                write_mc_fixture_tree(tmp, request, request["x_gf180_sram_adapter"]["composed_deck_sha256"],
+                                      unit_overrides=overrides)
+                rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                               request=tmp / "request.json", report=tmp / "report.json",
+                                               samples=tmp / "samples.json", record=record)
+                self.assertNotEqual(rc, 0)
+                self.assertEqual(len(summary["deck_sha256"]["errors"]), 1)
+                self.assertIn("absent" if sha_value is None else "differs",
+                              summary["deck_sha256"]["errors"][0])
+
+    def test_nc_engine_deaths_with_matching_counts_stay_parity(self):
+        """nc units that die on both sides (committed errored count matches)
+        are reported OPEN with reasons but do not break parity."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            family = "write-margin"
+            corners = request["x_gf180_sram_adapter"]["corners"]
+            dead = {f"mc.{corners[0]}.nc.00000", f"mc.{corners[1]}.nc.00001"}
+            for c in corners:
+                per = reduced["batches"][c]["nc"]["samples"]
+                reduced["batches"][c]["nc"]["samples"] = [
+                    (i, ({} if f"mc.{c}.nc.{i:05d}" in dead else r),
+                     ["exit without RESULT"] if f"mc.{c}.nc.{i:05d}" in dead else e)
+                    for i, r, e in per
+                ]
+            reduced["infra_failures"] = [{"id": uid, "reason": "declared outputs missing"}
+                                         for uid in sorted(dead)]
+            reduced["overall"] = "OPEN"
+            n_nc = request["x_gf180_sram_adapter"]["n_negative_control"]
+            for k, c in enumerate(corners):
+                reduced["measurements"][k]["negative_control"]["errored"] = 1
+                reduced["measurements"][k]["negative_control"]["samples"] = \
+                    [1.91003] * (n_nc - 1)
+            for m in ss["measurements"]:
+                m["negative_control"]["errored"] = 1
+                m["negative_control"]["samples"] = [1.91003] * (n_nc - 1)
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            (tmp / "samples.json").write_text(json.dumps(ss))
+            rc, out, summary = run_cmp_mc(tmp, family, tmp / "reduced.json",
+                                          request=tmp / "request.json", report=tmp / "report.json",
+                                          samples=tmp / "samples.json", record=record)
+            self.assertEqual(rc, 0, out)
+            self.assertEqual(summary["overall"], "parity")
+            nc0 = summary["corners"][0]["negative_control"]
+            self.assertEqual(nc0["errored_fleet"], nc0["errored_committed"])
+            self.assertTrue(nc0["open_units"])
+            self.assertIn("never counted as parity", out)
+
+    def test_nc_engine_deaths_with_mismatched_counts_fail(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            corners = request["x_gf180_sram_adapter"]["corners"]
+            dead = {f"mc.{corners[0]}.nc.00000", f"mc.{corners[0]}.nc.00001"}
+            for c in corners:
+                per = reduced["batches"][c]["nc"]["samples"]
+                reduced["batches"][c]["nc"]["samples"] = [
+                    (i, ({} if f"mc.{c}.nc.{i:05d}" in dead else r),
+                     ["exit without RESULT"] if f"mc.{c}.nc.{i:05d}" in dead else e)
+                    for i, r, e in per
+                ]
+            reduced["infra_failures"] = [{"id": uid, "reason": "declared outputs missing"}
+                                         for uid in sorted(dead)]
+            reduced["overall"] = "OPEN"
+            # committed recorded only ONE errored draw per corner: a finding
+            n_nc = request["x_gf180_sram_adapter"]["n_negative_control"]
+            for k, c in enumerate(corners):
+                reduced["measurements"][k]["negative_control"]["errored"] = 1
+                reduced["measurements"][k]["negative_control"]["samples"] = [1.91003] * (n_nc - 1)
+            for m in ss["measurements"]:
+                m["negative_control"]["errored"] = 1
+                m["negative_control"]["samples"] = [1.91003] * (n_nc - 1)
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            (tmp / "samples.json").write_text(json.dumps(ss))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertTrue(any("errored-count mismatch" in r
+                                for c in summary["corners"] for r in c["reasons"]))
+
+    def test_mm_infra_failure_breaks_parity(self):
+        """An infra failure on an mm unit is parity-breaking, unlike nc."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            corners = request["x_gf180_sram_adapter"]["corners"]
+            dead = f"mc.{corners[0]}.mm.00002"
+            per = reduced["batches"][corners[0]]["mm"]["samples"]
+            reduced["batches"][corners[0]]["mm"]["samples"] = [
+                (i, ({} if i == 2 else r), ["exit without RESULT"] if i == 2 else e)
+                for i, r, e in per
+            ]
+            reduced["infra_failures"] = [{"id": dead, "reason": "declared outputs missing"}]
+            reduced["overall"] = "OPEN"
+            reduced["measurements"][0]["errored"] = 1
+            reduced["measurements"][0]["samples"] = [
+                r["write_trip_voltage_v"] for i, r, _e in per if i != 2]
+            (tmp / "reduced.json").write_text(json.dumps(reduced))
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(summary["overall"], "OPEN")
+            self.assertTrue(any("mm sample 2" in r
+                                for c in summary["corners"] for r in c["reasons"]))
+
+    def test_seed_drift_is_a_hard_failure(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            drifted = {request["x_gf180_sram_adapter"]["units"][0]["id"]: 42}
+            write_mc_fixture_tree(tmp, request, request["x_gf180_sram_adapter"]["composed_deck_sha256"],
+                                  corner_inc_seeds=drifted)
+            rc, _out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record)
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(len(summary["seed_identity"]["errors"]), 1)
+            self.assertIn("seed drift", summary["seed_identity"]["errors"][0])
+            self.assertIn("derive_seed says", summary["seed_identity"]["errors"][0])
+
+
+PAIR_EXTRACTOR = """#!/usr/bin/env python3
+# Stub pre-#213 extractor: --pair mode, reports the mean of both curves' last
+# y values scaled by the LABEL_SCALE env var (default 1.0), as <label>_v plus
+# two lobe intermediates.
+import os, sys
+args = sys.argv[1:]
+assert args and args[0] == "--pair", "pair mode only"
+_, path_l, path_r, label = args
+def last_y(path):
+    ys = []
+    with open(path) as f:
+        for line in f:
+            parts = line.split()
+            if len(parts) >= 2:
+                try:
+                    ys.append(float(parts[1]))
+                except ValueError:
+                    pass
+    return ys[-1]
+scale = float(os.environ.get("LABEL_SCALE", "1.0"))
+v = (last_y(path_l) + last_y(path_r)) / 2 * scale
+print(f"RESULT: {label}_lobe_low_v = {v:.6f}")
+print(f"RESULT: {label}_lobe_high_v = {v:.6f}")
+print(f"RESULT: {label}_v = {v:.6f}")
+"""
+
+
+class McSnmPairPre213(unittest.TestCase):
+    """read-snm through the --pair extractor: tolerance-gated, per sample."""
+
+    def _fixture(self, tmp, *, committed_v=0.5, fleet_scale=1.0, drop_sweep_for=(),
+                 ctrl_committed=0.5):
+        family = "read-snm"
+        request, composed = mc_request_dict(family)
+        meta = request["x_gf180_sram_adapter"]
+        n = meta["n_mismatch"]
+        # committed sample-set values at committed_v; the stub extractor reads
+        # a sweep tail of 0.5 and multiplies by LABEL_SCALE
+        mm_committed = [committed_v] * n
+        reduced = mc_reduced_dict(family, request, mm_values={c: [0.4] * n for c in meta["corners"]},
+                                  ctrl_values={c: [0.4] * 2 for c in meta["corners"]})
+        ss = mc_sample_set_dict(family, request, mm_values={c: mm_committed for c in meta["corners"]},
+                                nc_samples={c: [committed_v] * (meta["n_negative_control"]) for c in meta["corners"]})
+        sweep_values = {}
+        for u in meta["units"]:
+            tail = 1.0  # (1.0 + 1.0)/2 = 1.0 -> x LABEL_SCALE
+            sweep_values[u["id"]] = f"0.0 3.3\n0.5 0.9\n0.8 {tail}\n"
+        outdir, _report = write_mc_fixture_tree(tmp, request, composed, sweep_values=sweep_values,
+                                                unit_overrides={uid: {"deck_sha256": None}
+                                                                for uid in ()})
+        for uid in drop_sweep_for:
+            datafile = "read_snm_sweep.txt"
+            p = outdir / uid / datafile
+            if p.is_file():
+                p.unlink()
+        pre213 = tmp / "pre213.py"
+        pre213.write_text(PAIR_EXTRACTOR)
+        (tmp / "request.json").write_text(json.dumps(request))
+        (tmp / "reduced.json").write_text(json.dumps(reduced))
+        (tmp / "samples.json").write_text(json.dumps(ss))
+        record = tmp / "record.md"
+        write_record(record, {c: {"read_snm_lobe_low_v": ctrl_committed,
+                                  "read_snm_lobe_high_v": ctrl_committed,
+                                  "read_snm_v": ctrl_committed}
+                              for c in meta["corners"]})
+        return request, record, pre213
+
+    def test_exact_match_passes(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, record, pre213 = self._fixture(tmp)  # tail 1.0 -> v 1.0
+            # committed all 1.0 so the stub extractor's 1.0 matches exactly
+            ss = json.loads((tmp / "samples.json").read_text())
+            for m in ss["measurements"]:
+                m["samples"] = [1.0] * len(m["samples"])
+                m["negative_control"]["samples"] = [1.0] * len(m["negative_control"]["samples"])
+            (tmp / "samples.json").write_text(json.dumps(ss))
+            record_path = tmp / "record2.md"
+            write_record(record_path, {c: {"read_snm_lobe_low_v": 1.0,
+                                           "read_snm_lobe_high_v": 1.0,
+                                           "read_snm_v": 1.0}
+                                       for c in request["x_gf180_sram_adapter"]["corners"]})
+            rc, out, summary = run_cmp_mc(tmp, "read-snm", tmp / "reduced.json",
+                                          request=tmp / "request.json", report=tmp / "report.json",
+                                          samples=tmp / "samples.json", record=record_path,
+                                          sweep_dir=tmp / "out", pre213=pre213)
+            self.assertEqual(rc, 0, out)
+            self.assertEqual(summary["overall"], "parity")
+            self.assertEqual(summary["corners"][0]["mismatch"]["deltas"]["max"], 0.0)
+
+    def test_tolerance_boundary_30uv_passes_31uv_fails(self):
+        for scale, expect_pass in (("1.00003", True), ("1.000031", False)):
+            with tempfile.TemporaryDirectory() as d:
+                tmp = Path(d)
+                request, record, pre213 = self._fixture(tmp)
+                ss = json.loads((tmp / "samples.json").read_text())
+                for m in ss["measurements"]:
+                    m["samples"] = [1.0] * len(m["samples"])
+                    m["negative_control"]["samples"] = [1.0] * len(m["negative_control"]["samples"])
+                (tmp / "samples.json").write_text(json.dumps(ss))
+                record_path = tmp / "record2.md"
+                write_record(record_path, {c: {"read_snm_lobe_low_v": 1.0,
+                                               "read_snm_lobe_high_v": 1.0,
+                                               "read_snm_v": 1.0}
+                                           for c in request["x_gf180_sram_adapter"]["corners"]})
+                env_extractor = tmp / "pre213_env.py"
+                env_extractor.write_text(
+                    PAIR_EXTRACTOR.replace('os.environ.get("LABEL_SCALE", "1.0")',
+                                           repr(scale))
+                )
+                rc, out, summary = run_cmp_mc(tmp, "read-snm", tmp / "reduced.json",
+                                              request=tmp / "request.json", report=tmp / "report.json",
+                                              samples=tmp / "samples.json", record=record_path,
+                                              sweep_dir=tmp / "out", pre213=env_extractor)
+                if expect_pass:
+                    self.assertEqual(rc, 0, out)
+                    self.assertEqual(summary["overall"], "parity")
+                else:
+                    self.assertNotEqual(rc, 0)
+                    self.assertEqual(summary["overall"], "OPEN")
+                    self.assertTrue(any("exceeds" in r for c in summary["corners"] for r in c["reasons"]))
+
+    def test_missing_sweep_pair_is_open(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, record, pre213 = self._fixture(tmp)
+            corners = request["x_gf180_sram_adapter"]["corners"]
+            ss = json.loads((tmp / "samples.json").read_text())
+            for m in ss["measurements"]:
+                m["samples"] = [1.0] * len(m["samples"])
+                m["negative_control"]["samples"] = [1.0] * len(m["negative_control"]["samples"])
+            (tmp / "samples.json").write_text(json.dumps(ss))
+            record_path = tmp / "record2.md"
+            write_record(record_path, {c: {"read_snm_lobe_low_v": 1.0,
+                                           "read_snm_lobe_high_v": 1.0,
+                                           "read_snm_v": 1.0}
+                                       for c in corners})
+            rc, out, summary = run_cmp_mc(tmp, "read-snm", tmp / "reduced.json",
+                                          request=tmp / "request.json", report=tmp / "report.json",
+                                          samples=tmp / "samples.json", record=record_path,
+                                          sweep_dir=tmp / "out", pre213=pre213)
+            self.assertEqual(rc, 0, out)
+            # now drop one mm sample's L sweep: that sample is OPEN, not parity
+            unit_id = f"mc.{corners[0]}.mm.00001.L"
+            (tmp / "out" / unit_id / "read_snm_sweep.txt").unlink()
+            rc, _out, summary = run_cmp_mc(tmp, "read-snm", tmp / "reduced.json",
+                                           request=tmp / "request.json", report=tmp / "report.json",
+                                           samples=tmp / "samples.json", record=record_path,
+                                           sweep_dir=tmp / "out", pre213=pre213)
+            self.assertNotEqual(rc, 0)
+            self.assertEqual(summary["overall"], "OPEN")
+            self.assertTrue(any("sweep pair not found" in r
+                                for c in summary["corners"] for r in c["reasons"]))
 
 
 def main() -> int:
