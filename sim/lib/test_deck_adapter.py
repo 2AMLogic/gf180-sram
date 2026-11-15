@@ -178,6 +178,59 @@ def test_bounded_reduce_scopes_coverage():
         r3 = da.reduce_report("write-margin", rep3, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
         check("deck sha drift => OPEN", r3["overall"] == "OPEN"
               and any("deck bytes differ" in e for e in r3["coverage_errors"]), str(r3["coverage_errors"]))
+        # a unit that reports no deck_sha256 (None, or key absent) is itself a
+        # coverage error: the deck-bytes check cannot run, so it must not look
+        # like it passed (#347)
+        rep4 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256=None)
+        r4 = da.reduce_report("write-margin", rep4, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("deck sha None => OPEN", r4["overall"] == "OPEN"
+              and any("deck_sha256 not reported for" in e for e in r4["coverage_errors"]), str(r4["coverage_errors"]))
+        check("deck sha None distinct from drift", not any("deck bytes differ" in e for e in r4["coverage_errors"]))
+        rep5 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256=_OMIT)
+        r5 = da.reduce_report("write-margin", rep5, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("deck sha absent => OPEN", r5["overall"] == "OPEN"
+              and any("deck_sha256 not reported for" in e for e in r5["coverage_errors"]), str(r5["coverage_errors"]))
+        r5u = da.reduce_report("write-margin", rep5)
+        check("unbounded ignores absent sha", r5u["overall"] == "OPEN"
+              and not any("deck_sha256" in e for e in r5u["coverage_errors"]), str(r5u["coverage_errors"]))
+        # every unit unreported: one error listing all of them, not one per unit
+        req2 = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30", "ss:125:3.63"])
+        exp2, exp_sha2 = da.expected_from_request("write-margin", req2)
+        rep6 = _stub_report("write-margin", rd, keep=tuple(exp2), deck_sha256=None)
+        r6 = da.reduce_report("write-margin", rep6, expected_ids=exp2, expected_deck_sha256=exp_sha2)
+        unrep = [e for e in r6["coverage_errors"] if "deck_sha256 not reported for" in e]
+        check("all unreported => one error listing all", len(unrep) == 1
+              and all(i in unrep[0] for i in exp2), str(r6["coverage_errors"]))
+        # drifted and unreported units in one report: both errors, distinguishable
+        rep7 = _stub_report("write-margin", rd, keep=tuple(exp2), deck_sha256="f" * 64)
+        rep7["units"][0]["deck_sha256"] = None
+        r7 = da.reduce_report("write-margin", rep7, expected_ids=exp2, expected_deck_sha256=exp_sha2)
+        check("mixed drift+unreported both reported", any("deck bytes differ" in e for e in r7["coverage_errors"])
+              and any("deck_sha256 not reported for" in e for e in r7["coverage_errors"]), str(r7["coverage_errors"]))
+        # a unit without an id must not crash the reducer: the sorted() sites
+        # at dupes and drifted see None mixed with str (#347)
+        rep8 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256="f" * 64)
+        ghost = dict(rep8["units"][0])
+        ghost.pop("id")
+        rep8["units"].append(ghost)
+        try:
+            r8 = da.reduce_report("write-margin", rep8, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+            check("no-id drifted unit returns, not raises", r8["overall"] == "OPEN"
+                  and any("unexpected unit ids" in e for e in r8["coverage_errors"]), str(r8["coverage_errors"]))
+        except TypeError as te:
+            check("no-id drifted unit returns, not raises", False, repr(te))
+        rep9 = _stub_report("write-margin", rd, keep=(cid,), dup=cid, deck_sha256=exp_sha)
+        proto = dict(rep9["units"][0])
+        for _ in range(2):
+            g = dict(proto)
+            g.pop("id")
+            rep9["units"].append(g)
+        try:
+            r9 = da.reduce_report("write-margin", rep9, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+            check("no-id mixed dupes sort guarded", r9["overall"] == "OPEN"
+                  and any("duplicate unit ids" in e for e in r9["coverage_errors"]), str(r9["coverage_errors"]))
+        except TypeError as te:
+            check("no-id mixed dupes sort guarded", False, repr(te))
         # guards
         for args, why in (((["bogus_corner"],), "unratified id"), (([],), "empty list")):
             try:
@@ -199,9 +252,16 @@ def test_bounded_reduce_scopes_coverage():
             pass
 
 
+_OMIT = object()
+
+
 def _stub_report(family, outdir, *, drop=(), keep=None, dup=None, timeouts=(), stdout=None,
                  sweep=True, exit_code=0, deck_sha256="0" * 64):
-    """Hand-built stub deck report + unit dirs. NOT a measurement."""
+    """Hand-built stub deck report + unit dirs. NOT a measurement.
+
+    `deck_sha256=_OMIT` omits the key from every unit entirely (the
+    key-absent shape of #347); any other value, including None, is written.
+    """
     kind, datafile, label = da.parse_mode(da.FAMILIES[family][2])
     units = []
     for cid in da.corner_ids():
@@ -221,13 +281,16 @@ def _stub_report(family, outdir, *, drop=(), keep=None, dup=None, timeouts=(), s
             else:
                 missing = [datafile]
         timed = cid in timeouts
-        units.append({
+        unit = {
             "id": cid, "status": "timeout" if timed else "pass",
             "exit_code": None if timed else exit_code, "timed_out": timed,
             "stdout": f"{cid}/stdout.bin", "stderr": f"{cid}/stderr.bin",
             "outputs": [] if missing else ([datafile] if datafile else []),
-            "missing_outputs": missing, "deck_sha256": deck_sha256,
-        })
+            "missing_outputs": missing,
+        }
+        if deck_sha256 is not _OMIT:
+            unit["deck_sha256"] = deck_sha256
+        units.append(unit)
     if dup:
         units.append(dict(units[0], id=dup))
     return {"mode": "decks", "status": "pass", "unit_count": len(units), "units": units, "outdir": str(outdir)}

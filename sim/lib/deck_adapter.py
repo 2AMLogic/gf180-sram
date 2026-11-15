@@ -26,7 +26,9 @@ does NOT run ngspice, submit anything, or mint a record:
   coverage, missing declared outputs and timeouts. Exit 0 from the engine is
   never read as a measurement PASS. Pass `--request` (the file `build` wrote)
   so a bounded run is graded against exactly the corners it asked for, and
-  the executed decks' `deck_sha256` is checked against the composed bytes.
+  the executed decks' `deck_sha256` is checked against the composed bytes --
+  a unit that reports no `deck_sha256` is itself a coverage error, so the
+  check cannot silently not-run.
 
 The only byte-level difference from the launcher's scratch deck is the
 `@@REPO_ROOT@@` token, which becomes `.` (the DUT netlist is staged at
@@ -344,7 +346,9 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
     to the corners the request actually asked for; the default is the full
     27-corner grid. `expected_deck_sha256`, when given, must equal every
     unit's reported `deck_sha256` -- the deck-bytes-unchanged claim, checked
-    rather than assumed.
+    rather than assumed. A unit whose `deck_sha256` is None or absent is
+    itself a coverage error ("deck_sha256 not reported for: [...]"): a check
+    that cannot run must never look like one that passed.
     """
     _exp, _tb, mode = FAMILIES[family]
     kind, datafile, label = parse_mode(mode)
@@ -366,7 +370,7 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
     else:
         units = report["units"]
     ids = [u.get("id") for u in units]
-    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    dupes = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     if dupes:
         coverage_errors.append(f"duplicate unit ids: {dupes}")
     missing = [c for c in expected if c not in ids]
@@ -377,11 +381,18 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
         coverage_errors.append(f"unexpected unit ids: {extra}")
     if expected_deck_sha256 is not None:
         drifted = sorted(
-            u.get("id") for u in units
-            if u.get("deck_sha256") is not None and u.get("deck_sha256") != expected_deck_sha256
+            (u.get("id") for u in units
+             if u.get("deck_sha256") is not None and u.get("deck_sha256") != expected_deck_sha256),
+            key=str,
         )
         if drifted:
             coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
+        unreported = sorted(
+            (u.get("id") for u in units if u.get("deck_sha256") is None),
+            key=str,
+        )
+        if unreported:
+            coverage_errors.append(f"deck_sha256 not reported for: {unreported}")
 
     by_id = {}
     for u in units:
