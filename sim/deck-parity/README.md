@@ -24,7 +24,10 @@ sim/deck-parity/
       request.json               # the deck-list request as submitted
       report.json                # klt sim's deck report (environment.remote)
       reduced.json               # deck_adapter.py reduce --request output
-                                 # (MC receipts: mc-reduce --json-out output)
+                                 # (MC receipts: mc-reduce --json-out output);
+                                 # each corner carries the raw RESULT: lines
+                                 # its reducer matched -- see the
+                                 # committed-bytes rule below
       parity-compare.md          # parity_compare.py's full comparison table
       parity-summary.json        # its machine-readable summary
       <corner-id>/               # one subdirectory per corner run
@@ -51,8 +54,16 @@ receipt extends it): per family, commit `request.json`, `report.json`,
 `reduced.json` and the per-corner `corner.inc`; commit the returned
 `*_sweep.txt` for the SNM families (they are what makes the pre-#213
 crosscheck auditable); commit a unit's `stdout.log` **only** when that unit
-graded anything other than `recorded`. The one-corner receipt (2026-11-14)
-predates this rule and committed each family's single
+graded anything other than `recorded`; and `reduced.json` must carry, per
+corner, the raw `RESULT:` lines its reducer matched (`corners[].result_lines`)
+so the graded numbers are re-derivable from committed bytes. That preserved
+grading input is cheap -- measured ~9.6 KB across the five families of the
+full-grid receipt (~3.9 KB of it for the three `RESULT:`-emitting ones, ~0.5%
+of the ~2 MB full stdout would add) -- while omitting it leaves the three
+`RESULT:`-emitting families' numbers unverifiable: their raw lines lived in
+the per-unit `stdout.bin` this rule discards for clean runs, and only the two
+SNM families stay re-derivable, via their committed sweeps. The one-corner
+receipt (2026-11-14) predates this rule and committed each family's single
 `stdout.log`/`corner.inc`/sweep flat at the family level; the full-grid
 receipt (2026-11-15, 135 units) introduced the per-corner subdirectories and
 the rule, because committing all 135 engine stdout streams would add ~2 MB of

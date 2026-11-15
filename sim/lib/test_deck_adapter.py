@@ -301,11 +301,20 @@ def test_reducer_direct():
         r = da.reduce_report("write-margin", _stub_report("write-margin", td))
         check("direct recorded", r["overall"] == "recorded", json.dumps(r["coverage_errors"]))
         check("direct shape", all(set(c["results"]) == {"write-margin_stub_s".replace("write-margin", "write-margin")} for c in r["corners"]))
+        line = "RESULT: write-margin_stub_s = 1.5e-09\n"  # group(0) keeps the trailing newline the regex's \s* consumed
+        check("result_lines byte-identical to matched text, in match order",
+              all(c["result_lines"] == [line] for c in r["corners"]), json.dumps(r["corners"][0]))
+        check("preserved lines re-parse to results", all(
+            {m.group(1): float(m.group(2))
+             for m in da.RESULT_RE.finditer("\n".join(c["result_lines"]) + "\n")} == c["results"]
+            for c in r["corners"]))
     with tempfile.TemporaryDirectory() as td:
         rep = _stub_report("write-margin", td, drop=("tt_25c_3.30v",))
         r = da.reduce_report("write-margin", rep)
         check("missing corner => OPEN", r["overall"] == "OPEN" and r["coverage_errors"], str(r["coverage_errors"]))
         check("missing corner reported", any(c["id"] == "tt_25c_3.30v" and c["status"] == "OPEN" for c in r["corners"]))
+        check("missing corner carries empty result_lines",
+              all(c.get("result_lines") == [] for c in r["corners"] if c["id"] == "tt_25c_3.30v"))
     with tempfile.TemporaryDirectory() as td:
         r = da.reduce_report("write-margin", _stub_report("write-margin", td, dup="ff_-40c_2.97v"))
         check("duplicate => OPEN", r["overall"] == "OPEN" and any("duplicate" in e for e in r["coverage_errors"]))
@@ -317,9 +326,14 @@ def test_reducer_direct():
         # exit 0 with no RESULT line is NOT a pass
         r = da.reduce_report("write-margin", _stub_report("write-margin", td, stdout="all done\n"))
         check("exit 0 without RESULT => OPEN", r["overall"] == "OPEN")
+        check("no RESULT match => empty result_lines, not missing key",
+              all(c["result_lines"] == [] for c in r["corners"]))
     with tempfile.TemporaryDirectory() as td:
         r = da.reduce_report("write-margin", _stub_report("write-margin", td, stdout="RESULT-ERROR: write_trip_voltage -- x\n"))
         check("RESULT-ERROR => OPEN", r["overall"] == "OPEN")
+        check("RESULT-ERROR preserved verbatim in reasons",
+              all("RESULT-ERROR: write_trip_voltage -- x" in c["reasons"] for c in r["corners"]))
+        check("RESULT-ERROR line is not a RESULT line", all(c["result_lines"] == [] for c in r["corners"]))
     check("non-deck report => OPEN", da.reduce_report("write-margin", {"mode": "corners"})["overall"] == "OPEN")
 
 
@@ -329,11 +343,19 @@ def test_reducer_snm():
         check("snm recorded", r["overall"] == "recorded", json.dumps(r["corners"][0]))
         keys = set(r["corners"][0]["results"]) if r["corners"] else set()
         check("snm result shape", keys == {"read_snm_lobe_low_v", "read_snm_lobe_high_v", "read_snm_v"}, str(keys))
+        check("snm result_lines preserved, one per metric in match order",
+              all(len(c["result_lines"]) == 3 and all(ln.startswith("RESULT: read_snm") for ln in c["result_lines"])
+                  for c in r["corners"]), json.dumps(r["corners"][0]["result_lines"]))
+        check("snm preserved lines re-parse to results", all(
+            {m.group(1): float(m.group(2))
+             for m in da.RESULT_RE.finditer("\n".join(c["result_lines"]) + "\n")} == c["results"]
+            for c in r["corners"]))
     with tempfile.TemporaryDirectory() as td:
         r = da.reduce_report("read-snm", _stub_report("read-snm", td, sweep=False))
         c = r["corners"][0]
         check("missing sweep file => OPEN", r["overall"] == "OPEN" and c["status"] == "OPEN"
               and any("missing" in x for x in c["reasons"]), str(c["reasons"]))
+        check("missing sweep file => empty result_lines", all(c["result_lines"] == [] for c in r["corners"]))
 
 
 # --------------------------------------------------------------------------
