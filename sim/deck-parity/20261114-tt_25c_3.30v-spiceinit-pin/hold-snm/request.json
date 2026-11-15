@@ -1,0 +1,31 @@
+{
+  "engine": "ngspice",
+  "decks": [
+    {
+      "id": "tt_25c_3.30v",
+      "deck": "units/tt_25c_3.30v/tb_hold_snm.spice",
+      "timeout_s": 300,
+      "inputs": [
+        {
+          "path": "units/tt_25c_3.30v/.spiceinit",
+          "name": ".spiceinit"
+        }
+      ],
+      "outputs": [
+        "hold_snm_sweep.txt"
+      ]
+    }
+  ],
+  "options": {
+    "timeout_s": 300
+  },
+  "x_gf180_sram_adapter": {
+    "family": "hold-snm",
+    "mode": "snm:hold_snm_sweep.txt:hold_snm",
+    "testbench": "sim/hold-snm/testbench/tb_hold_snm.spice",
+    "testbench_sha256": "44cbfec1f71e84bcc0c8a5845ddb6de7f4962d8f83e7d650e1238b58c2c9170f",
+    "composed_deck_sha256": "44cbfec1f71e84bcc0c8a5845ddb6de7f4962d8f83e7d650e1238b58c2c9170f",
+    "corner_count": 27,
+    "spiceinit_sha256": "e1a1d1767609427159244035b5a761f1bf43df653e7cfd0cd40a6f762829dffc"
+  }
+}

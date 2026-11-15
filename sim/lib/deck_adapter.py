@@ -7,6 +7,7 @@
                            [--outdir DIR] [--json-out FILE]
     deck_adapter.py mc-build  <family> --corner P:T:V ... --seed N --stage-dir DIR --request-out FILE
     deck_adapter.py mc-reduce <family> <request.json> <klt-sim-report.json> [--outdir DIR]
+    deck_adapter.py spiceinit   # print the pinned run-directory .spiceinit (#338)
     deck_adapter.py families
 
 This is the *offline preparation* half of retiring `run_corner_sweep.sh`. It
@@ -87,6 +88,48 @@ PDK_VARIANT = "gf180mcuD"
 MODEL_REL = f"{PDK_VARIANT}/libs.tech/ngspice/sm141064.ngspice"
 DESIGN_INC_REL = f"{PDK_VARIANT}/libs.tech/ngspice/design.ngspice"
 DECK_TIMEOUT_S = 300
+
+# The pinned ngspice environment, staged as a run-directory `.spiceinit`
+# (issue #338). ngspice reads `.spiceinit` from its current working
+# directory, and every execution path in this repo runs the engine with cwd
+# set to a per-unit scratch directory, so staging this file there makes the
+# environment a property of the repo rather than of whichever host runs the
+# deck. A run-directory `.spiceinit` *replaces* `$HOME/.spiceinit` (verified
+# 2026-11-14, #338) rather than merging with it, so the file carries every
+# line a run needs -- not just the compatibility mode.
+#
+# Do NOT replace this with `options.ngspice_init`: on the deck-list path
+# (`klayout_tools.sim_decks`) that option is silently dropped (the worker
+# request's option allowlist is timeout_s/max_workers/ngspice_binary), so a
+# request setting it would record a pinned mode that was never in force.
+# Upstream gap: 2AMLogic/klayout-tools#5738. The single source of truth for
+# these lines is SPICEINIT_TEXT below; `run_corner_sweep.sh` writes the same
+# bytes via this module's `spiceinit` verb and `run_mc_campaign.py` imports
+# the constant, and sim/lib/test_deck_adapter.py asserts the three paths stay
+# byte-identical.
+SPICEINIT_NAME = ".spiceinit"
+SPICEINIT_TEXT = (
+    "* Pinned ngspice environment -- staged into every run directory by\n"
+    "* sim/lib (issue #338). A run-directory .spiceinit replaces $HOME/.spiceinit,\n"
+    "* so every setting a run needs is in this file. Single source of truth:\n"
+    "* SPICEINIT_TEXT in sim/lib/deck_adapter.py; do not edit copies.\n"
+    "*\n"
+    "* ngbehavior=hsa: the mode the committed sim/ corpus ran under (its corner\n"
+    "* logs carry 'Compatibility modes selected: hs a'), so the committed records\n"
+    "* stay reproducible, and the mode the gf180mcu ngspice model decks are\n"
+    "* written against (a distro-packaged ngspice supplies it via its own spinit;\n"
+    "* a locally built one does not).\n"
+    "set ngbehavior=hsa\n"
+    "* One ngspice thread per unit: batch-fleet workers run units in parallel\n"
+    "* and rely on per-worker thread pinning; a run-directory .spiceinit would\n"
+    "* otherwise drop the host's num_threads and oversubscribe a shared worker.\n"
+    "set num_threads=1\n"
+    "* Per-finger model binning (W/NF). NOT implied by ngbehavior=hsa (verified\n"
+    "* 2026-11-14, #338). Inert today -- every device in this repo is nf=1, so\n"
+    "* W/nf == W and bin selection cannot change -- but pinned so drawing a\n"
+    "* multi-finger device cannot silently change model-bin selection.\n"
+    "set wnflag=1\n"
+)
 
 # The five characterization families run_corner_sweep.sh is invoked with
 # (sim/README.md "Cold-start invocation"). `mode` is the launcher's mode.
@@ -211,6 +254,10 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
         (unit / "corner.inc").write_text(
             compose_corner_inc(process, temp, vdd, design_inc, model_file)
         )
+        # The pinned run-directory .spiceinit (#338): transported as a staged
+        # deck input (decks[].inputs[] IS carried into the worker request,
+        # unlike options.ngspice_init, which the deck path silently drops).
+        (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
         if REPO_ROOT_TOKEN in tb_bytes.decode("utf-8"):
             dest = unit / DUT_NETLIST
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -219,8 +266,13 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
             "id": cid,
             "deck": f"units/{cid}/{tb_name}",
             "timeout_s": DECK_TIMEOUT_S,
+            "inputs": [{"path": f"units/{cid}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
         }
         if datafile:
+            if datafile == SPICEINIT_NAME:
+                raise ValueError(
+                    f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
+                )
             entry["outputs"] = [datafile]
         units.append(entry)
 
@@ -235,6 +287,9 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
         "composed_deck_sha256": _sha256(deck_bytes),
         "corners": [corner_id(*c) for c in selected],
         "corner_count": len(units),
+        # The pinned .spiceinit every unit carries (#338); recorded so the
+        # environment the request ran under is auditable from the request.
+        "spiceinit_sha256": _sha256(SPICEINIT_TEXT.encode("utf-8")),
         "full_grid": len(selected) == len(corners()),
     }
     return request
@@ -510,12 +565,25 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
         unit.mkdir(parents=True, exist_ok=True)
         (unit / tb_name).write_bytes(deck_bytes)
         (unit / "corner.inc").write_text(inc, encoding="utf-8")
+        # The pinned run-directory .spiceinit (#338) -- one copy per MC unit:
+        # one unit per (corner, kind, sample[, side]), so the same bytes are
+        # staged once per unit and named once in that unit's inputs[].
+        (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
         if needs_dut:
             dest = unit / DUT_NETLIST
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(dut_path, dest)
-        entry = {"id": m["id"], "deck": f"units/{m['id']}/{tb_name}", "timeout_s": DECK_TIMEOUT_S}
+        entry = {
+            "id": m["id"],
+            "deck": f"units/{m['id']}/{tb_name}",
+            "timeout_s": DECK_TIMEOUT_S,
+            "inputs": [{"path": f"units/{m['id']}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
+        }
         if datafile:
+            if datafile == SPICEINIT_NAME:
+                raise ValueError(
+                    f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
+                )
             entry["outputs"] = [datafile]
         decks.append(entry)
 
@@ -534,6 +602,8 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
         "corners": [mc.corner_id(*_parse_corner(c)) for c in corner_specs],
         "n_mismatch": n, "n_determinism_control": n_control, "n_negative_control": n_nc,
         "nc_mismatch_scale": nc_mismatch_scale, "nc_vdd": nc_vdd,
+        # The pinned .spiceinit every unit carries (#338); see build_request.
+        "spiceinit_sha256": _sha256(SPICEINIT_TEXT.encode("utf-8")),
         "units": manifest,
     }
     return request
@@ -727,6 +797,13 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("families")
+    sub.add_parser(
+        "spiceinit",
+        help="print SPICEINIT_TEXT -- the pinned run-directory .spiceinit "
+        "(#338); run_corner_sweep.sh writes it into each corner's scratch "
+        "directory so the launcher path pins the same environment deck mode "
+        "stages",
+    )
     b = sub.add_parser("build")
     b.add_argument("family", choices=sorted(FAMILIES))
     b.add_argument("--stage-dir", required=True)
@@ -792,6 +869,12 @@ def main(argv=None):
     if args.cmd == "families":
         for name, (d, tb, mode) in sorted(FAMILIES.items()):
             print(f"{name}\t{d}/testbench/{tb}\t{mode}")
+        return 0
+    if args.cmd == "spiceinit":
+        # Byte-exact stdout (no print()'s trailing-newline doubling): the
+        # bash launcher redirects this straight into the scratch .spiceinit,
+        # and the test suite asserts those bytes equal SPICEINIT_TEXT.
+        sys.stdout.write(SPICEINIT_TEXT)
         return 0
     if args.cmd == "build":
         req = build_request(args.family, args.stage_dir, pdk_dir=args.pdk_dir,

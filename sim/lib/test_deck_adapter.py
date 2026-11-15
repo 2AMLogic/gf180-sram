@@ -11,10 +11,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -103,6 +106,12 @@ def test_klt_accepts_requests():
             req = da.build_request(family, td)
             units = sim_decks.plan_deck_units(req, request_dir=td)
             check(f"{family} planner", len(units) == 27)
+            # the staged .spiceinit must survive the planner as a per-unit
+            # staged input (#338), not be dropped with the options allowlist
+            for u in units:
+                names = [i["name"] for i in u["inputs"]]
+                check(f"{family} planner {u['id']} stages spiceinit",
+                      da.SPICEINIT_NAME in names, str(names))
 
 
 def test_bounded_corner_selection():
@@ -494,12 +503,140 @@ def test_mc_reduce_fails_closed():
         check("mc seed drift => OPEN", r["overall"] == "OPEN" and any("seed drift" in e for e in r["coverage_errors"]))
 
 
+# --------------------------------------------------------------------------
+# Pinned run-directory .spiceinit (#338)
+# --------------------------------------------------------------------------
+
+SPICEINIT_BYTES = da.SPICEINIT_TEXT.encode("utf-8")
+
+
+def test_spiceinit_staged_in_requests():
+    """Both builders stage the pinned .spiceinit into every unit dir and
+    declare it as that unit's deck input, record its sha256, never set
+    options.ngspice_init (silently dropped on the deck path -- that would
+    record a mode never in force), and never let an output collide with it."""
+    cases = [("build", da.build_request, list(da.FAMILIES)),
+             ("mc-build", None, list(da.MC_FAMILIES))]
+    for label, build, families in cases:
+        for family in families:
+            with tempfile.TemporaryDirectory() as td:
+                if build is None:
+                    req = _mc_build(family, td)
+                else:
+                    req = build(family, td)
+                meta = req["x_gf180_sram_adapter"]
+                check(f"{label} {family} spiceinit sha recorded",
+                      meta.get("spiceinit_sha256") == hashlib.sha256(SPICEINIT_BYTES).hexdigest())
+                check(f"{label} {family} no ngspice_init option",
+                      "ngspice_init" not in (req.get("options") or {}),
+                      json.dumps(req.get("options")))
+                for d in req["decks"]:
+                    uid = d["id"]
+                    staged = Path(td) / "units" / uid / da.SPICEINIT_NAME
+                    check(f"{label} {family} {uid} staged bytes",
+                          staged.read_bytes() == SPICEINIT_BYTES)
+                    check(f"{label} {family} {uid} inputs entry",
+                          d.get("inputs") == [{"path": f"units/{uid}/{da.SPICEINIT_NAME}",
+                                               "name": da.SPICEINIT_NAME}],
+                          json.dumps(d.get("inputs")))
+                    check(f"{label} {family} {uid} output no collision",
+                          da.SPICEINIT_NAME not in d.get("outputs", []))
+
+
+def test_spiceinit_cli_matches_constant():
+    """run_corner_sweep.sh consumes `deck_adapter.py spiceinit` stdout; its
+    bytes must equal SPICEINIT_TEXT exactly (sys.stdout.write, not print)."""
+    out = subprocess.run(
+        [sys.executable, str(REPO / "sim/lib/deck_adapter.py"), "spiceinit"],
+        check=True, capture_output=True,
+    )
+    check("spiceinit CLI bytes", out.stdout == SPICEINIT_BYTES,
+          out.stdout[:80].decode("utf-8", errors="replace"))
+
+
+def test_spiceinit_three_paths_byte_identical():
+    """The pinned .spiceinit must reach the engine's cwd on all three
+    execution paths, byte-identical. Deck mode is asserted on the staged
+    bytes in test_spiceinit_staged_in_requests; here the bash launcher is
+    EXECUTED (fake ngspice shim + fake pinned PDK tree, 27 corners) and the
+    MC pool's two scratch-dir flows are exercised with subprocess mocked and
+    the cwd captured at call time. Captures must equal SPICEINIT_TEXT --
+    including absence being loud (a MISSING marker, never a silent skip)."""
+    captured = []  # bytes of each run-directory .spiceinit, in call order
+
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        # fake pinned PDK tree: pdk_env.sh checks the two ngspice files exist
+        # and that a SOURCES file carries the pinned open_pdks sha
+        pin = (REPO / "sim/lib/pdk_pin.txt").read_text().strip()
+        variant = root / "pdk" / "gf180mcuD"
+        ng = variant / "libs.tech" / "ngspice"
+        ng.mkdir(parents=True)
+        (ng / "sm141064.ngspice").write_text("* fake model file (spiceinit staging test only)\n")
+        (ng / "design.ngspice").write_text("* fake design defaults (spiceinit staging test only)\n")
+        (variant / "SOURCES").write_text(f"gf180mcu_fd_pr {pin}\n")
+        (root / "bin").mkdir()
+        shim = root / "bin" / "ngspice"
+        shim.write_text(
+            "#!/usr/bin/env bash\n"
+            "# test shim: never simulates; captures the run dir's .spiceinit\n"
+            'd="$SPICEINIT_CAPTURE/$(printf \'%03d\' "$(ls "$SPICEINIT_CAPTURE" | wc -l)")"\n'
+            'mkdir -p "$d"\n'
+            'if [[ -f .spiceinit ]]; then cp .spiceinit "$d/.spiceinit"; else : > "$d/MISSING"; fi\n'
+            'echo "RESULT: fake_s = 1e-9"\n'
+        )
+        shim.chmod(0o755)
+        exp_dir = root / "exp"
+        exp_dir.mkdir()
+        capture = root / "capture"
+        capture.mkdir()
+        env = dict(os.environ)
+        env["PATH"] = f"{root / 'bin'}:{env['PATH']}"
+        env["GF180_PDK_PATH"] = str(variant)
+        env["SPICEINIT_CAPTURE"] = str(capture)
+        subprocess.run(
+            ["bash", str(REPO / "sim/lib/run_corner_sweep.sh"),
+             str(exp_dir), str(REPO / "sim/write-margin/testbench/tb_write_margin.spice"),
+             "direct", "spiceinit staging test (fake ngspice; not a measurement)"],
+            env=env, check=True, capture_output=True, timeout=300,
+        )
+        shots = sorted(capture.iterdir())
+        check("launcher corner count", len(shots) == 27, str(len(shots)))
+        for s in shots:
+            f = s / da.SPICEINIT_NAME
+            check(f"launcher {s.name} captured, not MISSING",
+                  not (s / "MISSING").exists() and f.is_file(), str(s))
+            if f.is_file():
+                captured.append(f.read_bytes())
+
+    def fake_run(argv, **kw):
+        f = Path(kw["cwd"]) / da.SPICEINIT_NAME
+        captured.append(f.read_bytes() if f.is_file() else b"MISSING")
+        return mock.Mock(returncode=0, stdout="RESULT: fake_s = 1e-9\n", stderr="")
+
+    with mock.patch.object(mc.subprocess, "run", side_effect=fake_run):
+        mc.run_one("* fake tb\n.end\n", "* fake corner inc\n", "direct", "tb_fake.spice")
+        mc.run_one_snm_pair(
+            "* fake tb\n.end\n", "tb_fake.spice",
+            pdk={"GF180_MODEL_FILE": "/pdk/model.ngspice"},
+            process="tt", temp=25, vdd="3.30", seed_l=1, seed_r=2,
+            datafile="fake_sweep.txt", label="fake", sw_stat_mismatch=0.0,
+        )
+
+    check("three-path capture count", len(captured) == 27 + 3, str(len(captured)))
+    for i, b in enumerate(captured):
+        check(f"capture {i} byte-identical", b == SPICEINIT_BYTES,
+              b[:60].decode("utf-8", errors="replace"))
+
+
 def main():
     for t in (test_corner_matrix, test_corner_inc_matches_launcher, test_launcher_loop_axes_match,
               test_build_all_families, test_klt_accepts_requests, test_reducer_direct, test_reducer_snm,
               test_bounded_corner_selection, test_bounded_reduce_scopes_coverage,
               test_mc_seed_pins, test_mc_build_identity, test_mc_n1_and_guard,
-              test_mc_reduce_shapes, test_mc_reduce_fails_closed):
+              test_mc_reduce_shapes, test_mc_reduce_fails_closed,
+              test_spiceinit_staged_in_requests, test_spiceinit_cli_matches_constant,
+              test_spiceinit_three_paths_byte_identical):
         t()
     if FAILURES:
         for f in FAILURES[:10]:

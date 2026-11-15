@@ -3,14 +3,14 @@
   "kind": "generic",
   "t1_item": 9,
   "status": "pass",
-  "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, the macro smoke and control-pulse benches, and the wordline-RC benches. The pins prove these files are the ones attested; running the testbenches needs ngspice and the pinned PDK, which CI does not install, so no run is re-verified by CI.",
+  "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, the macro smoke and control-pulse benches, and the wordline-RC benches. The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:8646ece4f4060a8018f19223fcdf897df23ce021f7be50e0ca2bcab14b03b7a4",
+      "content_hash": "sha256:465a9c52b1f012616c020de2805db713eb535714744ce34805dae5ddeca84a11",
       "paths": [
         {
           "path": "sim/README.md",
-          "content_hash": "sha256:c596a3220c18c384a5e6d4bc2197b36fb43deea1790dc141f1ff53875b34b631"
+          "content_hash": "sha256:e2db7d6f917fae9b7b7ef7bc505d9b8c81ee4b417de0ded79fd5126eac9fb61f"
         },
         {
           "path": "sim/lib/pdk_pin.txt",
@@ -18,7 +18,7 @@
         },
         {
           "path": "sim/lib/run_corner_sweep.sh",
-          "content_hash": "sha256:34c70cee43908d5ce6a9acc92ea810c42e8c7c519642eb31b621ce8d42603105"
+          "content_hash": "sha256:db9855eb941827a94afb50f5cfe2f8620097950f48b72030a91a16843e717f0a"
         },
         {
           "path": "sim/read-snm/testbench/tb_read_snm.spice",

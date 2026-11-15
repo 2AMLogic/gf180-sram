@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "request_count": 5,
+  "max_in_flight": 5,
+  "submitted": 5,
+  "refused": 0,
+  "refused_codes": [],
+  "requests": [
+    {
+      "index": 0,
+      "request": "/tmp/spiceinit-pin-338/stage/read-snm/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-81d1d3dc05ff",
+      "job_ids": [
+        "klt-sim-81d1d3dc05ff"
+      ],
+      "report": "/tmp/spiceinit-pin-338/out/request/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 1,
+      "request": "/tmp/spiceinit-pin-338/stage/hold-snm/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-de9f79cb5c9d",
+      "job_ids": [
+        "klt-sim-de9f79cb5c9d"
+      ],
+      "report": "/tmp/spiceinit-pin-338/out/request-1/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 2,
+      "request": "/tmp/spiceinit-pin-338/stage/write-margin/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-0be024644841",
+      "job_ids": [
+        "klt-sim-0be024644841"
+      ],
+      "report": "/tmp/spiceinit-pin-338/out/request-2/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 3,
+      "request": "/tmp/spiceinit-pin-338/stage/read-access/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-d235dbdd7849",
+      "job_ids": [
+        "klt-sim-d235dbdd7849"
+      ],
+      "report": "/tmp/spiceinit-pin-338/out/request-3/report.json",
+      "error": null,
+      "shards": []
+    },
+    {
+      "index": 4,
+      "request": "/tmp/spiceinit-pin-338/stage/write-access/request.json",
+      "status": "pass",
+      "exit_code": 0,
+      "job_id": "klt-sim-ea3fa0000095",
+      "job_ids": [
+        "klt-sim-ea3fa0000095"
+      ],
+      "report": "/tmp/spiceinit-pin-338/out/request-4/report.json",
+      "error": null,
+      "shards": []
+    }
+  ]
+}
