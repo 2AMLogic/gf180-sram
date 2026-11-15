@@ -1,0 +1,696 @@
+{
+ "family": "read-snm",
+ "mode": "snm:read_snm_sweep.txt:read_snm",
+ "recorded_metric": "read_snm_v",
+ "comparison": "pre213-tolerance",
+ "tolerance_v": 3e-05,
+ "record": "sim/read-snm/records/20260817-011523-4448966.md",
+ "coverage": {
+  "corners": 27,
+  "missing_in_record": [],
+  "missing_in_fleet": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "corners": [
+  {
+   "id": "ff_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.781993,
+     "fleet": 0.781993,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.346745,
+     "fleet": 0.346745,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.346745,
+     "fleet": 0.346745,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.78755,
+     "fleet": 0.78755,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.348079,
+     "fleet": 0.348079,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.348079,
+     "fleet": 0.348079,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.784559,
+     "fleet": 0.784559,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.378868,
+     "fleet": 0.378868,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.378868,
+     "fleet": 0.378868,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.660028,
+     "fleet": 0.660028,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.279259,
+     "fleet": 0.279259,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.279259,
+     "fleet": 0.279259,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.652703,
+     "fleet": 0.652703,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.29104,
+     "fleet": 0.29104,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.29104,
+     "fleet": 0.29104,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.640587,
+     "fleet": 0.640587,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.322552,
+     "fleet": 0.322552,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.322552,
+     "fleet": 0.322552,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.472848,
+     "fleet": 0.472848,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.214599,
+     "fleet": 0.214599,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.214599,
+     "fleet": 0.214599,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.455824,
+     "fleet": 0.455824,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.237829,
+     "fleet": 0.237829,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.237829,
+     "fleet": 0.237829,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.440354,
+     "fleet": 0.440354,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.265005,
+     "fleet": 0.265005,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.265005,
+     "fleet": 0.265005,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.934968,
+     "fleet": 0.934967,
+     "delta": -1.0000000000287557e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.443117,
+     "fleet": 0.443117,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.443117,
+     "fleet": 0.443117,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.965074,
+     "fleet": 0.965072,
+     "delta": -1.999999999946489e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.450044,
+     "fleet": 0.450044,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.450044,
+     "fleet": 0.450044,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.984568,
+     "fleet": 0.984568,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.45802,
+     "fleet": 0.45802,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.45802,
+     "fleet": 0.45802,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.842689,
+     "fleet": 0.842689,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.377941,
+     "fleet": 0.377941,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.377941,
+     "fleet": 0.377941,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.857685,
+     "fleet": 0.857683,
+     "delta": -2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.381267,
+     "fleet": 0.381267,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.381267,
+     "fleet": 0.381267,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.865131,
+     "fleet": 0.865131,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.385058,
+     "fleet": 0.385058,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.385058,
+     "fleet": 0.385058,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.692016,
+     "fleet": 0.692016,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.295443,
+     "fleet": 0.295443,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.295443,
+     "fleet": 0.295443,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.692196,
+     "fleet": 0.692196,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.296711,
+     "fleet": 0.296711,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.296711,
+     "fleet": 0.296711,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.690133,
+     "fleet": 0.690133,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.318427,
+     "fleet": 0.318427,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.318427,
+     "fleet": 0.318427,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 1.052778,
+     "fleet": 1.052778,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.540536,
+     "fleet": 0.540537,
+     "delta": 1.0000000000287557e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "read_snm_v": {
+     "record": 0.540536,
+     "fleet": 0.540537,
+     "delta": 1.0000000000287557e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 1.103049,
+     "fleet": 1.103049,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.55084,
+     "fleet": 0.55084,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.55084,
+     "fleet": 0.55084,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 1.144814,
+     "fleet": 1.144814,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.56375,
+     "fleet": 0.56375,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.56375,
+     "fleet": 0.56375,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.984053,
+     "fleet": 0.984053,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.475538,
+     "fleet": 0.475538,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.475538,
+     "fleet": 0.475538,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 1.021938,
+     "fleet": 1.021938,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.483481,
+     "fleet": 0.483481,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.483481,
+     "fleet": 0.483481,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 1.051086,
+     "fleet": 1.051086,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.493503,
+     "fleet": 0.493503,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.493503,
+     "fleet": 0.493503,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.870873,
+     "fleet": 0.870873,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.394239,
+     "fleet": 0.394239,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.394239,
+     "fleet": 0.394239,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.891352,
+     "fleet": 0.891352,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.40076,
+     "fleet": 0.40076,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.40076,
+     "fleet": 0.40076,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "read_snm_lobe_low_v": {
+     "record": 0.906729,
+     "fleet": 0.906729,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_lobe_high_v": {
+     "record": 0.40862,
+     "fleet": 0.40862,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "read_snm_v": {
+     "record": 0.40862,
+     "fleet": 0.40862,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "parity"
+}

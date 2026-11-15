@@ -1,0 +1,181 @@
+{
+  "engine": "ngspice",
+  "decks": [
+    {
+      "id": "ff_-40c_2.97v",
+      "deck": "units/ff_-40c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_-40c_3.30v",
+      "deck": "units/ff_-40c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_-40c_3.63v",
+      "deck": "units/ff_-40c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_25c_2.97v",
+      "deck": "units/ff_25c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_25c_3.30v",
+      "deck": "units/ff_25c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_25c_3.63v",
+      "deck": "units/ff_25c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_125c_2.97v",
+      "deck": "units/ff_125c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_125c_3.30v",
+      "deck": "units/ff_125c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ff_125c_3.63v",
+      "deck": "units/ff_125c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_-40c_2.97v",
+      "deck": "units/tt_-40c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_-40c_3.30v",
+      "deck": "units/tt_-40c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_-40c_3.63v",
+      "deck": "units/tt_-40c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_25c_2.97v",
+      "deck": "units/tt_25c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_25c_3.30v",
+      "deck": "units/tt_25c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_25c_3.63v",
+      "deck": "units/tt_25c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_125c_2.97v",
+      "deck": "units/tt_125c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_125c_3.30v",
+      "deck": "units/tt_125c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "tt_125c_3.63v",
+      "deck": "units/tt_125c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_-40c_2.97v",
+      "deck": "units/ss_-40c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_-40c_3.30v",
+      "deck": "units/ss_-40c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_-40c_3.63v",
+      "deck": "units/ss_-40c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_25c_2.97v",
+      "deck": "units/ss_25c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_25c_3.30v",
+      "deck": "units/ss_25c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_25c_3.63v",
+      "deck": "units/ss_25c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_125c_2.97v",
+      "deck": "units/ss_125c_2.97v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_125c_3.30v",
+      "deck": "units/ss_125c_3.30v/tb_write_margin.spice",
+      "timeout_s": 300
+    },
+    {
+      "id": "ss_125c_3.63v",
+      "deck": "units/ss_125c_3.63v/tb_write_margin.spice",
+      "timeout_s": 300
+    }
+  ],
+  "options": {
+    "timeout_s": 300
+  },
+  "x_gf180_sram_adapter": {
+    "family": "write-margin",
+    "mode": "direct",
+    "testbench": "sim/write-margin/testbench/tb_write_margin.spice",
+    "testbench_sha256": "318b50cc771f8608c571174736142d7a09b33fee2b7ba50f85c12825f8714a77",
+    "composed_deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3",
+    "corners": [
+      "ff_-40c_2.97v",
+      "ff_-40c_3.30v",
+      "ff_-40c_3.63v",
+      "ff_25c_2.97v",
+      "ff_25c_3.30v",
+      "ff_25c_3.63v",
+      "ff_125c_2.97v",
+      "ff_125c_3.30v",
+      "ff_125c_3.63v",
+      "tt_-40c_2.97v",
+      "tt_-40c_3.30v",
+      "tt_-40c_3.63v",
+      "tt_25c_2.97v",
+      "tt_25c_3.30v",
+      "tt_25c_3.63v",
+      "tt_125c_2.97v",
+      "tt_125c_3.30v",
+      "tt_125c_3.63v",
+      "ss_-40c_2.97v",
+      "ss_-40c_3.30v",
+      "ss_-40c_3.63v",
+      "ss_25c_2.97v",
+      "ss_25c_3.30v",
+      "ss_25c_3.63v",
+      "ss_125c_2.97v",
+      "ss_125c_3.30v",
+      "ss_125c_3.63v"
+    ],
+    "corner_count": 27,
+    "full_grid": true
+  }
+}
