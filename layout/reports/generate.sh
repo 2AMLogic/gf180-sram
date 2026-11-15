@@ -88,8 +88,9 @@ if [ "${1:-}" = "--macro" ]; then run_macro; exit 0; fi
 # --- 0a. the 64 x 128 array (issue #327) -------------------------------------
 # The 4:1 tiling the macro floorplan is built on (spec/periphery-architecture.md,
 # layout/README.md "The array"), emitted by the same generator as the 256 x 32
-# array. `./layout/reports/generate.sh --array64` runs only this block (~15 min,
-# extract-dominated on 8,192 bitcells).
+# array. `./layout/reports/generate.sh --array64` runs only this block (~1 h,
+# extract-dominated on 8,192 bitcells: the committed extract report's
+# timing.total_seconds is 3,629 s for that stage alone on the generating host).
 #
 # Minted under the pinned released klt with the engine pinned on both sides
 # (`--with klayout==0.30.12`), the same two-sided pin layout/README.md

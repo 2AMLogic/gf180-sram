@@ -18,9 +18,10 @@ out and overwrites the files below in place. `./layout/reports/generate.sh
 `--native` also runs them against the PDK's native DRC deck (~3 min more);
 `./layout/reports/generate.sh --macro` regenerates only
 [`drc-macro.json`](drc-macro.json) (~1 min); `./layout/reports/generate.sh
---array64` regenerates only the 64 x 128 array trio (~15 min, dominated by
-`klt extract` on 8,192 bitcells under the pinned engine; see the trio's row
-below for the pin); the full run's `klt erc` step alone is ~26 min.
+--array64` regenerates only the 64 x 128 array trio (~1 h, dominated by
+`klt extract` on 8,192 bitcells under the pinned engine -- `timing.total_seconds`
+in the committed extract report is 3,629 s for that stage alone; see the trio's
+row below for the pin); the full run's `klt erc` step alone is ~26 min.
 
 ## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205; `drc-macro.json` added 2026-11-14, issue #326; 64 x 128 trio added 2026-11-15, issue #327)
 
