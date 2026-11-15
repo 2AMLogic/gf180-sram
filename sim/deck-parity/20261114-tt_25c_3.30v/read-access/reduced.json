@@ -1,0 +1,22 @@
+{
+  "family": "read-access",
+  "mode": "direct",
+  "expected": [
+    "tt_25c_3.30v"
+  ],
+  "expected_deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "read_access_time_s": 1.70142e-10
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "5735fee24f0a84222b5ebab069e90c41b5ab97303b467da651bc5844a3f63ea4"
+    }
+  ],
+  "overall": "recorded"
+}

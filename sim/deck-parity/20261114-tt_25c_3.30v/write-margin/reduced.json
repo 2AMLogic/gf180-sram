@@ -1,0 +1,23 @@
+{
+  "family": "write-margin",
+  "mode": "direct",
+  "expected": [
+    "tt_25c_3.30v"
+  ],
+  "expected_deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3",
+  "coverage_errors": [],
+  "corners": [
+    {
+      "id": "tt_25c_3.30v",
+      "status": "recorded",
+      "reasons": [],
+      "results": {
+        "write_trip_voltage_v": 1.91003,
+        "write_vdd_v": 3.3
+      },
+      "engine_exit_code": 0,
+      "deck_sha256": "f0562e40bad7c3603eb6e9a094e0d3a195d629a2b4ea1d3c5e3f81b4b75220e3"
+    }
+  ],
+  "overall": "recorded"
+}
