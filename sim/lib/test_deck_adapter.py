@@ -184,6 +184,32 @@ def test_bounded_reduce_scopes_coverage():
         r5u = da.reduce_report("write-margin", rep5)
         check("unbounded ignores absent sha", r5u["overall"] == "OPEN"
               and not any("deck_sha256" in e for e in r5u["coverage_errors"]), str(r5u["coverage_errors"]))
+        # the request side must fail closed too (#362): without
+        # composed_deck_sha256 the reducer's whole deck check silently skips,
+        # so expected_from_request refuses a request that cannot support it
+        for mutate, why in (
+            ("drop", "missing key"),
+            (lambda m: m.update(composed_deck_sha256=""), "empty-string key"),
+            (lambda m: m.update(composed_deck_sha256=None), "null key"),
+        ):
+            bad = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30"])
+            meta = bad["x_gf180_sram_adapter"]
+            if mutate == "drop":
+                del meta["composed_deck_sha256"]
+            else:
+                mutate(meta)
+            try:
+                da.expected_from_request("write-margin", bad)
+                check(f"request refuses {why}", False, "returned a sha instead")
+            except ValueError:
+                pass
+        # an absent x_gf180_sram_adapter block entirely still trips the family
+        # check first: callers must see the same error as before #362
+        try:
+            da.expected_from_request("write-margin", {"engine": "ngspice", "decks": []})
+            check("request absent block family-first", False, "returned instead of raising")
+        except ValueError as ve:
+            check("request absent block family-first", "not 'write-margin'" in str(ve), str(ve))
         # every unit unreported: one error listing all of them, not one per unit
         req2 = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30", "ss:125:3.63"])
         exp2, exp_sha2 = da.expected_from_request("write-margin", req2)

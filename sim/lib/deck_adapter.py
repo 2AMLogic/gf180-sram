@@ -276,8 +276,11 @@ def expected_from_request(family, request):
         raise ValueError("request is a Monte Carlo deck request -- use mc-reduce")
     if meta.get("family") != family:
         raise ValueError(f"request is for family {meta.get('family')!r}, not {family!r}")
+    sha = meta.get("composed_deck_sha256")
+    if not sha:
+        raise ValueError("request has no x_gf180_sram_adapter.composed_deck_sha256")
     ids = list(meta.get("corners") or corner_ids())
-    return ids, meta.get("composed_deck_sha256")
+    return ids, sha
 
 
 def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_deck_sha256=None):
