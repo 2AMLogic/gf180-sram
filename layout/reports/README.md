@@ -17,10 +17,12 @@ out and overwrites the files below in place. `./layout/reports/generate.sh
 --column-path` regenerates only the column-path reports (~2 min), and adding
 `--native` also runs them against the PDK's native DRC deck (~3 min more);
 `./layout/reports/generate.sh --macro` regenerates only
-[`drc-macro.json`](drc-macro.json) (~1 min); the full run's `klt erc` step alone
-is ~26 min.
+[`drc-macro.json`](drc-macro.json) (~1 min); `./layout/reports/generate.sh
+--array64` regenerates only the 64 x 128 array trio (~15 min, dominated by
+`klt extract` on 8,192 bitcells under the pinned engine; see the trio's row
+below for the pin); the full run's `klt erc` step alone is ~26 min.
 
-## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205; `drc-macro.json` added 2026-11-14, issue #326)
+## Results (DRC/LVS/extract rows as of `db3fa5c`, 2026-08-21; `erc-array-supply.json` added 2026-09-21, issue #124; column-path rows added 2026-10-18, issue #205; `drc-macro.json` added 2026-11-14, issue #326; 64 x 128 trio added 2026-11-15, issue #327)
 
 | Report | Command | Result |
 |---|---|---|
@@ -37,7 +39,8 @@ is ~26 min.
 | `drc-native-column-precharge-slice.json`, `drc-native-column-io-slice.json`, `drc-native-column-abut.json` | `klt drc --engine klayout` with the PDK's native deck (`generate.sh --column-path --native`) | `status: clean`, 0 violations, `coverage_assertion` 640 expected = 640 observed rule categories |
 | `drc-row-path.json`, `extract-row-path.json`, `lvs-row-path.json` | `klt drc --deck gf180mcu`, `klt extract`, and `klt lvs` (inline extraction, `options.flatten_reference: true`) on `layout/periphery/row/row_path.gds` vs. `design/netlist/row_path.spice` (issue #204; `generate.sh --row-path`) | DRC `status: clean`, 0 violations; 528 devices (264 nfet + 264 pfet), 279 nets, 79 pins; LVS `status: match`, 528/528 devices, 279/279 nets, 79/79 pins, `mismatches[]` only the `topology.flattened` disclosure and the "no bjt" note. Strip only -- no physical-fit, parasitic or wordline-RC claim; PDK-native deck not run (not installed on the generating host) |
 | `drc-sram-ctrl.json`, `extract-sram-ctrl.json`, `lvs-sram-ctrl.json`, `drc-col-decode.json`, `extract-col-decode.json`, `lvs-col-decode.json` | `klt drc --deck gf180mcu`, `klt extract`, and `klt lvs` (inline extraction, `options.flatten_reference: true`) on `layout/periphery/control/{sram_ctrl,col_decode}.gds` vs. `design/netlist/{sram_ctrl,col_decode}.spice` (issue #246; `generate.sh --control`) | DRC `status: clean`, 0 violations on both; `sram_ctrl` 356 devices, 171 nets, 35 pins and `col_decode` 40 devices, 27 nets, 15 pins, each LVS `status: match` with everything matched and `mismatches[]` only the `topology.flattened` disclosure and the "no bjt" note. Block level only -- no timing, delay-calibration, parasitic or physical-fit claim; PDK-native deck not run |
-| [`drc-macro.json`](drc-macro.json) | `klt drc --deck gf180mcu --format json layout/macro/sram_256x32.gds` on the assembled macro, hierarchical top cell `sram_256x32` (issue #326; `generate.sh --macro`) | `status: clean`, 0 violations -- 51 rules checked, 63 inapplicable, 97 unmodeled, 11 layers. **No macro LVS or extract counterpart exists** (see "Known gap: macro-level LVS" below): macro-level DRC and the pin check are the only macro verdicts in this repo. First report here minted under the pinned released `klayout-tools==0.8.0` with `klayout==0.30.12`, so it carries `schema_version: 3` and an object-valued `file` where the older rows carry `schema_version: 1`/`2` and a string |
+| [`drc-macro.json`](drc-macro.json) | `klt drc --deck gf180mcu --format json layout/macro/sram_256x32.gds` on the assembled macro, hierarchical top cell `sram_256x32` (issue #326; `generate.sh --macro`) | `status: clean`, 0 violations -- 51 rules checked, 63 inapplicable, 97 unmodeled, 11 layers. **No macro LVS or extract counterpart exists** (see "Known gap: macro-level LVS" below): macro-level DRC and the pin check are the only macro verdicts in this repo. Minted under the pinned released `klayout-tools==0.8.0` with `klayout==0.30.12` (the 64 x 128 trio below is minted the same way), so it carries `schema_version: 3` and an object-valued `file` where the older rows carry `schema_version: 1`/`2` and a string |
+| [`drc-array-64x128.json`](drc-array-64x128.json), [`extract-array-64x128.json`](extract-array-64x128.json), [`lvs-array-64x128.json`](lvs-array-64x128.json) | `klt drc --deck gf180mcu`, `klt extract` and `klt lvs` (scratch extract, `options.flatten_reference: true`) on `layout/sram_64x128/sram_64x128_array.gds` vs. `design/netlist/sram_64x128_array.spice` -- the 4:1 array the macro floorplan is built on (issue #327; `generate.sh --array64`, under the pinned `klt 0.8.0` with `klayout 0.30.12`) | DRC `status: clean`, 0 violations; extract `status: extracted`, 49,152 devices (32,768 nfet + 16,384 pfet), 16,706 nets, 322 pins, `devices[]`/`nets[]` omitted as in `extract-array.json`; LVS `status: match`, 49,152/49,152 devices, 16,706/16,706 nets, 322/322 pins, `mismatches[]` only the `severity: warning` `topology.flattened` disclosure. The LVS layout input is a scratch extract that does not bind the committed GDS -- see "The 64 x 128 array trio" below |
 | `extract-column-precharge-slice.json`, `extract-column-io-slice.json` | `klt extract --deck gf180mcu` on the slices | 12 devices (pfet), 14 nets, 14 pins; 99 devices (50 nfet + 49 pfet), 59 nets, 26 pins |
 | `lvs-column-precharge-slice.json`, `lvs-column-io-slice.json` | `klt lvs` (inline `layout.file` + `deck`, `options.flatten_reference: true`) vs. `design/netlist/{precharge,io}_slice.spice` | `status: match`; 12/12 and 99/99 devices, 14/14 and 59/59 nets, 14/14 and 26/26 pins. `mismatches[]` holds only `severity: warning` entries: the `topology.flattened` disclosure and "device class absent on both sides" notes -- no `net.supply_fragmented` |
 
@@ -84,6 +87,32 @@ list in prose).
 mismatches, directly against the schematic-derived reference netlist, with no
 rewrite of the reference (see `layout/README.md` "Known tool gaps" #1 for
 the bulk-net history).
+
+## The 64 x 128 array trio (issue #327): what the LVS input binds to
+
+`drc-array-64x128.json`, `extract-array-64x128.json` and
+`lvs-array-64x128.json` are minted by `generate.sh --array64` under the
+pinned released `klayout-tools==0.8.0` with `klayout==0.30.12` -- the same
+two-sided engine pin `drc-macro.json` was minted under
+(layout/README.md "Reproduce this locally"), never the host `klt`
+(signoff/README.md). The trio carries the pinned release's report shapes:
+`schema_version` 3 (DRC), 4 (extract) and 2 (LVS). The DRC and extract
+reports pin the committed GDS directly via `provenance.input.content_hash`;
+the extract report's `devices[]`/`nets[]` bulk arrays are omitted exactly as
+`extract-array.json`'s are (same 8,192-bitcell array size either way).
+
+The LVS report's layout input is **the scratch extracted netlist** the script
+writes into its temp dir, not the committed GDS:
+`provenance.input.content_hash` and `environment.layout_sha256` hash that
+scratch netlist, `environment.extracted_netlist` is `null`, and the report's
+own `_note` says so -- nothing in `lvs-array-64x128.json` binds it to
+`layout/sram_64x128/sram_64x128_array.gds`. That is the same structural gap
+issue #285 records against `lvs-array.json`, reproduced here by construction
+(making the LVS input bind a committed file is #285's deliverable, not this
+report's). Read the trio as: DRC and extraction pin the committed GDS; the
+LVS proves the *extract of it* matches `design/netlist/sram_64x128_array.spice`
+topology under the disclosed `flatten_reference` option -- not GDS-fresh LVS
+evidence beyond that.
 
 ## Item 11 (power delivery, structural): the array supply read
 
