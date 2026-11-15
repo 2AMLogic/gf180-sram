@@ -16,6 +16,17 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+# The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
+# (#331). The `klt sim` request's `corners` block below is derived from it
+# rather than hand-listed, so this request cannot sweep a different matrix
+# than sim/lib/run_corner_sweep.sh and the deck adapter do. `klt sim` wants
+# the two numeric axes as JSON numbers, so they are converted here, at this
+# consumer's own boundary -- the owner holds every axis point as the spec's
+# literal label (see that module's "Axis element type").
+from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
 
 PERIOD = 20.0  # ns
 FIRST_EDGE = 5.0  # ns; edge 0 is an idle (CEN=1) initialisation cycle
@@ -137,7 +148,8 @@ def gen_klt():
 
 
 def klt_request():
-    """The klt sim request for gen_klt(): 27 corners, one FIND per sampled Q bit."""
+    """The klt sim request for gen_klt(): the ratified corner matrix (27 corners
+    today, derived from sim/lib/corner_matrix.py), one FIND per sampled Q bit."""
     meas = []
     for i, o in enumerate(OPS):
         if o[6] is None:
@@ -150,9 +162,9 @@ def klt_request():
         "engine": "ngspice",
         "models": {"lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"},
         "corners": {
-            "process": [{"name": "ff", "sections": ["ff"]}, {"name": "tt", "sections": ["typical"]}, {"name": "ss", "sections": ["ss"]}],
-            "supply_v": {"vvdd": [2.97, 3.30, 3.63]},
-            "temperature_c": [-40, 25, 125],
+            "process": [{"name": p, "sections": [LIB_SECTION[p]]} for p in PROCESSES],
+            "supply_v": {"vvdd": [float(v) for v in VDDS]},
+            "temperature_c": [int(t) for t in TEMPS],
         },
         "analysis": {"kind": "tran", "args": f"0.02n {edge(len(OPS) - 1) + PERIOD:g}n"},
         "measurements": meas,
