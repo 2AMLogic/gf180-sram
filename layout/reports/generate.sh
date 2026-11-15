@@ -117,104 +117,47 @@ if [ "${1:-}" = "--macro" ]; then run_macro; exit 0; fi
 # (`--with klayout==0.30.12`), the same two-sided pin layout/README.md
 # "Reproduce this locally" documents for drc-macro.json -- never the bare host
 # `klt` the older blocks still call (signoff/README.md; converting them is out
-# of scope for #327). Under klt 0.8.0 the DRC/extract `file` field is already
-# emitted repo-relative (`scope: repo`); the rewrites below cover both that
-# object form and the older string form, plus the three fields that do leak
-# host paths (`netlist_path` on extract, `layout` and `reference` on lvs),
-# and a final assert that nothing host-specific slipped through.
+# of scope for #327). Committed through the same one guarded path as every
+# other report in this script (#340): the $ROOT/$WORK rewrite covers the
+# object-or-string `file` form, extract's `netlist_path` and lvs's echoed
+# `reference` with no field named anywhere, and `lint-envelope` vetoes each
+# write itself -- issue #327's "no host path may reach a committed 64 x 128
+# report" rule is structural now, enforced at every call rather than asserted
+# once at the end of the block.
 ARRAY64_GDS=layout/sram_64x128/sram_64x128_array.gds
 ARRAY64_REF=design/netlist/sram_64x128_array.spice
 KLT64=(uvx --from klayout-tools==0.8.0 --with klayout==0.30.12 klt)
 run_array64() {
 hr "0a. 64 x 128 array (issue #327): DRC, extract, LVS"
 "${KLT64[@]}" drc --deck gf180mcu --format json "$ARRAY64_GDS" > "$WORK/drc-array64-raw.json"
-python3 -c "
-import json
-d = json.load(open('$WORK/drc-array64-raw.json'))
-f = d.get('file')
-if isinstance(f, dict):
-    if f.get('path') == '$ROOT/$ARRAY64_GDS':
-        f['path'] = '$ARRAY64_GDS'
-elif f == '$ROOT/$ARRAY64_GDS':
-    d['file'] = '$ARRAY64_GDS'
-json.dump(d, open('$OUT/drc-array-64x128.json', 'w'), indent=2)
-open('$OUT/drc-array-64x128.json', 'a').write('\n')
-print('drc-array-64x128:', d['status'], '| violations:', d['violation_count'])
-"
+commit_report "$WORK/drc-array64-raw.json" "$OUT/drc-array-64x128.json" \
+  --print 'drc-array-64x128: {status} | violations: {violation_count}'
 "${KLT64[@]}" extract --deck gf180mcu --format json "$ARRAY64_GDS" -o "$WORK/array64.spice" > "$WORK/extract-array64-full.json"
 # Same bulk omission step 4 applies to the 256 x 32 extract (8,192 bitcells
 # either way -- ~18 MB unabridged): drop devices[]/nets[], keep every other
-# field incl. counts and provenance.
-python3 -c "
-import json
-d = json.load(open('$WORK/extract-array64-full.json'))
-d.pop('devices', None)
-d.pop('nets', None)
-d['_note'] = ('devices[]/nets[] omitted from this committed report (%d devices / %d nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh --array64' % (d['device_count'], d['net_count']))
-f = d.get('file')
-if isinstance(f, dict):
-    if f.get('path') == '$ROOT/$ARRAY64_GDS':
-        f['path'] = '$ARRAY64_GDS'
-elif f == '$ROOT/$ARRAY64_GDS':
-    d['file'] = '$ARRAY64_GDS'
-if d.get('netlist_path') == '$WORK/array64.spice':
-    d['netlist_path'] = 'array64.spice'  # a temp dir at generation time
-json.dump(d, open('$OUT/extract-array-64x128.json', 'w'), indent=2)
-open('$OUT/extract-array-64x128.json', 'a').write('\n')
-print('extract-array-64x128:', d['status'], '| devices:', d['device_count'], '| nets:', d['net_count'], '| pins:', d['pin_count'])
-"
+# field incl. counts and provenance. `netlist_path` names the scratch extract,
+# and the $WORK rewrite collapses it to its basename -- a temp-dir name that
+# `netlist_sha256`/`provenance.input.content_hash` are what actually pin.
+commit_report "$WORK/extract-array64-full.json" "$OUT/extract-array-64x128.json" \
+  --drop devices --drop nets \
+  --set '_note=devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh --array64' \
+  --print 'extract-array-64x128: {status} | devices: {device_count} | nets: {net_count} | pins: {pin_count}'
 # `reference.netlist` must stay absolute for the run to work at all (klt lvs
 # resolves it against the request document's own directory -- see step 4's
-# comment); the echoed fields are rewritten post-hoc below. `layout` names the
-# scratch extract, NOT the committed GDS: its hash does not bind the GDS (the
-# #285 defect, disclosed in layout/reports/README.md), so it stays labelled as
-# a scratch file instead of claiming the repo-relative GDS as its input.
+# comment); commit_report rewrites the echoed `reference` to its repo-relative
+# form. `layout` names the scratch extract, NOT the committed GDS: its hash
+# does not bind the GDS (the #285 defect, disclosed in layout/reports/README.md),
+# so the _note states what the layout input actually binds to and the report
+# cannot be read as GDS-fresh evidence.
 cat > "$WORK/lvs-array64-request.json" <<EOF
 {"layout":{"netlist":"$WORK/array64.spice","top":"sram_64x128_array"},
  "reference":{"netlist":"$ROOT/$ARRAY64_REF","form":"subckt-call"},
  "options":{"flatten_reference":true}}
 EOF
 "${KLT64[@]}" lvs "$WORK/lvs-array64-request.json" --format json > "$WORK/lvs-array64-raw.json"
-# Under klt 0.8.0 the echoed `layout` field is {"path": null, "scope":
-# "external"} (nothing to leak); `reference` still echoes the absolute path
-# and is rewritten. The `_note` states what the layout input actually binds
-# to, so the report cannot be read as GDS-fresh evidence.
-python3 -c "
-import json
-d = json.load(open('$WORK/lvs-array64-raw.json'))
-if d.get('layout') == '$WORK/array64.spice':
-    d['layout'] = 'array64.spice (scratch extract at generation time, see #285)'
-if d.get('reference') == '$ROOT/$ARRAY64_REF':
-    d['reference'] = '$ARRAY64_REF'
-d['_note'] = ('layout input is the scratch extracted netlist array64.spice (klt extract of '
-              'the committed GDS into a temp dir at generation time): environment.layout_sha256 '
-              'and provenance.input.content_hash hash that scratch netlist, not the GDS, and '
-              'environment.extracted_netlist is null -- nothing in this report binds it to '
-              'layout/sram_64x128/sram_64x128_array.gds (issue #285). Regenerate via '
-              'layout/reports/generate.sh --array64.')
-json.dump(d, open('$OUT/lvs-array-64x128.json', 'w'), indent=2)
-open('$OUT/lvs-array-64x128.json', 'a').write('\n')
-print('lvs-array-64x128:', d['status'], '| mismatches:', d['mismatch_count'], '| errors:', d['error_count'])
-"
-# Issue #327: no host path may reach a committed 64 x 128 report -- stricter
-# than the older blocks, whose committed reports still leak theirs.
-python3 -c "
-import json, sys
-bad = []
-for fn in ('drc-array-64x128.json', 'extract-array-64x128.json', 'lvs-array-64x128.json'):
-    def walk(o, path=fn):
-        if isinstance(o, dict):
-            for k, v in o.items(): walk(v, path + '.' + k)
-        elif isinstance(o, list):
-            for i, v in enumerate(o): walk(v, path + '[%d]' % i)
-        elif isinstance(o, str) and ('$ROOT/' in o or '$WORK/' in o):
-            bad.append((path, o))
-    walk(json.load(open('$OUT/' + fn)))
-if bad:
-    for path, val in bad: print('host path leaked:', path, '=', val, file=sys.stderr)
-    sys.exit(1)
-print('no host paths in the three 64 x 128 reports')
-"
+commit_report "$WORK/lvs-array64-raw.json" "$OUT/lvs-array-64x128.json" \
+  --set '_note=layout input is the scratch extracted netlist array64.spice (klt extract of the committed GDS into a temp dir at generation time): environment.layout_sha256 and provenance.input.content_hash hash that scratch netlist, not the GDS, and environment.extracted_netlist is null -- nothing in this report binds it to layout/sram_64x128/sram_64x128_array.gds (issue #285). Regenerate via layout/reports/generate.sh --array64.' \
+  --print 'lvs-array-64x128: {status} | mismatches: {mismatch_count} | errors: {error_count}'
 }
 if [ "${1:-}" = "--array64" ]; then run_array64; exit 0; fi
 
