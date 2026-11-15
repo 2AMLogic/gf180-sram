@@ -197,8 +197,11 @@ run's worker stdout carries `Note: No compatibility mode selected!`. ngspice
 reads compatibility mode from the executing host's `.spiceinit`, which deck
 mode does not transport; at this corner it is worth a few microvolts on the two
 geometric SNM metrics and nothing on the three `RESULT:`-emitting families.
-Pinning it explicitly in the request (`options.ngspice_init`) is tracked in
-#338.
+This is issue #338, and the section below is its fix: a run-directory
+`.spiceinit` staged onto every execution path. The request-level
+`options.ngspice_init` was considered and rejected -- `klt sim` silently
+drops it on the deck path (`2AMLogic/klayout-tools#5738`) -- so the staged
+input, not the option, is the pin.
 
 ## The pinned ngspice environment (`.spiceinit`, issue #338)
 

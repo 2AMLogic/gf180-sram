@@ -6,11 +6,11 @@
   "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, the macro smoke and control-pulse benches, and the wordline-RC benches. The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:595acc46bf041c0a538318511d039fb6b9f99648f1a5aa832418f9c69013b33e",
+      "content_hash": "sha256:c2a7279886883fc9deb0a51413a6797096d8baaaef3e7290086c1e5d18449ead",
       "paths": [
         {
           "path": "sim/README.md",
-          "content_hash": "sha256:8a3a2a75cdac1c64d0f4e559d1858529f89bc79738015ad33087da1046a6e69c"
+          "content_hash": "sha256:6c278f162333c39880a1bcf3ba6669ae8de50c0ce43cb9c290b97d70e96a0350"
         },
         {
           "path": "sim/lib/pdk_pin.txt",
