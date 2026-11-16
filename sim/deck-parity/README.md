@@ -24,7 +24,13 @@ sim/deck-parity/
       request.json               # the deck-list request as submitted
       report.json                # klt sim's deck report (environment.remote)
       reduced.json               # deck_adapter.py reduce --request output
-                                 # (MC receipts: mc-reduce --json-out output)
+                                 # (MC receipts: mc-reduce --json-out output);
+                                 # deterministic receipts: each corner carries
+                                 # the raw RESULT: lines its reducer matched
+                                 # (corners[].result_lines); MC receipts
+                                 # carry theirs as per-corner
+                                 # result-lines.txt -- see the
+                                 # committed-bytes rule below
       parity-compare.md          # parity_compare.py's full comparison table
       parity-summary.json        # its machine-readable summary
       <corner-id>/               # one subdirectory per corner run
@@ -51,8 +57,29 @@ receipt extends it): per family, commit `request.json`, `report.json`,
 `reduced.json` and the per-corner `corner.inc`; commit the returned
 `*_sweep.txt` for the SNM families (they are what makes the pre-#213
 crosscheck auditable); commit a unit's `stdout.log` **only** when that unit
-graded anything other than `recorded`. The one-corner receipt (2026-11-14)
-predates this rule and committed each family's single
+graded anything other than `recorded`; and the deterministic `reduce`
+output must carry, per corner, the raw `RESULT:` lines its reducer matched
+(`corners[].result_lines`) so the graded numbers are re-derivable from
+committed bytes. That requirement is keyed to the `corners[]` shape
+`deck_adapter.py reduce` emits; `reduce_mc_report()` has no `corners[]`,
+and the MC rule below supplies the equivalent for its one `RESULT:`-emitting
+family -- the raw lines as a per-corner `result-lines.txt` -- so that
+family's MC grading is re-derivable from committed bytes through that file.
+That preserved
+grading input is cheap -- the matched lines are ~9.6 KB of raw text across
+the five families of the full-grid receipt (~3.9 KB of it for the three
+`RESULT:`-emitting ones); as committed bytes the rule's cost is measured at
+9,504 B for the two SNM families, re-reducing both from the receipt's
+committed inputs under this rule (5,778 B of raw text plus ~23 B per
+preserved line of JSON array formatting), with the three
+`RESULT:`-emitting families adding at least their measured 3,996 B of raw
+text (their clean-run `stdout.bin` was discarded, so their serialized
+growth is not directly measurable on this receipt) -- all of it well under
+1% of the ~2 MB full stdout would add -- while omitting it leaves the three
+`RESULT:`-emitting families' numbers unverifiable: their raw lines lived in
+the per-unit `stdout.bin` this rule discards for clean runs, and only the two
+SNM families stay re-derivable, via their committed sweeps. The one-corner
+receipt (2026-11-14) predates this rule and committed each family's single
 `stdout.log`/`corner.inc`/sweep flat at the family level; the full-grid
 receipt (2026-11-15, 135 units) introduced the per-corner subdirectories and
 the rule, because committing all 135 engine stdout streams would add ~2 MB of
@@ -72,13 +99,51 @@ exact-match claim is re-derivable from committed bytes. The receipt must
 state which claims are re-derivable from committed bytes and which are not
 (the MC receipt has a section for exactly this).
 
+A receipt's `## Files in` table -- whose heading names the receipt directory
+the table's paths live under -- is gated by CI
+(`scripts/ci/check-evidence-format.sh`): every backticked path in the table's
+File column must resolve to at least one committed file under the receipt
+directory, with `<...>` placeholders matched as per-segment globs (so
+`<family>/<corner-id>/stdout.log` demands a committed `stdout.log` under some
+family/corner pair). A row that documents artifacts deliberately **not**
+committed -- today, the full-grid `stdout.log` row above -- must carry the
+literal token `(none committed)` in its What cell; the gate skips such a row.
+This keeps a receipt from citing evidence it does not commit (issue #356).
+
+**Prose committed-bytes sections are deliberately out of scope for that
+gate** (issue #372). A receipt may additionally -- or instead -- document
+its artifacts in prose (both MC receipts do, under `## What is re-derivable
+from committed bytes`); CI does not resolve prose-cited paths. Prose claims
+are not machine-checkable: the receipt's machine-checkable inventory is its
+`## Files in` table, and a receipt that documents committed artifacts in
+prose only sits outside the gate. Two pieces of visibility keep that from
+being silent: the check's success line reports its coverage -- receipt
+`Files in` tables gated, rows resolved -- so a zero-coverage receipt shows
+up as a dropped count rather than the same green line as a fully-gated one;
+and a deck-parity receipt whose `| File | What |` table sits under a heading
+the gate cannot see (a one-character heading deviation) draws a warning,
+never a CI failure, naming the doc and the unmatched heading. Tables in the
+other experiments' READMEs are directory listings, not receipts, and are
+outside the warning.
+
 ## Receipts
+
+The first three receipts answer the deck-transport question (the #230
+migration this directory scopes itself to); the `spiceinit-pin` receipt
+answers a different one -- generator **environment**: whether the staged,
+pinned `.spiceinit` (#338) reaches the fleet worker and reproduces the
+committed values. The `mc-9corner` receipt completes the MC half of the
+transport question and records a new finding about that environment: the
+committed *MC* records were taken unpinned, so the pin moves the SNM
+negative-control values off them (fully attributed in the receipt).
 
 | Receipt | Corner(s) | Families | Result |
 |---|---|---|---|
 | [`20261114-tt_25c_3.30v.md`](20261114-tt_25c_3.30v.md) | `tt_25c_3.30v` | all 5 characterization families | parity holds; the 3 `RESULT:`-emitting families match the committed value exactly, the 2 SNM families match to <= 3 uV once the documented #213 extractor change is held fixed |
 | [`20261115-full-grid.md`](20261115-full-grid.md) | all 27 | all 5 characterization families | parity holds at every corner: 108/108 record metrics exact across the 3 `RESULT:`-emitting families, the 2 SNM families within 1 uV / 7 uV of the committed value (gate 30 uV) under the pre-#213 crosscheck, 0 `OPEN` units |
 | [`20261115-mc-2corner.md`](20261115-mc-2corner.md) | `tt_25c_3.30v`, `ff_125c_2.97v` | the 3 MC families (`read-snm`, `hold-snm`, `write-margin`) | first live Monte Carlo run (3,040 units, one batch-set): every mm sample of the committed arrays reproduced -- `write-margin` exact, the SNM families exact under the pre-#213 `--pair` extractor (max delta 0.0 V) -- every ctrl anchor pinned, every nc errored count and surviving value matched; 5 `OPEN` nc units reported (committed record excluded the same draws) |
+| [`20261116-mc-9corner.md`](20261116-mc-9corner.md) | all 9 (full committed MC matrix) | the 3 MC families | 13,680 units in two phases (first submit crashed mid-upload at `klayout-tools#5880`; its 16 collected shards were reused after a byte-identical re-staging provenance check, 5 missing shards re-submitted): all 5,400 mm samples within gate (`write-margin` exact, worst SNM delta 6 uV), 108/108 ctrl anchors exact under the #346 pin, nc errored sets exact everywhere; nc surviving values diverge only for the known-bad draws and are attributed by a committed local A/B to the pin (the committed MC campaign ran unpinned) |
+| [`20261114-tt_25c_3.30v-spiceinit-pin.md`](20261114-tt_25c_3.30v-spiceinit-pin.md) | `tt_25c_3.30v` | all 5 characterization families | parity holds with the `.spiceinit` pin staged (#338): all 7 committed record metrics across the 5 families reproduce exactly -- the 3 `RESULT:`-emitting families exact, the 2 SNM families exact under the pre-#213 extractor crosscheck |
 
 ## Reproducing one
 

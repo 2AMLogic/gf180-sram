@@ -144,6 +144,28 @@ class ParityCompareExactFamilies(unittest.TestCase):
             self.assertIn("EXACT", out)
             self.assertIn("Overall: **parity**", out)
 
+    def test_unit_label_matches_family_unit(self):
+        """The max-|delta| block labels each metric with its family's unit:
+        seconds for the access-time families, volts for the others (#359)."""
+        for family, metric, unit in (
+            ("read-access", "read_access_time_s", "s"),
+            ("write-margin", "write_trip_voltage_v", "V"),
+        ):
+            with self.subTest(family=family):
+                with tempfile.TemporaryDirectory() as d:
+                    tmp = Path(d)
+                    rows = exact_record_rows(family, CORNERS)
+                    record = tmp / "record.md"
+                    write_record(record, rows)
+                    reduced = tmp / "reduced.json"
+                    reduced.write_text(json.dumps(make_reduced(family, rows)))
+                    rc, out, summary = run_cmp(tmp, family, reduced, record=record)
+                    self.assertEqual(rc, 0, out)
+                    self.assertEqual(summary["unit"], unit)
+                    self.assertIn(f"- `{metric}`: 0.000e+00 {unit} (gated)", out)
+                    if family == "write-margin":
+                        self.assertIn("- `write_vdd_v`: 0.000e+00 V\n", out)
+
     def test_seeded_mismatch_fails_with_delta(self):
         rows = exact_record_rows("write-margin", CORNERS)
         reduced_rows = exact_record_rows("write-margin", CORNERS)
@@ -728,6 +750,48 @@ class McDirectExactPerSample(unittest.TestCase):
             self.assertEqual(mm["n_compared"], mm["n_expected"])
             self.assertEqual(mm["deltas"]["max"], 0.0)
             self.assertIn("**Overall: parity**", out)
+
+    def test_mc_distribution_lines_read_summary_unit(self):
+        """The per-sample |delta| distribution lines label all four stats with
+        summary["unit"], not a literal V (#378). A seconds unit proves the key
+        is read; the unmutated write-margin summary proves volts still render.
+        No MC_SAMPLE_SETS binding is added or asserted: the renderer is a pure
+        function of the summary dict."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            rc, out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                          request=tmp / "request.json", report=tmp / "report.json",
+                                          samples=tmp / "samples.json", record=record)
+            self.assertEqual(rc, 0, out)
+
+            # Volts no-regression: a real write-margin summary renders V on
+            # both the mismatch-batch and negative-control distribution lines
+            # of every corner.
+            rendered = pc.render_mc_markdown(summary)
+            dist_lines = [ln for ln in rendered.splitlines()
+                          if "per-sample |delta| distribution" in ln]
+            self.assertEqual(len(dist_lines), 2 * len(summary["corners"]), rendered)
+            for ln in dist_lines:
+                self.assertRegex(ln, r"max=\S+ V, mean=\S+ V, p50=\S+ V, p95=\S+ V$")
+
+            # Unit read: the renderer reads summary["unit"] for the same lines.
+            summary["unit"] = "s"
+            rendered_s = pc.render_mc_markdown(summary)
+            dist_lines_s = [ln for ln in rendered_s.splitlines()
+                            if "per-sample |delta| distribution" in ln]
+            self.assertEqual(len(dist_lines_s), 2 * len(summary["corners"]), rendered_s)
+            for ln in dist_lines_s:
+                self.assertNotIn(" V,", ln)
+                self.assertRegex(ln, r"max=\S+ s, mean=\S+ s, p50=\S+ s, p95=\S+ s$")
+
+            # Guards unmoved: a corner with no mm deltas and no nc deltas
+            # still renders, without a distribution line.
+            for c in summary["corners"]:
+                (c.get("mismatch") or {}).pop("deltas", None)
+                (c.get("negative_control") or {}).pop("deltas", None)
+            rendered_nod = pc.render_mc_markdown(summary)
+            self.assertNotIn("per-sample |delta| distribution", rendered_nod)
 
     def test_wrong_value_at_one_index_fails(self):
         with tempfile.TemporaryDirectory() as d:

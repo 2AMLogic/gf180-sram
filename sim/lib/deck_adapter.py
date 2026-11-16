@@ -55,7 +55,6 @@ import hashlib
 import io
 import json
 import os
-import re
 import shutil
 import sys
 from pathlib import Path
@@ -405,7 +404,7 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
     for cid in expected:
         unit = by_id.get(cid)
         if unit is None:
-            graded.append({"id": cid, "status": "OPEN", "reasons": ["no unit in report"], "results": {}})
+            graded.append({"id": cid, "status": "OPEN", "reasons": ["no unit in report"], "results": {}, "result_lines": []})
             continue
         reasons = []
         unit_dir = base / cid
@@ -427,11 +426,11 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
                 log += _snm_lines(data, label)
             else:
                 log += f"RESULT-ERROR: {label} -- expected data file {datafile} not produced\n"
-        errors = re.findall(r"^RESULT-ERROR:.*$", log, re.MULTILINE)
-        results = {
-            k: float(v)
-            for k, v in re.findall(r"^RESULT:\s*(\S+)\s*=\s*([\-0-9.eE+]+)\s*;?\s*$", log, re.MULTILINE)
-        }
+        errors = RESULT_ERROR_RE.findall(log)
+        results, result_lines = {}, []
+        for m in RESULT_RE.finditer(log):
+            results[m.group(1)] = float(m.group(2))
+            result_lines.append(m.group(0))
         reasons += errors
         if not errors and not results:
             reasons.append(f"no RESULT line captured (engine exit {unit.get('exit_code')})")
@@ -441,6 +440,7 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
                 "status": "OPEN" if reasons else "recorded",
                 "reasons": reasons,
                 "results": results,
+                "result_lines": result_lines,
                 "engine_exit_code": unit.get("exit_code"),
                 "deck_sha256": unit.get("deck_sha256"),
             }

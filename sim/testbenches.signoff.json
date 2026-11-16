@@ -3,34 +3,18 @@
   "kind": "generic",
   "t1_item": 9,
   "status": "pass",
-  "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, the macro smoke and control-pulse benches, and the wordline-RC benches. The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
+  "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, and the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:465a9c52b1f012616c020de2805db713eb535714744ce34805dae5ddeca84a11",
+      "content_hash": "sha256:9aa2d09da041d25495ce12fb482390ce7f5bd7da1e342554b18797529ce972dc",
       "paths": [
         {
           "path": "sim/README.md",
-          "content_hash": "sha256:e2db7d6f917fae9b7b7ef7bc505d9b8c81ee4b417de0ded79fd5126eac9fb61f"
+          "content_hash": "sha256:8de12d4c33a9e317b3f828e99ebb7fd6cf762e25136d2a6529e6caec38fffa9b"
         },
         {
-          "path": "sim/lib/pdk_pin.txt",
-          "content_hash": "sha256:f25b4d6a065b9b4c4e3cd78b734d90718bef40e00b09e876c9958757dc1e9cd3"
-        },
-        {
-          "path": "sim/lib/run_corner_sweep.sh",
-          "content_hash": "sha256:db9855eb941827a94afb50f5cfe2f8620097950f48b72030a91a16843e717f0a"
-        },
-        {
-          "path": "sim/read-snm/testbench/tb_read_snm.spice",
-          "content_hash": "sha256:48a5909be69179051802f794b2ad7c5049506d197224295fb25d8e3f9bf2aebe"
-        },
-        {
-          "path": "sim/hold-snm/testbench/tb_hold_snm.spice",
-          "content_hash": "sha256:44cbfec1f71e84bcc0c8a5845ddb6de7f4962d8f83e7d650e1238b58c2c9170f"
-        },
-        {
-          "path": "sim/write-margin/testbench/tb_write_margin.spice",
-          "content_hash": "sha256:318b50cc771f8608c571174736142d7a09b33fee2b7ba50f85c12825f8714a77"
+          "path": "sim/access-power/testbench/tb_access_power.klt.spice",
+          "content_hash": "sha256:7021a61af46c0cb3a3d0b0f15e233f64288b1e084f2fe832c6d478180c5ed95b"
         },
         {
           "path": "sim/access-time/testbench/tb_read_access_time.spice",
@@ -41,12 +25,68 @@
           "content_hash": "sha256:6cab512ce6a6ed1d32afabe959991679f7944c1716f45d0490674e3e65041961"
         },
         {
-          "path": "sim/macro-smoke/testbench/tb_macro_write_read.klt.spice",
-          "content_hash": "sha256:241e7bf449f9086ac3457f66bcab82590c8cb864a026b99b065c8ba433f9ee2b"
+          "path": "sim/bitcell-leakage/testbench/tb_bitcell_leakage.klt.spice",
+          "content_hash": "sha256:9db22e3c53d6751ba272bc14eeb387955e8c7011010aa228762a2880bbefb6de"
+        },
+        {
+          "path": "sim/hold-snm/testbench/tb_hold_snm.spice",
+          "content_hash": "sha256:44cbfec1f71e84bcc0c8a5845ddb6de7f4962d8f83e7d650e1238b58c2c9170f"
+        },
+        {
+          "path": "sim/lib/pdk_pin.txt",
+          "content_hash": "sha256:f25b4d6a065b9b4c4e3cd78b734d90718bef40e00b09e876c9958757dc1e9cd3"
+        },
+        {
+          "path": "sim/lib/run_corner_sweep.sh",
+          "content_hash": "sha256:db9855eb941827a94afb50f5cfe2f8620097950f48b72030a91a16843e717f0a"
         },
         {
           "path": "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
           "content_hash": "sha256:4b91f85b2efa2033f546b5d9acac4f71167889bfe8af60d4df84ed6b2a886040"
+        },
+        {
+          "path": "sim/macro-smoke/testbench/tb_macro_write_read.klt.spice",
+          "content_hash": "sha256:241e7bf449f9086ac3457f66bcab82590c8cb864a026b99b065c8ba433f9ee2b"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h04_l10.klt.spice",
+          "content_hash": "sha256:0ab8625e7aa45d4cb12f37ff227f9de6b4e7448e7c352f67c8c248b5d99e20fe"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h06_l10.klt.spice",
+          "content_hash": "sha256:b47dc9b4207260b605fbc600bca7f5f41b93e2f3c73e6aaca40e9d13c513be3d"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h08_l10.klt.spice",
+          "content_hash": "sha256:a5ea8eec2b3a0e2d5e9bb7b72fa00d0a6c6e07f83eea7cd67299e65864f824ea"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h10_l04.klt.spice",
+          "content_hash": "sha256:a15aa668b3f7f8ea1cc798bdc130ee2fddcae06025393545d0a47b66790114e9"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h10_l06.klt.spice",
+          "content_hash": "sha256:35b47938e6f5e47d483bb7c8991b3aab3447389395b3c66e863df9ba35f70c34"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h10_l08.klt.spice",
+          "content_hash": "sha256:05e30f345b5b7acfd6cb812be67690de72dbf0d38cd1d25d59f986f94453b43e"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h10_l10.klt.spice",
+          "content_hash": "sha256:a6988bfe306262c14557969d9d63a85a40f465df7f44891f218fb3cb0a0bfa20"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h12_l10.klt.spice",
+          "content_hash": "sha256:133451acba8738ffc2eaf4487227972e95ec315e67b70cf7c265afc37db64dae"
+        },
+        {
+          "path": "sim/min-clock-pulse/testbench/tb_min_clk_h14_l10.klt.spice",
+          "content_hash": "sha256:772e445f58b4abf1f5b464fd19bfcd35df36e0c2e1b485082436007b3a1f6c16"
+        },
+        {
+          "path": "sim/read-snm/testbench/tb_read_snm.spice",
+          "content_hash": "sha256:48a5909be69179051802f794b2ad7c5049506d197224295fb25d8e3f9bf2aebe"
         },
         {
           "path": "sim/wordline-rc/testbench/tb_wl_rc_centre_x1.klt.spice",
@@ -71,6 +111,10 @@
         {
           "path": "sim/wordline-rc/testbench/tb_wl_rc_row64_x1p5.klt.spice",
           "content_hash": "sha256:1bb0f423915bb6f9db6e9949d26bfacdc921a1609cb8f759dde72501d8b8c06c"
+        },
+        {
+          "path": "sim/write-margin/testbench/tb_write_margin.spice",
+          "content_hash": "sha256:318b50cc771f8608c571174736142d7a09b33fee2b7ba50f85c12825f8714a77"
         }
       ]
     }

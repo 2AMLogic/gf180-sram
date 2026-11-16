@@ -40,13 +40,17 @@ artifact:
                               phase; smoke.py's fixed 6.0 ns violates its own
                               setup discipline once clk_low < 6.0)
 
-Everything else is copied verbatim from `sim/macro-smoke/smoke.py` (its `OPS`
-table, `reduced_array()`, `pwl()` and grading rule): same reduced two-row
-array, same 20 fF bit-line stand-in, same 7 sampled words, so results stay
-comparable with the 10/10 ns baseline. At (10, 10) the derived constants
-reproduce smoke.py's exactly (PERIOD 20, SAMPLE 9, SETUP 6), and the generated
-body is line-for-line its `tb_macro_write_read.klt.spice` -- pinned by
-`sim/lib/test_min_clock_pulse.py`.
+Everything else is `sim/macro-smoke/smoke.py`'s own unchanged stimulus,
+imported rather than copied (the `sim/access-power/access_power.py` pattern,
+#394): its `OPS` table, `FIRST_EDGE`/`TRISE`/`BL_STANDIN_FF` constants and
+`reduced_array()` -- same reduced two-row array, same 20 fF bit-line
+stand-in, same 7 sampled words, so results stay comparable with the 10/10 ns
+baseline. `pwl()` and `gen_klt()` stay local because they thread the derived
+constants as arguments; the `gen_klt` body remains hand-synced with
+smoke.py's, pinned by `sim/lib/test_min_clock_pulse.py`. At (10, 10) the
+derived constants reproduce smoke.py's exactly (PERIOD 20, SAMPLE 9,
+SETUP 6), and the generated body is line-for-line its
+`tb_macro_write_read.klt.spice`.
 
 `check-klt` grades one variant's report per corner against that corner's own
 VDD (a bit is defined if within 20% of a rail); a variant passes a corner only
@@ -69,19 +73,33 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "macro-smoke"))
 # The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
 # (#331); the request's `corners` block is derived from it, exactly as
 # sim/macro-smoke/smoke.py does. Numbers are converted at this consumer's own
 # boundary (see corner_matrix's "Axis element type").
 from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
 
+# The stimulus data and helpers shared with the 10/10 ns baseline are
+# imported, not copied (the sim/access-power/access_power.py pattern, #394):
+# smoke.py is the ratified generator and is not edited here, so its `OPS`
+# table, timing constants and `reduced_array()` cannot drift. Everything the
+# sweep varies stays local: `derived()` and `pwl()` below, and `gen_klt()`,
+# whose body remains hand-synced with smoke.py's (pinned by
+# `sim/lib/test_min_clock_pulse.py`).
+from smoke import (  # noqa: E402  (path-injected import, as access_power.py does)
+    BL_STANDIN_FF,
+    FIRST_EDGE,
+    M32,
+    OPS,
+    TRISE,
+    reduced_array,
+)
+
 HERE = Path(__file__).resolve().parent
 TB_DIR = HERE / "testbench"
 REQ_DIR = HERE / "requests"
 
-FIRST_EDGE = 5.0  # ns; edge 0 is an idle (CEN=1) initialisation cycle
-TRISE = 0.1
-BL_STANDIN_FF = 20  # lumped bit-line capacitance for the unpopulated rows
 DUT_COPY = "sram_256x32.noarray.spice"  # copied from sim/macro-smoke/testbench/
 
 # The swept grid: two 1-D sweeps sharing the 10/10 ns baseline (counted once,
@@ -92,25 +110,6 @@ CLK_LOW_HELD = 10.0
 CLK_HIGH_HELD = 10.0
 CLK_HIGH_GRID = (4.0, 6.0, 8.0, 10.0, 12.0, 14.0)
 CLK_LOW_GRID = (4.0, 6.0, 8.0, 10.0)
-
-# (label, CEN, GWEN, A, D, WEN, expected Q after this cycle's edge or None)
-# WEN[i] = 0 writes bit i. Q is only loaded by reads (CEN=0, GWEN=1).
-# Copied verbatim from sim/macro-smoke/smoke.py -- do not diverge.
-M32 = 0xFFFFFFFF
-OPS = [
-    ("idle-init", 1, 1, 0x00, 0x00000000, M32, None),
-    ("write A7", 0, 0, 0xA7, 0xDEADBEEF, 0x00000000, None),
-    ("write 3C", 0, 0, 0x3C, 0x12345678, 0x00000000, None),
-    ("read A7", 0, 1, 0xA7, 0x00000000, M32, 0xDEADBEEF),
-    ("read 3C", 0, 1, 0x3C, 0x00000000, M32, 0x12345678),
-    # per-bit mask: bits 15:0 masked (WEN=1), bits 31:16 written with ones
-    ("masked write A7", 0, 0, 0xA7, 0xFFFFFFFF, 0x0000FFFF, 0x12345678),
-    ("read A7 after mask", 0, 1, 0xA7, 0x00000000, M32, 0xFFFFBEEF),
-    ("read 3C neighbour", 0, 1, 0x3C, 0x00000000, M32, 0x12345678),
-    # CEN=1 with GWEN=0 and fresh data: no write, Q holds
-    ("idle (CEN=1) no write", 1, 0, 0xA7, 0x00000000, 0x00000000, 0x12345678),
-    ("read A7 after idle", 0, 1, 0xA7, 0x00000000, M32, 0xFFFFBEEF),
-]
 
 
 def variant_tag(clk_high: float, clk_low: float) -> str:
@@ -163,26 +162,6 @@ def pwl(values, period: float, setup: float, vdd="VDDC"):
             pts.append(f"{t + TRISE:g}n {vdd if v else 0}")
             prev = v
     return "PWL(" + " ".join(pts) + ")"
-
-
-def reduced_array(w):
-    """The reduced `sram_64x128_array`: only the rows OPS addresses, 20 fF stand-ins.
-
-    Copied verbatim from sim/macro-smoke/smoke.py so the array (and therefore
-    the result) stays comparable with the 10/10 ns baseline record.
-    """
-    rows = sorted({o[3] >> 2 for o in OPS})
-    pins = [f"WL{r}" for r in range(64)]
-    for p in range(128):
-        pins += [f"BL{p}", f"BLB{p}"]
-    w(".subckt sram_64x128_array " + " ".join(pins) + " VDD VSS")
-    for r in rows:
-        for p in range(128):
-            w(f"Xr{r}c{p} BL{p} BLB{p} WL{r} VDD VSS bitcell_6t")
-    for p in range(128):
-        w(f"Cbl{p} BL{p} VSS {BL_STANDIN_FF}f")
-        w(f"Cblb{p} BLB{p} VSS {BL_STANDIN_FF}f")
-    w(".ends")
 
 
 def gen_klt(clk_high: float, clk_low: float) -> str:
@@ -406,13 +385,33 @@ def grade_set(reports) -> int:
     """Fold per-variant verdicts into the per-corner minimum on each axis.
     Exit 0 if every corner is bracketed on both axes; 2 if any corner carries
     a sentinel (OPEN / >= max) -- recorded evidence, not a crash; 1 on a
-    structural problem (unreadable report, variant off the grid, an axis
-    missing a variant)."""
+    structural problem (a variant off the grid, an axis missing or repeating
+    a variant, a corner short of the full variant set, or reports disagreeing
+    on the corner-id set). Completeness is a SET test against grid_tags(axis)
+    per corner and axis -- never a count -- so an on-axis off-grid tag cannot
+    substitute for an omitted grid point (#365, #382); every corner is
+    validated before anything prints, so no MIN line precedes an ERROR."""
     by_axis = {}  # corner_id -> {"high": {width: status}, "low": {...}}
-    seen_axes = {}  # corner_id -> {"high": set(tags), "low": set(tags)}
+    seen_axes = {}  # corner_id -> {"high": [tags], "low": [tags]}: one append
+    # per report-axis visit.
+    corner_ids = None  # every report must carry the same corner-id set
     sentinels = 0
     for path in reports:
         tag, verdicts = grade_report(path)
+        ids = set(verdicts)
+        if corner_ids is None:
+            corner_ids = ids
+        elif ids != corner_ids:
+            # a short corners[] array (e.g. a reduced re-collection patch
+            # run) must be named at its source, not surface later as a
+            # per-corner axis shortfall (#382).
+            print(
+                f"ERROR: {tag}: corner set differs from earlier reports"
+                f" (missing: {sorted(corner_ids - ids)},"
+                f" unexpected: {sorted(ids - corner_ids)})",
+                file=sys.stderr,
+            )
+            return 1
         high, low = parse_variant(tag)
         if low == CLK_LOW_HELD:
             axes = [("high", high)]  # a high-axis variant (incl. the 10/10 baseline)
@@ -424,23 +423,48 @@ def grade_set(reports) -> int:
             for cid, v in verdicts.items():
                 by_axis.setdefault(cid, {"high": {}, "low": {}})[axis][width] = v["status"]
                 seen_axes.setdefault(cid, {"high": [], "low": []})[axis].append(tag)
+    # Validation pass: every corner, every axis, checked before any output
+    # (#382 AC3) -- a defect confined to a late-sorting corner must not let
+    # earlier corners print MIN lines first.
+    cells_by_cid = {}
     for cid in sorted(by_axis):
         cells = {}
         for axis, grid in (("high", CLK_HIGH_GRID), ("low", CLK_LOW_GRID)):
-            expected = len(grid)
-            got = len(seen_axes[cid][axis])
-            if got != expected:
-                missing = sorted(set(grid_tags(axis)) - set(seen_axes[cid][axis]))
+            seen = seen_axes[cid][axis]
+            seen_set, want = set(seen), set(grid_tags(axis))
+            if seen_set != want:  # set equality, not a distinct count (#382)
+                parts = []
+                if missing := sorted(want - seen_set):
+                    parts.append(f"missing: {missing}")
+                if unexpected := sorted(seen_set - want):
+                    parts.append(f"unexpected: {unexpected}")
+                # both halves when both are non-empty (the substitution case
+                # has missing and unexpected at once, and the distinct count
+                # can equal the grid size -- 6 of 6, still wrong -- so no
+                # "N of M" framing here).
                 print(
-                    f"ERROR: {cid}: {axis} axis has {got} of {expected} variants"
-                    f" (missing: {missing})",
+                    f"ERROR: {cid}: {axis} axis variant set does not match"
+                    f" the grid ({'; '.join(parts)})",
                     file=sys.stderr,
                 )
+                return 1
+            repeated = sorted(t for t in set(seen) if seen.count(t) > 1)
+            if repeated:
+                for tag in repeated:
+                    print(
+                        f"ERROR: {cid}: {axis} axis has {tag} more than once"
+                        " (one report per variant)",
+                        file=sys.stderr,
+                    )
                 return 1
             display, note = fold_axis(by_axis[cid][axis], grid)
             cells[axis] = (display, note, by_axis[cid][axis])
             if display == OPEN or display.startswith(">="):
                 sentinels += 1
+        cells_by_cid[cid] = cells
+
+    # Printing pass: reached only when every corner graded cleanly.
+    for cid, cells in cells_by_cid.items():
 
         def status_str(m):
             return " ".join(f"{w:g}:{s[0]}" for w, s in sorted(m.items()))

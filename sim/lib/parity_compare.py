@@ -168,7 +168,7 @@ def compare(family, reduced, record_path, *, request=None, sweep_dir=None,
     """
     if family not in RECORD_CLAIMS:
         raise SystemExit(f"unknown family {family!r}; known: {sorted(RECORD_CLAIMS)}")
-    records_rel, _claim, metric = RECORD_CLAIMS[family]
+    records_rel, _claim, metric, unit = RECORD_CLAIMS[family]
     _exp_dir, _tb, mode = deck_adapter.FAMILIES[family]
     kind, datafile, label = deck_adapter.parse_mode(mode)
 
@@ -299,6 +299,7 @@ def compare(family, reduced, record_path, *, request=None, sweep_dir=None,
         "family": family,
         "mode": mode,
         "recorded_metric": metric,
+        "unit": unit,
         "comparison": "pre213-tolerance" if kind == "snm" else "exact",
         "tolerance_v": tolerance_v,
         "record": str(record_path),
@@ -435,7 +436,7 @@ def compare_mc(family, reduced, request, report, sample_set_path, record_path, *
         raise SystemExit(f"unknown family {family!r}; known: {sorted(RECORD_CLAIMS)}")
     if family not in MC_SAMPLE_SETS:
         raise SystemExit(f"family {family!r} has no committed MC sample-set binding")
-    _records_rel, _claim, metric = RECORD_CLAIMS[family]
+    _records_rel, _claim, metric, unit = RECORD_CLAIMS[family]
     mode, key = deck_adapter.MC_FAMILIES[family]
     kind, datafile, label = deck_adapter.parse_mc_mode(mode)
     is_snm = kind in ("snm", "snm-pair")
@@ -729,6 +730,7 @@ def compare_mc(family, reduced, request, report, sample_set_path, record_path, *
         "family": family,
         "mode": mode,
         "recorded_metric": metric,
+        "unit": unit,
         "comparison": "pre213-tolerance" if is_snm else "exact",
         "tolerance_v": tolerance_v,
         "record": str(record_path),
@@ -813,9 +815,10 @@ def render_markdown(summary):
     if max_deltas:
         lines.append("**Maximum |delta| per metric**:")
         lines.append("")
+        unit = summary["unit"]
         for key, d in sorted(max_deltas.items()):
             gate = " (gated)" if key == metric else ""
-            lines.append(f"- `{key}`: {d:.3e} V{gate}")
+            lines.append(f"- `{key}`: {d:.3e} {unit}{gate}")
         lines.append("")
     n_parity = sum(1 for c in summary["corners"] if c["status"] == "parity")
     n_open = sum(1 for c in summary["corners"] if c["status"] == "OPEN")
@@ -832,7 +835,7 @@ def render_markdown(summary):
 
 
 def default_record_path(family):
-    records_rel, claim, _metric = RECORD_CLAIMS[family]
+    records_rel, claim, _metric, _unit = RECORD_CLAIMS[family]
     return latest_record_for_claim(REPO_ROOT / "sim" / records_rel, claim)
 
 
@@ -847,6 +850,7 @@ def render_mc_markdown(summary):
     cov = summary["coverage"]
     sha = summary["deck_sha256"]
     seed = summary["seed_identity"]
+    unit = summary["unit"]
     if summary["comparison"] == "pre213-tolerance":
         rule = (
             f"pre-#213 extractor (`e140796^`) `--pair` mode applied to the fleet's own "
@@ -887,8 +891,8 @@ def render_mc_markdown(summary):
         dstats = mm.get("deltas")
         if dstats:
             lines.append(
-                f"  - per-sample |delta| distribution: n={dstats['n']}, max={dstats['max']:.3e} V,"
-                f" mean={dstats['mean']:.3e} V, p50={dstats['p50']:.3e} V, p95={dstats['p95']:.3e} V"
+                f"  - per-sample |delta| distribution: n={dstats['n']}, max={dstats['max']:.3e} {unit},"
+                f" mean={dstats['mean']:.3e} {unit}, p50={dstats['p50']:.3e} {unit}, p95={dstats['p95']:.3e} {unit}"
             )
         nc = corner["negative_control"] or {}
         if nc:
@@ -900,8 +904,8 @@ def render_mc_markdown(summary):
             nstats = nc.get("deltas")
             if nstats:
                 lines.append(
-                    f"  - per-sample |delta| distribution: n={nstats['n']}, max={nstats['max']:.3e} V,"
-                    f" mean={nstats['mean']:.3e} V, p50={nstats['p50']:.3e} V, p95={nstats['p95']:.3e} V"
+                    f"  - per-sample |delta| distribution: n={nstats['n']}, max={nstats['max']:.3e} {unit},"
+                    f" mean={nstats['mean']:.3e} {unit}, p50={nstats['p50']:.3e} {unit}, p95={nstats['p95']:.3e} {unit}"
                 )
             for o in nc.get("open_units") or []:
                 lines.append(f"  - OPEN unit `{o['id']}`: {o['reason']} (never counted as parity)")

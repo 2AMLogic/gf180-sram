@@ -8,8 +8,43 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-16
+
+- **PR #401**: fix: grade-set completeness becomes a set test; validate before printing
+- **PR #398**: docs: scope deck-parity committed-bytes rule to reduce output, relabel byte figure as raw text
+- **Issue #382** (closed): sim: grade-set completeness is a distinct count, not a set — an off-grid variant can substitute for an omitted grid point
+- **Issue #381** (closed): Amended committed-bytes rule: MC receipts carry no preserved RESULT: lines, and the stated byte cost measures raw line text rather than committed growth
+- **PR #395**: ci: gate the item-9 testbench attestation on what sim/ ships
+- **PR #391**: reports: catch TypeError and AttributeError in --set-format template failures
+- **PR #387**: fix: label MC |delta| distribution stats from summary["unit"]
+- **PR #367**: ci: add repo-hygiene gate bounding tracked blob size, binary type, venv paths
+- **PR #366**: ci: resolve receipt "Files in" table entries against committed bytes
+- **PR #386**: feat(sim): full 9-corner MC deck-mode parity receipt, 13,680 units, with pin-attributed negative-control finding
+- **PR #383**: reports: template _note counts via --set-format; lint failures name the raw input
+- **PR #380**: docs: index the spiceinit-pin receipt in deck-parity README and link the now-landed unpinned receipt
+- **PR #377**: fix: label metric deltas with each family's unit from RECORD_CLAIMS
+- **PR #375**: fix: grade-set counts distinct variant tags and rejects a repeated report
+- **PR #374**: feat: preserve matched RESULT: lines per corner in deck_adapter reduce
+- **Issue #385** (closed): commit_report.py: --set-format does not catch TypeError, so a list-subscript template tracebacks instead of naming the field
+- **Issue #378** (closed): render_mc_markdown still hardcodes "V" on the per-sample |delta| distribution lines
+- **Issue #361** (closed): No CI guard against an accidentally committed venv / vendored binary tree
+- **Issue #357** (closed): Signoff T1 item 9 attests a named testbench set that now omits sim/access-power/testbench/tb_access_power.klt.spice
+- **Issue #356** (closed): check-evidence-format.sh does not verify that a receipt's cited artifact files exist
+- **Issue #371** (closed): commit_report.py: three small follow-ups from the #340 review (templated --set, lint-failure diagnostic, README scoping)
+- **Issue #370** (closed): sim/deck-parity: index the spiceinit-pin receipt and drop its now-stale "not on main yet" note
+- **Issue #365** (closed): sim: grade-set's variant-completeness guard counts occurrences, not distinct grid points
+- **Issue #360** (closed): Full-grid deck-parity receipts commit no raw RESULT: lines, so the RESULT:-family exact-match claim is not re-derivable from committed bytes
+- **Issue #359** (closed): parity_compare.py hardcodes "V" as the unit for every metric delta, mislabelling the access-time families
+
 ### 2026-11-15
 
+- **PR #369**: fix: fail closed when a request lacks composed_deck_sha256
+- **PR #364**: feat(sim): first live Monte Carlo deck-mode parity receipt, 3 families x 2 corners
+- **PR #346**: feat(sim): pin the ngspice environment via a staged run-directory .spiceinit
+- **PR #344**: refactor(reports): one guarded scrub path for every committed klt report
+- **Issue #362** (closed): deck_adapter: expected_from_request silently returns no composed_deck_sha256, re-opening the fail-open one level up
+- **Issue #340** (closed): Collapse layout/reports/generate.sh's ten inline python3 -c scrub blocks into one helper, guarded by klt env-provenance scan
+- **Issue #338** (closed): Pin ngspice compatibility mode in deck-mode requests instead of inheriting the executing host's .spiceinit
 - **PR #363**: feat(layout): mint the 64 x 128 array DRC/extract/LVS report trio under the pinned klt
 - **PR #358**: fix: fail closed on unreported deck_sha256 in reduce_report
 - **PR #355**: sim: full-grid deck-mode parity receipt, 27 corners x 5 families, via mechanical parity_compare

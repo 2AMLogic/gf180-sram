@@ -296,11 +296,16 @@ gap and stays tracked there.
 
 ## Provenance hygiene: one scrub path
 
-Every report in this directory is written by exactly one piece of code --
+Every report `generate.sh` writes is written by exactly one piece of code --
 [`commit_report.py`](commit_report.py), called from `generate.sh` as
-`commit_report <raw-json> <out-json> [--set F=V] [--drop F] [--print FMT]`.
-There is no second path, and that is the point. It does three things to every
-report, in order:
+`commit_report <raw-json> <out-json> [--set F=V] [--set-format F=TEMPLATE]
+[--drop F] [--print FMT]`. There is no second path, and that is the point.
+The one report in this directory *outside* that path is
+`drc-foundry-bitcell.json`, hand-maintained separately because it checks the
+foundry's macro rather than this repo's own layout -- see the table above and
+"The CI half, and what is grandfathered" below. For everything
+`generate.sh` mints, `commit_report.py` does three things to every report, in
+order:
 
 1. **Rewrite.** The generating checkout's root (`$ROOT`) and the run's scratch
    directory (`$WORK`) are stripped out of *every string in the document* --
@@ -317,7 +322,13 @@ report, in order:
    the offending field named. Two fields are deliberate prose rather than paths
    and are set explicitly with `--set`: the scratch abutted composite's `file`
    (`drc-column-abut.json`, `drc-native-column-abut.json`) and the PDK-native
-   `deck` (`drc-native-column-*.json`).
+   `deck` (`drc-native-column-*.json`). A third form, `--set-format
+   F=TEMPLATE`, sets a field from a `str.format` template over the report's
+   other top-level fields -- applied after `--drop` and `--set`, the same
+   template `--print` applies -- so the array reports' `_note`s cite the
+   report's own `{device_count}`/`{net_count}` instead of hand-copied numbers
+   (issue #371). If `--set` and `--set-format` target the same field,
+   `--set-format` wins.
 3. **Re-dump** with `indent=2` and a trailing newline, then print the status
    line (`--print` is a `str.format` template over the report's top-level
    fields).

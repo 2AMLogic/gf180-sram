@@ -9,8 +9,9 @@ content (#200); the spec's status table is dated and stays as is.
 ## What is swept
 
 The same reduced-array macro bench as `sim/macro-smoke` (identical `OPS`
-table, `reduced_array()` and 20 fF bit-line stand-in, copied verbatim —
-pinned by `sim/lib/test_min_clock_pulse.py`), with `(clk_high, clk_low)` as
+table, `reduced_array()` and 20 fF bit-line stand-in, imported from
+`smoke.py` per the `access_power.py` pattern — pinned by
+`sim/lib/test_min_clock_pulse.py`), with `(clk_high, clk_low)` as
 generator arguments. `klt sim`'s corner axes are PVT only, so the swept axis
 lives outside the request: one generated body + request per grid point, the
 `sim/wordline-rc/` shape. Two 1-D sweeps sharing the 10/10 ns baseline
@@ -56,7 +57,14 @@ FAIL — bench evidence, not a macro failure.
 
 `grade-set <reports...>` folds the per-variant verdicts into the per-corner
 minimum on each axis: the smallest grid width that passes **and** has no
-failing or unmeasured width above it. A pass island below the reported
+failing or unmeasured width above it. Pass each variant's report exactly
+once, and pass only reports that all carry the same corner set: every
+corner is validated against its axis grid — the set of variant tags must
+equal the grid exactly, so an off-grid tag is as much an error as a missing
+one — before any minimum prints. A structural error (a variant off the
+grid or repeated on an axis, a corner short of the full variant set, or
+reports disagreeing on the corner-id set) is an `ERROR:` line on stderr
+and exit 1, with **no** minimums reported. A pass island below the reported
 minimum is recorded in a NOTE, not smoothed. Sentinels per AC2, never
 dropped: `>= <max grid>` (smallest passing width is the largest grid point —
 the grid does not bracket the minimum) and `OPEN` (nothing passes, or a
