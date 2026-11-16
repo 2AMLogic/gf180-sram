@@ -11,6 +11,7 @@ hand-edit that region.
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
 - **#349**: config: widen Guide doc-maintenance debounce windows to 6h/12h
+- **#384**: chore(loom): resync installed Loom to v0.19.1302
 
 ## Very Important
 
@@ -23,47 +24,40 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 `loom:important`; taken before unlabelled work.
 
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS
-- **#327**: Commit DRC and LVS reports for the 64 x 128 array the macro is built on
-- **#328**: sim: minimum clock pulse bench on the macro-smoke netlist over the 27 corners
-- **#329**: sim: dynamic power per read and write access on the macro-smoke netlist, 27 corners
-- **#338**: Pin ngspice compatibility mode in deck-mode requests instead of inheriting the executing host's .spiceinit
 - **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance
 
 ## Ready
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#337**: Adopt sim/lib/repo_root.py at the 5 sites still hand-rolling a fixed-depth repo root
+- **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance
+- **#372**: Evidence gate: receipt "Files in" coverage is invisible — a receipt with no matching table heading is silently ungated
+- **#373**: deck_adapter mc-reduce: the MC path never checks composed_deck_sha256, so MC receipts have no deck-bytes-unchanged check at all
+- **#381**: Amended committed-bytes rule: MC receipts carry no preserved RESULT: lines, and the stated byte cost measures raw line text rather than committed growth
+- **#382**: sim: grade-set completeness is a distinct count, not a set — an off-grid variant can substitute for an omitted grid point
+- **#388**: Consolidate duplicated klt request skeleton and Q-word grading across smoke, access-power, min-clock-pulse benches
+- **#392**: Four committed sim/pex/*/testbench/tb_* benches are pinned by no signoff wrapper
+- **#393**: commit_report.py: --print templates are unguarded, so a malformed one tracebacks AFTER out.json is already committed
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
-- **#327**: Commit DRC and LVS reports for the 64 x 128 array the macro is built on
-- **#328**: sim: minimum clock pulse bench on the macro-smoke netlist over the 27 corners
-- **#329**: sim: dynamic power per read and write access on the macro-smoke netlist, 27 corners
 - **#332**: Remove the duplicated evidence-format CI run and the stale 'nothing has landed yet' scaffolding framing
-- **#335**: Remove dead npm script worktree:return — its target was deleted by a Loom resync
-- **#338**: Pin ngspice compatibility mode in deck-mode requests instead of inheriting the executing host's .spiceinit
-- **#340**: Collapse layout/reports/generate.sh's ten inline python3 -c scrub blocks into one helper, guarded by klt env-provenance scan
-- **#342**: Remove the dead spacing_of() stub in layout/macro/generate.py: no callers, and wrong for M1 and vias
-- **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
 - **#264**: feat: store new evidence bytes in the artifact store, commit manifests only
-- **#351**: data: measure minimum clock pulse width per corner on the macro bench (#328)
-- **#352**: fix: drop dead spacing_of() stub from the macro generator
 
 ## Approved (Awaiting Merge)
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#348**: build: remove dead worktree:return npm script entry
 - **#349**: config: widen Guide doc-maintenance debounce windows to 6h/12h
+- **#384**: chore(loom): resync installed Loom to v0.19.1302
 
 ## Proposed
 
@@ -74,17 +68,19 @@ Issues carrying `loom:curated`.
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 - **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)*
-- **#327**: Commit DRC and LVS reports for the 64 x 128 array the macro is built on *(curated)*
-- **#328**: sim: minimum clock pulse bench on the macro-smoke netlist over the 27 corners *(curated)*
-- **#329**: sim: dynamic power per read and write access on the macro-smoke netlist, 27 corners *(curated)*
-- **#338**: Pin ngspice compatibility mode in deck-mode requests instead of inheriting the executing host's .spiceinit *(curated)*
 - **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance *(curated)*
-- **#345**: deck_adapter.reduce_report() inlines the RESULT:/RESULT-ERROR: grammar its own module already re-exports *(curated)*
+- **#372**: Evidence gate: receipt "Files in" coverage is invisible — a receipt with no matching table heading is silently ungated *(curated)*
+- **#373**: deck_adapter mc-reduce: the MC path never checks composed_deck_sha256, so MC receipts have no deck-bytes-unchanged check at all *(curated)*
+- **#381**: Amended committed-bytes rule: MC receipts carry no preserved RESULT: lines, and the stated byte cost measures raw line text rather than committed growth *(curated)*
+- **#382**: sim: grade-set completeness is a distinct count, not a set — an off-grid variant can substitute for an omitted grid point *(curated)*
+- **#392**: Four committed sim/pex/*/testbench/tb_* benches are pinned by no signoff wrapper *(curated)*
+- **#393**: commit_report.py: --print templates are unguarded, so a malformed one tracebacks AFTER out.json is already committed *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)*
 - **#330**: Split the shared periphery-layout library out of layout/periphery/column/generate.py *(hermit)*
+- **#394**: Dedupe pulse.py's copied smoke.py stimulus/testbench code (~50-110 LOC) *(hermit)*
 
 ## Epics
 
@@ -94,14 +90,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 2 |
 | Very important | 1 |
-| Important | 6 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 10 |
-| PRs awaiting review | 3 |
+| Important | 2 |
+| Ready (`loom:issue`) | 8 |
+| In Progress (`loom:building`) | 2 |
+| PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 2 |
-| Curated | 11 |
-| Architect / Hermit proposals | 2 |
+| Curated | 12 |
+| Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
