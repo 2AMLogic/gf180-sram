@@ -212,10 +212,12 @@ def _do_commit(args: argparse.Namespace) -> int:
             )
         try:
             data[field] = template.format(**data)
-        except (KeyError, IndexError, ValueError) as exc:
-            # An unknown placeholder (KeyError), a bad index, or a malformed
-            # template must name the field and exit, not traceback -- the
-            # report was never staged, so there is nothing to clean up.
+        except (KeyError, IndexError, ValueError, TypeError, AttributeError) as exc:
+            # An unknown placeholder (KeyError), a bad index, a malformed
+            # template (ValueError), a type mismatch such as {list[key]}
+            # (TypeError), or an attribute access like {str.attr}
+            # (AttributeError) must name the field and exit, not traceback --
+            # the report was never staged, so there is nothing to clean up.
             sys.exit(
                 f"FATAL: --set-format field {field!r}: template "
                 f"{template!r} does not format against the report's "

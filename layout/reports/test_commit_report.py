@@ -246,6 +246,46 @@ class CommitTest(unittest.TestCase):
             list(self.tmp.glob(".out.json.*")), [], "nothing staged either"
         )
 
+    def test_set_format_type_error_over_a_list_exits_naming_the_field(self):
+        """`{list[key]}` formats to TypeError, which is outside the old
+        (KeyError, IndexError, ValueError) tuple (issue #385)."""
+        proc = self.commit(
+            {"status": "clean", "devices": [1, 2]},
+            "--skip-lint",
+            "--set-format",
+            "_note={devices[key]} x",
+            check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", out)
+        self.assertIn("_note", out)
+        self.assertFalse(self.out.exists(), "nothing committed on a bad template")
+        self.assertEqual(
+            list(self.tmp.glob(".out.json.*")), [], "nothing staged either"
+        )
+
+    def test_set_format_attribute_error_over_a_string_field_exits_naming_the_field(
+        self,
+    ):
+        """`{str.attr}` formats to AttributeError, likewise outside the old
+        tuple (issue #385)."""
+        proc = self.commit(
+            {"status": "clean"},
+            "--skip-lint",
+            "--set-format",
+            "_note={status.y}",
+            check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", out)
+        self.assertIn("_note", out)
+        self.assertFalse(self.out.exists(), "nothing committed on a bad template")
+        self.assertEqual(
+            list(self.tmp.glob(".out.json.*")), [], "nothing staged either"
+        )
+
     def test_generate_sh_note_templates_render_committed_notes_byte_for_byte(self):
         """Issue #371 item 1's no-op oracle: each `--set-format` template in
         generate.sh, rendered against the committed report's own field
