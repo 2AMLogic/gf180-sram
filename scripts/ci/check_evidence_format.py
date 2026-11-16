@@ -56,6 +56,16 @@ exists today:
       inline code in a table rather than as a markdown link, so a receipt
       asserting evidence it does not commit fails CI naming the row
       instead of reporting green (issue #356).
+   8. `sim/testbenches.signoff.json` -- the T1 item 9 "Testbenches shipped"
+      attestation -- pins an explicitly enumerated path set, and that
+      enumeration must track what `sim/` actually ships: every tracked
+      `sim/<experiment>/testbench/tb_*` bench must appear in the wrapper's
+      `provenance.input.paths`. Nothing else couples the enumeration to
+      the tree, so every new bench silently lands outside the verdict of
+      record while item 9 keeps grading `met` -- the drift recurred three
+      times (#310, #350, #328), twice while issue #357 was open, which is
+      why this is a CI failure rather than a data fix. Pure Python over
+      committed files -- no ngspice, no PDK, no `klt`.
 
 As the harness and evidence-record grammar land (#21, #24), this script is
 the place to grow real per-record field validation -- it does not invent
@@ -65,6 +75,7 @@ that grammar itself.
 from __future__ import annotations
 
 import fnmatch
+import json
 import re
 import subprocess
 import sys
@@ -384,6 +395,72 @@ def check_receipt_files_tables(tracked: set[str], errors: list[str]) -> None:
             errors.append(files_table_error(doc, token, pattern))
 
 
+# --- T1 item-9 testbench-attestation gate (issue #357) ------------------
+# The item-9 wrapper ("Testbenches shipped") pins an explicitly enumerated
+# path set; nothing else ties that enumeration to what sim/ ships, so every
+# new bench silently lands outside the verdict of record while the item
+# keeps grading `met`. This check makes the drift a CI failure.
+
+# The wrapper whose pinned set must cover every tracked bench.
+TESTBENCH_ATTESTATION = "sim/testbenches.signoff.json"
+
+
+def is_bench_path(path: str) -> bool:
+    """A bench is `sim/<experiment>/testbench/tb_*`: exactly one experiment
+    level, a `testbench/` directory, and a `tb_` file prefix. The prefix
+    rule deliberately excludes the array-stripped DUT netlist copies
+    (`sram_256x32.noarray.spice`) that also live in testbench/ dirs -- item
+    9 attests benches, not derived design netlists."""
+    parts = path.split("/")
+    return (
+        len(parts) == 4
+        and parts[0] == "sim"
+        and parts[2] == "testbench"
+        and parts[3].startswith("tb_")
+    )
+
+
+def bench_paths(tracked: set[str]) -> set[str]:
+    """The tracked files that are benches under the is_bench_path rule."""
+    return {p for p in tracked if is_bench_path(p)}
+
+
+def attestation_gaps(bench_paths: set[str], pinned: set[str]) -> list[str]:
+    """Benches the item-9 wrapper fails to pin, sorted.
+
+    Pure helper: takes the tracked bench set and the wrapper's pinned
+    paths, so it unit-tests without a repo walk. A pinned path that is not
+    a bench (sim/README.md, the DUT netlist copies) is never reported --
+    gaps are computed over benches only.
+    """
+    return sorted(bench_paths - pinned)
+
+
+def pinned_attestation_paths(wrapper: str) -> list[str]:
+    doc = json.loads((REPO_ROOT / wrapper).read_text(encoding="utf-8"))
+    return [
+        member["path"]
+        for member in doc.get("provenance", {}).get("input", {}).get("paths", [])
+    ]
+
+
+def check_testbench_attestation(tracked: set[str], errors: list[str]) -> None:
+    if TESTBENCH_ATTESTATION not in tracked:
+        # Wrapper not committed in this checkout -- nothing to compare.
+        return
+    gaps = attestation_gaps(
+        bench_paths(tracked), set(pinned_attestation_paths(TESTBENCH_ATTESTATION))
+    )
+    for path in gaps:
+        errors.append(
+            f"unattested testbench: {path} is tracked under "
+            "sim/<experiment>/testbench/ but absent from the T1 item-9 "
+            f"wrapper {TESTBENCH_ATTESTATION} (provenance.input.paths) -- "
+            'add it as {"path": ...} and re-run ./signoff/regenerate.sh '
+            "so the verdict of record keeps covering every committed bench"
+        )
+
+
 def check_derived_fresh(
     tracked: set[str], errors: list[str], spec: DerivedFile
 ) -> None:
@@ -427,6 +504,7 @@ def main() -> int:
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
     check_receipt_files_tables(tracked, errors)
+    check_testbench_attestation(tracked, errors)
     for spec in DERIVED_FILES:
         check_derived_fresh(tracked, errors, spec)
 
@@ -443,6 +521,8 @@ def main() -> int:
         "raw artifacts, no broken relative doc links, every receipt "
         '"Files in" table entry resolves to committed files, '
         + ", ".join(f"{d.committed} in sync with {d.generator}" for d in DERIVED_FILES)
+        + ", every tracked sim/<experiment>/testbench/tb_* bench pinned by "
+        + TESTBENCH_ATTESTATION
         + "."
     )
     return 0
