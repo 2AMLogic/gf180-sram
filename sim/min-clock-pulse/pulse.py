@@ -406,15 +406,33 @@ def grade_set(reports) -> int:
     """Fold per-variant verdicts into the per-corner minimum on each axis.
     Exit 0 if every corner is bracketed on both axes; 2 if any corner carries
     a sentinel (OPEN / >= max) -- recorded evidence, not a crash; 1 on a
-    structural problem (unreadable report, variant off the grid, an axis
-    missing or repeating a variant)."""
+    structural problem (a variant off the grid, an axis missing or repeating
+    a variant, a corner short of the full variant set, or reports disagreeing
+    on the corner-id set). Completeness is a SET test against grid_tags(axis)
+    per corner and axis -- never a count -- so an on-axis off-grid tag cannot
+    substitute for an omitted grid point (#365, #382); every corner is
+    validated before anything prints, so no MIN line precedes an ERROR."""
     by_axis = {}  # corner_id -> {"high": {width: status}, "low": {...}}
     seen_axes = {}  # corner_id -> {"high": [tags], "low": [tags]}: one append
-    # per report-axis visit; completeness counts the DISTINCT tags, not the
-    # occurrences, so a repeated report cannot mask an omitted one (#365).
+    # per report-axis visit.
+    corner_ids = None  # every report must carry the same corner-id set
     sentinels = 0
     for path in reports:
         tag, verdicts = grade_report(path)
+        ids = set(verdicts)
+        if corner_ids is None:
+            corner_ids = ids
+        elif ids != corner_ids:
+            # a short corners[] array (e.g. a reduced re-collection patch
+            # run) must be named at its source, not surface later as a
+            # per-corner axis shortfall (#382).
+            print(
+                f"ERROR: {tag}: corner set differs from earlier reports"
+                f" (missing: {sorted(corner_ids - ids)},"
+                f" unexpected: {sorted(ids - corner_ids)})",
+                file=sys.stderr,
+            )
+            return 1
         high, low = parse_variant(tag)
         if low == CLK_LOW_HELD:
             axes = [("high", high)]  # a high-axis variant (incl. the 10/10 baseline)
@@ -426,21 +444,28 @@ def grade_set(reports) -> int:
             for cid, v in verdicts.items():
                 by_axis.setdefault(cid, {"high": {}, "low": {}})[axis][width] = v["status"]
                 seen_axes.setdefault(cid, {"high": [], "low": []})[axis].append(tag)
+    # Validation pass: every corner, every axis, checked before any output
+    # (#382 AC3) -- a defect confined to a late-sorting corner must not let
+    # earlier corners print MIN lines first.
+    cells_by_cid = {}
     for cid in sorted(by_axis):
         cells = {}
         for axis, grid in (("high", CLK_HIGH_GRID), ("low", CLK_LOW_GRID)):
-            expected = len(grid)
             seen = seen_axes[cid][axis]
-            got = len(set(seen))  # distinct variants, not occurrences (#365)
-            if got != expected:
-                missing = sorted(set(grid_tags(axis)) - set(seen))
-                if missing:
-                    detail = f"missing: {missing}"
-                else:  # extras: a variant off this axis's grid
-                    detail = f"unexpected: {sorted(set(seen) - set(grid_tags(axis)))}"
+            seen_set, want = set(seen), set(grid_tags(axis))
+            if seen_set != want:  # set equality, not a distinct count (#382)
+                parts = []
+                if missing := sorted(want - seen_set):
+                    parts.append(f"missing: {missing}")
+                if unexpected := sorted(seen_set - want):
+                    parts.append(f"unexpected: {unexpected}")
+                # both halves when both are non-empty (the substitution case
+                # has missing and unexpected at once, and the distinct count
+                # can equal the grid size -- 6 of 6, still wrong -- so no
+                # "N of M" framing here).
                 print(
-                    f"ERROR: {cid}: {axis} axis has {got} of {expected} variants"
-                    f" ({detail})",
+                    f"ERROR: {cid}: {axis} axis variant set does not match"
+                    f" the grid ({'; '.join(parts)})",
                     file=sys.stderr,
                 )
                 return 1
@@ -457,6 +482,10 @@ def grade_set(reports) -> int:
             cells[axis] = (display, note, by_axis[cid][axis])
             if display == OPEN or display.startswith(">="):
                 sentinels += 1
+        cells_by_cid[cid] = cells
+
+    # Printing pass: reached only when every corner graded cleanly.
+    for cid, cells in cells_by_cid.items():
 
         def status_str(m):
             return " ".join(f"{w:g}:{s[0]}" for w, s in sorted(m.items()))

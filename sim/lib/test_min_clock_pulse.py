@@ -364,6 +364,85 @@ class FixtureGradingTest(unittest.TestCase):
         self.assertEqual(code, 1)
         Path(tmp.name).unlink()
 
+    def fabricated(self, src_tag: str, dst_tag: str) -> str:
+        """A copy of a fixture report re-tagged as `dst_tag` via its
+        netlist.path (the substitution technique of the off-axis test)."""
+        rep = fixture(src_tag)
+        rep["netlist"]["path"] = f"sim/min-clock-pulse/testbench/tb_min_clk_{dst_tag}.klt.spice"
+        (tmp := tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)).write(
+            json.dumps(rep)
+        )
+        tmp.close()
+        return tmp.name
+
+    def short_report(self, src_tag: str, drop_cid: str) -> str:
+        """A copy of a fixture report minus one corners[] entry."""
+        rep = fixture(src_tag)
+        rep["corners"] = [c for c in rep["corners"] if c["corner_id"] != drop_cid]
+        (tmp := tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)).write(
+            json.dumps(rep)
+        )
+        tmp.close()
+        return tmp.name
+
+    def test_grade_set_rejects_off_grid_substitution(self):
+        """An on-axis, off-grid tag (h07_l10) substituting for an omitted grid
+        point (h04_l10) keeps a distinct count at 6 of 6 (#382 AC1) — the set
+        test must reject it: exit 1, no MIN line, and the error names BOTH
+        halves (missing h04_l10, unexpected h07_l10), with no "N of M" count
+        framing to read as a 6-of-6 contradiction (AC2)."""
+        by_tag = self.fixture_reports_by_tag()
+        fab = self.fabricated("h04_l10", "h07_l10")
+        argv = [p for t, p in by_tag.items() if t != "h04_l10"] + [fab]
+        try:
+            code, out, err = self.grade_set_captured(argv)
+        finally:
+            Path(fab).unlink()
+        self.assertEqual(code, 1)
+        self.assertIn("missing: ['h04_l10']", err)
+        self.assertIn("unexpected: ['h07_l10']", err)
+        self.assertNotIn("of 6 variants", err)  # count framing invites "6 of 6, yet wrong"
+        self.assertNotIn("Traceback", err)
+        self.assertNotIn("MIN:", out)
+
+    def test_grade_set_no_min_before_corner_short_error(self):
+        """A report short one corners[] entry is a structural error before any
+        minimum prints (#382 AC3): exit 1 and zero MIN lines, whichever end of
+        sorted(corner_id) the dropped corner sits at. #365's AC3 held for the
+        uniform-corner case only; this makes it unconditional."""
+        by_tag = self.fixture_reports_by_tag()
+        for drop in ("tt_25c_3.30v", "tt_-40c_3.63v"):  # sorts last / first
+            short = self.short_report("h14_l10", drop)
+            argv = [p for t, p in by_tag.items() if t != "h14_l10"] + [short]
+            try:
+                code, out, err = self.grade_set_captured(argv)
+            finally:
+                Path(short).unlink()
+            self.assertEqual(code, 1, f"dropped {drop}")
+            self.assertEqual([l for l in out.splitlines() if l.startswith("MIN:")], [],
+                             f"MIN printed before the error (dropped {drop})")
+            self.assertIn(drop, err)
+            self.assertNotIn("Traceback", err)
+
+    def test_grade_set_below_grid_substitution_is_structural_error(self):
+        """A substitute below the grid floor (h03_l10 for an omitted h14_l10)
+        used to reach fold_axis with the grid's top point missing and raise an
+        uncaught KeyError: 14.0 (#382 AC4). The set test rejects it first:
+        exit 1 with an ERROR, never a traceback."""
+        by_tag = self.fixture_reports_by_tag()
+        fab = self.fabricated("h14_l10", "h03_l10")
+        argv = [p for t, p in by_tag.items() if t != "h14_l10"] + [fab]
+        try:
+            code, out, err = self.grade_set_captured(argv)
+        finally:
+            Path(fab).unlink()
+        self.assertEqual(code, 1)
+        self.assertIn("missing: ['h14_l10']", err)
+        self.assertIn("unexpected: ['h03_l10']", err)
+        self.assertNotIn("KeyError", err)
+        self.assertNotIn("Traceback", err)
+        self.assertNotIn("MIN:", out)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
