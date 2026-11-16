@@ -460,13 +460,13 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:f7d30e9c63adaff8bfe05016e4f0626c3f771fff8e5d0c9aa65414144cf78b49",
+        "content_hash": "sha256:1c73d53d7a80f1d3b424843c7831dc01622822e71bfa5e8fae1b4133610fdf9f",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 10,
           "path": null,
-          "content_hash": "sha256:f7d30e9c63adaff8bfe05016e4f0626c3f771fff8e5d0c9aa65414144cf78b49",
+          "content_hash": "sha256:1c73d53d7a80f1d3b424843c7831dc01622822e71bfa5e8fae1b4133610fdf9f",
           "input_verified": true,
           "members": [
             {
@@ -481,11 +481,11 @@
             },
             {
               "path": ".github/workflows/ci.yml",
-              "content_hash": "sha256:d6ede424ec6391c59951689d9847c0588ac35bacb6c1363fd1e5bf215f530406",
+              "content_hash": "sha256:17e0c00b3313c9b6606b98b2b499801dca0882ce95e6822d5af00d1213edc343",
               "status": "verified"
             }
           ],
-          "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request and push to main, plus the signoff re-grade, the provenance-hygiene host-path-leak guard, and the repo-hygiene tracked-tree gate). The pins prove these files are the ones attested; they do not run CI."
+          "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request and push to main, plus the signoff re-grade, the provenance-hygiene host-path-leak guard, the generated-array-schematics drift check, and the repo-hygiene tracked-tree gate). The pins prove these files are the ones attested; they do not run CI."
         }
       }
     },
