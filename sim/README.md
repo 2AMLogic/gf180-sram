@@ -155,7 +155,9 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
   a request whose seeds drifted). `mc-reduce` regroups a deck report into the
   per-seed `(index, results, errors)` tuples `run_batch`/`run_batch_pair`
   return plus the `klt yield` sample-set measurement blocks. Same fail-closed
-  rules as `reduce`; exit 0 is never a PASS. Example:
+  rules as `reduce`, including the deck check: every unit's `deck_sha256`
+  must equal the request's composed deck, and a unit that reports none is
+  itself a coverage error; exit 0 is never a PASS. Example:
   `sim/lib/deck_adapter.py mc-build read-snm --corner tt:25:3.30 --corner ff:125:2.97 --seed 1 --stage-dir /tmp/mc --request-out /tmp/mc/request.json`
 * `sim/lib/test_deck_adapter.py` (in `npm test`) covers this offline with stub
   reports. Stub results are contract checks, **not** physical evidence.
@@ -189,8 +191,9 @@ the deterministic campaign ran with compatibility modes -- so which
 environment future campaigns standardize on is now an open
 evidence-policy decision (recorded in that receipt; a spec/ decision
 record, not a transport gap). `parity_compare.py mc` mechanically asserts
-deck bytes and per-unit seeds against the *returned* units (which
-`mc-reduce` does not check) and compares per-sample arrays.
+deck bytes and per-unit seeds against the *returned* units (independently
+of `mc-reduce`'s own checks, as defense in depth) and compares per-sample
+arrays.
 
 1. *Executor capability* -- **met.** A `decks[]` request from this repo was
    accepted and executed end to end: runner `klt 0.9.0` on AMI

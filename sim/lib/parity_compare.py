@@ -400,9 +400,9 @@ def compare_mc(family, reduced, request, report, sample_set_path, record_path, *
     """Compare one family's MC deck-mode grading against its committed sample-set.
 
     MC counterpart of `compare` (the 2026-11-15 curated acceptance criteria
-    for #230's Monte Carlo increment). Asserts, here and never by
-    `mc-reduce`'s silence (which checks seeds and coverage but performs
-    **no** deck-bytes check at all):
+    for #230's Monte Carlo increment). Asserts, here and independently of
+    `mc-reduce`'s own grading (which checks deck bytes and seeds too -- the
+    comparator reads the *returned* units rather than trusting the reducer):
 
     * deck bytes: every report unit's `deck_sha256` present and equal to the
       request's `composed_deck_sha256`;
@@ -471,7 +471,8 @@ def compare_mc(family, reduced, request, report, sample_set_path, record_path, *
     if extra_units:
         problems.append(f"units in the report but not the request: {extra_units}")
 
-    # -- deck bytes: present AND equal, for every unit (mc-reduce has no check)
+    # -- deck bytes: present AND equal, for every unit (asserted here independently
+    #    of mc-reduce's own deck check; the comparator reads the returned units)
     deck_sha_errors = []
     if not composed:
         problems.append("request has no x_gf180_sram_adapter.composed_deck_sha256 to assert against")
@@ -930,7 +931,7 @@ def main_mc(argv) -> int:
                     help="the request.json mc-build wrote (manifest, seeds, composed deck sha256)")
     ap.add_argument("--report", required=True,
                     help="klt sim's deck report (units[].deck_sha256 -- the comparator's "
-                         "deck-bytes evidence; mc-reduce performs no such check)")
+                         "deck-bytes evidence, asserted independently of mc-reduce's own check)")
     ap.add_argument("--samples", help="committed MC sample-set (default: the family's binding "
                                       "in render_signoff_table.MC_SAMPLE_SETS)")
     ap.add_argument("--record", help="deterministic record for the ctrl anchor "
