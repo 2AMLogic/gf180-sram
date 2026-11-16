@@ -8,6 +8,20 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-16
+
+- **PR #386**: feat(sim): full 9-corner MC deck-mode parity receipt, 13,680 units, with pin-attributed negative-control finding
+- **PR #383**: reports: template _note counts via --set-format; lint failures name the raw input
+- **PR #380**: docs: index the spiceinit-pin receipt in deck-parity README and link the now-landed unpinned receipt
+- **PR #377**: fix: label metric deltas with each family's unit from RECORD_CLAIMS
+- **PR #375**: fix: grade-set counts distinct variant tags and rejects a repeated report
+- **PR #374**: feat: preserve matched RESULT: lines per corner in deck_adapter reduce
+- **Issue #371** (closed): commit_report.py: three small follow-ups from the #340 review (templated --set, lint-failure diagnostic, README scoping)
+- **Issue #370** (closed): sim/deck-parity: index the spiceinit-pin receipt and drop its now-stale "not on main yet" note
+- **Issue #365** (closed): sim: grade-set's variant-completeness guard counts occurrences, not distinct grid points
+- **Issue #360** (closed): Full-grid deck-parity receipts commit no raw RESULT: lines, so the RESULT:-family exact-match claim is not re-derivable from committed bytes
+- **Issue #359** (closed): parity_compare.py hardcodes "V" as the unit for every metric delta, mislabelling the access-time families
+
 ### 2026-11-15
 
 - **PR #369**: fix: fail closed when a request lacks composed_deck_sha256
