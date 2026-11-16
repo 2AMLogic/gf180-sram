@@ -55,7 +55,14 @@ exists today:
       check 3, this closes the gap where a receipt cites evidence as
       inline code in a table rather than as a markdown link, so a receipt
       asserting evidence it does not commit fails CI naming the row
-      instead of reporting green (issue #356).
+      instead of reporting green (issue #356). The gate also reports its
+      own coverage -- tables gated, rows resolved -- in the success line,
+      so a receipt whose heading deviates (table invisible to the gate)
+      shows up as a dropped count plus a warning rather than as silence,
+      and a receipt-shaped table under an unmatched heading in a
+      deck-parity receipt is warned about without failing CI (issue
+      #372). Prose committed-bytes sections are deliberately out of
+      scope: prose claims are not machine-checkable.
    8. `sim/testbenches.signoff.json` -- the T1 item 9 "Testbenches shipped"
       attestation -- pins an explicitly enumerated path set, and that
       enumeration must track what `sim/` actually ships: every tracked
@@ -159,6 +166,26 @@ PLACEHOLDER_RE = re.compile(r"<[^<>]*>")
 NONE_COMMITTED_TOKEN = "(none committed)"
 # A markdown table separator row such as `|---|---|`.
 TABLE_SEPARATOR_RE = re.compile(r"^\|[\s:|-]*$")
+
+# The receipt docs the ungated-table warning scans (issue #372): top-level
+# sim/deck-parity/*.md only, README.md excluded. The `| File | What |`
+# tables elsewhere (the sim/*/README.md directory listings) are not run
+# receipts and must stay outside the warning.
+RECEIPT_DOC_RE = re.compile(r"^sim/deck-parity/[^/]+\.md$")
+
+
+class FilesTableCoverage(NamedTuple):
+    """What the receipt "Files in" walk actually looked at (issue #372).
+
+    Counts accumulated by the same walk that produces the unresolved-entry
+    errors, so the coverage line in main()'s success message cannot
+    disagree with what was checked: a drop to 0 shows up in the CI log
+    instead of a fixed assertion reporting green over an ungated receipt.
+    """
+
+    tables: int  # "## Files in `<dir>/`" sections parsed
+    rows: int  # non-exempt rows walked (each resolved on the success path)
+    rows_exempt: int  # rows skipped via the (none committed) token
 
 
 class DerivedFile(NamedTuple):
@@ -347,6 +374,34 @@ def glob_segment_match(pattern: str, path: str) -> bool:
     )
 
 
+def walk_files_tables(
+    doc_text: str, base_dir: str, file_list: Iterable[str]
+) -> tuple[list[tuple[str, str]], FilesTableCoverage]:
+    """Single walk of a receipt's "Files in" tables (issue #372).
+
+    Returns the unresolved ``(token, glob_pattern)`` findings -- what
+    :func:`unresolved_files_table_rows` reports -- together with the
+    :class:`FilesTableCoverage` counted along the way. One walk for both
+    so the reported coverage cannot disagree with the errors produced:
+    on the success path every non-exempt row counted is a row resolved.
+    """
+    findings: list[tuple[str, str]] = []
+    tables = rows = rows_exempt = 0
+    for dir_name, doc_rows in parse_files_tables(doc_text):
+        tables += 1
+        prefix = f"{base_dir.rstrip('/')}/{dir_name}"
+        for tokens, exempt in doc_rows:
+            if exempt:
+                rows_exempt += 1
+                continue
+            rows += 1
+            for token in tokens:
+                pattern = f"{prefix}/{PLACEHOLDER_RE.sub('*', token)}"
+                if not any(glob_segment_match(pattern, p) for p in file_list):
+                    findings.append((token, pattern))
+    return findings, FilesTableCoverage(tables, rows, rows_exempt)
+
+
 def unresolved_files_table_rows(
     doc_text: str, base_dir: str, file_list: Iterable[str]
 ) -> list[tuple[str, str]]:
@@ -359,16 +414,7 @@ def unresolved_files_table_rows(
     zero committed files; exempt rows (What cell carries
     ``(none committed)``) are skipped entirely.
     """
-    findings: list[tuple[str, str]] = []
-    for dir_name, rows in parse_files_tables(doc_text):
-        prefix = f"{base_dir.rstrip('/')}/{dir_name}"
-        for tokens, exempt in rows:
-            if exempt:
-                continue
-            for token in tokens:
-                pattern = f"{prefix}/{PLACEHOLDER_RE.sub('*', token)}"
-                if not any(glob_segment_match(pattern, p) for p in file_list):
-                    findings.append((token, pattern))
+    findings, _ = walk_files_tables(doc_text, base_dir, file_list)
     return findings
 
 
@@ -382,7 +428,12 @@ def files_table_error(doc: str, token: str, pattern: str) -> str:
     )
 
 
-def check_receipt_files_tables(tracked: set[str], errors: list[str]) -> None:
+def check_receipt_files_tables(
+    tracked: set[str], errors: list[str]
+) -> FilesTableCoverage:
+    """Walk every doc's "Files in" tables, collecting errors; return the
+    coverage the same walk counted (issue #372)."""
+    tables = rows = rows_exempt = 0
     for doc in sorted(link_check_docs(tracked)):
         full = REPO_ROOT / doc
         try:
@@ -391,8 +442,86 @@ def check_receipt_files_tables(tracked: set[str], errors: list[str]) -> None:
             # Already reported by check_markdown_links over the same set.
             continue
         base_dir = full.parent.relative_to(REPO_ROOT).as_posix()
-        for token, pattern in unresolved_files_table_rows(text, base_dir, tracked):
+        findings, coverage = walk_files_tables(text, base_dir, tracked)
+        tables += coverage.tables
+        rows += coverage.rows
+        rows_exempt += coverage.rows_exempt
+        for token, pattern in findings:
             errors.append(files_table_error(doc, token, pattern))
+    return FilesTableCoverage(tables, rows, rows_exempt)
+
+
+def receipt_docs(tracked: set[str]) -> list[str]:
+    """Top-level deck-parity receipts: sim/deck-parity/*.md, README.md
+    excluded. The ungated-table warning's scan set (issue #372)."""
+    return sorted(
+        doc
+        for doc in link_check_docs(tracked)
+        if RECEIPT_DOC_RE.match(doc) and Path(doc).name != "README.md"
+    )
+
+
+def ungated_receipt_headings(doc_text: str) -> list[str]:
+    """Headings a ``| File | What |`` table sits under in a receipt doc
+    that are NOT a matching ``## Files in `<dir>/` `` heading -- the
+    receipt-shaped but ungated case (issue #372). The table under such a
+    heading is invisible to check 7; the caller warns, it does not fail.
+    Returns the unmatched heading line per offending table (empty string
+    when the table has no preceding heading at all)."""
+    lines = doc_text.splitlines()
+    unmatched: list[str] = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if cells != ["File", "What"]:
+            continue
+        heading = ""
+        for j in range(i - 1, -1, -1):
+            candidate = lines[j].strip()
+            if candidate.startswith("#"):
+                heading = candidate
+                break
+        if heading and FILES_TABLE_HEADING_RE.fullmatch(heading):
+            continue
+        unmatched.append(heading)
+    return unmatched
+
+
+def ungated_files_table_warning(doc: str, heading: str) -> str:
+    return (
+        f'ungated receipt table in {doc}: a "| File | What |" table sits '
+        f"under heading {heading!r}, which does not match the gated "
+        "'## Files in `<dir>/`' heading grammar -- the table is NOT "
+        "checked by the receipt files gate. Fix the heading (## Files in "
+        "`<receipt-dir>/`) or document the artifacts in prose if they are "
+        "not a committed-bytes inventory"
+    )
+
+
+def check_ungated_receipt_tables(tracked: set[str], warnings: list[str]) -> None:
+    """Warn (never fail) when a receipt's table is shaped like a "Files in"
+    table but sits under a heading the gate cannot see (issue #372)."""
+    for doc in receipt_docs(tracked):
+        try:
+            text = (REPO_ROOT / doc).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for heading in ungated_receipt_headings(text):
+            warnings.append(ungated_files_table_warning(doc, heading))
+
+
+def files_table_coverage_clause(coverage: FilesTableCoverage) -> str:
+    """The success-line fragment reporting check 7's coverage (issue #372)."""
+    clause = (
+        f'({coverage.tables} receipt "Files in" tables gated, '
+        f"{coverage.rows} rows resolved"
+    )
+    if coverage.rows_exempt:
+        noun = "row" if coverage.rows_exempt == 1 else "rows"
+        clause += f", {coverage.rows_exempt} exempt {noun} skipped"
+    return clause + ")"
 
 
 # --- T1 item-9 testbench-attestation gate (issue #357) ------------------
@@ -499,14 +628,21 @@ def check_derived_fresh(
 def main() -> int:
     tracked = set(tracked_files())
     errors: list[str] = []
+    warnings: list[str] = []
 
     check_readmes(tracked, errors)
     check_raw_artifacts(tracked, errors)
     check_markdown_links(tracked, errors)
-    check_receipt_files_tables(tracked, errors)
+    coverage = check_receipt_files_tables(tracked, errors)
+    check_ungated_receipt_tables(tracked, warnings)
     check_testbench_attestation(tracked, errors)
     for spec in DERIVED_FILES:
         check_derived_fresh(tracked, errors, spec)
+
+    # Warnings are signal, never verdict (issue #372): an ungated
+    # receipt-shaped table must not change the exit status.
+    for warning in warnings:
+        print(f"warning: {warning}", file=sys.stderr)
 
     if errors:
         print("evidence-format check FAILED:\n", file=sys.stderr)
@@ -519,7 +655,9 @@ def main() -> int:
         f"evidence-format check passed: {len(tracked)} tracked files, "
         f"{len(DELIVERABLE_DIRS)} deliverable READMEs present, no disallowed "
         "raw artifacts, no broken relative doc links, every receipt "
-        '"Files in" table entry resolves to committed files, '
+        '"Files in" table entry resolves to committed files '
+        + files_table_coverage_clause(coverage)
+        + ", "
         + ", ".join(f"{d.committed} in sync with {d.generator}" for d in DERIVED_FILES)
         + ", every tracked sim/<experiment>/testbench/tb_* bench pinned by "
         + TESTBENCH_ATTESTATION

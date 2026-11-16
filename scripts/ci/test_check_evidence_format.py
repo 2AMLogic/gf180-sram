@@ -234,6 +234,135 @@ class RealReceiptsTest(unittest.TestCase):
         )
 
 
+class FilesTableCoverageTest(unittest.TestCase):
+    """The coverage line and the ungated-table warning (issue #372)."""
+
+    def test_coverage_counts_from_the_error_walk(self):
+        # One walk returns the findings and the counts together: 2 tables,
+        # 1 non-exempt row, 1 exempt row, 1 unresolved token.
+        doc = (
+            receipt("run-a", "`missing.json`")
+            + "\n"
+            + receipt("run-b", "`ok.json`", "(none committed)")
+        )
+        findings, coverage = cef.walk_files_tables(
+            doc, "sim/deck-parity", ["sim/deck-parity/run-b/ok.json"]
+        )
+        self.assertEqual([t for t, _ in findings], ["missing.json"])
+        self.assertEqual(
+            coverage, cef.FilesTableCoverage(tables=2, rows=1, rows_exempt=1)
+        )
+
+    def test_coverage_clause_reports_counts(self):
+        clause = cef.files_table_coverage_clause(
+            cef.FilesTableCoverage(tables=3, rows=26, rows_exempt=1)
+        )
+        self.assertIn("3", clause)
+        self.assertIn('receipt "Files in" tables gated', clause)
+        self.assertIn("26 rows resolved", clause)
+        self.assertIn("1 exempt row skipped", clause)
+        zero = cef.files_table_coverage_clause(cef.FilesTableCoverage(0, 0, 0))
+        self.assertIn('0 receipt "Files in" tables gated', zero)
+        self.assertIn("0 rows resolved", zero)
+
+    def test_coverage_clause_pluralizes_exempt_rows(self):
+        clause = cef.files_table_coverage_clause(
+            cef.FilesTableCoverage(tables=1, rows=2, rows_exempt=2)
+        )
+        self.assertIn("2 exempt rows skipped", clause)
+
+    def test_main_success_line_uses_the_coverage_clause(self):
+        source = inspect.getsource(cef.main)
+        self.assertIn("files_table_coverage_clause", source)
+
+    def test_matching_heading_produces_no_warning(self):
+        self.assertEqual(
+            cef.ungated_receipt_headings(receipt("run-a", "`ok.json`")), []
+        )
+
+    def test_each_heading_deviation_warns_but_does_not_fail(self):
+        # The five measured deviations (issue #372): the identical table
+        # under each is invisible to the gate -- a warning naming the
+        # heading, and zero findings (so the run still exits 0).
+        deviations = [
+            "## Files in `run-a`",  # no trailing slash
+            "## Files in run-a/",  # no backticks
+            "### Files in `run-a/`",  # h3
+            "## Files committed in `run-a/`",  # extra words before
+            "## Files in `run-a/` (committed bytes)",  # extra words after
+        ]
+        table = "| File | What |\n|---|---|\n| `whatever.json` | x |\n"
+        for heading in deviations:
+            text = f"{heading}\n\n{table}\n"
+            unmatched = cef.ungated_receipt_headings(text)
+            self.assertEqual(unmatched, [heading], heading)
+            warning = cef.ungated_files_table_warning("sim/deck-parity/r.md", heading)
+            self.assertIn("sim/deck-parity/r.md", warning)
+            self.assertIn(heading, warning)
+            findings, _ = cef.walk_files_tables(
+                text, "sim/deck-parity", ["sim/deck-parity/run-a/whatever.json"]
+            )
+            self.assertEqual(findings, [], heading)
+
+    def test_table_with_no_preceding_heading_warns(self):
+        text = "| File | What |\n|---|---|\n| `a.json` | x |\n"
+        self.assertEqual(cef.ungated_receipt_headings(text), [""])
+
+    def test_receipt_docs_scope(self):
+        tracked = {
+            "sim/deck-parity/20261114-tt_25c_3.30v.md",  # top-level receipt
+            "sim/deck-parity/README.md",  # excluded
+            "sim/deck-parity/20261115-full-grid/parity-compare.md",  # nested
+            "sim/macro-smoke/README.md",  # other experiment
+            "README.md",  # repo root
+        }
+        self.assertEqual(cef.receipt_docs(tracked), [
+            "sim/deck-parity/20261114-tt_25c_3.30v.md"
+        ])
+
+    def test_non_receipt_readme_tables_stay_silent(self):
+        # The three sim/*/README.md directory listings are not receipts:
+        # they carry | File | What | tables under unmatched headings, and
+        # the warning must emit nothing for them (issue #372 AC).
+        for readme in (
+            "sim/access-power/README.md",
+            "sim/macro-smoke/README.md",
+            "sim/min-clock-pulse/README.md",
+        ):
+            text = (REPO / readme).read_text(encoding="utf-8")
+            self.assertTrue(
+                cef.ungated_receipt_headings(text),
+                f"{readme} fixture: expected an ungated-shaped table",
+            )
+            self.assertEqual(
+                cef.receipt_docs({readme}), [], f"{readme} must be out of scope"
+            )
+
+    def test_live_receipts_emit_no_warnings(self):
+        tracked = set(p.relative_to(REPO).as_posix()
+                      for p in (REPO / "sim" / "deck-parity").glob("*.md"))
+        warnings: list[str] = []
+        cef.check_ungated_receipt_tables(tracked, warnings)
+        self.assertEqual(warnings, [])
+
+    def test_live_coverage_is_nonzero_and_consistent(self):
+        # Same walk, both outputs: the counts must equal the per-doc parse
+        # totals, and the shipped tree must gate every receipt table.
+        tracked = {
+            p.relative_to(REPO).as_posix()
+            for p in (REPO / "sim" / "deck-parity").rglob("*.md")
+        }
+        _, coverage = cef.walk_files_tables(
+            (REPO / "sim" / "deck-parity" / "20261115-full-grid.md").read_text(
+                encoding="utf-8"
+            ),
+            "sim/deck-parity",
+            [],
+        )
+        self.assertEqual(coverage.tables, 1)
+        self.assertEqual(coverage.rows + coverage.rows_exempt, 10)
+
+
 class BenchAttestationTest(unittest.TestCase):
     """The item-9 gate (issue #357): every tracked
     sim/<experiment>/testbench/tb_* bench must be pinned by
