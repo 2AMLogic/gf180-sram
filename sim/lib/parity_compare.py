@@ -850,6 +850,7 @@ def render_mc_markdown(summary):
     cov = summary["coverage"]
     sha = summary["deck_sha256"]
     seed = summary["seed_identity"]
+    unit = summary["unit"]
     if summary["comparison"] == "pre213-tolerance":
         rule = (
             f"pre-#213 extractor (`e140796^`) `--pair` mode applied to the fleet's own "
@@ -890,8 +891,8 @@ def render_mc_markdown(summary):
         dstats = mm.get("deltas")
         if dstats:
             lines.append(
-                f"  - per-sample |delta| distribution: n={dstats['n']}, max={dstats['max']:.3e} V,"
-                f" mean={dstats['mean']:.3e} V, p50={dstats['p50']:.3e} V, p95={dstats['p95']:.3e} V"
+                f"  - per-sample |delta| distribution: n={dstats['n']}, max={dstats['max']:.3e} {unit},"
+                f" mean={dstats['mean']:.3e} {unit}, p50={dstats['p50']:.3e} {unit}, p95={dstats['p95']:.3e} {unit}"
             )
         nc = corner["negative_control"] or {}
         if nc:
@@ -903,8 +904,8 @@ def render_mc_markdown(summary):
             nstats = nc.get("deltas")
             if nstats:
                 lines.append(
-                    f"  - per-sample |delta| distribution: n={nstats['n']}, max={nstats['max']:.3e} V,"
-                    f" mean={nstats['mean']:.3e} V, p50={nstats['p50']:.3e} V, p95={nstats['p95']:.3e} V"
+                    f"  - per-sample |delta| distribution: n={nstats['n']}, max={nstats['max']:.3e} {unit},"
+                    f" mean={nstats['mean']:.3e} {unit}, p50={nstats['p50']:.3e} {unit}, p95={nstats['p95']:.3e} {unit}"
                 )
             for o in nc.get("open_units") or []:
                 lines.append(f"  - OPEN unit `{o['id']}`: {o['reason']} (never counted as parity)")
