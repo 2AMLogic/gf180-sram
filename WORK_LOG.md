@@ -10,6 +10,10 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-16
 
+- **PR #401**: fix: grade-set completeness becomes a set test; validate before printing
+- **PR #398**: docs: scope deck-parity committed-bytes rule to reduce output, relabel byte figure as raw text
+- **Issue #382** (closed): sim: grade-set completeness is a distinct count, not a set — an off-grid variant can substitute for an omitted grid point
+- **Issue #381** (closed): Amended committed-bytes rule: MC receipts carry no preserved RESULT: lines, and the stated byte cost measures raw line text rather than committed growth
 - **PR #395**: ci: gate the item-9 testbench attestation on what sim/ ships
 - **PR #391**: reports: catch TypeError and AttributeError in --set-format template failures
 - **PR #387**: fix: label MC |delta| distribution stats from summary["unit"]
