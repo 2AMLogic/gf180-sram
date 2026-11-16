@@ -308,6 +308,46 @@ class FilesTableCoverageTest(unittest.TestCase):
         text = "| File | What |\n|---|---|\n| `a.json` | x |\n"
         self.assertEqual(cef.ungated_receipt_headings(text), [""])
 
+    def test_fenced_comment_between_heading_and_table_is_not_warned(self):
+        # Issue #408 shape (1): a bash fence between a gated heading and
+        # its table must not make the warning fire -- the gate gates this
+        # table, so the warning shadowing the gate stays silent.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "```bash\n"
+            "# regenerate\n"
+            "./x.sh\n"
+            "```\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `ok.json` | the thing |\n"
+        )
+        self.assertEqual(
+            cef.parse_files_tables(text), [("run-a", [(["ok.json"], False)])]
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_second_table_under_one_heading_warns(self):
+        # Issue #408 shape (2): the parser consumes only the FIRST table
+        # in a section, so a second "| File | What |" table under the same
+        # gated heading is ungated and must be warned about.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nSome prose.\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+        )
+        self.assertEqual(
+            cef.parse_files_tables(text), [("run-a", [(["a.json"], False)])]
+        )
+        self.assertEqual(
+            cef.ungated_receipt_headings(text), ["## Files in `run-a/`"]
+        )
+
     def test_receipt_docs_scope(self):
         tracked = {
             "sim/deck-parity/20261114-tt_25c_3.30v.md",  # top-level receipt
