@@ -9,8 +9,9 @@ content (#200); the spec's status table is dated and stays as is.
 ## What is swept
 
 The same reduced-array macro bench as `sim/macro-smoke` (identical `OPS`
-table, `reduced_array()` and 20 fF bit-line stand-in, copied verbatim —
-pinned by `sim/lib/test_min_clock_pulse.py`), with `(clk_high, clk_low)` as
+table, `reduced_array()` and 20 fF bit-line stand-in, imported from
+`smoke.py` per the `access_power.py` pattern — pinned by
+`sim/lib/test_min_clock_pulse.py`), with `(clk_high, clk_low)` as
 generator arguments. `klt sim`'s corner axes are PVT only, so the swept axis
 lives outside the request: one generated body + request per grid point, the
 `sim/wordline-rc/` shape. Two 1-D sweeps sharing the 10/10 ns baseline

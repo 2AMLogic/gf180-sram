@@ -40,13 +40,17 @@ artifact:
                               phase; smoke.py's fixed 6.0 ns violates its own
                               setup discipline once clk_low < 6.0)
 
-Everything else is copied verbatim from `sim/macro-smoke/smoke.py` (its `OPS`
-table, `reduced_array()`, `pwl()` and grading rule): same reduced two-row
-array, same 20 fF bit-line stand-in, same 7 sampled words, so results stay
-comparable with the 10/10 ns baseline. At (10, 10) the derived constants
-reproduce smoke.py's exactly (PERIOD 20, SAMPLE 9, SETUP 6), and the generated
-body is line-for-line its `tb_macro_write_read.klt.spice` -- pinned by
-`sim/lib/test_min_clock_pulse.py`.
+Everything else is `sim/macro-smoke/smoke.py`'s own unchanged stimulus,
+imported rather than copied (the `sim/access-power/access_power.py` pattern,
+#394): its `OPS` table, `FIRST_EDGE`/`TRISE`/`BL_STANDIN_FF` constants and
+`reduced_array()` -- same reduced two-row array, same 20 fF bit-line
+stand-in, same 7 sampled words, so results stay comparable with the 10/10 ns
+baseline. `pwl()` and `gen_klt()` stay local because they thread the derived
+constants as arguments; the `gen_klt` body remains hand-synced with
+smoke.py's, pinned by `sim/lib/test_min_clock_pulse.py`. At (10, 10) the
+derived constants reproduce smoke.py's exactly (PERIOD 20, SAMPLE 9,
+SETUP 6), and the generated body is line-for-line its
+`tb_macro_write_read.klt.spice`.
 
 `check-klt` grades one variant's report per corner against that corner's own
 VDD (a bit is defined if within 20% of a rail); a variant passes a corner only
@@ -69,19 +73,33 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "macro-smoke"))
 # The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
 # (#331); the request's `corners` block is derived from it, exactly as
 # sim/macro-smoke/smoke.py does. Numbers are converted at this consumer's own
 # boundary (see corner_matrix's "Axis element type").
 from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
 
+# The stimulus data and helpers shared with the 10/10 ns baseline are
+# imported, not copied (the sim/access-power/access_power.py pattern, #394):
+# smoke.py is the ratified generator and is not edited here, so its `OPS`
+# table, timing constants and `reduced_array()` cannot drift. Everything the
+# sweep varies stays local: `derived()` and `pwl()` below, and `gen_klt()`,
+# whose body remains hand-synced with smoke.py's (pinned by
+# `sim/lib/test_min_clock_pulse.py`).
+from smoke import (  # noqa: E402  (path-injected import, as access_power.py does)
+    BL_STANDIN_FF,
+    FIRST_EDGE,
+    M32,
+    OPS,
+    TRISE,
+    reduced_array,
+)
+
 HERE = Path(__file__).resolve().parent
 TB_DIR = HERE / "testbench"
 REQ_DIR = HERE / "requests"
 
-FIRST_EDGE = 5.0  # ns; edge 0 is an idle (CEN=1) initialisation cycle
-TRISE = 0.1
-BL_STANDIN_FF = 20  # lumped bit-line capacitance for the unpopulated rows
 DUT_COPY = "sram_256x32.noarray.spice"  # copied from sim/macro-smoke/testbench/
 
 # The swept grid: two 1-D sweeps sharing the 10/10 ns baseline (counted once,
@@ -92,25 +110,6 @@ CLK_LOW_HELD = 10.0
 CLK_HIGH_HELD = 10.0
 CLK_HIGH_GRID = (4.0, 6.0, 8.0, 10.0, 12.0, 14.0)
 CLK_LOW_GRID = (4.0, 6.0, 8.0, 10.0)
-
-# (label, CEN, GWEN, A, D, WEN, expected Q after this cycle's edge or None)
-# WEN[i] = 0 writes bit i. Q is only loaded by reads (CEN=0, GWEN=1).
-# Copied verbatim from sim/macro-smoke/smoke.py -- do not diverge.
-M32 = 0xFFFFFFFF
-OPS = [
-    ("idle-init", 1, 1, 0x00, 0x00000000, M32, None),
-    ("write A7", 0, 0, 0xA7, 0xDEADBEEF, 0x00000000, None),
-    ("write 3C", 0, 0, 0x3C, 0x12345678, 0x00000000, None),
-    ("read A7", 0, 1, 0xA7, 0x00000000, M32, 0xDEADBEEF),
-    ("read 3C", 0, 1, 0x3C, 0x00000000, M32, 0x12345678),
-    # per-bit mask: bits 15:0 masked (WEN=1), bits 31:16 written with ones
-    ("masked write A7", 0, 0, 0xA7, 0xFFFFFFFF, 0x0000FFFF, 0x12345678),
-    ("read A7 after mask", 0, 1, 0xA7, 0x00000000, M32, 0xFFFFBEEF),
-    ("read 3C neighbour", 0, 1, 0x3C, 0x00000000, M32, 0x12345678),
-    # CEN=1 with GWEN=0 and fresh data: no write, Q holds
-    ("idle (CEN=1) no write", 1, 0, 0xA7, 0x00000000, 0x00000000, 0x12345678),
-    ("read A7 after idle", 0, 1, 0xA7, 0x00000000, M32, 0xFFFFBEEF),
-]
 
 
 def variant_tag(clk_high: float, clk_low: float) -> str:
@@ -163,26 +162,6 @@ def pwl(values, period: float, setup: float, vdd="VDDC"):
             pts.append(f"{t + TRISE:g}n {vdd if v else 0}")
             prev = v
     return "PWL(" + " ".join(pts) + ")"
-
-
-def reduced_array(w):
-    """The reduced `sram_64x128_array`: only the rows OPS addresses, 20 fF stand-ins.
-
-    Copied verbatim from sim/macro-smoke/smoke.py so the array (and therefore
-    the result) stays comparable with the 10/10 ns baseline record.
-    """
-    rows = sorted({o[3] >> 2 for o in OPS})
-    pins = [f"WL{r}" for r in range(64)]
-    for p in range(128):
-        pins += [f"BL{p}", f"BLB{p}"]
-    w(".subckt sram_64x128_array " + " ".join(pins) + " VDD VSS")
-    for r in rows:
-        for p in range(128):
-            w(f"Xr{r}c{p} BL{p} BLB{p} WL{r} VDD VSS bitcell_6t")
-    for p in range(128):
-        w(f"Cbl{p} BL{p} VSS {BL_STANDIN_FF}f")
-        w(f"Cblb{p} BLB{p} VSS {BL_STANDIN_FF}f")
-    w(".ends")
 
 
 def gen_klt(clk_high: float, clk_low: float) -> str:
