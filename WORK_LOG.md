@@ -10,6 +10,10 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-16
 
+- **PR #336**: ci: run the evidence-format check once, in its own job only
+- **Issue #332** (closed): Remove the duplicated evidence-format CI run and the stale 'nothing has landed yet' scaffolding framing
+- **PR #411**: docs(sim): state the min-clock-pulse OPS table is imported, not copied
+- **Issue #406** (closed): Stale docstring: test_min_clock_pulse.py OPSVerbatimTest still says 'copied verbatim'
 - **PR #409**: fix(sim): name both reports and omit empty halves in grade-set corner-set error
 - **Issue #403** (closed): grade-set: cross-report corner-set error names the wrong report when the short one is first, and prints empty halves
 - **PR #407**: ci: report receipt files-table gate coverage, warn on ungated receipt tables
