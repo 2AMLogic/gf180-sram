@@ -10,6 +10,14 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-16
 
+- **PR #409**: fix(sim): name both reports and omit empty halves in grade-set corner-set error
+- **Issue #403** (closed): grade-set: cross-report corner-set error names the wrong report when the short one is first, and prints empty halves
+- **PR #407**: ci: report receipt files-table gate coverage, warn on ungated receipt tables
+- **Issue #372** (closed): Evidence gate: receipt "Files in" coverage is invisible — a receipt with no matching table heading is silently ungated
+- **PR #405**: refactor(sim): import smoke.py stimulus into pulse.py instead of copying
+- **Issue #394** (closed): Dedupe pulse.py's copied smoke.py stimulus/testbench code (~50-110 LOC)
+- **PR #402**: reports: guard --print templates like --set-format, naming the committed report
+- **Issue #393** (closed): commit_report.py: --print templates are unguarded, so a malformed one tracebacks AFTER out.json is already committed
 - **PR #401**: fix: grade-set completeness becomes a set test; validate before printing
 - **PR #398**: docs: scope deck-parity committed-bytes rule to reduce output, relabel byte figure as raw text
 - **Issue #382** (closed): sim: grade-set completeness is a distinct count, not a set — an off-grid variant can substitute for an omitted grid point
