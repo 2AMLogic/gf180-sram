@@ -93,7 +93,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable, NamedTuple
+from typing import Iterable, Iterator, NamedTuple
 
 # sys.path bootstrap only (#337): the fixed depth survives just here, where a
 # wrong depth is a loud ImportError instead of a silently wrong tree.
@@ -319,6 +319,47 @@ def check_markdown_links(tracked: set[str], errors: list[str]) -> None:
                 )
 
 
+def walk_files_table_sections(
+    doc_text: str,
+) -> Iterator[tuple[str, int, list[list[str]]]]:
+    """Walk every "## Files in `<dir>/`" section of a receipt (issue #408).
+
+    Yields one ``(dir_name, header_line, rows)`` triple per heading, where
+    ``rows`` is the raw cell rows the section's table contributed (header
+    row first, separator rows already dropped -- exactly what
+    :func:`parse_files_tables` consumes) and ``header_line`` is the
+    0-based full-document line index of the table line taken as the
+    header row (``-1`` when the section has no table). Sharing this one
+    walk is what lets the ungated-table warning (issue #372) and the
+    parser agree on which ``| File | What |`` rows are gated, instead of
+    re-deriving gated-ness with a second, differently-shaped scan.
+    """
+    headings = list(FILES_TABLE_HEADING_RE.finditer(doc_text))
+    for i, heading in enumerate(headings):
+        section_end = (
+            headings[i + 1].start() if i + 1 < len(headings) else len(doc_text)
+        )
+        line_offset = doc_text.count("\n", 0, heading.end())
+        rows: list[list[str]] = []
+        header_line = -1
+        in_table = False
+        for k, line in enumerate(
+            doc_text[heading.end():section_end].splitlines()
+        ):
+            stripped = line.strip()
+            if not stripped.startswith("|"):
+                if in_table:
+                    break
+                continue
+            in_table = True
+            if TABLE_SEPARATOR_RE.match(stripped):
+                continue
+            if not rows:
+                header_line = line_offset + k
+            rows.append([c.strip() for c in stripped.strip("|").split("|")])
+        yield heading.group(1), header_line, rows
+
+
 def parse_files_tables(
     doc_text: str,
 ) -> list[tuple[str, list[tuple[list[str], bool]]]]:
@@ -333,25 +374,8 @@ def parse_files_tables(
     separator rows; the table ends at the first non-table line or the
     next heading.
     """
-    headings = list(FILES_TABLE_HEADING_RE.finditer(doc_text))
     tables: list[tuple[str, list[tuple[list[str], bool]]]] = []
-    for i, heading in enumerate(headings):
-        section_end = (
-            headings[i + 1].start() if i + 1 < len(headings) else len(doc_text)
-        )
-        rows: list[list[str]] = []
-        in_table = False
-        for line in doc_text[heading.end():section_end].splitlines():
-            stripped = line.strip()
-            if not stripped.startswith("|"):
-                if in_table:
-                    break
-                continue
-            in_table = True
-            if TABLE_SEPARATOR_RE.match(stripped):
-                continue
-            rows.append([c.strip() for c in stripped.strip("|").split("|")])
-
+    for dir_name, _header_line, rows in walk_files_table_sections(doc_text):
         parsed: list[tuple[list[str], bool]] = []
         for cells in rows[1:]:  # rows[0] is the "| File | What |" header
             file_cell = cells[0] if cells else ""
@@ -362,7 +386,7 @@ def parse_files_tables(
                     NONE_COMMITTED_TOKEN in what_cell,
                 )
             )
-        tables.append((heading.group(1), parsed))
+        tables.append((dir_name, parsed))
     return tables
 
 
@@ -469,12 +493,27 @@ def receipt_docs(tracked: set[str]) -> list[str]:
 
 def ungated_receipt_headings(doc_text: str) -> list[str]:
     """Headings a ``| File | What |`` table sits under in a receipt doc
-    that are NOT a matching ``## Files in `<dir>/` `` heading -- the
-    receipt-shaped but ungated case (issue #372). The table under such a
-    heading is invisible to check 7; the caller warns, it does not fail.
-    Returns the unmatched heading line per offending table (empty string
-    when the table has no preceding heading at all)."""
+    that the receipt files gate does NOT gate (issue #372). The table
+    under such a heading is invisible to check 7; the caller warns, it
+    does not fail. Returns the nearest heading line per offending table
+    (empty string when the table has no preceding heading at all).
+
+    Gated-ness is decided by :func:`walk_files_table_sections` itself, not
+    re-derived: every ``| File | What |`` header row whose line index the
+    gate's walk consumed is gated, and every other one is ungated (issue
+    #408). That fixes both shapes where a backward heading scan disagreed
+    with the parser -- a ``#`` line inside a fence between a gated heading
+    and its table (warned on a table the gate gates), and a second table
+    under one heading (silently skipped, the exact case #372 exists to
+    surface). The backward scan remains only to name a heading in the
+    warning text; it is message text, not a gate.
+    """
     lines = doc_text.splitlines()
+    gated_headers = {
+        header_line
+        for _, header_line, _ in walk_files_table_sections(doc_text)
+        if header_line >= 0
+    }
     unmatched: list[str] = []
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -483,14 +522,14 @@ def ungated_receipt_headings(doc_text: str) -> list[str]:
         cells = [c.strip() for c in stripped.strip("|").split("|")]
         if cells != ["File", "What"]:
             continue
+        if i in gated_headers:
+            continue
         heading = ""
         for j in range(i - 1, -1, -1):
             candidate = lines[j].strip()
             if candidate.startswith("#"):
                 heading = candidate
                 break
-        if heading and FILES_TABLE_HEADING_RE.fullmatch(heading):
-            continue
         unmatched.append(heading)
     return unmatched
 
