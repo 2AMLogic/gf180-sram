@@ -25,8 +25,11 @@ sim/deck-parity/
       report.json                # klt sim's deck report (environment.remote)
       reduced.json               # deck_adapter.py reduce --request output
                                  # (MC receipts: mc-reduce --json-out output);
-                                 # each corner carries the raw RESULT: lines
-                                 # its reducer matched -- see the
+                                 # deterministic receipts: each corner carries
+                                 # the raw RESULT: lines its reducer matched
+                                 # (corners[].result_lines); MC receipts
+                                 # carry theirs as per-corner
+                                 # result-lines.txt -- see the
                                  # committed-bytes rule below
       parity-compare.md          # parity_compare.py's full comparison table
       parity-summary.json        # its machine-readable summary
@@ -54,12 +57,25 @@ receipt extends it): per family, commit `request.json`, `report.json`,
 `reduced.json` and the per-corner `corner.inc`; commit the returned
 `*_sweep.txt` for the SNM families (they are what makes the pre-#213
 crosscheck auditable); commit a unit's `stdout.log` **only** when that unit
-graded anything other than `recorded`; and `reduced.json` must carry, per
-corner, the raw `RESULT:` lines its reducer matched (`corners[].result_lines`)
-so the graded numbers are re-derivable from committed bytes. That preserved
-grading input is cheap -- measured ~9.6 KB across the five families of the
-full-grid receipt (~3.9 KB of it for the three `RESULT:`-emitting ones, ~0.5%
-of the ~2 MB full stdout would add) -- while omitting it leaves the three
+graded anything other than `recorded`; and the deterministic `reduce`
+output must carry, per corner, the raw `RESULT:` lines its reducer matched
+(`corners[].result_lines`) so the graded numbers are re-derivable from
+committed bytes. That requirement is keyed to the `corners[]` shape
+`deck_adapter.py reduce` emits; `reduce_mc_report()` has no `corners[]`,
+and the MC rule below supplies the equivalent for its one `RESULT:`-emitting
+family -- the raw lines as a per-corner `result-lines.txt` -- so that
+family's MC grading is re-derivable from committed bytes through that file.
+That preserved
+grading input is cheap -- the matched lines are ~9.6 KB of raw text across
+the five families of the full-grid receipt (~3.9 KB of it for the three
+`RESULT:`-emitting ones); as committed bytes the rule's cost is measured at
+9,504 B for the two SNM families, re-reducing both from the receipt's
+committed inputs under this rule (5,778 B of raw text plus ~23 B per
+preserved line of JSON array formatting), with the three
+`RESULT:`-emitting families adding at least their measured 3,996 B of raw
+text (their clean-run `stdout.bin` was discarded, so their serialized
+growth is not directly measurable on this receipt) -- all of it well under
+1% of the ~2 MB full stdout would add -- while omitting it leaves the three
 `RESULT:`-emitting families' numbers unverifiable: their raw lines lived in
 the per-unit `stdout.bin` this rule discards for clean runs, and only the two
 SNM families stay re-derivable, via their committed sweeps. The one-corner
