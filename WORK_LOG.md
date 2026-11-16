@@ -10,6 +10,8 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-16
 
+- **PR #413**: fix: decide ungated-table warning from the receipt parser's own walk
+- **Issue #408** (closed): Evidence gate: ungated-receipt-table warning's nearest-heading scan diverges from parse_files_tables in two measured shapes
 - **PR #336**: ci: run the evidence-format check once, in its own job only
 - **Issue #332** (closed): Remove the duplicated evidence-format CI run and the stale 'nothing has landed yet' scaffolding framing
 - **PR #411**: docs(sim): state the min-clock-pulse OPS table is imported, not copied
