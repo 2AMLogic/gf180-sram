@@ -10,12 +10,22 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-16
 
+- **PR #395**: ci: gate the item-9 testbench attestation on what sim/ ships
+- **PR #391**: reports: catch TypeError and AttributeError in --set-format template failures
+- **PR #387**: fix: label MC |delta| distribution stats from summary["unit"]
+- **PR #367**: ci: add repo-hygiene gate bounding tracked blob size, binary type, venv paths
+- **PR #366**: ci: resolve receipt "Files in" table entries against committed bytes
 - **PR #386**: feat(sim): full 9-corner MC deck-mode parity receipt, 13,680 units, with pin-attributed negative-control finding
 - **PR #383**: reports: template _note counts via --set-format; lint failures name the raw input
 - **PR #380**: docs: index the spiceinit-pin receipt in deck-parity README and link the now-landed unpinned receipt
 - **PR #377**: fix: label metric deltas with each family's unit from RECORD_CLAIMS
 - **PR #375**: fix: grade-set counts distinct variant tags and rejects a repeated report
 - **PR #374**: feat: preserve matched RESULT: lines per corner in deck_adapter reduce
+- **Issue #385** (closed): commit_report.py: --set-format does not catch TypeError, so a list-subscript template tracebacks instead of naming the field
+- **Issue #378** (closed): render_mc_markdown still hardcodes "V" on the per-sample |delta| distribution lines
+- **Issue #361** (closed): No CI guard against an accidentally committed venv / vendored binary tree
+- **Issue #357** (closed): Signoff T1 item 9 attests a named testbench set that now omits sim/access-power/testbench/tb_access_power.klt.spice
+- **Issue #356** (closed): check-evidence-format.sh does not verify that a receipt's cited artifact files exist
 - **Issue #371** (closed): commit_report.py: three small follow-ups from the #340 review (templated --set, lint-failure diagnostic, README scoping)
 - **Issue #370** (closed): sim/deck-parity: index the spiceinit-pin receipt and drop its now-stale "not on main yet" note
 - **Issue #365** (closed): sim: grade-set's variant-completeness guard counts occurrences, not distinct grid points
