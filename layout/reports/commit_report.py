@@ -79,6 +79,14 @@ import sys
 import tempfile
 from typing import Any
 
+# A malformed str.format template can raise any of these: an unknown
+# placeholder (KeyError), a bad index (IndexError), a malformed template
+# (ValueError), a type mismatch such as {list[key]} (TypeError), or an
+# attribute access like {str.attr} (AttributeError). Issue #391's tuple,
+# shared by --set-format and both --print sites (issue #393) so the
+# surfaces cannot drift.
+TEMPLATE_ERRORS = (KeyError, IndexError, ValueError, TypeError, AttributeError)
+
 LINT_SUBCOMMAND = ("env-provenance", "lint-envelope")
 
 
@@ -212,7 +220,7 @@ def _do_commit(args: argparse.Namespace) -> int:
             )
         try:
             data[field] = template.format(**data)
-        except (KeyError, IndexError, ValueError, TypeError, AttributeError) as exc:
+        except TEMPLATE_ERRORS as exc:
             # An unknown placeholder (KeyError), a bad index, a malformed
             # template (ValueError), a type mismatch such as {list[key]}
             # (TypeError), or an attribute access like {str.attr}
@@ -243,14 +251,32 @@ def _do_commit(args: argparse.Namespace) -> int:
             os.unlink(staged)
 
     if args.print:
-        print(args.print.format(**data))
+        try:
+            print(args.print.format(**data))
+        except TEMPLATE_ERRORS as exc:
+            # Same guard as --set-format, but this template runs after
+            # os.replace: the report IS committed, and the non-zero exit
+            # must not be read as "nothing was written" (issue #393).
+            sys.exit(
+                f"FATAL: --print template {args.print!r} does not format "
+                f"against the report's top-level fields: {exc!r} -- the "
+                f"report itself was already committed to {args.out}"
+            )
     return 0
 
 
 def _do_status(args: argparse.Namespace) -> int:
     with open(args.json) as handle:
         data = json.load(handle)
-    print(args.print.format(**data))
+    try:
+        print(args.print.format(**data))
+    except TEMPLATE_ERRORS as exc:
+        # Same guard as --set-format; status only reads an already-committed
+        # report, so nothing was written either way (issue #393).
+        sys.exit(
+            f"FATAL: --print template {args.print!r} does not format "
+            f"against the report's top-level fields: {exc!r}"
+        )
     return 0
 
 
@@ -299,7 +325,8 @@ def main(argv: list[str] | None = None) -> int:
     commit.add_argument(
         "--print",
         metavar="FORMAT",
-        help="str.format template over the report's top-level fields",
+        help="str.format template over the report's top-level fields; a "
+        "malformed template fails the run AFTER the report is committed",
     )
     commit.add_argument(
         "--allow-prefix",
@@ -325,7 +352,8 @@ def main(argv: list[str] | None = None) -> int:
         "--print",
         required=True,
         metavar="FORMAT",
-        help="str.format template over the report's top-level fields",
+        help="str.format template over the report's top-level fields; a "
+        "malformed template fails the run (status only reads the report)",
     )
     status.set_defaults(func=_do_status)
 
