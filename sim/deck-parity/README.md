@@ -74,11 +74,18 @@ state which claims are re-derivable from committed bytes and which are not
 
 ## Receipts
 
+The first three receipts answer the deck-transport question (the #230
+migration this directory scopes itself to); the `spiceinit-pin` receipt
+answers a different one -- generator **environment**: whether the staged,
+pinned `.spiceinit` (#338) reaches the fleet worker and reproduces the
+committed values.
+
 | Receipt | Corner(s) | Families | Result |
 |---|---|---|---|
 | [`20261114-tt_25c_3.30v.md`](20261114-tt_25c_3.30v.md) | `tt_25c_3.30v` | all 5 characterization families | parity holds; the 3 `RESULT:`-emitting families match the committed value exactly, the 2 SNM families match to <= 3 uV once the documented #213 extractor change is held fixed |
 | [`20261115-full-grid.md`](20261115-full-grid.md) | all 27 | all 5 characterization families | parity holds at every corner: 108/108 record metrics exact across the 3 `RESULT:`-emitting families, the 2 SNM families within 1 uV / 7 uV of the committed value (gate 30 uV) under the pre-#213 crosscheck, 0 `OPEN` units |
 | [`20261115-mc-2corner.md`](20261115-mc-2corner.md) | `tt_25c_3.30v`, `ff_125c_2.97v` | the 3 MC families (`read-snm`, `hold-snm`, `write-margin`) | first live Monte Carlo run (3,040 units, one batch-set): every mm sample of the committed arrays reproduced -- `write-margin` exact, the SNM families exact under the pre-#213 `--pair` extractor (max delta 0.0 V) -- every ctrl anchor pinned, every nc errored count and surviving value matched; 5 `OPEN` nc units reported (committed record excluded the same draws) |
+| [`20261114-tt_25c_3.30v-spiceinit-pin.md`](20261114-tt_25c_3.30v-spiceinit-pin.md) | `tt_25c_3.30v` | all 5 characterization families | parity holds with the `.spiceinit` pin staged (#338): all 7 committed record metrics across the 5 families reproduce exactly -- the 3 `RESULT:`-emitting families exact, the 2 SNM families exact under the pre-#213 extractor crosscheck |
 
 ## Reproducing one
 
