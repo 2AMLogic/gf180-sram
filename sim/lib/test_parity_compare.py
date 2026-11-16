@@ -751,6 +751,48 @@ class McDirectExactPerSample(unittest.TestCase):
             self.assertEqual(mm["deltas"]["max"], 0.0)
             self.assertIn("**Overall: parity**", out)
 
+    def test_mc_distribution_lines_read_summary_unit(self):
+        """The per-sample |delta| distribution lines label all four stats with
+        summary["unit"], not a literal V (#378). A seconds unit proves the key
+        is read; the unmutated write-margin summary proves volts still render.
+        No MC_SAMPLE_SETS binding is added or asserted: the renderer is a pure
+        function of the summary dict."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            request, reduced, ss, record = self._fixture(tmp)
+            rc, out, summary = run_cmp_mc(tmp, "write-margin", tmp / "reduced.json",
+                                          request=tmp / "request.json", report=tmp / "report.json",
+                                          samples=tmp / "samples.json", record=record)
+            self.assertEqual(rc, 0, out)
+
+            # Volts no-regression: a real write-margin summary renders V on
+            # both the mismatch-batch and negative-control distribution lines
+            # of every corner.
+            rendered = pc.render_mc_markdown(summary)
+            dist_lines = [ln for ln in rendered.splitlines()
+                          if "per-sample |delta| distribution" in ln]
+            self.assertEqual(len(dist_lines), 2 * len(summary["corners"]), rendered)
+            for ln in dist_lines:
+                self.assertRegex(ln, r"max=\S+ V, mean=\S+ V, p50=\S+ V, p95=\S+ V$")
+
+            # Unit read: the renderer reads summary["unit"] for the same lines.
+            summary["unit"] = "s"
+            rendered_s = pc.render_mc_markdown(summary)
+            dist_lines_s = [ln for ln in rendered_s.splitlines()
+                            if "per-sample |delta| distribution" in ln]
+            self.assertEqual(len(dist_lines_s), 2 * len(summary["corners"]), rendered_s)
+            for ln in dist_lines_s:
+                self.assertNotIn(" V,", ln)
+                self.assertRegex(ln, r"max=\S+ s, mean=\S+ s, p50=\S+ s, p95=\S+ s$")
+
+            # Guards unmoved: a corner with no mm deltas and no nc deltas
+            # still renders, without a distribution line.
+            for c in summary["corners"]:
+                (c.get("mismatch") or {}).pop("deltas", None)
+                (c.get("negative_control") or {}).pop("deltas", None)
+            rendered_nod = pc.render_mc_markdown(summary)
+            self.assertNotIn("per-sample |delta| distribution", rendered_nod)
+
     def test_wrong_value_at_one_index_fails(self):
         with tempfile.TemporaryDirectory() as d:
             tmp = Path(d)
