@@ -29,6 +29,12 @@ flow/build/
 # repo content (see signoff/regenerate.sh, which builds its own under
 # mktemp -d precisely so it cannot be swept up by a wide `git add`).
 .venv*/
+# Non-dot-prefixed virtualenv siblings (issue #361): .venv*/ above covers
+# the dot-prefixed names, so a hand-made `python -m venv venv` (or `env`)
+# was the remaining gap — it landed in git status and could be swept
+# into a commit.
+venv/
+env/
 # >>> loom-managed (do not edit) >>>
 # Loom runtime state (don't commit these)
 .loom-in-use
