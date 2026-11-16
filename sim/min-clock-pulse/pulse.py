@@ -395,20 +395,29 @@ def grade_set(reports) -> int:
     seen_axes = {}  # corner_id -> {"high": [tags], "low": [tags]}: one append
     # per report-axis visit.
     corner_ids = None  # every report must carry the same corner-id set
+    first_tag = None  # the report corner_ids was seeded from (#403)
     sentinels = 0
     for path in reports:
         tag, verdicts = grade_report(path)
         ids = set(verdicts)
         if corner_ids is None:
             corner_ids = ids
+            first_tag = tag
         elif ids != corner_ids:
             # a short corners[] array (e.g. a reduced re-collection patch
-            # run) must be named at its source, not surface later as a
-            # per-corner axis shortfall (#382).
+            # run) must surface here, not later as a per-corner axis
+            # shortfall (#382). Without an expected corner set the code
+            # cannot tell which side is short, so the message names both
+            # reports -- the current tag and the baseline's -- instead of
+            # blaming whichever arrived second (#403).
+            parts = []
+            if missing := sorted(corner_ids - ids):
+                parts.append(f"missing: {missing}")
+            if unexpected := sorted(ids - corner_ids):
+                parts.append(f"unexpected: {unexpected}")
             print(
-                f"ERROR: {tag}: corner set differs from earlier reports"
-                f" (missing: {sorted(corner_ids - ids)},"
-                f" unexpected: {sorted(ids - corner_ids)})",
+                f"ERROR: {tag}: corner set differs from {first_tag}"
+                f" ({'; '.join(parts)})",
                 file=sys.stderr,
             )
             return 1
