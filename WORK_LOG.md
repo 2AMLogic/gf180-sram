@@ -10,6 +10,22 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-15
 
+- **PR #363**: feat(layout): mint the 64 x 128 array DRC/extract/LVS report trio under the pinned klt
+- **PR #358**: fix: fail closed on unreported deck_sha256 in reduce_report
+- **PR #355**: sim: full-grid deck-mode parity receipt, 27 corners x 5 families, via mechanical parity_compare
+- **PR #354**: refactor: derive the repo root via find_repo_root() at the last five fixed-depth sites
+- **PR #352**: fix: drop dead spacing_of() stub from the macro generator
+- **PR #351**: data: measure minimum clock pulse width per corner on the macro bench (#328)
+- **PR #350**: sim: dynamic access energy per read/write cycle on the macro netlist, 27 corners
+- **PR #348**: build: remove dead worktree:return npm script entry
+- **Issue #347** (closed): deck_adapter reduce: a unit that omits deck_sha256 silently passes the deck-bytes-unchanged check
+- **Issue #345** (closed): deck_adapter.reduce_report() inlines the RESULT:/RESULT-ERROR: grammar its own module already re-exports
+- **Issue #342** (closed): Remove the dead spacing_of() stub in layout/macro/generate.py: no callers, and wrong for M1 and vias
+- **Issue #337** (closed): Adopt sim/lib/repo_root.py at the 5 sites still hand-rolling a fixed-depth repo root
+- **Issue #335** (closed): Remove dead npm script worktree:return — its target was deleted by a Loom resync
+- **Issue #329** (closed): sim: dynamic power per read and write access on the macro-smoke netlist, 27 corners
+- **Issue #328** (closed): sim: minimum clock pulse bench on the macro-smoke netlist over the 27 corners
+- **Issue #327** (closed): Commit DRC and LVS reports for the 64 x 128 array the macro is built on
 - **PR #339**: sim: record the fleet deck-mode parity receipt at tt_25c_3.30v and bound build/reduce to a corner subset
 
 ### 2026-11-14

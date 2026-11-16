@@ -24,14 +24,15 @@ __pycache__/
 sim/build/
 # synthesis / P&R scratch
 flow/build/
-# local klt install, created by the setup script
-.venv/
-# Non-dot-prefixed virtualenv siblings (issue #361): the .venv/ line above
-# covers only the setup script's own name, so a hand-made
-# `python -m venv venv` (or `env`) lands in git status and can be swept
-# into a commit. Dot-prefixed siblings (.venv-klt080/ etc.) are handled by
-# the .venv*/ widening, which lands separately — do not re-widen the
-# .venv/ line here.
+# local klt install, created by the setup script — and any other local
+# virtualenv (`.venv-klt080/` & friends): a grading venv is tooling, never
+# repo content (see signoff/regenerate.sh, which builds its own under
+# mktemp -d precisely so it cannot be swept up by a wide `git add`).
+.venv*/
+# Non-dot-prefixed virtualenv siblings (issue #361): .venv*/ above covers
+# the dot-prefixed names, so a hand-made `python -m venv venv` (or `env`)
+# was the remaining gap — it landed in git status and could be swept
+# into a commit.
 venv/
 env/
 # >>> loom-managed (do not edit) >>>

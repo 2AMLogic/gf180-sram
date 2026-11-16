@@ -144,6 +144,28 @@ class ParityCompareExactFamilies(unittest.TestCase):
             self.assertIn("EXACT", out)
             self.assertIn("Overall: **parity**", out)
 
+    def test_unit_label_matches_family_unit(self):
+        """The max-|delta| block labels each metric with its family's unit:
+        seconds for the access-time families, volts for the others (#359)."""
+        for family, metric, unit in (
+            ("read-access", "read_access_time_s", "s"),
+            ("write-margin", "write_trip_voltage_v", "V"),
+        ):
+            with self.subTest(family=family):
+                with tempfile.TemporaryDirectory() as d:
+                    tmp = Path(d)
+                    rows = exact_record_rows(family, CORNERS)
+                    record = tmp / "record.md"
+                    write_record(record, rows)
+                    reduced = tmp / "reduced.json"
+                    reduced.write_text(json.dumps(make_reduced(family, rows)))
+                    rc, out, summary = run_cmp(tmp, family, reduced, record=record)
+                    self.assertEqual(rc, 0, out)
+                    self.assertEqual(summary["unit"], unit)
+                    self.assertIn(f"- `{metric}`: 0.000e+00 {unit} (gated)", out)
+                    if family == "write-margin":
+                        self.assertIn("- `write_vdd_v`: 0.000e+00 V\n", out)
+
     def test_seeded_mismatch_fails_with_delta(self):
         rows = exact_record_rows("write-margin", CORNERS)
         reduced_rows = exact_record_rows("write-margin", CORNERS)
