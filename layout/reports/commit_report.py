@@ -47,17 +47,25 @@ implementation instead of ten.
 Usage (from `generate.sh`, which wraps both forms in shell functions):
 
     commit_report.py commit RAW OUT --root ROOT --work WORK \
-        [--set FIELD=VALUE ...] [--drop FIELD ...] \
-        [--print FORMAT] [--allow-prefix PREFIX ...] [--skip-lint]
+        [--set FIELD=VALUE ...] [--set-format FIELD=TEMPLATE ...] \
+        [--drop FIELD ...] [--print FORMAT] \
+        [--allow-prefix PREFIX ...] [--skip-lint]
 
     commit_report.py status JSON --print FORMAT
 
 `--set` overrides a top-level field AFTER the rewrite (for the cases where the
 honest value is prose, not a path: the scratch abutted composite's `file`, the
 PDK-native deck's `deck`, the bulk-omission `_note`). `--drop` removes a
-top-level field (the ~18 MB `devices[]`/`nets[]` arrays). `--print` is a
-`str.format` template over the report's top-level fields, e.g.
-`'status: {status} | violations: {violation_count}'`. Stdlib only.
+top-level field (the ~18 MB `devices[]`/`nets[]` arrays). `--set-format`
+(issue #371) sets a top-level field from a `str.format` template over the
+document as it stands after the rewrite, `--drop` and `--set` -- the same
+template `--print` applies -- so a note can cite the report's own counts
+(`'{device_count} devices / {net_count} nets'`) instead of hand-copied
+numbers that drift the first time a geometry is re-minted. If `--set` and
+`--set-format` target the same field, `--set-format` wins (it is applied
+last). `--print` is a `str.format` template over the report's top-level
+fields, e.g. `'status: {status} | violations: {violation_count}'`. Stdlib
+only.
 """
 
 from __future__ import annotations
@@ -112,16 +120,23 @@ def _rewrite(node: Any, prefixes: list[tuple[str, str]]) -> Any:
     return node
 
 
-def _lint(path: str, allow_prefix: list[str]) -> None:
+def _lint(path: str, raw: str, allow_prefix: list[str]) -> None:
     """Fail unless klt's own envelope linter finds no absolute path.
 
     A check that cannot run must never look like one that passed, so a
     missing or too-old `klt` is a hard failure here, not a warning.
+
+    Every failure message names `raw`, never `path`: the staged file this
+    function lints is a hidden temp file that the caller's `finally` unlinks
+    the moment we exit, so a message pointing at it would send the operator
+    to a path that no longer exists (issue #371). `raw` still exists, is a
+    path the operator can open, and carries the same offending (pre-rewrite)
+    value.
     """
     if shutil.which("klt") is None:
         sys.exit(
             "FATAL: klt (klayout-tools) is required on PATH to lint "
-            f"{path} before committing it.\n"
+            f"the report built from {raw} before committing it.\n"
             "       pip install klayout-tools==0.8.0   # first release with "
             "`klt env-provenance lint-envelope`"
         )
@@ -133,10 +148,13 @@ def _lint(path: str, allow_prefix: list[str]) -> None:
     if proc.returncode == 0:
         return
     if proc.returncode != 3:
+        # The command line ends in the staged temp file; show everything up
+        # to it and name the surviving raw input instead.
         sys.exit(
-            f"FATAL: `{' '.join(cmd)}` exited {proc.returncode} "
-            "(expected 0 = clean or 3 = findings), so the provenance of "
-            f"{path} is unverified and it was NOT committed.\n"
+            f"FATAL: `{' '.join(cmd[:-1])} <staged report>` exited "
+            f"{proc.returncode} (expected 0 = clean or 3 = findings), so "
+            f"the provenance of the report built from {raw} is unverified "
+            "and it was NOT committed.\n"
             f"{proc.stderr.strip() or proc.stdout.strip()}"
         )
     # Exit 3: real findings. Name the offending fields, but do not echo the
@@ -153,10 +171,12 @@ def _lint(path: str, allow_prefix: list[str]) -> None:
     except (json.JSONDecodeError, AttributeError, TypeError):
         fields = []
     sys.exit(
-        f"FATAL: {path} still holds an absolute host path after the "
-        f"$ROOT/$WORK rewrite, in field(s): {', '.join(fields) or '<unparsed>'}.\n"
-        "       The report was NOT committed. Inspect it with:\n"
-        f"           klt {' '.join(LINT_SUBCOMMAND)} {path}\n"
+        f"FATAL: the report built from {raw} still holds an absolute host "
+        "path after the $ROOT/$WORK rewrite, in field(s): "
+        f"{', '.join(fields) or '<unparsed>'}.\n"
+        f"       The report was NOT committed. {raw} still exists and "
+        "carries the same offending (pre-rewrite) value; inspect it with:\n"
+        f"           klt {' '.join(LINT_SUBCOMMAND)} {raw}\n"
         "       Then either make the generator pass the path in a "
         "$ROOT-/$WORK-rooted form, override the field with "
         "`commit_report --set FIELD=<prose>` if the honest value is not a "
@@ -180,6 +200,27 @@ def _do_commit(args: argparse.Namespace) -> int:
                 f"FATAL: --set expects a top-level FIELD=VALUE, got {assignment!r}"
             )
         data[field] = value
+    # --set-format goes last, so it templates over the document as it stands
+    # after the rewrite, --drop and --set -- and wins if both target the same
+    # field (issue #371: the notes can then cite the report's own counts).
+    for assignment in args.set_format:
+        field, _, template = assignment.partition("=")
+        if not field or "." in field:
+            sys.exit(
+                "FATAL: --set-format expects a top-level FIELD=TEMPLATE, "
+                f"got {assignment!r}"
+            )
+        try:
+            data[field] = template.format(**data)
+        except (KeyError, IndexError, ValueError) as exc:
+            # An unknown placeholder (KeyError), a bad index, or a malformed
+            # template must name the field and exit, not traceback -- the
+            # report was never staged, so there is nothing to clean up.
+            sys.exit(
+                f"FATAL: --set-format field {field!r}: template "
+                f"{template!r} does not format against the report's "
+                f"top-level fields: {exc!r}"
+            )
 
     out_dir = os.path.dirname(os.path.abspath(args.out)) or "."
     os.makedirs(out_dir, exist_ok=True)
@@ -193,7 +234,7 @@ def _do_commit(args: argparse.Namespace) -> int:
             json.dump(data, handle, indent=2)
             handle.write("\n")
         if not args.skip_lint:
-            _lint(staged, args.allow_prefix)
+            _lint(staged, args.raw, args.allow_prefix)
         os.replace(staged, args.out)
     finally:
         if os.path.exists(staged):
@@ -236,6 +277,15 @@ def main(argv: list[str] | None = None) -> int:
         default=[],
         metavar="FIELD=VALUE",
         help="override a top-level field after the rewrite (repeatable)",
+    )
+    commit.add_argument(
+        "--set-format",
+        action="append",
+        default=[],
+        metavar="FIELD=TEMPLATE",
+        help="set a top-level field from a str.format template over the "
+        "report's other top-level fields, applied after --drop and --set "
+        "(repeatable; wins if both target the same field)",
     )
     commit.add_argument(
         "--drop",
