@@ -485,7 +485,7 @@
               "status": "verified"
             }
           ],
-          "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request and push to main, plus the signoff re-grade and the provenance-hygiene host-path-leak guard). The pins prove these files are the ones attested; they do not run CI."
+          "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request and push to main, plus the signoff re-grade, the provenance-hygiene host-path-leak guard, and the repo-hygiene tracked-tree gate). The pins prove these files are the ones attested; they do not run CI."
         }
       }
     },
