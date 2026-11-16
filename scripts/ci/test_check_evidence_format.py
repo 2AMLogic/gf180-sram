@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
-"""Offline tests for the receipt "Files in" gate in
-scripts/ci/check_evidence_format.py (issue #356).
+"""Offline tests for two gates in scripts/ci/check_evidence_format.py:
+the receipt "Files in" gate (issue #356) and the T1 item-9
+testbench-attestation gate (issue #357).
 
-The gate resolves every backticked path in a receipt's "## Files in
-`<dir>/`" table against the committed file list. These tests exercise the
-pure helper in both directions -- a missing concrete path and a zero-match
-placeholder row fail; an exempt row and the repo's two real deck-parity
-receipts pass -- with no git, no PDK and no simulator.
+The receipt gate resolves every backticked path in a receipt's "## Files
+in `<dir>/`" table against the committed file list. The attestation gate
+requires every tracked sim/*/testbench/tb_* bench to be pinned by
+sim/testbenches.signoff.json. These tests exercise the pure helpers in
+both directions -- a missing concrete path and a zero-match placeholder
+row fail; an exempt row and the repo's two real deck-parity receipts
+pass; an unpinned bench fails naming it while pinned non-bench paths and
+the tb_-prefixless DUT copies pass -- with no git, no PDK and no
+simulator.
 
 Run: python3 scripts/ci/test_check_evidence_format.py   (or via `npm run test`)
 """
@@ -227,6 +232,78 @@ class RealReceiptsTest(unittest.TestCase):
         self.assertEqual(
             [t for t, _ in findings], ["<family>/<corner-id>/stdout.log"]
         )
+
+
+class BenchAttestationTest(unittest.TestCase):
+    """The item-9 gate (issue #357): every tracked
+    sim/<experiment>/testbench/tb_* bench must be pinned by
+    sim/testbenches.signoff.json."""
+
+    PINNED = {
+        "sim/README.md",
+        "sim/lib/pdk_pin.txt",
+        "sim/lib/run_corner_sweep.sh",
+        "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
+        "sim/wordline-rc/testbench/tb_wl_rc_row64_x1.klt.spice",
+    }
+    BENCHES = {
+        "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
+        "sim/wordline-rc/testbench/tb_wl_rc_row64_x1.klt.spice",
+    }
+
+    def test_exact_match_yields_no_gaps(self):
+        self.assertEqual(cef.attestation_gaps(self.BENCHES, self.PINNED), [])
+
+    def test_missing_bench_yields_one_gap_naming_it(self):
+        benches = self.BENCHES | {
+            "sim/access-power/testbench/tb_access_power.klt.spice"
+        }
+        self.assertEqual(
+            cef.attestation_gaps(benches, self.PINNED),
+            ["sim/access-power/testbench/tb_access_power.klt.spice"],
+        )
+
+    def test_pinned_non_bench_not_reported_spurious(self):
+        # Gaps are computed over benches only: the wrapper's non-bench
+        # pins (sim/README.md, sim/lib/*) are never flagged as extra.
+        self.assertEqual(cef.attestation_gaps(set(), self.PINNED), [])
+
+    def test_dut_copy_without_tb_prefix_is_not_a_bench(self):
+        # sram_256x32.noarray.spice sits in both testbench/ dirs but is an
+        # array-stripped DUT netlist, not a bench -- the tb_ prefix rule
+        # keeps it out of the bench set (issue #357, Out of Scope).
+        for path in (
+            "sim/macro-smoke/testbench/sram_256x32.noarray.spice",
+            "sim/min-clock-pulse/testbench/sram_256x32.noarray.spice",
+        ):
+            self.assertFalse(cef.is_bench_path(path), path)
+        tracked = {
+            *self.BENCHES,
+            "sim/macro-smoke/testbench/sram_256x32.noarray.spice",
+        }
+        self.assertEqual(cef.bench_paths(tracked), self.BENCHES)
+
+    def test_bench_path_requires_one_experiment_level(self):
+        self.assertFalse(cef.is_bench_path("sim/macro-smoke/tb_x.spice"))
+        self.assertFalse(cef.is_bench_path("sim/a/b/testbench/tb_x.spice"))
+        self.assertFalse(cef.is_bench_path("design/testbench/tb_x.spice"))
+        self.assertTrue(
+            cef.is_bench_path(
+                "sim/min-clock-pulse/testbench/tb_min_clk_h10_l10.klt.spice"
+            )
+        )
+
+    def test_repo_wrapper_pins_every_committed_bench(self):
+        # The shipped tree must satisfy the gate: walk the checkout (no
+        # git) and compare against the committed wrapper.
+        benches = {
+            p.relative_to(REPO).as_posix()
+            for p in (REPO / "sim").glob("*/testbench/tb_*")
+            if p.is_file()
+        }
+        self.assertTrue(benches, "no benches found -- fixture broken")
+        pinned = set(cef.pinned_attestation_paths(cef.TESTBENCH_ATTESTATION))
+        self.assertEqual(cef.attestation_gaps(benches, pinned), [])
 
 
 class EnumerationTest(unittest.TestCase):
