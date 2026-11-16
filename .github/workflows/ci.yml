@@ -2,7 +2,7 @@ name: CI
 
 # Validates the design harness, the evidence-record format, and the freshness
 # of every committed derived artifact on each PR and each push to `main`
-# (T1 checklist item 10, issue #28). Five jobs run here:
+# (T1 checklist item 10, issue #28). Six jobs run here:
 #
 #   harness                    -- `npm run check:ci`: the pure-Python unit
 #                                 tests under sim/lib/ (the extraction and
@@ -25,6 +25,10 @@ name: CI
 #                                 reports for host-path leaks (#340).
 #   generated array schematics -- regenerates the array schematics and
 #                                 requires the committed copies to match.
+#   repo hygiene               -- scripts/ci/check-repo-hygiene.sh: the
+#                                 tracked-tree gate (size cap, binary
+#                                 allowlist, venv shape) plus per-rule
+#                                 fixture self-tests.
 #
 # The evidence-format check runs in `evidence-format` ONLY, so it is visible
 # as its own named status check. It is deliberately NOT also invoked from
