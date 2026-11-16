@@ -306,6 +306,50 @@ class FixtureGradingTest(unittest.TestCase):
             code = pulse.grade_set(reports)
         self.assertEqual(code, 1)
 
+    def grade_set_captured(self, paths):
+        """Run grade_set with stdout/stderr captured; return (code, out, err)."""
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = pulse.grade_set(paths)
+        return code, out.getvalue(), err.getvalue()
+
+    def fixture_reports_by_tag(self) -> dict:
+        """fixture file path for every variant tag, from the file names."""
+        prefix = len("fixture_min_clk_")
+        return {
+            p.stem[prefix:]: p for p in sorted(FIXTURES.glob("fixture_min_clk_*.json"))
+        }
+
+    def test_grade_set_duplicate_plus_omission_is_structural_error(self):
+        """A repeated variant plus an omitted one passes today's occurrence
+        count (#365). Either ordering is caller error: exit 1, an ERROR whose
+        missing list names the omitted tag, and no MIN line on stdout."""
+        by_tag = self.fixture_reports_by_tag()
+        self.assertEqual(len(by_tag), 9)
+        for dup, omit in (("h06_l10", "h04_l10"), ("h04_l10", "h06_l10")):
+            argv = [by_tag[t] for t in sorted(by_tag) if t != omit]
+            argv.append(by_tag[dup])
+            self.assertEqual(len(argv), 9)
+            code, out, err = self.grade_set_captured(argv)
+            self.assertEqual(code, 1, f"{dup} twice, {omit} omitted")
+            self.assertIn(f"missing: ['{omit}']", err)
+            self.assertNotIn("Traceback", err)
+            self.assertNotIn("MIN:", out)
+
+    def test_grade_set_complete_set_plus_duplicate_is_structural_error(self):
+        """A complete grid plus one repeated report (10 args) must exit 1 with
+        the repeated-tag error, never the occurrence-count '7 of 6 variants
+        (missing: [])' nonsense (#365)."""
+        by_tag = self.fixture_reports_by_tag()
+        argv = [by_tag[t] for t in sorted(by_tag)] + [by_tag["h06_l10"]]
+        code, out, err = self.grade_set_captured(argv)
+        self.assertEqual(code, 1)
+        self.assertIn("h06_l10 more than once", err)
+        self.assertIn("one report per variant", err)
+        self.assertNotIn("(missing: [])", err)
+        self.assertNotIn("Traceback", err)
+        self.assertNotIn("MIN:", out)
+
     def test_grade_set_rejects_off_axis_variant(self):
         """A variant on neither 1-D axis (both widths off the held values) is
         a structural error, silently folded into no axis."""
