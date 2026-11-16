@@ -90,8 +90,14 @@ class DerivedConstantsTest(unittest.TestCase):
         self.assertEqual(pulse.derived(4.0, 4.0), {"PERIOD": 8.0, "SAMPLE": 3.0, "SETUP": 3.0})
 
 
-class OPSVerbatimTest(unittest.TestCase):
-    """The OPS table and reduced array are copied verbatim from smoke.py."""
+class OPSSharedWithSmokeTest(unittest.TestCase):
+    """The OPS table and reduced_array are imported from smoke.py, not
+    copied (since #405; the access_power.py pattern).
+
+    Decision: keep test_ops_table_identical / test_reduced_array_identical
+    as cheap anchors -- they fail loudly if a local copy is ever
+    reintroduced. Folding them into the gen_klt body pin was rejected:
+    that pin does not cover the OPS table or reduced_array() directly."""
 
     def test_ops_table_identical(self):
         self.assertEqual(pulse.OPS, smoke.OPS)
