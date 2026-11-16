@@ -99,10 +99,12 @@ while IFS= read -r -d '' entry; do
     # Entry format: "<mode> <type> <object> <size>\t<path>"
     meta="${entry%%$'\t'*}"
     path="${entry#*$'\t'}"
-    size="$((10#${meta##* }))"
+    rawsize="${meta##* }"
     files=$((files + 1))
 
-    # Rule 3: venv-shape denylist. Path-component matches only.
+    # Rule 3: venv-shape denylist. Path-component matches only; applies
+    # to gitlink paths too (a submodule under site-packages/ is still a
+    # venv shape).
     if [[ "/$path" == */pyvenv.cfg ]]; then
         report "venv-shape" "$path (pyvenv.cfg must never be tracked)"
     elif [[ "/$path/" == */site-packages/* ]]; then
@@ -110,12 +112,18 @@ while IFS= read -r -d '' entry; do
     fi
 
     # Gitlinks (submodules) have size "-"; they are not blobs, so the
-    # blob rules do not apply.
-    [[ "${meta##* }" == "-" ]] && continue
+    # blob rules below do not apply. This guard must precede the size
+    # arithmetic: $((10#-)) is an arithmetic error that would abort the
+    # read loop mid-tree, and a truncated enumeration must never reach
+    # the success path (cross-checked after the loop).
+    [[ "$rawsize" == "-" ]] && continue
+    size="$((10#$rawsize))"
 
     # Rule 1: size cap (a blob at exactly the cap passes; one byte over fails).
+    # Raw bytes first: the MiB figure rounds, so a one-byte-over blob would
+    # otherwise read "8.00 MiB vs 8.00 MiB" and look like a false fire.
     if (( size > SIZE_CAP_BYTES )); then
-        report "size-cap" "$path is $(mib "$size") (cap ${SIZE_CAP_BYTES} bytes = $(mib "$SIZE_CAP_BYTES"))"
+        report "size-cap" "$path is $size bytes ($(mib "$size")), cap ${SIZE_CAP_BYTES} bytes ($(mib "$SIZE_CAP_BYTES"))"
     fi
 
     # Rule 2: binary allowlist. Allowlisted .gds files skip the blob read.
@@ -128,6 +136,13 @@ while IFS= read -r -d '' entry; do
     fi
 done < <(git ls-tree -r -l -z "$COMMIT")
 
+# A partial enumeration must never look like a pass: before the gitlink
+# guard above existed, one $((10#-)) arithmetic error aborted the read
+# loop and the gate reported PASS on a truncated tree. Cross-check the
+# loop's count against a second, sizeless enumeration so ANY future
+# abort — whatever its cause — dies here instead of passing green.
+expected="$(git ls-tree -r -z "$COMMIT" | tr -cd '\0' | wc -c)"
+(( files == expected )) || die "enumerated $files of $expected tracked entries at $COMMIT — refusing to report a verdict on a partial tree"
 (( files > 0 )) || die "ref $COMMIT tracks no files — refusing to pass vacuously"
 
 if (( violations > 0 )); then
