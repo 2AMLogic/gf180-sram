@@ -1,0 +1,696 @@
+{
+ "family": "hold-snm",
+ "mode": "snm:hold_snm_sweep.txt:hold_snm",
+ "recorded_metric": "hold_snm_v",
+ "comparison": "pre213-tolerance",
+ "tolerance_v": 3e-05,
+ "record": "sim/hold-snm/records/20260817-011558-4448966.md",
+ "coverage": {
+  "corners": 27,
+  "missing_in_record": [],
+  "missing_in_fleet": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "corners": [
+  {
+   "id": "ff_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.835613,
+     "fleet": 1.835627,
+     "delta": 1.399999999995849e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 0.999014,
+     "fleet": 0.999016,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 0.999014,
+     "fleet": 0.999016,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ff_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.047586,
+     "fleet": 2.047596,
+     "delta": 1.0000000000065512e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.075028,
+     "fleet": 1.07503,
+     "delta": 1.9999999998354667e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.075028,
+     "fleet": 1.07503,
+     "delta": 1.9999999998354667e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ff_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.253773,
+     "fleet": 2.253778,
+     "delta": 5.000000000254801e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.150509,
+     "fleet": 1.15051,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.150509,
+     "fleet": 1.15051,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.828985,
+     "fleet": 1.828994,
+     "delta": 8.999999999925734e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 0.972353,
+     "fleet": 0.972354,
+     "delta": 1.0000000000287557e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 0.972353,
+     "fleet": 0.972354,
+     "delta": 1.0000000000287557e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.031634,
+     "fleet": 2.031638,
+     "delta": 4.000000000115023e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.048587,
+     "fleet": 1.048588,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.048587,
+     "fleet": 1.048588,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ff_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.227106,
+     "fleet": 2.227107,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.124406,
+     "fleet": 1.124407,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.124406,
+     "fleet": 1.124407,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.792025,
+     "fleet": 1.792026,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 0.930461,
+     "fleet": 0.930461,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "hold_snm_v": {
+     "record": 0.930461,
+     "fleet": 0.930461,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.977898,
+     "fleet": 1.977898,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.008552,
+     "fleet": 1.008552,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "hold_snm_v": {
+     "record": 1.008552,
+     "fleet": 1.008552,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ff_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.157022,
+     "fleet": 2.157022,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.087062,
+     "fleet": 1.087062,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "hold_snm_v": {
+     "record": 1.087062,
+     "fleet": 1.087062,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.818979,
+     "fleet": 1.818985,
+     "delta": 6.000000000172534e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.055088,
+     "fleet": 1.05509,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.055088,
+     "fleet": 1.05509,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.037615,
+     "fleet": 2.037623,
+     "delta": 7.999999999785956e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.134683,
+     "fleet": 1.134685,
+     "delta": 1.9999999998354667e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.134683,
+     "fleet": 1.134685,
+     "delta": 1.9999999998354667e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.252356,
+     "fleet": 2.252366,
+     "delta": 1.0000000000065512e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.213568,
+     "fleet": 1.213569,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.213568,
+     "fleet": 1.213569,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.822534,
+     "fleet": 1.822549,
+     "delta": 1.4999999999876223e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.031028,
+     "fleet": 1.031032,
+     "delta": 3.999999999892978e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.031028,
+     "fleet": 1.031032,
+     "delta": 3.999999999892978e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.035532,
+     "fleet": 2.035546,
+     "delta": 1.4000000000180535e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.110807,
+     "fleet": 1.11081,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.110807,
+     "fleet": 1.11081,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.24311,
+     "fleet": 2.243117,
+     "delta": 6.999999999646178e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.189934,
+     "fleet": 1.189935,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.189934,
+     "fleet": 1.189935,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.811042,
+     "fleet": 1.81105,
+     "delta": 8.000000000008e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 0.993408,
+     "fleet": 0.99341,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 0.993408,
+     "fleet": 0.99341,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.009862,
+     "fleet": 2.009864,
+     "delta": 1.9999999998354667e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.074566,
+     "fleet": 1.074568,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.074566,
+     "fleet": 1.074568,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "tt_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.201823,
+     "fleet": 2.201824,
+     "delta": 9.999999996956888e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.155746,
+     "fleet": 1.155746,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    },
+    "hold_snm_v": {
+     "record": 1.155746,
+     "fleet": 1.155746,
+     "delta": 0.0,
+     "verdict": "EXACT"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.796057,
+     "fleet": 1.796058,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.105024,
+     "fleet": 1.105025,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.105024,
+     "fleet": 1.105025,
+     "delta": 9.999999999177334e-07,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.018994,
+     "fleet": 2.018997,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.187215,
+     "fleet": 1.187216,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.187215,
+     "fleet": 1.187216,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_-40c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.238914,
+     "fleet": 2.238919,
+     "delta": 5.000000000254801e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.268808,
+     "fleet": 1.268809,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.268808,
+     "fleet": 1.268809,
+     "delta": 1.000000000139778e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.804454,
+     "fleet": 1.804459,
+     "delta": 5.000000000032756e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.082379,
+     "fleet": 1.082383,
+     "delta": 4.000000000115023e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.082379,
+     "fleet": 1.082383,
+     "delta": 4.000000000115023e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.023401,
+     "fleet": 2.02341,
+     "delta": 9.000000000369823e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.165266,
+     "fleet": 1.16527,
+     "delta": 4.000000000115023e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.165266,
+     "fleet": 1.16527,
+     "delta": 4.000000000115023e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_25c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.238957,
+     "fleet": 2.238968,
+     "delta": 1.09999999997612e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.247287,
+     "fleet": 1.24729,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.247287,
+     "fleet": 1.24729,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 1.807864,
+     "fleet": 1.807884,
+     "delta": 2.0000000000131024e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.048438,
+     "fleet": 1.048445,
+     "delta": 7.000000000090267e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.048438,
+     "fleet": 1.048445,
+     "delta": 7.000000000090267e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.017041,
+     "fleet": 2.017055,
+     "delta": 1.4000000000180535e-05,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.132542,
+     "fleet": 1.132545,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.132542,
+     "fleet": 1.132545,
+     "delta": 2.9999999999752447e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  },
+  {
+   "id": "ss_125c_3.63v",
+   "status": "parity",
+   "reasons": [],
+   "metrics": {
+    "hold_snm_lobe_low_v": {
+     "record": 2.220851,
+     "fleet": 2.220857,
+     "delta": 5.999999999950489e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_lobe_high_v": {
+     "record": 1.216449,
+     "fleet": 1.216451,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    },
+    "hold_snm_v": {
+     "record": 1.216449,
+     "fleet": 1.216451,
+     "delta": 2.0000000000575113e-06,
+     "verdict": "WITHIN-TOL"
+    }
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "parity"
+}

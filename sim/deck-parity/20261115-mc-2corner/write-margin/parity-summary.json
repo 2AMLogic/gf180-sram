@@ -1,0 +1,170 @@
+{
+ "kind": "mc",
+ "family": "write-margin",
+ "mode": "direct",
+ "recorded_metric": "write_trip_voltage_v",
+ "comparison": "exact",
+ "tolerance_v": 3e-05,
+ "record": "sim/write-margin/records/20260817-105029-ce56f59.md",
+ "sample_set": "sim/write-margin/mc/samples/20260921-124804-cf5e975.json",
+ "coverage": {
+  "corners": 2,
+  "units": {
+   "expected": 608,
+   "reported": 608
+  },
+  "missing_in_report": [],
+  "missing_in_samples": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "seed_identity": {
+  "checked": true,
+  "errors": []
+ },
+ "reduce_grading": {
+  "coverage_errors": [],
+  "overall": "recorded",
+  "infra_failures": []
+ },
+ "corners": [
+  {
+   "id": "tt_25c_3.30v",
+   "status": "parity",
+   "reasons": [],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "write_trip_voltage_v": {
+      "record": 1.91003,
+      "fleet": 1.91003,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "write_vdd_v": {
+      "record": 3.3,
+      "fleet": 3.3,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 94,
+    "n_open": 0,
+    "errored_fleet": 6,
+    "errored_committed": 6,
+    "deltas": {
+     "n": 94,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "open_units": [
+     {
+      "id": "tt_25c_3.30v nc sample 13",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     },
+     {
+      "id": "tt_25c_3.30v nc sample 21",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     },
+     {
+      "id": "tt_25c_3.30v nc sample 54",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     },
+     {
+      "id": "tt_25c_3.30v nc sample 68",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     },
+     {
+      "id": "tt_25c_3.30v nc sample 72",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     },
+     {
+      "id": "tt_25c_3.30v nc sample 98",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     }
+    ]
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "parity",
+   "reasons": [],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "write_trip_voltage_v": {
+      "record": 1.64053,
+      "fleet": 1.64053,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "write_vdd_v": {
+      "record": 2.97,
+      "fleet": 2.97,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 98,
+    "n_open": 0,
+    "errored_fleet": 2,
+    "errored_committed": 2,
+    "deltas": {
+     "n": 98,
+     "max": 0.0,
+     "mean": 0.0,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "open_units": [
+     {
+      "id": "ff_125c_2.97v nc sample 0",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     },
+     {
+      "id": "ff_125c_2.97v nc sample 24",
+      "reason": "RESULT-ERROR: write_trip_voltage -- write succeeded even with no bit-line differential (VWRITE = VDD)"
+     }
+    ]
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "parity"
+}

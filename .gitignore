@@ -16,11 +16,19 @@ __pycache__/
 # layout every other experiment directory uses.
 !sim/**/corners/**/*.log
 !sim/**/mc/raw-logs/**/*.log
+# Same reasoning for sim/deck-parity/: a parity receipt's evidence IS the
+# engine's own stdout from the fleet run (and the extractor cross-check
+# output), committed alongside the klt sim report it is read with -- see
+# sim/deck-parity/README.md.
+!sim/deck-parity/**/*.log
 sim/build/
 # synthesis / P&R scratch
 flow/build/
-# local klt install, created by the setup script
-.venv/
+# local klt install, created by the setup script — and any other local
+# virtualenv (`.venv-klt080/` & friends): a grading venv is tooling, never
+# repo content (see signoff/regenerate.sh, which builds its own under
+# mktemp -d precisely so it cannot be swept up by a wide `git add`).
+.venv*/
 # >>> loom-managed (do not edit) >>>
 # Loom runtime state (don't commit these)
 .loom-in-use

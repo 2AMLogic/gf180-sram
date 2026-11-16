@@ -65,7 +65,13 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+# sys.path bootstrap only (#337): the fixed depth survives just here, where a
+# wrong depth is a loud ImportError instead of a silently wrong tree.
+SIM_LIB = Path(__file__).resolve().parents[2] / "sim" / "lib"
+sys.path.insert(0, str(SIM_LIB))
+from repo_root import find_repo_root  # noqa: E402  (path-injected import)
+
+REPO_ROOT = find_repo_root(Path(__file__))
 
 # Top-level directories that must always carry a README.md describing scope.
 DELIVERABLE_DIRS = ["design", "sim", "layout", "views", "measurements", "signoff"]
@@ -78,11 +84,13 @@ EVIDENCE_DIRS = ["sim", "layout", "measurements"]
 # committed, mirroring the *.raw / *.log / *.vcd / *.vvp rules in .gitignore.
 RAW_ARTIFACT_EXTENSIONS = {".raw", ".log", ".vcd", ".vvp"}
 
-# The documented exceptions (see .gitignore): per-corner ngspice logs and
-# per-sample Monte Carlo logs are committed append-only evidence.
+# The documented exceptions (see .gitignore): per-corner ngspice logs,
+# per-sample Monte Carlo logs, and a deck-mode parity receipt's engine streams
+# are committed append-only evidence.
 RAW_ARTIFACT_ALLOW_GLOBS = [
     "sim/*/corners/**/*.log",
     "sim/*/mc/raw-logs/**/*.log",
+    "sim/deck-parity/**/*.log",
 ]
 
 # Markdown/doc files to link-check. Kept to design-relevant docs (not the

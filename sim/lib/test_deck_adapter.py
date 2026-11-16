@@ -11,10 +11,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -103,14 +106,192 @@ def test_klt_accepts_requests():
             req = da.build_request(family, td)
             units = sim_decks.plan_deck_units(req, request_dir=td)
             check(f"{family} planner", len(units) == 27)
+            # the staged .spiceinit must survive the planner as a per-unit
+            # staged input (#338), not be dropped with the options allowlist
+            for u in units:
+                names = [i["name"] for i in u["inputs"]]
+                check(f"{family} planner {u['id']} stages spiceinit",
+                      da.SPICEINIT_NAME in names, str(names))
 
 
-def _stub_report(family, outdir, *, drop=(), dup=None, timeouts=(), stdout=None, sweep=True, exit_code=0):
-    """Hand-built stub deck report + unit dirs. NOT a measurement."""
+def test_bounded_corner_selection():
+    """`--corner` bounds the request to ratified corners, in the launcher's order."""
+    cli = ["ss:125:3.63", "tt:25:3.30"]  # deliberately out of loop order
+    with tempfile.TemporaryDirectory() as td:
+        req = da.build_request("read-snm", td, corner_specs=cli)
+        ids = [d["id"] for d in req["decks"]]
+        check("bounded count", len(ids) == 2, str(ids))
+        check("bounded loop order", ids == ["tt_25c_3.30v", "ss_125c_3.63v"], str(ids))
+        meta = req["x_gf180_sram_adapter"]
+        check("bounded corners recorded", meta["corners"] == ids, str(meta.get("corners")))
+        check("bounded not full grid", meta["full_grid"] is False)
+        check("bounded corner_count", meta["corner_count"] == 2)
+        for cid in ids:
+            check(f"bounded staged {cid}", (Path(td) / "units" / cid / "corner.inc").is_file())
+        check("bounded stages nothing else",
+              sorted(q.name for q in (Path(td) / "units").iterdir()) == sorted(ids))
+        # byte-identical decks and corner.inc to the full-grid build
+        full = da.build_request("read-snm", td + "-full", corner_specs=None)
+        check("full grid default", len(full["decks"]) == 27 and full["x_gf180_sram_adapter"]["full_grid"] is True)
+        check("same composed deck",
+              meta["composed_deck_sha256"] == full["x_gf180_sram_adapter"]["composed_deck_sha256"])
+        for cid in ids:
+            a = (Path(td) / "units" / cid / "corner.inc").read_bytes()
+            b = (Path(td + "-full") / "units" / cid / "corner.inc").read_bytes()
+            check(f"same corner.inc {cid}", a == b)
+    for bad in ("tt:25", "xx:25:3.30", "tt:30:3.30", "tt:25:3.31", "tt:q:3.30"):
+        try:
+            da.select_corners([bad])
+        except ValueError:
+            continue
+        check(f"refuse {bad}", False, "accepted an unratified corner spec")
+    try:
+        da.select_corners(["tt:25:3.30", "tt:25:3.30"])
+        check("refuse duplicate corner", False, "accepted a duplicate")
+    except ValueError:
+        pass
+
+
+def test_bounded_reduce_scopes_coverage():
+    """A one-corner report grades `recorded` only when the request pins coverage."""
+    cid = "tt_25c_3.30v"
+    with tempfile.TemporaryDirectory() as bd, tempfile.TemporaryDirectory() as rd:
+        req = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30"])
+        exp_ids, exp_sha = da.expected_from_request("write-margin", req)
+        check("expected_from_request ids", exp_ids == [cid], str(exp_ids))
+        check("expected_from_request sha", exp_sha == req["x_gf180_sram_adapter"]["composed_deck_sha256"])
+        rep = _stub_report("write-margin", rd, keep=(cid,), deck_sha256=exp_sha)
+        bounded = da.reduce_report("write-margin", rep, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("bounded recorded", bounded["overall"] == "recorded", json.dumps(bounded["coverage_errors"]))
+        check("bounded one corner", [c["id"] for c in bounded["corners"]] == [cid])
+        unbounded = da.reduce_report("write-margin", rep)
+        check("unbounded sees 26 missing", unbounded["overall"] == "OPEN"
+              and any("missing corners" in e for e in unbounded["coverage_errors"]),
+              str(unbounded["coverage_errors"]))
+        # an extra corner the request did not ask for is still a coverage error
+        rep2 = _stub_report("write-margin", rd, keep=(cid, "ff_25c_3.30v"), deck_sha256=exp_sha)
+        r2 = da.reduce_report("write-margin", rep2, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("bounded extra id => OPEN", r2["overall"] == "OPEN"
+              and any("unexpected unit ids" in e for e in r2["coverage_errors"]), str(r2["coverage_errors"]))
+        # deck bytes that differ from the composed deck are refused
+        rep3 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256="f" * 64)
+        r3 = da.reduce_report("write-margin", rep3, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("deck sha drift => OPEN", r3["overall"] == "OPEN"
+              and any("deck bytes differ" in e for e in r3["coverage_errors"]), str(r3["coverage_errors"]))
+        # a unit that reports no deck_sha256 (None, or key absent) is itself a
+        # coverage error: the deck-bytes check cannot run, so it must not look
+        # like it passed (#347)
+        rep4 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256=None)
+        r4 = da.reduce_report("write-margin", rep4, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("deck sha None => OPEN", r4["overall"] == "OPEN"
+              and any("deck_sha256 not reported for" in e for e in r4["coverage_errors"]), str(r4["coverage_errors"]))
+        check("deck sha None distinct from drift", not any("deck bytes differ" in e for e in r4["coverage_errors"]))
+        rep5 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256=_OMIT)
+        r5 = da.reduce_report("write-margin", rep5, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+        check("deck sha absent => OPEN", r5["overall"] == "OPEN"
+              and any("deck_sha256 not reported for" in e for e in r5["coverage_errors"]), str(r5["coverage_errors"]))
+        r5u = da.reduce_report("write-margin", rep5)
+        check("unbounded ignores absent sha", r5u["overall"] == "OPEN"
+              and not any("deck_sha256" in e for e in r5u["coverage_errors"]), str(r5u["coverage_errors"]))
+        # the request side must fail closed too (#362): without
+        # composed_deck_sha256 the reducer's whole deck check silently skips,
+        # so expected_from_request refuses a request that cannot support it
+        for mutate, why in (
+            ("drop", "missing key"),
+            (lambda m: m.update(composed_deck_sha256=""), "empty-string key"),
+            (lambda m: m.update(composed_deck_sha256=None), "null key"),
+        ):
+            bad = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30"])
+            meta = bad["x_gf180_sram_adapter"]
+            if mutate == "drop":
+                del meta["composed_deck_sha256"]
+            else:
+                mutate(meta)
+            try:
+                da.expected_from_request("write-margin", bad)
+                check(f"request refuses {why}", False, "returned a sha instead")
+            except ValueError:
+                pass
+        # an absent x_gf180_sram_adapter block entirely still trips the family
+        # check first: callers must see the same error as before #362
+        try:
+            da.expected_from_request("write-margin", {"engine": "ngspice", "decks": []})
+            check("request absent block family-first", False, "returned instead of raising")
+        except ValueError as ve:
+            check("request absent block family-first", "not 'write-margin'" in str(ve), str(ve))
+        # every unit unreported: one error listing all of them, not one per unit
+        req2 = da.build_request("write-margin", bd, corner_specs=["tt:25:3.30", "ss:125:3.63"])
+        exp2, exp_sha2 = da.expected_from_request("write-margin", req2)
+        rep6 = _stub_report("write-margin", rd, keep=tuple(exp2), deck_sha256=None)
+        r6 = da.reduce_report("write-margin", rep6, expected_ids=exp2, expected_deck_sha256=exp_sha2)
+        unrep = [e for e in r6["coverage_errors"] if "deck_sha256 not reported for" in e]
+        check("all unreported => one error listing all", len(unrep) == 1
+              and all(i in unrep[0] for i in exp2), str(r6["coverage_errors"]))
+        # drifted and unreported units in one report: both errors, distinguishable
+        rep7 = _stub_report("write-margin", rd, keep=tuple(exp2), deck_sha256="f" * 64)
+        rep7["units"][0]["deck_sha256"] = None
+        r7 = da.reduce_report("write-margin", rep7, expected_ids=exp2, expected_deck_sha256=exp_sha2)
+        check("mixed drift+unreported both reported", any("deck bytes differ" in e for e in r7["coverage_errors"])
+              and any("deck_sha256 not reported for" in e for e in r7["coverage_errors"]), str(r7["coverage_errors"]))
+        # a unit without an id must not crash the reducer: the sorted() sites
+        # at dupes and drifted see None mixed with str (#347)
+        rep8 = _stub_report("write-margin", rd, keep=(cid,), deck_sha256="f" * 64)
+        ghost = dict(rep8["units"][0])
+        ghost.pop("id")
+        rep8["units"].append(ghost)
+        try:
+            r8 = da.reduce_report("write-margin", rep8, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+            check("no-id drifted unit returns, not raises", r8["overall"] == "OPEN"
+                  and any("unexpected unit ids" in e for e in r8["coverage_errors"]), str(r8["coverage_errors"]))
+        except TypeError as te:
+            check("no-id drifted unit returns, not raises", False, repr(te))
+        rep9 = _stub_report("write-margin", rd, keep=(cid,), dup=cid, deck_sha256=exp_sha)
+        proto = dict(rep9["units"][0])
+        for _ in range(2):
+            g = dict(proto)
+            g.pop("id")
+            rep9["units"].append(g)
+        try:
+            r9 = da.reduce_report("write-margin", rep9, expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+            check("no-id mixed dupes sort guarded", r9["overall"] == "OPEN"
+                  and any("duplicate unit ids" in e for e in r9["coverage_errors"]), str(r9["coverage_errors"]))
+        except TypeError as te:
+            check("no-id mixed dupes sort guarded", False, repr(te))
+        # guards
+        for args, why in (((["bogus_corner"],), "unratified id"), (([],), "empty list")):
+            try:
+                da.reduce_report("write-margin", rep, expected_ids=args[0])
+                check(f"reduce refuses {why}", False, "accepted")
+            except ValueError:
+                pass
+        try:
+            da.expected_from_request("read-snm", req)
+            check("expected_from_request family mismatch", False, "accepted another family's request")
+        except ValueError:
+            pass
+    with tempfile.TemporaryDirectory() as bd:
+        mcreq = da.build_mc_request("read-snm", bd, MC_CORNERS, n=1, n_control=0, n_nc=0, seed=1)
+        try:
+            da.expected_from_request("read-snm", mcreq)
+            check("expected_from_request refuses MC request", False, "accepted an MC request")
+        except ValueError:
+            pass
+
+
+_OMIT = object()
+
+
+def _stub_report(family, outdir, *, drop=(), keep=None, dup=None, timeouts=(), stdout=None,
+                 sweep=True, exit_code=0, deck_sha256="0" * 64):
+    """Hand-built stub deck report + unit dirs. NOT a measurement.
+
+    `deck_sha256=_OMIT` omits the key from every unit entirely (the
+    key-absent shape of #347); any other value, including None, is written.
+    """
     kind, datafile, label = da.parse_mode(da.FAMILIES[family][2])
     units = []
     for cid in da.corner_ids():
-        if cid in drop:
+        if cid in drop or (keep is not None and cid not in keep):
             continue
         ud = Path(outdir) / cid
         ud.mkdir(parents=True, exist_ok=True)
@@ -126,13 +307,16 @@ def _stub_report(family, outdir, *, drop=(), dup=None, timeouts=(), stdout=None,
             else:
                 missing = [datafile]
         timed = cid in timeouts
-        units.append({
+        unit = {
             "id": cid, "status": "timeout" if timed else "pass",
             "exit_code": None if timed else exit_code, "timed_out": timed,
             "stdout": f"{cid}/stdout.bin", "stderr": f"{cid}/stderr.bin",
             "outputs": [] if missing else ([datafile] if datafile else []),
-            "missing_outputs": missing, "deck_sha256": "0" * 64,
-        })
+            "missing_outputs": missing,
+        }
+        if deck_sha256 is not _OMIT:
+            unit["deck_sha256"] = deck_sha256
+        units.append(unit)
     if dup:
         units.append(dict(units[0], id=dup))
     return {"mode": "decks", "status": "pass", "unit_count": len(units), "units": units, "outdir": str(outdir)}
@@ -345,11 +529,140 @@ def test_mc_reduce_fails_closed():
         check("mc seed drift => OPEN", r["overall"] == "OPEN" and any("seed drift" in e for e in r["coverage_errors"]))
 
 
+# --------------------------------------------------------------------------
+# Pinned run-directory .spiceinit (#338)
+# --------------------------------------------------------------------------
+
+SPICEINIT_BYTES = da.SPICEINIT_TEXT.encode("utf-8")
+
+
+def test_spiceinit_staged_in_requests():
+    """Both builders stage the pinned .spiceinit into every unit dir and
+    declare it as that unit's deck input, record its sha256, never set
+    options.ngspice_init (silently dropped on the deck path -- that would
+    record a mode never in force), and never let an output collide with it."""
+    cases = [("build", da.build_request, list(da.FAMILIES)),
+             ("mc-build", None, list(da.MC_FAMILIES))]
+    for label, build, families in cases:
+        for family in families:
+            with tempfile.TemporaryDirectory() as td:
+                if build is None:
+                    req = _mc_build(family, td)
+                else:
+                    req = build(family, td)
+                meta = req["x_gf180_sram_adapter"]
+                check(f"{label} {family} spiceinit sha recorded",
+                      meta.get("spiceinit_sha256") == hashlib.sha256(SPICEINIT_BYTES).hexdigest())
+                check(f"{label} {family} no ngspice_init option",
+                      "ngspice_init" not in (req.get("options") or {}),
+                      json.dumps(req.get("options")))
+                for d in req["decks"]:
+                    uid = d["id"]
+                    staged = Path(td) / "units" / uid / da.SPICEINIT_NAME
+                    check(f"{label} {family} {uid} staged bytes",
+                          staged.read_bytes() == SPICEINIT_BYTES)
+                    check(f"{label} {family} {uid} inputs entry",
+                          d.get("inputs") == [{"path": f"units/{uid}/{da.SPICEINIT_NAME}",
+                                               "name": da.SPICEINIT_NAME}],
+                          json.dumps(d.get("inputs")))
+                    check(f"{label} {family} {uid} output no collision",
+                          da.SPICEINIT_NAME not in d.get("outputs", []))
+
+
+def test_spiceinit_cli_matches_constant():
+    """run_corner_sweep.sh consumes `deck_adapter.py spiceinit` stdout; its
+    bytes must equal SPICEINIT_TEXT exactly (sys.stdout.write, not print)."""
+    out = subprocess.run(
+        [sys.executable, str(REPO / "sim/lib/deck_adapter.py"), "spiceinit"],
+        check=True, capture_output=True,
+    )
+    check("spiceinit CLI bytes", out.stdout == SPICEINIT_BYTES,
+          out.stdout[:80].decode("utf-8", errors="replace"))
+
+
+def test_spiceinit_three_paths_byte_identical():
+    """The pinned .spiceinit must reach the engine's cwd on all three
+    execution paths, byte-identical. Deck mode is asserted on the staged
+    bytes in test_spiceinit_staged_in_requests; here the bash launcher is
+    EXECUTED (fake ngspice shim + fake pinned PDK tree, 27 corners) and the
+    MC pool's two scratch-dir flows are exercised with subprocess mocked and
+    the cwd captured at call time. Captures must equal SPICEINIT_TEXT --
+    including absence being loud (a MISSING marker, never a silent skip)."""
+    captured = []  # bytes of each run-directory .spiceinit, in call order
+
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        # fake pinned PDK tree: pdk_env.sh checks the two ngspice files exist
+        # and that a SOURCES file carries the pinned open_pdks sha
+        pin = (REPO / "sim/lib/pdk_pin.txt").read_text().strip()
+        variant = root / "pdk" / "gf180mcuD"
+        ng = variant / "libs.tech" / "ngspice"
+        ng.mkdir(parents=True)
+        (ng / "sm141064.ngspice").write_text("* fake model file (spiceinit staging test only)\n")
+        (ng / "design.ngspice").write_text("* fake design defaults (spiceinit staging test only)\n")
+        (variant / "SOURCES").write_text(f"gf180mcu_fd_pr {pin}\n")
+        (root / "bin").mkdir()
+        shim = root / "bin" / "ngspice"
+        shim.write_text(
+            "#!/usr/bin/env bash\n"
+            "# test shim: never simulates; captures the run dir's .spiceinit\n"
+            'd="$SPICEINIT_CAPTURE/$(printf \'%03d\' "$(ls "$SPICEINIT_CAPTURE" | wc -l)")"\n'
+            'mkdir -p "$d"\n'
+            'if [[ -f .spiceinit ]]; then cp .spiceinit "$d/.spiceinit"; else : > "$d/MISSING"; fi\n'
+            'echo "RESULT: fake_s = 1e-9"\n'
+        )
+        shim.chmod(0o755)
+        exp_dir = root / "exp"
+        exp_dir.mkdir()
+        capture = root / "capture"
+        capture.mkdir()
+        env = dict(os.environ)
+        env["PATH"] = f"{root / 'bin'}:{env['PATH']}"
+        env["GF180_PDK_PATH"] = str(variant)
+        env["SPICEINIT_CAPTURE"] = str(capture)
+        subprocess.run(
+            ["bash", str(REPO / "sim/lib/run_corner_sweep.sh"),
+             str(exp_dir), str(REPO / "sim/write-margin/testbench/tb_write_margin.spice"),
+             "direct", "spiceinit staging test (fake ngspice; not a measurement)"],
+            env=env, check=True, capture_output=True, timeout=300,
+        )
+        shots = sorted(capture.iterdir())
+        check("launcher corner count", len(shots) == 27, str(len(shots)))
+        for s in shots:
+            f = s / da.SPICEINIT_NAME
+            check(f"launcher {s.name} captured, not MISSING",
+                  not (s / "MISSING").exists() and f.is_file(), str(s))
+            if f.is_file():
+                captured.append(f.read_bytes())
+
+    def fake_run(argv, **kw):
+        f = Path(kw["cwd"]) / da.SPICEINIT_NAME
+        captured.append(f.read_bytes() if f.is_file() else b"MISSING")
+        return mock.Mock(returncode=0, stdout="RESULT: fake_s = 1e-9\n", stderr="")
+
+    with mock.patch.object(mc.subprocess, "run", side_effect=fake_run):
+        mc.run_one("* fake tb\n.end\n", "* fake corner inc\n", "direct", "tb_fake.spice")
+        mc.run_one_snm_pair(
+            "* fake tb\n.end\n", "tb_fake.spice",
+            pdk={"GF180_MODEL_FILE": "/pdk/model.ngspice"},
+            process="tt", temp=25, vdd="3.30", seed_l=1, seed_r=2,
+            datafile="fake_sweep.txt", label="fake", sw_stat_mismatch=0.0,
+        )
+
+    check("three-path capture count", len(captured) == 27 + 3, str(len(captured)))
+    for i, b in enumerate(captured):
+        check(f"capture {i} byte-identical", b == SPICEINIT_BYTES,
+              b[:60].decode("utf-8", errors="replace"))
+
+
 def main():
     for t in (test_corner_matrix, test_corner_inc_matches_launcher, test_launcher_loop_axes_match,
               test_build_all_families, test_klt_accepts_requests, test_reducer_direct, test_reducer_snm,
+              test_bounded_corner_selection, test_bounded_reduce_scopes_coverage,
               test_mc_seed_pins, test_mc_build_identity, test_mc_n1_and_guard,
-              test_mc_reduce_shapes, test_mc_reduce_fails_closed):
+              test_mc_reduce_shapes, test_mc_reduce_fails_closed,
+              test_spiceinit_staged_in_requests, test_spiceinit_cli_matches_constant,
+              test_spiceinit_three_paths_byte_identical):
         t()
     if FAILURES:
         for f in FAILURES[:10]:

@@ -31,6 +31,8 @@ ROW_GDS=layout/periphery/row/row_path.gds
 CTRL_DIR=layout/periphery/control
 CTRL_GDS=$CTRL_DIR/sram_ctrl.gds
 COLDEC_GDS=$CTRL_DIR/col_decode.gds
+MACRO_DIR=layout/macro
+MACRO_GDS=$MACRO_DIR/sram_256x32.gds
 
 hr() { printf '\n=== %s ===\n' "$1"; }
 
@@ -46,7 +48,9 @@ $PY layout/sram_256x32/generate.py --rows 64 --cols 128 \
 $PY layout/periphery/row/generate.py
 # The control block and the column decoder (issue #246).
 $PY $CTRL_DIR/generate.py
-GENERATED_GDS="$BITCELL_GDS $ARRAY_GDS $ARRAY64_GDS $PRECHARGE_GDS $IO_GDS $BAND_GDS $ROW_GDS $CTRL_GDS $COLDEC_GDS"
+# The macro: every block above placed and wired into one top cell (issue #326).
+$PY $MACRO_DIR/generate.py
+GENERATED_GDS="$BITCELL_GDS $ARRAY_GDS $ARRAY64_GDS $PRECHARGE_GDS $IO_GDS $BAND_GDS $ROW_GDS $CTRL_GDS $COLDEC_GDS $MACRO_GDS"
 if git diff --quiet -- $GENERATED_GDS; then
   echo "PASS: re-running the generators reproduced the committed GDS byte-for-byte"
 else
@@ -59,7 +63,7 @@ hr "2. layout hygiene (klt precheck, 5 nm grid)"
 klt precheck --deck gf180mcu --grid-um 0.005 "$BITCELL_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY_GDS"
 klt precheck --deck gf180mcu --grid-um 0.005 "$ARRAY64_GDS"
-for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS" "$ROW_GDS" "$CTRL_GDS" "$COLDEC_GDS"; do
+for gds in "$PRECHARGE_GDS" "$IO_GDS" "$BAND_GDS" "$ROW_GDS" "$CTRL_GDS" "$COLDEC_GDS" "$MACRO_GDS"; do
   klt precheck --deck gf180mcu --grid-um 0.005 "$gds"
 done
 
@@ -115,8 +119,13 @@ for cell in sram_ctrl col_decode; do
 \"options\":{\"flatten_reference\":true}}"
 done
 
+hr "5f. macro pins: GDS labels vs the #198 pin list (issue #326)"
+# 107 signals on Metal2 along the bottom edge + VDD/VSS Metal3 straps on the top edge;
+# fails on any missing, extra or duplicate label.
+$PY $MACRO_DIR/check_pins.py
+
 if [ "$QUICK" = "1" ]; then
-  hr "skipped (--quick): full-array DRC and extraction, column-seam DRC"
+  hr "skipped (--quick): macro DRC, full-array DRC and extraction, column-seam DRC"
   exit 0
 fi
 
@@ -143,3 +152,6 @@ hr "10. DRC: column bands abutted to the committed 64x128 array (bit-line seam, 
 # composite is a scratch file; only its inputs are committed.
 $PY $COLUMN_DIR/generate.py --abut "$ARRAY64_GDS" -o "$WORK/column_abut.gds" >/dev/null
 klt drc --deck gf180mcu "$WORK/column_abut.gds"
+
+hr "11. DRC: the macro, hierarchical top cell sram_256x32 (~1 min)"
+klt drc --deck gf180mcu "$MACRO_GDS"

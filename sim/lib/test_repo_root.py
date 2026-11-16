@@ -52,7 +52,10 @@ class FindRepoRootTest(unittest.TestCase):
             (root / ".git").mkdir()
             nested = root / "sim" / "lib" / "common"
             nested.mkdir(parents=True)
-            for name in ("repo_root.py", "render_signoff_table.py"):
+            # render_signoff_table's path-injected sibling imports travel with
+            # it: repo_root.py and corner_matrix.py (the corner matrix's single
+            # owner, #331).
+            for name in ("repo_root.py", "corner_matrix.py", "render_signoff_table.py"):
                 shutil.copy(LIB / name, nested / name)
             code = (
                 "import sys; sys.path.insert(0, sys.argv[1]);"

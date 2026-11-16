@@ -47,20 +47,46 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Ratified PVT matrix, spec/sram.md "Corner set" -- process x temperature x
+# voltage. Imported from its single owner (#331), never re-derived here: the
+# "Note on corner count" paragraph below renders the axis product into the
+# committed sim/signoff-summary.md, so a private copy would let that artifact
+# keep asserting a stale product after an axis change. Same order
+# sim/lib/run_corner_sweep.sh iterates, so every record's corner ordering
+# already matches this.
+from corner_matrix import PROCESSES, TEMPS, VDDS, corner_ids  # noqa: E402
 from repo_root import find_repo_root  # noqa: E402 (path-injected sibling import)
 
-# Ratified PVT matrix, spec/sram.md "Corner set" -- process x temperature x
-# voltage, 3x3x3 = 27 points. Same order sim/lib/run_corner_sweep.sh
-# iterates so every record's corner ordering already matches this.
-PROCESSES = ["ff", "tt", "ss"]
-TEMPS = ["-40", "25", "125"]
-VDDS = ["2.97", "3.30", "3.63"]
-CORNER_ORDER = [
-    f"{p}_{t}c_{v}v" for p in PROCESSES for t in TEMPS for v in VDDS
-]
+CORNER_ORDER = corner_ids()
+
+# The five characterization families' append-only evidence, in one place:
+# family -> (records dir relative to sim/, Claim substring, recorded metric
+# key). render_signoff_table.main() renders its verdicts from these and
+# sim/lib/parity_compare.py (#230 full-grid deck-mode parity) compares fleet
+# results against them -- one owner so the two consumers cannot drift into
+# comparing different records or different metrics.
+RECORD_CLAIMS = {
+    "read-snm": ("read-snm/records", "read SNM", "read_snm_v"),
+    "hold-snm": ("hold-snm/records", "hold SNM", "hold_snm_v"),
+    "write-margin": ("write-margin/records", "write margin", "write_trip_voltage_v"),
+    "read-access": ("access-time/records", "read access time", "read_access_time_s"),
+    "write-access": ("access-time/records", "write access time", "write_access_time_s"),
+}
 
 RESULT_RE = re.compile(r"RESULT:\s*(\w+)\s*=\s*([-+0-9.eE]+)\s*;?")
 ROW_RE = re.compile(r"^\s*-\s*\*\*(\S+)\*\*:\s*(.*)$")
+
+# The committed Monte Carlo sample-sets, one per family that has one (family
+# -> path relative to sim/). One owner, same rule as RECORD_CLAIMS above:
+# sim/lib/parity_compare.py's MC mode (#230) compares the deck-mode run's
+# per-sample values against exactly these documents, so the binding lives
+# here beside the record bindings rather than inline in the comparator.
+# read-access/write-access have no committed MC record, so no binding.
+MC_SAMPLE_SETS = {
+    "read-snm": "read-snm/mc/samples/20260921-124232-cf5e975.json",
+    "hold-snm": "hold-snm/mc/samples/20260921-124534-cf5e975.json",
+    "write-margin": "write-margin/mc/samples/20260921-124804-cf5e975.json",
+}
 
 
 def latest_record_for_claim(records_dir: Path, claim_substring: str) -> Path:
@@ -133,11 +159,18 @@ def main() -> int:
     repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else default_repo_root()
     sim_dir = repo_root / "sim"
 
-    read_snm_record = latest_record_for_claim(sim_dir / "read-snm" / "records", "read SNM")
-    hold_snm_record = latest_record_for_claim(sim_dir / "hold-snm" / "records", "hold SNM")
-    write_margin_record = latest_record_for_claim(sim_dir / "write-margin" / "records", "write margin")
-    read_at_record = latest_record_for_claim(sim_dir / "access-time" / "records", "read access time")
-    write_at_record = latest_record_for_claim(sim_dir / "access-time" / "records", "write access time")
+    # The five records come from RECORD_CLAIMS (see its comment): same
+    # (records dir, Claim substring) pairs main() has always resolved, now
+    # shared with parity_compare.py.
+    records = {
+        family: latest_record_for_claim(sim_dir / records_rel, claim)
+        for family, (records_rel, claim, _metric) in RECORD_CLAIMS.items()
+    }
+    read_snm_record = records["read-snm"]
+    hold_snm_record = records["hold-snm"]
+    write_margin_record = records["write-margin"]
+    read_at_record = records["read-access"]
+    write_at_record = records["write-access"]
 
     read_snm = parse_record(read_snm_record)
     hold_snm = parse_record(hold_snm_record)

@@ -132,12 +132,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent.parent
 
-# gf180mcu process-corner label -> the model file's own bare `.LIB` section
-# name (same mapping sim/lib/run_corner_sweep.sh uses -- "tt" is this
-# repo's/spec's label for gf180mcu's "typical" section).
-LIB_SECTION = {"ff": "ff", "tt": "typical", "ss": "ss"}
+sys.path.insert(0, str(SCRIPT_DIR))
+# The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
+# (#331): the `tt -> typical` model-section mapping and the corner-id format
+# are imported, never re-derived here. Re-exported under this module's own
+# names because callers (sim/lib/deck_adapter.py) already reach them as
+# `mc.LIB_SECTION` / `mc.corner_id`.
+from corner_matrix import LIB_SECTION, corner_id  # noqa: E402,F401
+from repo_root import find_repo_root  # noqa: E402  (#337: imported, never re-derived)
+
+REPO_ROOT = find_repo_root(Path(__file__))
 
 # design.ngspice's own defaults for every name its combined `.param` card
 # sets, reproduced verbatim here (see module docstring, "Known ngspice/
@@ -192,10 +197,6 @@ def derive_seed(base_seed: int, corner_id: str, kind: str, sample_index: int) ->
     return (int(digest[:8], 16) % 2_000_000_000) + 1
 
 
-def corner_id(process: str, temp: str, vdd: str) -> str:
-    return f"{process}_{temp}c_{vdd}v"
-
-
 def build_corner_inc(pdk: dict[str, str], process: str, temp: str, vdd: str, seed: int, sw_stat_mismatch: float) -> str:
     section = LIB_SECTION[process]
     lines = [
@@ -216,6 +217,21 @@ def build_corner_inc(pdk: dict[str, str], process: str, temp: str, vdd: str, see
     return "\n".join(lines) + "\n"
 
 
+def _write_spiceinit(work_dir: Path) -> None:
+    """Stage the pinned run-directory `.spiceinit` (#338) into `work_dir`.
+
+    ngspice reads `.spiceinit` from its cwd, and a run-directory one replaces
+    `$HOME/.spiceinit`, so without this the compatibility mode in force would
+    depend on whoever's machine runs the pool. Single source of truth is
+    `deck_adapter.SPICEINIT_TEXT` -- the same bytes deck mode stages as a deck
+    input. Deferred import: deck_adapter imports this module, so a top-level
+    import here would be circular.
+    """
+    from deck_adapter import SPICEINIT_TEXT  # noqa: PLC0415 -- deferred to avoid an import cycle
+
+    (work_dir / ".spiceinit").write_text(SPICEINIT_TEXT, encoding="utf-8")
+
+
 def run_one(testbench_text: str, corner_inc_text: str, mode: str, tb_name: str) -> tuple[str, dict[str, float], list[str]]:
     """Run one ngspice invocation in a scratch directory; return
     (combined log text, {key: value} extracted results, [error strings]).
@@ -224,6 +240,7 @@ def run_one(testbench_text: str, corner_inc_text: str, mode: str, tb_name: str) 
         work = Path(tmp)
         (work / "corner.inc").write_text(corner_inc_text, encoding="utf-8")
         (work / tb_name).write_text(testbench_text, encoding="utf-8")
+        _write_spiceinit(work)
         proc = subprocess.run(
             ["ngspice", "-b", tb_name],
             cwd=work,
@@ -279,6 +296,7 @@ def run_one_snm_pair(
             inc = build_corner_inc(pdk, process, temp, vdd, seed, sw_stat_mismatch)
             (side_dir / "corner.inc").write_text(inc, encoding="utf-8")
             (side_dir / tb_name).write_text(testbench_text, encoding="utf-8")
+            _write_spiceinit(side_dir)
             proc = subprocess.run(
                 ["ngspice", "-b", tb_name], cwd=side_dir, capture_output=True, text=True, check=False
             )

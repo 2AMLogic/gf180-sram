@@ -2,15 +2,19 @@
 """Deck-mode adapter: the 27-corner characterization grid as a `klt sim` deck request (#230).
 
     deck_adapter.py build  <family> --stage-dir DIR --request-out FILE [--pdk-dir DIR]
-    deck_adapter.py reduce <family> <klt-sim-report.json> [--outdir DIR] [--json-out FILE]
+                           [--corner P:T:V ...]
+    deck_adapter.py reduce <family> <klt-sim-report.json> [--request FILE]
+                           [--outdir DIR] [--json-out FILE]
     deck_adapter.py mc-build  <family> --corner P:T:V ... --seed N --stage-dir DIR --request-out FILE
     deck_adapter.py mc-reduce <family> <request.json> <klt-sim-report.json> [--outdir DIR]
+    deck_adapter.py spiceinit   # print the pinned run-directory .spiceinit (#338)
     deck_adapter.py families
 
 This is the *offline preparation* half of retiring `run_corner_sweep.sh`. It
 does NOT run ngspice, submit anything, or mint a record:
 
-* `build` composes, for each of the 27 ratified corners, exactly the scratch
+* `build` composes, for each of the 27 ratified corners (or the subset
+  `--corner` names, for a bounded parity run), exactly the scratch
   directory `run_corner_sweep.sh` composes (the testbench, a generated
   `corner.inc`, the staged DUT netlist) and writes a `klt sim` *deck-list*
   request that transports those decks unchanged (`klayout_tools.sim_decks`).
@@ -20,7 +24,11 @@ does NOT run ngspice, submit anything, or mint a record:
   launcher's grading -- `RESULT:` / `RESULT-ERROR:` lines, `snm_extract.py`
   for the DC-sweep families -- to a deck report and fails closed on missing
   coverage, missing declared outputs and timeouts. Exit 0 from the engine is
-  never read as a measurement PASS.
+  never read as a measurement PASS. Pass `--request` (the file `build` wrote)
+  so a bounded run is graded against exactly the corners it asked for, and
+  the executed decks' `deck_sha256` is checked against the composed bytes --
+  a unit that reports no `deck_sha256` is itself a coverage error, so the
+  check cannot silently not-run.
 
 The only byte-level difference from the launcher's scratch deck is the
 `@@REPO_ROOT@@` token, which becomes `.` (the DUT netlist is staged at
@@ -45,7 +53,6 @@ import argparse
 import contextlib
 import hashlib
 import io
-import itertools
 import json
 import os
 import re
@@ -57,16 +64,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import run_mc_campaign as mc  # noqa: E402
 import snm_extract  # noqa: E402
+from corner_matrix import (  # noqa: E402
+    LIB_SECTION,
+    corner_id,
+    corner_ids,
+    corners,
+)
+
+# Re-exported, not used directly in this module: the ratified corner matrix
+# has a single owner (sim/lib/corner_matrix.py, #331), but
+# test_deck_adapter.py's launcher-equality guards read them as
+# `da.PROCESSES` / `da.TEMPS` / `da.VDDS`. Keep them bound here so that
+# guard keeps comparing this module's view of the axes against
+# run_corner_sweep.sh's own arrays.
+from corner_matrix import PROCESSES, TEMPS, VDDS  # noqa: E402,F401
 from repo_root import find_repo_root  # noqa: E402
 
 REPO_ROOT = find_repo_root(Path(__file__))
-
-# Ratified corner matrix (spec/sram.md "Corner set"); same order as
-# run_corner_sweep.sh so unit order matches the launcher's corner order.
-PROCESSES = ("ff", "tt", "ss")
-TEMPS = (-40, 25, 125)
-VDDS = ("2.97", "3.30", "3.63")
-LIB_SECTION = {"ff": "ff", "tt": "typical", "ss": "ss"}
 
 REPO_ROOT_TOKEN = "@@REPO_ROOT@@"
 DUT_NETLIST = "design/netlist/bitcell_6t.spice"
@@ -74,6 +88,48 @@ PDK_VARIANT = "gf180mcuD"
 MODEL_REL = f"{PDK_VARIANT}/libs.tech/ngspice/sm141064.ngspice"
 DESIGN_INC_REL = f"{PDK_VARIANT}/libs.tech/ngspice/design.ngspice"
 DECK_TIMEOUT_S = 300
+
+# The pinned ngspice environment, staged as a run-directory `.spiceinit`
+# (issue #338). ngspice reads `.spiceinit` from its current working
+# directory, and every execution path in this repo runs the engine with cwd
+# set to a per-unit scratch directory, so staging this file there makes the
+# environment a property of the repo rather than of whichever host runs the
+# deck. A run-directory `.spiceinit` *replaces* `$HOME/.spiceinit` (verified
+# 2026-11-14, #338) rather than merging with it, so the file carries every
+# line a run needs -- not just the compatibility mode.
+#
+# Do NOT replace this with `options.ngspice_init`: on the deck-list path
+# (`klayout_tools.sim_decks`) that option is silently dropped (the worker
+# request's option allowlist is timeout_s/max_workers/ngspice_binary), so a
+# request setting it would record a pinned mode that was never in force.
+# Upstream gap: 2AMLogic/klayout-tools#5738. The single source of truth for
+# these lines is SPICEINIT_TEXT below; `run_corner_sweep.sh` writes the same
+# bytes via this module's `spiceinit` verb and `run_mc_campaign.py` imports
+# the constant, and sim/lib/test_deck_adapter.py asserts the three paths stay
+# byte-identical.
+SPICEINIT_NAME = ".spiceinit"
+SPICEINIT_TEXT = (
+    "* Pinned ngspice environment -- staged into every run directory by\n"
+    "* sim/lib (issue #338). A run-directory .spiceinit replaces $HOME/.spiceinit,\n"
+    "* so every setting a run needs is in this file. Single source of truth:\n"
+    "* SPICEINIT_TEXT in sim/lib/deck_adapter.py; do not edit copies.\n"
+    "*\n"
+    "* ngbehavior=hsa: the mode the committed sim/ corpus ran under (its corner\n"
+    "* logs carry 'Compatibility modes selected: hs a'), so the committed records\n"
+    "* stay reproducible, and the mode the gf180mcu ngspice model decks are\n"
+    "* written against (a distro-packaged ngspice supplies it via its own spinit;\n"
+    "* a locally built one does not).\n"
+    "set ngbehavior=hsa\n"
+    "* One ngspice thread per unit: batch-fleet workers run units in parallel\n"
+    "* and rely on per-worker thread pinning; a run-directory .spiceinit would\n"
+    "* otherwise drop the host's num_threads and oversubscribe a shared worker.\n"
+    "set num_threads=1\n"
+    "* Per-finger model binning (W/NF). NOT implied by ngbehavior=hsa (verified\n"
+    "* 2026-11-14, #338). Inert today -- every device in this repo is nf=1, so\n"
+    "* W/nf == W and bin selection cannot change -- but pinned so drawing a\n"
+    "* multi-finger device cannot silently change model-bin selection.\n"
+    "set wnflag=1\n"
+)
 
 # The five characterization families run_corner_sweep.sh is invoked with
 # (sim/README.md "Cold-start invocation"). `mode` is the launcher's mode.
@@ -86,17 +142,42 @@ FAMILIES = {
 }
 
 
-def corners():
-    """(process, temp_c, vdd) in the launcher's loop order."""
-    return list(itertools.product(PROCESSES, TEMPS, VDDS))
+def parse_corner_spec(spec):
+    """'tt:25:3.30' -> ('tt', '25', '3.30'), restricted to the ratified matrix.
+
+    Only a corner the spec already ratifies can be named: a bounded run is a
+    subset of the committed grid, never a new corner. Axis labels are the
+    spec's own literal text (corner_matrix's rule), so each field must match
+    its axis verbatim.
+    """
+    parts = str(spec).split(":")
+    if len(parts) != 3:
+        raise ValueError(f"corner {spec!r} must be process:temp:vdd (e.g. tt:25:3.30)")
+    process, temp, vdd = parts
+    if process not in PROCESSES:
+        raise ValueError(f"corner {spec!r}: process must be one of {list(PROCESSES)}")
+    if temp not in TEMPS:
+        raise ValueError(f"corner {spec!r}: temperature must be one of {list(TEMPS)} (spec/sram.md corner set)")
+    if vdd not in VDDS:
+        raise ValueError(f"corner {spec!r}: vdd must be one of {list(VDDS)} (spec/sram.md corner set)")
+    return process, temp, vdd
 
 
-def corner_id(process, temp, vdd):
-    return f"{process}_{temp}c_{vdd}v"
+def select_corners(corner_specs=None):
+    """The ratified corners named by `corner_specs`, in the launcher's order.
 
-
-def corner_ids():
-    return [corner_id(*c) for c in corners()]
+    `None`/empty selects the full 27-corner grid (the default, unchanged).
+    Any subset keeps the launcher's loop order so unit order never depends on
+    the order the corners were named on the command line.
+    """
+    if not corner_specs:
+        return corners()
+    wanted = [parse_corner_spec(s) for s in corner_specs]
+    ids = [corner_id(*c) for c in wanted]
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    if dupes:
+        raise ValueError(f"duplicate corners: {dupes}")
+    return [c for c in corners() if c in wanted]
 
 
 def compose_corner_inc(process, temp, vdd, design_inc, model_file):
@@ -130,13 +211,19 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
+def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corner_specs=None):
     """Write per-corner unit dirs under `stage_dir` and return the request dict.
 
     `pdk_dir` (absolute path to the gf180mcuD variant dir) is written into
     corner.inc verbatim and `models.pdk_root` is set to its parent; by default
     the includes use the literal `$PDK_ROOT/gf180mcuD/...` form, which the
     executing host resolves.
+
+    `corner_specs` (e.g. `["tt:25:3.30"]`) bounds the request to those ratified
+    corners -- the bounded parity run the migration needs before cutover. The
+    default is the full 27-corner grid. The deck bytes are identical either
+    way; only which corners are staged changes, and the selection is recorded
+    in `x_gf180_sram_adapter.corners` so `reduce` expects exactly that set.
     """
     exp_dir, tb_name, mode = FAMILIES[family]
     kind, datafile, _label = parse_mode(mode)
@@ -157,8 +244,9 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
         model_file = f"$PDK_ROOT/{MODEL_REL}"
 
     stage = Path(stage_dir)
+    selected = select_corners(corner_specs)
     units = []
-    for process, temp, vdd in corners():
+    for process, temp, vdd in selected:
         cid = corner_id(process, temp, vdd)
         unit = stage / "units" / cid
         unit.mkdir(parents=True, exist_ok=True)
@@ -166,6 +254,10 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
         (unit / "corner.inc").write_text(
             compose_corner_inc(process, temp, vdd, design_inc, model_file)
         )
+        # The pinned run-directory .spiceinit (#338): transported as a staged
+        # deck input (decks[].inputs[] IS carried into the worker request,
+        # unlike options.ngspice_init, which the deck path silently drops).
+        (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
         if REPO_ROOT_TOKEN in tb_bytes.decode("utf-8"):
             dest = unit / DUT_NETLIST
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -174,8 +266,13 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
             "id": cid,
             "deck": f"units/{cid}/{tb_name}",
             "timeout_s": DECK_TIMEOUT_S,
+            "inputs": [{"path": f"units/{cid}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
         }
         if datafile:
+            if datafile == SPICEINIT_NAME:
+                raise ValueError(
+                    f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
+                )
             entry["outputs"] = [datafile]
         units.append(entry)
 
@@ -188,7 +285,12 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT):
         "testbench": f"{exp_dir}/testbench/{tb_name}",
         "testbench_sha256": _sha256(tb_bytes),
         "composed_deck_sha256": _sha256(deck_bytes),
+        "corners": [corner_id(*c) for c in selected],
         "corner_count": len(units),
+        # The pinned .spiceinit every unit carries (#338); recorded so the
+        # environment the request ran under is auditable from the request.
+        "spiceinit_sha256": _sha256(SPICEINIT_TEXT.encode("utf-8")),
+        "full_grid": len(selected) == len(corners()),
     }
     return request
 
@@ -217,16 +319,51 @@ def _snm_lines(datafile_path, label):
     return out.getvalue() + err.getvalue()
 
 
-def reduce_report(family, report, *, outdir=None):
+def expected_from_request(family, request):
+    """(expected corner ids, composed deck sha256) for a request `build` wrote.
+
+    Pinning coverage to the request is what lets a *bounded* run grade as
+    `recorded`: without it the reducer expects all 27 corners and a one-corner
+    parity run is indistinguishable from a 26-corner loss.
+    """
+    meta = request.get("x_gf180_sram_adapter") or {}
+    if meta.get("campaign") == "monte-carlo":
+        raise ValueError("request is a Monte Carlo deck request -- use mc-reduce")
+    if meta.get("family") != family:
+        raise ValueError(f"request is for family {meta.get('family')!r}, not {family!r}")
+    sha = meta.get("composed_deck_sha256")
+    if not sha:
+        raise ValueError("request has no x_gf180_sram_adapter.composed_deck_sha256")
+    ids = list(meta.get("corners") or corner_ids())
+    return ids, sha
+
+
+def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_deck_sha256=None):
     """Grade a `klt sim` deck report with the launcher's rules.
 
     Returns {"family", "expected", "coverage_errors", "corners": [...],
     "overall"}; overall is "recorded" only if coverage is exact and every
     corner produced a RESULT with no RESULT-ERROR, else "OPEN".
+
+    `expected_ids` (from `expected_from_request`) bounds the expected coverage
+    to the corners the request actually asked for; the default is the full
+    27-corner grid. `expected_deck_sha256`, when given, must equal every
+    unit's reported `deck_sha256` -- the deck-bytes-unchanged claim, checked
+    rather than assumed. A unit whose `deck_sha256` is None or absent is
+    itself a coverage error ("deck_sha256 not reported for: [...]"): a check
+    that cannot run must never look like one that passed.
     """
     _exp, _tb, mode = FAMILIES[family]
     kind, datafile, label = parse_mode(mode)
-    expected = corner_ids()
+    if expected_ids is None:
+        expected = corner_ids()
+    else:
+        expected = list(expected_ids)
+        if not expected:
+            raise ValueError("expected corner list is empty")
+        unknown = [c for c in expected if c not in corner_ids()]
+        if unknown:
+            raise ValueError(f"not ratified corner ids: {unknown}")
     base = Path(outdir or report.get("outdir") or ".")
 
     coverage_errors = []
@@ -236,7 +373,7 @@ def reduce_report(family, report, *, outdir=None):
     else:
         units = report["units"]
     ids = [u.get("id") for u in units]
-    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    dupes = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     if dupes:
         coverage_errors.append(f"duplicate unit ids: {dupes}")
     missing = [c for c in expected if c not in ids]
@@ -245,6 +382,20 @@ def reduce_report(family, report, *, outdir=None):
         coverage_errors.append(f"missing corners: {missing}")
     if extra:
         coverage_errors.append(f"unexpected unit ids: {extra}")
+    if expected_deck_sha256 is not None:
+        drifted = sorted(
+            (u.get("id") for u in units
+             if u.get("deck_sha256") is not None and u.get("deck_sha256") != expected_deck_sha256),
+            key=str,
+        )
+        if drifted:
+            coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
+        unreported = sorted(
+            (u.get("id") for u in units if u.get("deck_sha256") is None),
+            key=str,
+        )
+        if unreported:
+            coverage_errors.append(f"deck_sha256 not reported for: {unreported}")
 
     by_id = {}
     for u in units:
@@ -300,6 +451,7 @@ def reduce_report(family, report, *, outdir=None):
         "family": family,
         "mode": mode,
         "expected": expected,
+        "expected_deck_sha256": expected_deck_sha256,
         "coverage_errors": coverage_errors,
         "corners": graded,
         "overall": "recorded" if ok else "OPEN",
@@ -416,12 +568,25 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
         unit.mkdir(parents=True, exist_ok=True)
         (unit / tb_name).write_bytes(deck_bytes)
         (unit / "corner.inc").write_text(inc, encoding="utf-8")
+        # The pinned run-directory .spiceinit (#338) -- one copy per MC unit:
+        # one unit per (corner, kind, sample[, side]), so the same bytes are
+        # staged once per unit and named once in that unit's inputs[].
+        (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
         if needs_dut:
             dest = unit / DUT_NETLIST
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(dut_path, dest)
-        entry = {"id": m["id"], "deck": f"units/{m['id']}/{tb_name}", "timeout_s": DECK_TIMEOUT_S}
+        entry = {
+            "id": m["id"],
+            "deck": f"units/{m['id']}/{tb_name}",
+            "timeout_s": DECK_TIMEOUT_S,
+            "inputs": [{"path": f"units/{m['id']}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
+        }
         if datafile:
+            if datafile == SPICEINIT_NAME:
+                raise ValueError(
+                    f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
+                )
             entry["outputs"] = [datafile]
         decks.append(entry)
 
@@ -440,6 +605,8 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
         "corners": [mc.corner_id(*_parse_corner(c)) for c in corner_specs],
         "n_mismatch": n, "n_determinism_control": n_control, "n_negative_control": n_nc,
         "nc_mismatch_scale": nc_mismatch_scale, "nc_vdd": nc_vdd,
+        # The pinned .spiceinit every unit carries (#338); see build_request.
+        "spiceinit_sha256": _sha256(SPICEINIT_TEXT.encode("utf-8")),
         "units": manifest,
     }
     return request
@@ -633,16 +800,28 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("families")
+    sub.add_parser(
+        "spiceinit",
+        help="print SPICEINIT_TEXT -- the pinned run-directory .spiceinit "
+        "(#338); run_corner_sweep.sh writes it into each corner's scratch "
+        "directory so the launcher path pins the same environment deck mode "
+        "stages",
+    )
     b = sub.add_parser("build")
     b.add_argument("family", choices=sorted(FAMILIES))
     b.add_argument("--stage-dir", required=True)
     b.add_argument("--request-out", required=True)
     b.add_argument("--pdk-dir")
+    b.add_argument("--corner", action="append", dest="corners", metavar="process:temp:vdd",
+                   help="bound the request to this ratified corner (repeatable; default: all 27)")
     r = sub.add_parser("reduce")
     r.add_argument("family", choices=sorted(FAMILIES))
     r.add_argument("report")
     r.add_argument("--outdir")
     r.add_argument("--json-out")
+    r.add_argument("--request",
+                   help="the request `build` wrote: expect exactly its corners and deck sha256 "
+                        "(required to grade a bounded run; without it all 27 corners are expected)")
     mb = sub.add_parser("mc-build")
     mb.add_argument("family", choices=sorted(MC_FAMILIES))
     mb.add_argument("--corner", action="append", required=True, dest="corners", metavar="process:temp:vdd")
@@ -694,13 +873,26 @@ def main(argv=None):
         for name, (d, tb, mode) in sorted(FAMILIES.items()):
             print(f"{name}\t{d}/testbench/{tb}\t{mode}")
         return 0
+    if args.cmd == "spiceinit":
+        # Byte-exact stdout (no print()'s trailing-newline doubling): the
+        # bash launcher redirects this straight into the scratch .spiceinit,
+        # and the test suite asserts those bytes equal SPICEINIT_TEXT.
+        sys.stdout.write(SPICEINIT_TEXT)
+        return 0
     if args.cmd == "build":
-        req = build_request(args.family, args.stage_dir, pdk_dir=args.pdk_dir)
+        req = build_request(args.family, args.stage_dir, pdk_dir=args.pdk_dir,
+                            corner_specs=args.corners)
         Path(args.request_out).write_text(json.dumps(req, indent=2) + "\n")
         print(f"wrote {len(req['decks'])} decks; request: {args.request_out}")
         return 0
     report = json.loads(Path(args.report).read_text())
-    result = reduce_report(args.family, report, outdir=args.outdir)
+    expected_ids = expected_sha = None
+    if args.request:
+        expected_ids, expected_sha = expected_from_request(
+            args.family, json.loads(Path(args.request).read_text())
+        )
+    result = reduce_report(args.family, report, outdir=args.outdir,
+                           expected_ids=expected_ids, expected_deck_sha256=expected_sha)
     if args.json_out:
         Path(args.json_out).write_text(json.dumps(result, indent=2) + "\n")
     for c in result["corners"]:
