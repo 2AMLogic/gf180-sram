@@ -110,6 +110,22 @@ committed -- today, the full-grid `stdout.log` row above -- must carry the
 literal token `(none committed)` in its What cell; the gate skips such a row.
 This keeps a receipt from citing evidence it does not commit (issue #356).
 
+**Prose committed-bytes sections are deliberately out of scope for that
+gate** (issue #372). A receipt may additionally -- or instead -- document
+its artifacts in prose (both MC receipts do, under `## What is re-derivable
+from committed bytes`); CI does not resolve prose-cited paths. Prose claims
+are not machine-checkable: the receipt's machine-checkable inventory is its
+`## Files in` table, and a receipt that documents committed artifacts in
+prose only sits outside the gate. Two pieces of visibility keep that from
+being silent: the check's success line reports its coverage -- receipt
+`Files in` tables gated, rows resolved -- so a zero-coverage receipt shows
+up as a dropped count rather than the same green line as a fully-gated one;
+and a deck-parity receipt whose `| File | What |` table sits under a heading
+the gate cannot see (a one-character heading deviation) draws a warning,
+never a CI failure, naming the doc and the unmatched heading. Tables in the
+other experiments' READMEs are directory listings, not receipts, and are
+outside the warning.
+
 ## Receipts
 
 The first three receipts answer the deck-transport question (the #230
