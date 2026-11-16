@@ -1,0 +1,642 @@
+{
+ "kind": "mc",
+ "family": "hold-snm",
+ "mode": "snm-pair:hold_snm_sweep.txt:hold_snm",
+ "recorded_metric": "hold_snm_v",
+ "unit": "V",
+ "comparison": "pre213-tolerance",
+ "tolerance_v": 3e-05,
+ "record": "sim/hold-snm/records/20260817-011558-4448966.md",
+ "sample_set": "sim/hold-snm/mc/samples/20260921-124534-cf5e975.json",
+ "coverage": {
+  "corners": 9,
+  "units": {
+   "expected": 5472,
+   "reported": 5472
+  },
+  "missing_in_report": [],
+  "missing_in_samples": []
+ },
+ "deck_sha256": {
+  "checked": true,
+  "errors": []
+ },
+ "seed_identity": {
+  "checked": true,
+  "errors": []
+ },
+ "reduce_grading": {
+  "coverage_errors": [],
+  "overall": "OPEN",
+  "infra_failures": [
+   {
+    "id": "mc.ff_25c_3.30v.nc.00011.R",
+    "reason": "declared outputs missing: ['hold_snm_sweep.txt']"
+   },
+   {
+    "id": "mc.tt_-40c_3.63v.nc.00054.L",
+    "reason": "declared outputs missing: ['hold_snm_sweep.txt']"
+   }
+  ]
+ },
+ "corners": [
+  {
+   "id": "ff_-40c_2.97v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 6: |delta| 2.030e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 11: |delta| 1.400e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 27: |delta| 3.700e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 28: |delta| 1.799e-01 V exceeds the 3e-05 V tolerance",
+    "nc sample 56: |delta| 7.300e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 68: |delta| 1.620e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 95: |delta| 4.100e-05 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 1.835613,
+      "fleet": 1.835613,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 0.999014,
+      "fleet": 0.999014,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 0.999014,
+      "fleet": 0.999014,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 3.000000000086267e-06,
+     "mean": 2.1450000000006185e-06,
+     "p50": 2.0000000000575113e-06,
+     "p95": 2.9999999999752447e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.179946,
+     "mean": 0.0018072799999999994,
+     "p50": 0.0,
+     "p95": 4.099999999998549e-05
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "ff_25c_3.30v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 7: |delta| 5.300e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 18: |delta| 3.600e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 32: |delta| 5.000e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 77: |delta| 3.290e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 92: |delta| 3.900e-05 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 2.031634,
+      "fleet": 2.031634,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.048587,
+      "fleet": 1.048587,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 1.048587,
+      "fleet": 1.048587,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 2.0000000000575113e-06,
+     "mean": 9.70000000003468e-07,
+     "p50": 9.999999999177334e-07,
+     "p95": 1.000000000139778e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 99,
+    "n_open": 0,
+    "errored_fleet": 1,
+    "errored_committed": 1,
+    "deltas": {
+     "n": 99,
+     "max": 0.0003290000000000003,
+     "mean": 6.7676767676765054e-06,
+     "p50": 0.0,
+     "p95": 2.9000000000001247e-05
+    },
+    "open_units": [
+     {
+      "id": "mc.ff_25c_3.30v.nc.00011.R",
+      "reason": "declared outputs missing: ['hold_snm_sweep.txt']"
+     },
+     {
+      "id": "ff_25c_3.30v nc sample 11",
+      "reason": "R: declared outputs missing: ['hold_snm_sweep.txt']"
+     }
+    ]
+   }
+  },
+  {
+   "id": "ff_125c_2.97v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 1: |delta| 5.300e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 16: |delta| 1.576e-02 V exceeds the 3e-05 V tolerance",
+    "nc sample 22: |delta| 8.300e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 41: |delta| 3.100e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 47: |delta| 5.700e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 48: |delta| 3.700e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 51: |delta| 1.010e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 70: |delta| 1.280e-04 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 1.792025,
+      "fleet": 1.792025,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 0.930461,
+      "fleet": 0.930461,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 0.930461,
+      "fleet": 0.930461,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 1.0000000000287557e-06,
+     "mean": 6.649999999963629e-07,
+     "p50": 9.999999999177334e-07,
+     "p95": 1.0000000000287557e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.015761,
+     "mean": 0.00016613000000000042,
+     "p50": 1.000000000001e-06,
+     "p95": 5.300000000000443e-05
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "tt_-40c_3.63v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 4: |delta| 5.600e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 7: |delta| 9.200e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 17: |delta| 6.500e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 20: |delta| 6.900e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 34: |delta| 3.800e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 62: |delta| 2.864e-01 V exceeds the 3e-05 V tolerance",
+    "nc sample 63: |delta| 7.400e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 67: |delta| 5.500e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 71: |delta| 1.860e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 72: |delta| 3.500e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 73: |delta| 4.800e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 76: |delta| 1.210e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 94: |delta| 4.997e-03 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 2.252356,
+      "fleet": 2.252356,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.213568,
+      "fleet": 1.213568,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 1.213568,
+      "fleet": 1.213568,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 2.0000000000575113e-06,
+     "mean": 1.265000000011396e-06,
+     "p50": 1.000000000139778e-06,
+     "p95": 2.0000000000575113e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 99,
+    "n_open": 0,
+    "errored_fleet": 1,
+    "errored_committed": 1,
+    "deltas": {
+     "n": 99,
+     "max": 0.286368,
+     "mean": 0.0029524040404040404,
+     "p50": 0.0,
+     "p95": 7.400000000000115e-05
+    },
+    "open_units": [
+     {
+      "id": "mc.tt_-40c_3.63v.nc.00054.L",
+      "reason": "declared outputs missing: ['hold_snm_sweep.txt']"
+     },
+     {
+      "id": "tt_-40c_3.63v nc sample 54",
+      "reason": "L: declared outputs missing: ['hold_snm_sweep.txt']"
+     }
+    ]
+   }
+  },
+  {
+   "id": "tt_25c_3.30v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 1: |delta| 4.500e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 44: |delta| 7.300e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 68: |delta| 7.136e-02 V exceeds the 3e-05 V tolerance",
+    "nc sample 71: |delta| 1.230e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 73: |delta| 6.600e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 75: |delta| 8.400e-05 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 2.035532,
+      "fleet": 2.035532,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.110807,
+      "fleet": 1.110807,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 1.110807,
+      "fleet": 1.110807,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 3.0000000001972893e-06,
+     "mean": 2.2849999999996486e-06,
+     "p50": 2.0000000000575113e-06,
+     "p95": 2.9999999999752447e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.071358,
+     "mean": 0.00071951,
+     "p50": 0.0,
+     "p95": 4.49999999999999e-05
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "tt_125c_2.97v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 10: |delta| 5.200e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 13: |delta| 5.600e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 15: |delta| 9.000e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 34: |delta| 4.700e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 39: |delta| 1.520e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 41: |delta| 4.500e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 44: |delta| 9.000e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 70: |delta| 1.280e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 75: |delta| 4.080e-04 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 1.811042,
+      "fleet": 1.811042,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 0.993408,
+      "fleet": 0.993408,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 0.993408,
+      "fleet": 0.993408,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 3.0000000001972893e-06,
+     "mean": 2.125000000002264e-06,
+     "p50": 2.0000000000575113e-06,
+     "p95": 2.9999999999752447e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.0004080000000000004,
+     "mean": 1.3719999999999835e-05,
+     "p50": 1.000000000001e-06,
+     "p95": 5.6000000000000494e-05
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "ss_-40c_3.63v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 23: |delta| 7.800e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 59: |delta| 1.820e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 68: |delta| 4.300e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 97: |delta| 6.500e-05 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 2.238914,
+      "fleet": 2.238914,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.268808,
+      "fleet": 1.268808,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 1.268808,
+      "fleet": 1.268808,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 2.0000000000575113e-06,
+     "mean": 1.254999999998896e-06,
+     "p50": 1.000000000139778e-06,
+     "p95": 2.0000000000575113e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.00018200000000001548,
+     "mean": 5.130000000000204e-06,
+     "p50": 0.0,
+     "p95": 1.9999999999999185e-05
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "ss_25c_2.97v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 12: |delta| 1.210e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 14: |delta| 3.200e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 15: |delta| 4.700e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 40: |delta| 2.460e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 47: |delta| 4.000e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 95: |delta| 9.200e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 96: |delta| 4.100e-05 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 1.804454,
+      "fleet": 1.804454,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.082379,
+      "fleet": 1.082379,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 1.082379,
+      "fleet": 1.082379,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 6.000000000172534e-06,
+     "mean": 3.994999999988868e-06,
+     "p50": 3.999999999892978e-06,
+     "p95": 5.000000000032756e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.0002459999999999997,
+     "mean": 8.27000000000002e-06,
+     "p50": 0.0,
+     "p95": 4.0000000000000105e-05
+    },
+    "open_units": []
+   }
+  },
+  {
+   "id": "ss_125c_3.63v",
+   "status": "OPEN",
+   "reasons": [
+    "nc sample 29: |delta| 3.800e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 42: |delta| 5.100e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 44: |delta| 7.100e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 48: |delta| 1.850e-04 V exceeds the 3e-05 V tolerance",
+    "nc sample 89: |delta| 4.800e-05 V exceeds the 3e-05 V tolerance",
+    "nc sample 94: |delta| 4.700e-05 V exceeds the 3e-05 V tolerance"
+   ],
+   "determinism_control": {
+    "n_expected": 4,
+    "n_ok": 4,
+    "metrics": {
+     "hold_snm_lobe_low_v": {
+      "record": 2.220851,
+      "fleet": 2.220851,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_lobe_high_v": {
+      "record": 1.216449,
+      "fleet": 1.216449,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     },
+     "hold_snm_v": {
+      "record": 1.216449,
+      "fleet": 1.216449,
+      "delta": 0.0,
+      "verdict": "EXACT"
+     }
+    }
+   },
+   "mismatch": {
+    "n_expected": 200,
+    "n_compared": 200,
+    "n_open": 0,
+    "deltas": {
+     "n": 200,
+     "max": 2.9999999999752447e-06,
+     "mean": 1.6300000000013526e-06,
+     "p50": 1.9999999998354667e-06,
+     "p95": 2.0000000000575113e-06
+    }
+   },
+   "negative_control": {
+    "n_expected": 100,
+    "n_usable": 100,
+    "n_open": 0,
+    "errored_fleet": 0,
+    "errored_committed": 0,
+    "deltas": {
+     "n": 100,
+     "max": 0.0001850000000000046,
+     "mean": 6.809999999999913e-06,
+     "p50": 0.0,
+     "p95": 3.799999999999637e-05
+    },
+    "open_units": []
+   }
+  }
+ ],
+ "problems": [],
+ "overall": "OPEN"
+}

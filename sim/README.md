@@ -169,20 +169,28 @@ five families over **all 27 ratified corners** (one `klt sim --batch-set`,
 135 units), through `klt sim` deck mode on the batch fleet. Together they
 settle prerequisites 1 and 2 below for the deterministic corner grid.
 
-**Monte Carlo, verified live (2026-11-15, two corners):**
-`sim/deck-parity/20261115-mc-2corner.md` is the **first live run of the MC
-deck-mode path**: three MC families (`read-snm`, `hold-snm`, `write-margin`)
-x two corners (`tt_25c_3.30v`, `ff_125c_2.97v`) x the committed campaign's
-own sample counts, as one `klt sim --batch-set` of three members (3,040
-units). Every committed mismatch sample reproduced exactly (`write-margin`
-raw-exact; the SNM families exact under the pre-#213 `--pair` extractor,
-max delta 0.0 V), every determinism-control sample collapsed onto the
-committed deterministic record's value, and every negative-control errored
-count and surviving value matched the committed sample-set. `parity_compare.py mc`
-mechanically asserts deck bytes and per-unit seeds against the *returned*
-units (which `mc-reduce` does not check) and compares per-sample arrays in
-index order. Still open: the remaining **7 MC corners** of the committed
-9-corner matrix.
+**Monte Carlo, verified live (2026-11-15 two corners, 2026-11-16 the full
+matrix):** `sim/deck-parity/20261115-mc-2corner.md` is the **first live run
+of the MC deck-mode path** (3,040 units, unpinned environment);
+`sim/deck-parity/20261116-mc-9corner.md` completes the committed **9-corner
+matrix** for the three MC families (`read-snm`, `hold-snm`, `write-margin`)
+-- 13,680 units in two phases (the first submit crashed mid-upload on the
+serial-upload gap `2AMLogic/klayout-tools#5880`; its 16 collected shards
+were reused after a byte-identical re-staging provenance check, and the 5
+never-submitted shards were re-submitted and collected). All 5,400 mismatch
+samples reproduce within the 30 uV gate (`write-margin` exact, worst SNM
+delta 6 uV), all 108 determinism-control samples reproduce the committed
+deterministic record **exactly** under the #346 `.spiceinit` pin, and the
+committed negative-control **errored sets** match on every
+(family, corner). The SNM negative-control *surviving values* diverge on a
+minority of known-bad draws; a committed local A/B attributes every such
+delta to the pin itself -- the committed MC campaign ran **unpinned** while
+the deterministic campaign ran with compatibility modes -- so which
+environment future campaigns standardize on is now an open
+evidence-policy decision (recorded in that receipt; a spec/ decision
+record, not a transport gap). `parity_compare.py mc` mechanically asserts
+deck bytes and per-unit seeds against the *returned* units (which
+`mc-reduce` does not check) and compares per-sample arrays.
 
 1. *Executor capability* -- **met.** A `decks[]` request from this repo was
    accepted and executed end to end: runner `klt 0.9.0` on AMI
@@ -197,47 +205,62 @@ index order. Still open: the remaining **7 MC corners** of the committed
    (`2AMLogic/klayout-tools#4109` closed COMPLETED 2026-10-27, but its proof
    run was a sky130 `matrix-batch` request, which did not establish this.)
 2. *Measurement parity receipt* -- **met for the full 27-corner deterministic
-   matrix (2026-11-15) and the first two MC corners (2026-11-15); the
-   remaining 7 MC corners are open.** At every corner of the deterministic
-   matrix, `write-margin`, `read-access` and `write-access` reproduce the
-   committed record value exactly (108/108 record metrics, zero delta), and
-   `read-snm`/`hold-snm` differ against the record only through the
-   documented #213 extractor change (see "Earlier SNM values over-read"
-   below): with the pre-#213 extractor applied to the fleet's own sweep data
-   they match to <= 1 uV (read SNM) / <= 7 uV (hold SNM) on the recorded
-   metric -- no metric on any corner exceeded the 30 uV gate
-   `parity_compare.py` enforces. The Monte Carlo path's first live run
-   (`sim/deck-parity/20261115-mc-2corner.md`: 3 families x 2 corners, 3,040
-   units) reproduced **every committed mismatch sample exactly** --
-   `write-margin` raw-exact, the SNM families exact under the pre-#213
-   `--pair` extractor -- pinned every determinism-control anchor, and matched
-   every negative-control errored count and surviving value; its comparator
-   also asserts per-unit deck bytes and seed identity, which `mc-reduce`
-   itself does not check. `run_mc_campaign.py` and its pool are untouched.
-   The mechanical comparison lives in `sim/lib/parity_compare.py` (corner and
-   `mc` modes, + `test_parity_compare.py` offline fixtures), driven per
-   family with the record bindings from `RECORD_CLAIMS` and the MC
-   sample-set bindings from `MC_SAMPLE_SETS` in `render_signoff_table.py`.
-3. *Cutover* -- **still blocked**, now on the remaining **7 MC corners**
-   (the committed MC matrix has 9 per family; 2 have live receipts). Retiring
+   matrix (2026-11-15) and the full 9-corner MC matrix (2026-11-16).** At
+   every corner of the deterministic matrix, `write-margin`, `read-access`
+   and `write-access` reproduce the committed record value exactly (108/108
+   record metrics, zero delta), and `read-snm`/`hold-snm` differ against the
+   record only through the documented #213 extractor change (see "Earlier
+   SNM values over-read" below): with the pre-#213 extractor applied to the
+   fleet's own sweep data they match to <= 1 uV (read SNM) / <= 7 uV (hold
+   SNM) on the recorded metric -- no metric on any corner exceeded the 30 uV
+   gate `parity_compare.py` enforces. The Monte Carlo path is evidenced by
+   `sim/deck-parity/20261115-mc-2corner.md` (first live run, 2 corners,
+   3,040 units) and `sim/deck-parity/20261116-mc-9corner.md` (the full
+   committed matrix, 13,680 units): all 5,400 committed mismatch samples
+   reproduce within the gate (`write-margin` exact, worst SNM delta 6 uV),
+   all determinism-control anchors reproduce the deterministic record
+   exactly under the #346 `.spiceinit` pin, and the committed
+   negative-control errored sets match on every (family, corner). The SNM
+   negative-control *surviving values* diverge on a minority of known-bad
+   draws under the pin; the 20261116 receipt attributes every such delta to
+   the pin by a committed local A/B (the committed MC campaign ran
+   unpinned) -- an evidence-environment question, not a transport gap.
+   `run_mc_campaign.py` and its pool are untouched. The mechanical
+   comparison lives in `sim/lib/parity_compare.py` (corner and `mc` modes,
+   + `test_parity_compare.py` offline fixtures), driven per family with the
+   record bindings from `RECORD_CLAIMS` and the MC sample-set bindings from
+   `MC_SAMPLE_SETS` in `render_signoff_table.py`.
+3. *Cutover* -- **parity-complete; two decisions gate the switch.** Retiring
    `run_corner_sweep.sh`/the MC pool, switching defaults, and updating the
-   cold-start section below happen only after the full MC matrix has its own
-   receipt. Single-point probes stay local. Until then the cold-start
-   section below is the historical procedure and is not to be run on dispatch
-   workers.
+   cold-start section below were gated on "the full MC matrix has its own
+   receipt", which the 2026-11-16 receipt now is. Two things remain before
+   the switch itself: (a) the evidence-environment decision the 20261116
+   receipt records -- deterministic evidence was taken with compatibility
+   modes, MC evidence unpinned, and future campaigns must standardize on
+   one (a spec/ decision record); and (b) the operator ruling's own final
+   gate ("equivalent measurements and supported execution are
+   established"), which the receipts now evidence -- the retirement PR
+   should cite both receipts and the decision. Single-point probes stay
+   local. Until cutover lands, the cold-start section below is the
+   historical procedure and is not to be run on dispatch workers.
 
-One known environmental difference, measured rather than assumed: the committed
-2026-08 corner logs carry `Note: Compatibility modes selected: hs a`, the
-fleet worker's stdout carries `Note: No compatibility mode selected!`. ngspice
-reads compatibility mode from the executing host's `.spiceinit`, which deck
-mode does not transport. It is worth a few microvolts on the two geometric SNM
-metrics and nothing on the three `RESULT:`-emitting families -- now quantified
-across the whole matrix by the 2026-11-15 full-grid receipt, not just at the
-nominal corner: worst recorded-metric delta 1 uV (read SNM) / 7 uV (hold SNM),
-worst lobe intermediate 20 uV, over all 27 corners. The 2026-11-15 MC receipt
-(3,040 units, unpinned mode) saw the same class only on the ctrl anchors
-(worst 14 uV, `hold-snm` lobe low) while every mismatch sample reproduced
-exactly.
+The compat-mode history, measured rather than assumed: the committed 2026-08
+deterministic logs carry `Note: Compatibility modes selected: hs a`; the
+pre-#346 deck-mode fleet runs (2026-11-14/15) carried `Note: No compatibility
+mode selected!` -- ngspice reads compatibility mode from the executing
+host's `.spiceinit`, which deck mode did not transport. That cost a few
+microvolts on the two geometric SNM metrics and nothing on the three
+`RESULT:`-emitting families, quantified across the whole matrix by the
+2026-11-15 full-grid receipt (worst recorded-metric delta 1 uV read SNM /
+7 uV hold SNM, worst lobe 20 uV). Since #338/#346, deck mode **stages a
+pinned run-directory `.spiceinit`**, and the 2026-11-16 MC receipt confirms
+the deterministic anchors now reproduce **exactly** (0.0 V on all 108 ctrl
+samples). The same receipt shows the pin is not value-neutral everywhere:
+the committed *MC* campaign (2026-09-21) ran unpinned, so the pin moves the
+SNM negative-control surviving values off those records (attributed by a
+committed local A/B in that receipt) -- the two committed evidence families
+were taken under different ngspice environments, and standardizing is the
+open evidence-policy decision noted under blocker 3.
 
 This is issue #338, and the section below is its fix: a run-directory
 `.spiceinit` staged onto every execution path. The request-level
