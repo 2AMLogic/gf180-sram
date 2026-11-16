@@ -1,0 +1,20 @@
+* Pinned ngspice environment -- staged into every run directory by
+* sim/lib (issue #338). A run-directory .spiceinit replaces $HOME/.spiceinit,
+* so every setting a run needs is in this file. Single source of truth:
+* SPICEINIT_TEXT in sim/lib/deck_adapter.py; do not edit copies.
+*
+* ngbehavior=hsa: the mode the committed sim/ corpus ran under (its corner
+* logs carry 'Compatibility modes selected: hs a'), so the committed records
+* stay reproducible, and the mode the gf180mcu ngspice model decks are
+* written against (a distro-packaged ngspice supplies it via its own spinit;
+* a locally built one does not).
+set ngbehavior=hsa
+* One ngspice thread per unit: batch-fleet workers run units in parallel
+* and rely on per-worker thread pinning; a run-directory .spiceinit would
+* otherwise drop the host's num_threads and oversubscribe a shared worker.
+set num_threads=1
+* Per-finger model binning (W/NF). NOT implied by ngbehavior=hsa (verified
+* 2026-11-14, #338). Inert today -- every device in this repo is nf=1, so
+* W/nf == W and bin selection cannot change -- but pinned so drawing a
+* multi-finger device cannot silently change model-bin selection.
+set wnflag=1

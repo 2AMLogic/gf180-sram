@@ -78,13 +78,17 @@ The first three receipts answer the deck-transport question (the #230
 migration this directory scopes itself to); the `spiceinit-pin` receipt
 answers a different one -- generator **environment**: whether the staged,
 pinned `.spiceinit` (#338) reaches the fleet worker and reproduces the
-committed values.
+committed values. The `mc-9corner` receipt completes the MC half of the
+transport question and records a new finding about that environment: the
+committed *MC* records were taken unpinned, so the pin moves the SNM
+negative-control values off them (fully attributed in the receipt).
 
 | Receipt | Corner(s) | Families | Result |
 |---|---|---|---|
 | [`20261114-tt_25c_3.30v.md`](20261114-tt_25c_3.30v.md) | `tt_25c_3.30v` | all 5 characterization families | parity holds; the 3 `RESULT:`-emitting families match the committed value exactly, the 2 SNM families match to <= 3 uV once the documented #213 extractor change is held fixed |
 | [`20261115-full-grid.md`](20261115-full-grid.md) | all 27 | all 5 characterization families | parity holds at every corner: 108/108 record metrics exact across the 3 `RESULT:`-emitting families, the 2 SNM families within 1 uV / 7 uV of the committed value (gate 30 uV) under the pre-#213 crosscheck, 0 `OPEN` units |
 | [`20261115-mc-2corner.md`](20261115-mc-2corner.md) | `tt_25c_3.30v`, `ff_125c_2.97v` | the 3 MC families (`read-snm`, `hold-snm`, `write-margin`) | first live Monte Carlo run (3,040 units, one batch-set): every mm sample of the committed arrays reproduced -- `write-margin` exact, the SNM families exact under the pre-#213 `--pair` extractor (max delta 0.0 V) -- every ctrl anchor pinned, every nc errored count and surviving value matched; 5 `OPEN` nc units reported (committed record excluded the same draws) |
+| [`20261116-mc-9corner.md`](20261116-mc-9corner.md) | all 9 (full committed MC matrix) | the 3 MC families | 13,680 units in two phases (first submit crashed mid-upload at `klayout-tools#5880`; its 16 collected shards were reused after a byte-identical re-staging provenance check, 5 missing shards re-submitted): all 5,400 mm samples within gate (`write-margin` exact, worst SNM delta 6 uV), 108/108 ctrl anchors exact under the #346 pin, nc errored sets exact everywhere; nc surviving values diverge only for the known-bad draws and are attributed by a committed local A/B to the pin (the committed MC campaign ran unpinned) |
 | [`20261114-tt_25c_3.30v-spiceinit-pin.md`](20261114-tt_25c_3.30v-spiceinit-pin.md) | `tt_25c_3.30v` | all 5 characterization families | parity holds with the `.spiceinit` pin staged (#338): all 7 committed record metrics across the 5 families reproduce exactly -- the 3 `RESULT:`-emitting families exact, the 2 SNM families exact under the pre-#213 extractor crosscheck |
 
 ## Reproducing one
