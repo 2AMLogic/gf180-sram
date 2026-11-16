@@ -140,7 +140,7 @@ commit_report "$WORK/drc-array64-raw.json" "$OUT/drc-array-64x128.json" \
 # `netlist_sha256`/`provenance.input.content_hash` are what actually pin.
 commit_report "$WORK/extract-array64-full.json" "$OUT/extract-array-64x128.json" \
   --drop devices --drop nets \
-  --set '_note=devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh --array64' \
+  --set-format '_note=devices[]/nets[] omitted from this committed report ({device_count} devices / {net_count} nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh --array64' \
   --print 'extract-array-64x128: {status} | devices: {device_count} | nets: {net_count} | pins: {pin_count}'
 # `reference.netlist` must stay absolute for the run to work at all (klt lvs
 # resolves it against the request document's own directory -- see step 4's
@@ -336,7 +336,7 @@ klt extract --deck gf180mcu --format json "$ARRAY_GDS" -o "$WORK/array.spice" > 
 # device_count/net_count/pin_count (still present) already summarize them.
 commit_report "$WORK/extract-array-full.json" "$OUT/extract-array.json" \
   --drop devices --drop nets \
-  --set '_note=devices[]/nets[] omitted from this committed report (49152 devices / 16706 nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh' \
+  --set-format '_note=devices[]/nets[] omitted from this committed report ({device_count} devices / {net_count} nets -- see device_count/net_count/pin_count above); full output reproducible via layout/reports/generate.sh' \
   --print 'status: {status} | devices: {device_count} | nets: {net_count} | pins: {pin_count}'
 # `klt lvs` resolves a request document's "reference.netlist" relative to
 # the *request document's own directory* (verified empirically -- a
