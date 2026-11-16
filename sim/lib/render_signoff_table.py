@@ -61,20 +61,33 @@ CORNER_ORDER = corner_ids()
 
 # The five characterization families' append-only evidence, in one place:
 # family -> (records dir relative to sim/, Claim substring, recorded metric
-# key). render_signoff_table.main() renders its verdicts from these and
+# key, unit). render_signoff_table.main() renders its verdicts from these and
 # sim/lib/parity_compare.py (#230 full-grid deck-mode parity) compares fleet
 # results against them -- one owner so the two consumers cannot drift into
-# comparing different records or different metrics.
+# comparing different records, different metrics, or mislabelling a metric's
+# unit (#359: the comparator renders this unit on every max-|delta| line).
 RECORD_CLAIMS = {
-    "read-snm": ("read-snm/records", "read SNM", "read_snm_v"),
-    "hold-snm": ("hold-snm/records", "hold SNM", "hold_snm_v"),
-    "write-margin": ("write-margin/records", "write margin", "write_trip_voltage_v"),
-    "read-access": ("access-time/records", "read access time", "read_access_time_s"),
-    "write-access": ("access-time/records", "write access time", "write_access_time_s"),
+    "read-snm": ("read-snm/records", "read SNM", "read_snm_v", "V"),
+    "hold-snm": ("hold-snm/records", "hold SNM", "hold_snm_v", "V"),
+    "write-margin": ("write-margin/records", "write margin", "write_trip_voltage_v", "V"),
+    "read-access": ("access-time/records", "read access time", "read_access_time_s", "s"),
+    "write-access": ("access-time/records", "write access time", "write_access_time_s", "s"),
 }
 
 RESULT_RE = re.compile(r"RESULT:\s*(\w+)\s*=\s*([-+0-9.eE]+)\s*;?")
 ROW_RE = re.compile(r"^\s*-\s*\*\*(\S+)\*\*:\s*(.*)$")
+
+# The committed Monte Carlo sample-sets, one per family that has one (family
+# -> path relative to sim/). One owner, same rule as RECORD_CLAIMS above:
+# sim/lib/parity_compare.py's MC mode (#230) compares the deck-mode run's
+# per-sample values against exactly these documents, so the binding lives
+# here beside the record bindings rather than inline in the comparator.
+# read-access/write-access have no committed MC record, so no binding.
+MC_SAMPLE_SETS = {
+    "read-snm": "read-snm/mc/samples/20260921-124232-cf5e975.json",
+    "hold-snm": "hold-snm/mc/samples/20260921-124534-cf5e975.json",
+    "write-margin": "write-margin/mc/samples/20260921-124804-cf5e975.json",
+}
 
 
 def latest_record_for_claim(records_dir: Path, claim_substring: str) -> Path:
@@ -152,7 +165,7 @@ def main() -> int:
     # shared with parity_compare.py.
     records = {
         family: latest_record_for_claim(sim_dir / records_rel, claim)
-        for family, (records_rel, claim, _metric) in RECORD_CLAIMS.items()
+        for family, (records_rel, claim, _metric, _unit) in RECORD_CLAIMS.items()
     }
     read_snm_record = records["read-snm"]
     hold_snm_record = records["hold-snm"]

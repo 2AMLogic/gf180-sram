@@ -36,11 +36,11 @@
     },
     "9": {
       "file": "sim/testbenches.signoff.json",
-      "content_hash": "sha256:ff51e6f0ac9039e046c8629b5e8084900faad13f35760a02eb3292ce924cb9bd"
+      "content_hash": "sha256:465a9c52b1f012616c020de2805db713eb535714744ce34805dae5ddeca84a11"
     },
     "10": {
       "file": "repo-hygiene.signoff.json",
-      "content_hash": "sha256:0fdda06caa72a7e13e88c782e4b7d0cf30d86d50b7b0a1cd4f5c0eb4da5f8481"
+      "content_hash": "sha256:bf3da4516fb6c6b68d01393963c81afde0a404356de611f31a9c0a6379da4cb7"
     },
     "11": [
       {

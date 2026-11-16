@@ -217,6 +217,21 @@ def build_corner_inc(pdk: dict[str, str], process: str, temp: str, vdd: str, see
     return "\n".join(lines) + "\n"
 
 
+def _write_spiceinit(work_dir: Path) -> None:
+    """Stage the pinned run-directory `.spiceinit` (#338) into `work_dir`.
+
+    ngspice reads `.spiceinit` from its cwd, and a run-directory one replaces
+    `$HOME/.spiceinit`, so without this the compatibility mode in force would
+    depend on whoever's machine runs the pool. Single source of truth is
+    `deck_adapter.SPICEINIT_TEXT` -- the same bytes deck mode stages as a deck
+    input. Deferred import: deck_adapter imports this module, so a top-level
+    import here would be circular.
+    """
+    from deck_adapter import SPICEINIT_TEXT  # noqa: PLC0415 -- deferred to avoid an import cycle
+
+    (work_dir / ".spiceinit").write_text(SPICEINIT_TEXT, encoding="utf-8")
+
+
 def run_one(testbench_text: str, corner_inc_text: str, mode: str, tb_name: str) -> tuple[str, dict[str, float], list[str]]:
     """Run one ngspice invocation in a scratch directory; return
     (combined log text, {key: value} extracted results, [error strings]).
@@ -225,6 +240,7 @@ def run_one(testbench_text: str, corner_inc_text: str, mode: str, tb_name: str) 
         work = Path(tmp)
         (work / "corner.inc").write_text(corner_inc_text, encoding="utf-8")
         (work / tb_name).write_text(testbench_text, encoding="utf-8")
+        _write_spiceinit(work)
         proc = subprocess.run(
             ["ngspice", "-b", tb_name],
             cwd=work,
@@ -280,6 +296,7 @@ def run_one_snm_pair(
             inc = build_corner_inc(pdk, process, temp, vdd, seed, sw_stat_mismatch)
             (side_dir / "corner.inc").write_text(inc, encoding="utf-8")
             (side_dir / tb_name).write_text(testbench_text, encoding="utf-8")
+            _write_spiceinit(side_dir)
             proc = subprocess.run(
                 ["ngspice", "-b", tb_name], cwd=side_dir, capture_output=True, text=True, check=False
             )

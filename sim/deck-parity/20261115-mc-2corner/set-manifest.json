@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "requests": [
+    {
+      "index": 0,
+      "request": "/tmp/gf180-mc-2corner/stage/read-snm/request.json",
+      "dir": "/tmp/gf180-mc-2corner/out/request",
+      "status": "error",
+      "job_id": "klt-sim-a975b8930886",
+      "job_ids": [
+        "klt-sim-a975b8930886"
+      ],
+      "attempts": 1
+    },
+    {
+      "index": 1,
+      "request": "/tmp/gf180-mc-2corner/stage/hold-snm/request.json",
+      "dir": "/tmp/gf180-mc-2corner/out/request-1",
+      "status": "pass",
+      "job_id": "klt-sim-b3213eb6879d",
+      "job_ids": [
+        "klt-sim-b3213eb6879d"
+      ],
+      "attempts": 1
+    },
+    {
+      "index": 2,
+      "request": "/tmp/gf180-mc-2corner/stage/write-margin/request.json",
+      "dir": "/tmp/gf180-mc-2corner/out/request-2",
+      "status": "pass",
+      "job_id": "klt-sim-389ba82ded53",
+      "job_ids": [
+        "klt-sim-389ba82ded53"
+      ],
+      "attempts": 1
+    }
+  ]
+}

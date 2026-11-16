@@ -167,8 +167,22 @@ ruling of 2026-11-14 authorised (the 2026-11-15 one under the Curator's
 delegation to schedule the follow-up corners): first `tt_25c_3.30v`, then all
 five families over **all 27 ratified corners** (one `klt sim --batch-set`,
 135 units), through `klt sim` deck mode on the batch fleet. Together they
-settle prerequisites 1 and 2 below for the deterministic corner grid; the
-Monte Carlo path remains open.
+settle prerequisites 1 and 2 below for the deterministic corner grid.
+
+**Monte Carlo, verified live (2026-11-15, two corners):**
+`sim/deck-parity/20261115-mc-2corner.md` is the **first live run of the MC
+deck-mode path**: three MC families (`read-snm`, `hold-snm`, `write-margin`)
+x two corners (`tt_25c_3.30v`, `ff_125c_2.97v`) x the committed campaign's
+own sample counts, as one `klt sim --batch-set` of three members (3,040
+units). Every committed mismatch sample reproduced exactly (`write-margin`
+raw-exact; the SNM families exact under the pre-#213 `--pair` extractor,
+max delta 0.0 V), every determinism-control sample collapsed onto the
+committed deterministic record's value, and every negative-control errored
+count and surviving value matched the committed sample-set. `parity_compare.py mc`
+mechanically asserts deck bytes and per-unit seeds against the *returned*
+units (which `mc-reduce` does not check) and compares per-sample arrays in
+index order. Still open: the remaining **7 MC corners** of the committed
+9-corner matrix.
 
 1. *Executor capability* -- **met.** A `decks[]` request from this repo was
    accepted and executed end to end: runner `klt 0.9.0` on AMI
@@ -183,25 +197,32 @@ Monte Carlo path remains open.
    (`2AMLogic/klayout-tools#4109` closed COMPLETED 2026-10-27, but its proof
    run was a sky130 `matrix-batch` request, which did not establish this.)
 2. *Measurement parity receipt* -- **met for the full 27-corner deterministic
-   matrix (2026-11-15); the Monte Carlo path is still open.** At every corner
-   of the matrix, `write-margin`, `read-access` and `write-access` reproduce
-   the committed record value exactly (108/108 record metrics, zero delta),
-   and `read-snm`/`hold-snm` differ against the record only through the
+   matrix (2026-11-15) and the first two MC corners (2026-11-15); the
+   remaining 7 MC corners are open.** At every corner of the deterministic
+   matrix, `write-margin`, `read-access` and `write-access` reproduce the
+   committed record value exactly (108/108 record metrics, zero delta), and
+   `read-snm`/`hold-snm` differ against the record only through the
    documented #213 extractor change (see "Earlier SNM values over-read"
    below): with the pre-#213 extractor applied to the fleet's own sweep data
    they match to <= 1 uV (read SNM) / <= 7 uV (hold SNM) on the recorded
-   metric -- no metric on any corner exceeded the 30 uV gate `parity_compare.py`
-   enforces. Still open: the Monte Carlo adapter (`mc-build`/`mc-reduce`),
-   which has had no live run of any kind. `run_mc_campaign.py` and its pool
-   are untouched. The mechanical comparison lives in
-   `sim/lib/parity_compare.py` (+ `test_parity_compare.py` offline fixtures),
-   driven per family with the record bindings from `RECORD_CLAIMS` in
-   `render_signoff_table.py`.
-3. *Cutover* -- **still blocked.** Retiring `run_corner_sweep.sh`/the MC pool,
-   switching defaults, and updating the cold-start section below happen only
-   after the MC path has its own receipt (2 is now satisfied for the full
-   deterministic matrix). Single-point probes stay local. Until then the
-   cold-start
+   metric -- no metric on any corner exceeded the 30 uV gate
+   `parity_compare.py` enforces. The Monte Carlo path's first live run
+   (`sim/deck-parity/20261115-mc-2corner.md`: 3 families x 2 corners, 3,040
+   units) reproduced **every committed mismatch sample exactly** --
+   `write-margin` raw-exact, the SNM families exact under the pre-#213
+   `--pair` extractor -- pinned every determinism-control anchor, and matched
+   every negative-control errored count and surviving value; its comparator
+   also asserts per-unit deck bytes and seed identity, which `mc-reduce`
+   itself does not check. `run_mc_campaign.py` and its pool are untouched.
+   The mechanical comparison lives in `sim/lib/parity_compare.py` (corner and
+   `mc` modes, + `test_parity_compare.py` offline fixtures), driven per
+   family with the record bindings from `RECORD_CLAIMS` and the MC
+   sample-set bindings from `MC_SAMPLE_SETS` in `render_signoff_table.py`.
+3. *Cutover* -- **still blocked**, now on the remaining **7 MC corners**
+   (the committed MC matrix has 9 per family; 2 have live receipts). Retiring
+   `run_corner_sweep.sh`/the MC pool, switching defaults, and updating the
+   cold-start section below happen only after the full MC matrix has its own
+   receipt. Single-point probes stay local. Until then the cold-start
    section below is the historical procedure and is not to be run on dispatch
    workers.
 
@@ -213,8 +234,62 @@ mode does not transport. It is worth a few microvolts on the two geometric SNM
 metrics and nothing on the three `RESULT:`-emitting families -- now quantified
 across the whole matrix by the 2026-11-15 full-grid receipt, not just at the
 nominal corner: worst recorded-metric delta 1 uV (read SNM) / 7 uV (hold SNM),
-worst lobe intermediate 20 uV, over all 27 corners. Pinning it explicitly in
-the request (`options.ngspice_init`) is tracked in #338.
+worst lobe intermediate 20 uV, over all 27 corners. The 2026-11-15 MC receipt
+(3,040 units, unpinned mode) saw the same class only on the ctrl anchors
+(worst 14 uV, `hold-snm` lobe low) while every mismatch sample reproduced
+exactly.
+
+This is issue #338, and the section below is its fix: a run-directory
+`.spiceinit` staged onto every execution path. The request-level
+`options.ngspice_init` was considered and rejected -- `klt sim` silently
+drops it on the deck path (`2AMLogic/klayout-tools#5738`) -- so the staged
+input, not the option, is the pin.
+
+## The pinned ngspice environment (`.spiceinit`, issue #338)
+
+Every ngspice invocation in this repo -- the `klt sim` deck-mode path
+(`sim/lib/deck_adapter.py`), `sim/lib/run_corner_sweep.sh`, and the
+`sim/lib/run_mc_campaign.py` pool -- stages the same `.spiceinit` into the
+run directory before the engine starts, so the environment a measurement ran
+under is a property of the repo rather than of whichever host executes it.
+ngspice reads `.spiceinit` from its current working directory, and all three
+paths set that cwd to a per-unit scratch directory; without the staged file
+the mode in force came from the executing host's `~/.spiceinit` -- the
+committed 2026-08 corpus's corner logs carry
+`Note: Compatibility modes selected: hs a`, while a 2026-11 fleet deck-mode
+run of the same corner carried `Note: No compatibility mode selected!`
+(see `sim/deck-parity/`).
+
+Two facts make the staged file load-bearing:
+
+- **A run-directory `.spiceinit` *replaces* `$HOME/.spiceinit`** -- it does
+  not merge with it (verified 2026-11-14, #338: a setting from the host's
+  home file was not visible inside a deck that staged a `.spiceinit`). The
+  staged file therefore carries every line the run needs, not just the mode.
+- **`options.ngspice_init` is not a substitute on the deck path.** `klt sim`
+  accepts it in a deck-list request and silently drops it
+  (`2AMLogic/klayout-tools#5738`), so setting it would record a pinned mode
+  that was never in force. The staged deck input is the mechanism; the
+  option stays unset in every request this repo emits.
+
+The pinned lines -- single source of truth `SPICEINIT_TEXT` in
+`sim/lib/deck_adapter.py`; `run_corner_sweep.sh` writes the same bytes via
+`deck_adapter.py spiceinit`, the MC pool imports the constant, and
+`sim/lib/test_deck_adapter.py` asserts the three paths stay byte-identical
+(the launcher path is executed against a fake ngspice shim, the MC scratch
+dirs captured at call time):
+
+| Line | Why |
+|---|---|
+| `set ngbehavior=hsa` | the mode the committed corpus ran under (`hs a`), so the committed records stay reproducible, and the mode the gf180mcu ngspice model decks are written against (a distro-packaged ngspice supplies it via its own `spinit`; a locally built one does not) |
+| `set num_threads=1` | fleet workers run units in parallel and rely on per-worker single-threaded ngspice; a run-directory `.spiceinit` would otherwise drop the host's setting and oversubscribe a shared worker |
+| `set wnflag=1` | per-finger model binning (`W/NF`); **not** implied by `ngbehavior=hsa` (verified 2026-11-14, #338). Inert today -- every device in this repo is `nf=1`, so `W/nf == W` and bin selection cannot change -- but pinned so a future multi-finger device cannot silently change model-bin selection |
+
+Evidence that the pin reaches the fleet and what it does to the numbers:
+[deck-parity/20261114-tt_25c_3.30v-spiceinit-pin.md](deck-parity/20261114-tt_25c_3.30v-spiceinit-pin.md)
+(bounded one-corner-per-family deck-mode run on the batch fleet, all five
+families, worker stdout carrying the pinned mode; every committed record
+value reproduced exactly).
 
 ## Cold-start invocation
 
