@@ -56,7 +56,10 @@ FAIL — bench evidence, not a macro failure.
 
 `grade-set <reports...>` folds the per-variant verdicts into the per-corner
 minimum on each axis: the smallest grid width that passes **and** has no
-failing or unmeasured width above it. A pass island below the reported
+failing or unmeasured width above it. Pass each variant's report exactly
+once: an axis missing a variant, or one receiving the same variant report
+twice, is a structural error — an `ERROR:` line on stderr and exit 1, with
+no minimums reported. A pass island below the reported
 minimum is recorded in a NOTE, not smoothed. Sentinels per AC2, never
 dropped: `>= <max grid>` (smallest passing width is the largest grid point —
 the grid does not bracket the minimum) and `OPEN` (nothing passes, or a
