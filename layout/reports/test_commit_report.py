@@ -286,6 +286,70 @@ class CommitTest(unittest.TestCase):
             list(self.tmp.glob(".out.json.*")), [], "nothing staged either"
         )
 
+    def test_print_unknown_placeholder_on_commit_fails_after_committing(self):
+        """A malformed `--print` template on `commit` exits non-zero with a
+        FATAL message -- no traceback -- but the report IS committed: the
+        template runs after os.replace, so exit status alone must not be
+        read as "nothing was written" (issue #393)."""
+        proc = self.commit(
+            {"status": "clean", "devices": [1, 2]},
+            "--skip-lint",
+            "--print",
+            "{nope}",
+            check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", out)
+        self.assertIn("FATAL: --print", out)
+        self.assertIn("nope", out)
+        self.assertIn(str(self.out), out, "message must say the report was committed")
+        self.assertTrue(self.out.exists(), "the commit itself succeeded")
+        self.assertEqual(
+            list(self.tmp.glob(".out.json.*")), [], "nothing staged either"
+        )
+
+    def test_print_type_error_over_a_list_on_commit_fails_after_committing(self):
+        """The shape measured in issue #393: `{devices[key]}` formats to
+        TypeError at the post-commit `--print` site."""
+        proc = self.commit(
+            {"status": "clean", "devices": [1, 2]},
+            "--skip-lint",
+            "--print",
+            "{devices[key]}",
+            check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", out)
+        self.assertIn("FATAL: --print", out)
+        self.assertTrue(self.out.exists(), "the commit itself succeeded")
+
+    def test_print_unknown_placeholder_on_status_fails_without_a_traceback(self):
+        """`status --print` has nothing to commit; the same guard keeps it
+        a FATAL message naming the template's error instead of a traceback
+        (issue #393)."""
+        self.commit({"status": "clean", "device_count": 3}, "--skip-lint")
+        proc = run(["status", str(self.out), "--print", "{nope}"], check=False)
+        self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", out)
+        self.assertIn("FATAL: --print", out)
+        self.assertIn("nope", out)
+
+    def test_print_type_error_over_a_list_on_status_fails_without_a_traceback(self):
+        """`{devices[key]}` on `status` formats to TypeError, covered by
+        the same guard (issue #393)."""
+        self.commit({"status": "clean", "devices": [1, 2]}, "--skip-lint")
+        proc = run(
+            ["status", str(self.out), "--print", "{devices[key]}"],
+            check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", out)
+        self.assertIn("FATAL: --print", out)
+
     def test_generate_sh_note_templates_render_committed_notes_byte_for_byte(self):
         """Issue #371 item 1's no-op oracle: each `--set-format` template in
         generate.sh, rendered against the committed report's own field
