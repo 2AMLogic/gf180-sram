@@ -38,6 +38,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 - **#388**: Consolidate duplicated klt request skeleton and Q-word grading across smoke, access-power, min-clock-pulse benches
 - **#392**: Four committed sim/pex/*/testbench/tb_* benches are pinned by no signoff wrapper
 - **#393**: commit_report.py: --print templates are unguarded, so a malformed one tracebacks AFTER out.json is already committed
+- **#394**: Dedupe pulse.py's copied smoke.py stimulus/testbench code (~50-110 LOC)
 
 ## In Progress
 
@@ -80,7 +81,6 @@ Issues carrying `loom:curated`.
 
 - **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)*
 - **#330**: Split the shared periphery-layout library out of layout/periphery/column/generate.py *(hermit)*
-- **#394**: Dedupe pulse.py's copied smoke.py stimulus/testbench code (~50-110 LOC) *(hermit)*
 
 ## Epics
 
@@ -93,11 +93,11 @@ _None._
 | Operator merge-risk holds | 2 |
 | Very important | 1 |
 | Important | 2 |
-| Ready (`loom:issue`) | 8 |
+| Ready (`loom:issue`) | 9 |
 | In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 2 |
 | Curated | 12 |
-| Architect / Hermit proposals | 3 |
+| Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
