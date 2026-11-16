@@ -16,7 +16,9 @@
 # the offending path (and size where applicable):
 #
 #   1. Size cap: no tracked blob may exceed SIZE_CAP_BYTES (8 MiB).
-#        Derived from measurement on origin/main @ b818322 (2026-11-15):
+#        Derived from measurement on origin/main @ b818322 (2026-11-15;
+#        re-confirmed on this PR's merged main @ 2406 tracked files,
+#        2026-11-16 — same maximum, no new near-cap blobs):
 #        the largest legitimately-tracked blob is
 #        views/sram_256x32_array.lef at 4.97 MiB, followed by design/*.sch
 #        at ~3.5 MiB and sim/ corner reports at ~2.4 MiB. 8 MiB is ~1.6x
@@ -29,7 +31,9 @@
 #   2. Binary allowlist: a tracked file Git treats as binary (a NUL byte
 #        in its first 8000 bytes — the same heuristic `git grep -I` uses)
 #        must match layout/**/*.gds.
-#        Derived from measurement on origin/main @ b818322 (2026-11-15):
+#        Derived from measurement on origin/main @ b818322 (2026-11-15;
+#        re-confirmed on this PR's merged main @ 2406 tracked files,
+#        2026-11-16 — still exactly 10, all GDSII under layout/):
 #        exactly 10 tracked files are binary to Git and all of them are
 #        GDSII under layout/ (largest layout/macro/sram_256x32.gds at
 #        0.93 MiB); there were no other tracked binaries, which is what
