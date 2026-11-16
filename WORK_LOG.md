@@ -10,6 +10,13 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-15
 
+- **PR #369**: fix: fail closed when a request lacks composed_deck_sha256
+- **PR #364**: feat(sim): first live Monte Carlo deck-mode parity receipt, 3 families x 2 corners
+- **PR #346**: feat(sim): pin the ngspice environment via a staged run-directory .spiceinit
+- **PR #344**: refactor(reports): one guarded scrub path for every committed klt report
+- **Issue #362** (closed): deck_adapter: expected_from_request silently returns no composed_deck_sha256, re-opening the fail-open one level up
+- **Issue #340** (closed): Collapse layout/reports/generate.sh's ten inline python3 -c scrub blocks into one helper, guarded by klt env-provenance scan
+- **Issue #338** (closed): Pin ngspice compatibility mode in deck-mode requests instead of inheriting the executing host's .spiceinit
 - **PR #363**: feat(layout): mint the 64 x 128 array DRC/extract/LVS report trio under the pinned klt
 - **PR #358**: fix: fail closed on unreported deck_sha256 in reduce_report
 - **PR #355**: sim: full-grid deck-mode parity receipt, 27 corners x 5 families, via mechanical parity_compare
