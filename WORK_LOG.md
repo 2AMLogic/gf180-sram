@@ -10,6 +10,12 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-17
 
+- **PR #431**: docs: state corners[].result_lines as a required clause in the deck-parity tree listing
+- **PR #430**: fix: mc-reduce fails closed on deck-bytes drift
+- **PR #426**: docs: exempt the full-grid receipt from the corners[].result_lines clause only
+- **Issue #429** (closed): deck-parity README's directory-tree listing still states corners[].result_lines as a property of committed deterministic receipts
+- **Issue #400** (closed): Committed-bytes rule's corners[].result_lines clause is satisfied by zero committed deterministic receipts
+- **Issue #373** (closed): deck_adapter mc-reduce: the MC path never checks composed_deck_sha256, so MC receipts have no deck-bytes-unchanged check at all
 - **PR #425**: refactor: single-owner klt request skeleton and Q-word grading for the three macro-netlist benches
 - **Issue #423** (closed): ungated_receipt_headings docstring asserts a false fence invariant (and hides a fenced-example hard error)
 - **PR #424**: fix: correct fenced-row slot invariant in ungated_receipt_headings docstring
