@@ -5,8 +5,8 @@ No ngspice, no PDK, no fleet. The graded reports below are hand-built STUBS
 fed through the real `deck_adapter.py reduce` grading; nothing here is
 physical evidence and no stub value may be quoted as a measurement. What is
 under test is the minting CONTRACT: record format, append-only refusals,
-fail-closed coverage rules, and that `compare_records.py` consumes the
-minted output unchanged.
+fail-closed coverage rules, report-declared stream-path resolution (#444),
+and that `compare_records.py` consumes the minted output unchanged.
 """
 from __future__ import annotations
 
@@ -34,35 +34,46 @@ SCH_KEY = "pex-write-margin-schematic"
 EXT_KEY = "pex-write-margin-extracted"
 
 
-def _graded(family, request, values, *, drop=(), open_corners=()):
+def _graded(family, request, values, *, drop=(), open_corners=(), stream_decl="declared"):
     """Stub deck report -> real reduce grading. NOT a measurement.
 
     `values` maps corner id -> the write_trip_voltage_v stub; corners in
     `drop` are missing from the report entirely (a coverage error); corners
-    in `open_corners` produce no RESULT line (grade OPEN). The returned
-    dict carries `_stub_report_outdir` -- the unit dir to pass as
-    `unit_dir` -- which no real reduce output ever has."""
+    in `open_corners` produce no RESULT line (grade OPEN). `stream_decl`
+    picks the unit stream layout (#444): "declared" (default) declares
+    `<cid>/stdout.bin`-shaped paths, "units" declares a non-default
+    `units/<cid>/out.bin` layout, "omitted" writes the default layout with
+    no `stdout`/`stderr` fields (exercising the fallback). The returned
+    dict carries `_stub_report_outdir` (the unit dir to pass as `unit_dir`)
+    and `_stub_report` (the report to pass as `report`) -- which no real
+    reduce output ever has."""
     ids = [c for c in request["x_gf180_sram_adapter"]["corners"] if c not in drop]
     outdir = Path(tempfile.mkdtemp(prefix="mint-units-"))
     units = []
     for cid in ids:
-        ud = outdir / cid
-        ud.mkdir(parents=True, exist_ok=True)
+        if stream_decl == "units":
+            stdout_rel, stderr_rel = f"units/{cid}/out.bin", f"units/{cid}/err.bin"
+        else:
+            stdout_rel, stderr_rel = f"{cid}/stdout.bin", f"{cid}/stderr.bin"
         text = "" if cid in open_corners else (
             f"RESULT: write_trip_voltage_v = {values[cid]}\nRESULT: write_vdd_v = 3.3\n"
         )
-        (ud / "stdout.bin").write_bytes(text.encode())
-        (ud / "stderr.bin").write_bytes(b"")
-        units.append({"id": cid, "status": "pass", "exit_code": 0, "timed_out": False,
-                      "stdout": f"{cid}/stdout.bin", "stderr": f"{cid}/stderr.bin",
-                      "missing_outputs": [],
-                      "deck_sha256": request["x_gf180_sram_adapter"]["composed_deck_sha256"]})
+        (outdir / stdout_rel).parent.mkdir(parents=True, exist_ok=True)
+        (outdir / stdout_rel).write_bytes(text.encode())
+        (outdir / stderr_rel).write_bytes(b"")
+        unit = {"id": cid, "status": "pass", "exit_code": 0, "timed_out": False,
+                "missing_outputs": [],
+                "deck_sha256": request["x_gf180_sram_adapter"]["composed_deck_sha256"]}
+        if stream_decl != "omitted":
+            unit["stdout"], unit["stderr"] = stdout_rel, stderr_rel
+        units.append(unit)
     report = {"mode": "decks", "status": "pass", "unit_count": len(units), "units": units,
               "outdir": str(outdir)}
     exp_ids, exp_sha = da.expected_from_request(family, request)
     reduced = da.reduce_report(family, report, outdir=outdir,
                                expected_ids=exp_ids, expected_deck_sha256=exp_sha)
     reduced["_stub_report_outdir"] = str(outdir)
+    reduced["_stub_report"] = report
     return reduced
 
 
@@ -87,7 +98,8 @@ def test_mint_recorded():
         exp = Path(td)
         _seed_exp_dir(td, SCH_KEY)
         rid = "20261117-120000-deadbee"
-        md = mcr.mint_record(SCH_KEY, reduced, req, unit_dir=Path(reduced["_stub_report_outdir"]),
+        md = mcr.mint_record(SCH_KEY, reduced, req, report=reduced["_stub_report"],
+                             unit_dir=Path(reduced["_stub_report_outdir"]),
                              exp_dir=exp, record_id=rid, claim="test claim",
                              timestamp="2026-11-17T12:00:00Z")
         text = md.read_text()
@@ -135,12 +147,14 @@ def test_mint_refusals():
     with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory() as ud:
         req = da.build_request(SCH_KEY, ud)
         values = {c: 1.0 for c in req["x_gf180_sram_adapter"]["corners"]}
+        good = _graded(SCH_KEY, req, values)
         exp = Path(td)
         _seed_exp_dir(td, SCH_KEY)
         rid = "20261117-120000-deadbee"
 
         def mint(**kw):
-            args = dict(family=SCH_KEY, request=req, exp_dir=exp, record_id=rid, claim="c")
+            args = dict(family=SCH_KEY, request=req, report=good["_stub_report"],
+                        exp_dir=exp, record_id=rid, claim="c")
             args.update(kw)
             return mcr.mint_record(**args)
 
@@ -163,7 +177,6 @@ def test_mint_refusals():
         # subset `expected` (reduce --request pins coverage to the corners
         # the request asked for), and a subset never mints a record that
         # claims the full ratified matrix
-        good = _graded(SCH_KEY, req, values)
         one_corner = dict(good, expected=good["expected"][:1])
         try:
             mint(reduced=one_corner, unit_dir=Path("/x"))
@@ -222,6 +235,21 @@ def test_mint_refusals():
             check("wrong testbench refused", False)
         except ValueError as ve:
             check("wrong testbench refused", "differs" in str(ve), str(ve))
+        # report that is not a deck-list report
+        try:
+            mint(reduced=good, report={"mode": "engines", "units": []}, unit_dir=Path("/x"))
+            check("non-decks report refused", False)
+        except ValueError as ve:
+            check("non-decks report refused", "deck-list report" in str(ve), str(ve))
+        # a recorded corner with no unit in the report (grading/report mismatch)
+        first_cid = good["corners"][0]["id"]
+        stripped = dict(good["_stub_report"],
+                        units=[u for u in good["_stub_report"]["units"] if u["id"] != first_cid])
+        try:
+            mint(reduced=good, report=stripped, unit_dir=Path(good["_stub_report_outdir"]))
+            check("report missing recorded unit refused", False)
+        except ValueError as ve:
+            check("report missing recorded unit refused", "no unit in the report" in str(ve), str(ve))
         # nothing was written under the seeded exp dir
         check("refusals wrote nothing",
               sorted(p.name for p in exp.iterdir()) == ["testbench"],
@@ -238,7 +266,8 @@ def test_mint_open_and_append_only():
         exp = Path(td)
         _seed_exp_dir(td, EXT_KEY)
         rid = "20261117-120001-deadbee"
-        md = mcr.mint_record(EXT_KEY, reduced, req, unit_dir=Path(reduced["_stub_report_outdir"]),
+        md = mcr.mint_record(EXT_KEY, reduced, req, report=reduced["_stub_report"],
+                             unit_dir=Path(reduced["_stub_report_outdir"]),
                              exp_dir=exp, record_id=rid, claim="c",
                              supersedes="20260822-093435-fc6ce30 (testbench changed)",
                              timestamp="2026-11-17T12:00:01Z")
@@ -260,7 +289,8 @@ def test_mint_open_and_append_only():
         # append-only: same id again refuses, and the first artifacts survive
         before = {p: p.read_bytes() for p in exp.rglob("*") if p.is_file()}
         try:
-            mcr.mint_record(EXT_KEY, reduced, req, unit_dir=Path(reduced["_stub_report_outdir"]),
+            mcr.mint_record(EXT_KEY, reduced, req, report=reduced["_stub_report"],
+                            unit_dir=Path(reduced["_stub_report_outdir"]),
                             exp_dir=exp, record_id=rid, claim="c")
             check("append-only refused", False)
         except ValueError as ve:
@@ -286,9 +316,11 @@ def test_compare_records_consumes_minted():
         sch = _graded(SCH_KEY, sch_req, sch_vals)
         ext = _graded(EXT_KEY, ext_req, ext_vals)
         sch_id, ext_id = "20261117-120100-deadbee", "20261117-120101-deadbee"
-        mcr.mint_record(SCH_KEY, sch, sch_req, unit_dir=Path(sch["_stub_report_outdir"]),
+        mcr.mint_record(SCH_KEY, sch, sch_req, report=sch["_stub_report"],
+                        unit_dir=Path(sch["_stub_report_outdir"]),
                         exp_dir=exp, record_id=sch_id, claim="c", timestamp="2026-11-17T12:01:00Z")
-        mcr.mint_record(EXT_KEY, ext, ext_req, unit_dir=Path(ext["_stub_report_outdir"]),
+        mcr.mint_record(EXT_KEY, ext, ext_req, report=ext["_stub_report"],
+                        unit_dir=Path(ext["_stub_report_outdir"]),
                         exp_dir=exp, record_id=ext_id, claim="c", timestamp="2026-11-17T12:01:01Z")
         old_exp = cr.EXPERIMENT_DIR
         cr.EXPERIMENT_DIR = exp
@@ -325,9 +357,66 @@ def test_compare_records_consumes_minted():
               str(row))
 
 
+def test_mint_declared_stream_paths():
+    """The minter takes a unit's raw streams from the report's declared
+    `units[].stdout`/`.stderr` paths -- a non-default layout included --
+    falls back to `<cid>/stdout.bin` when the fields are omitted, and
+    refuses fail-closed when a declared path is missing on disk (#444)."""
+    with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory() as ud:
+        req = da.build_request(SCH_KEY, ud)
+        values = {c: 1.0 for c in req["x_gf180_sram_adapter"]["corners"]}
+        exp = Path(td)
+        _seed_exp_dir(td, SCH_KEY)
+
+        # non-default declared layout: units/<cid>/out.bin + err.bin, nothing
+        # at the default layout -- the mint can only succeed via the
+        # declaration (the old hardcoded minter refused here)
+        declared = _graded(SCH_KEY, req, values, stream_decl="units")
+        outdir = Path(declared["_stub_report_outdir"])
+        check("declared stub has no default-layout files",
+              not (outdir / "tt_25c_3.30v").exists())
+        rid = "20261117-120200-deadbee"
+        mcr.mint_record(SCH_KEY, declared, req, report=declared["_stub_report"],
+                        unit_dir=outdir, exp_dir=exp, record_id=rid, claim="c",
+                        timestamp="2026-11-17T12:02:00Z")
+        log = (exp / "corners" / rid / "tt_25c_3.30v.log").read_text()
+        check("declared layout streams minted",
+              "RESULT: write_trip_voltage_v = 1.0" in log, log[:300])
+
+        # omitted stream fields: the default <cid>/stdout.bin layout is the
+        # fallback, and the mint still finds the streams
+        omitted = _graded(SCH_KEY, req, values, stream_decl="omitted")
+        check("omitted stub declares no stream fields",
+              "stdout" not in omitted["_stub_report"]["units"][0])
+        rid2 = "20261117-120201-deadbee"
+        mcr.mint_record(SCH_KEY, omitted, req, report=omitted["_stub_report"],
+                        unit_dir=Path(omitted["_stub_report_outdir"]), exp_dir=exp,
+                        record_id=rid2, claim="c", timestamp="2026-11-17T12:02:01Z")
+        log2 = (exp / "corners" / rid2 / "tt_25c_3.30v.log").read_text()
+        check("fallback layout streams minted",
+              "RESULT: write_trip_voltage_v = 1.0" in log2, log2[:300])
+
+        # a declared path missing on disk refuses, fail-closed, writing nothing
+        holed = _graded(SCH_KEY, req, values, stream_decl="units")
+        (Path(holed["_stub_report_outdir"]) / "units" / "tt_25c_3.30v" / "out.bin").unlink()
+        before = sorted(p.name for p in exp.iterdir())
+        try:
+            mcr.mint_record(SCH_KEY, holed, req, report=holed["_stub_report"],
+                            unit_dir=Path(holed["_stub_report_outdir"]), exp_dir=exp,
+                            record_id="20261117-120202-deadbee", claim="c")
+            check("declared path missing refused", False)
+        except ValueError as ve:
+            check("declared path missing refused",
+                  "raw units/tt_25c_3.30v/out.bin missing for recorded corner tt_25c_3.30v"
+                  in str(ve),
+                  str(ve))
+        check("refused mint wrote nothing",
+              sorted(p.name for p in exp.iterdir()) == before)
+
+
 def main():
     for t in (test_mint_recorded, test_mint_refusals, test_mint_open_and_append_only,
-              test_compare_records_consumes_minted):
+              test_mint_declared_stream_paths, test_compare_records_consumes_minted):
         t()
     if FAILURES:
         for f in FAILURES[:10]:
