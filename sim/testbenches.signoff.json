@@ -6,7 +6,7 @@
   "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/deck_adapter.py (the deck-mode adapter the cold-start section invokes: it stages the testbenches' decks, the generated corner.inc and the pinned run-directory .spiceinit for `klt sim`) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point), and the four nested post-layout (PEX) benches under sim/pex/<experiment>/testbench/ -- tb_read_access_time.pex.spice and tb_write_access_time.pex.spice (the klt-pex-native access-time pair) and tb_write_margin_schematic.spice and tb_write_margin_extracted.spice (the by-hand schematic-vs-extracted write-margin pair) -- the parallel benches the T1 item-7 runs consume (issue #392). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the adapter stages the pinned run-directory .spiceinit itself); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:741663908e3ce3368d9de3dcbd4fb847df3358c3992b75120a67c2ffbea678c2",
+      "content_hash": "sha256:07c9c24326f6cbaf2c85a08882b2076a5836a3fe896ea0d154949383f4b70ac0",
       "paths": [
         {
           "path": "sim/README.md",
@@ -38,7 +38,7 @@
         },
         {
           "path": "sim/lib/deck_adapter.py",
-          "content_hash": "sha256:7dad97452fdaecf5a017745ce5ff859753782d012462057c969597003ed5a4f0"
+          "content_hash": "sha256:f0d1da1a87505c8e3aa009b8501c59856ed2fe0a2caefe4bc050f0f0d086d211"
         },
         {
           "path": "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
