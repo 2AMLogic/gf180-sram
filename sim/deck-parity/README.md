@@ -25,10 +25,12 @@ sim/deck-parity/
       report.json                # klt sim's deck report (environment.remote)
       reduced.json               # deck_adapter.py reduce --request output
                                  # (MC receipts: mc-reduce --json-out output);
-                                 # deterministic receipts: each corner carries
-                                 # the raw RESULT: lines its reducer matched
-                                 # (corners[].result_lines); MC receipts
-                                 # carry theirs as per-corner
+                                 # deterministic receipts must carry the
+                                 # raw RESULT: lines each corner's reducer
+                                 # matched (corners[].result_lines; the
+                                 # committed-bytes rule below says which
+                                 # committed receipts are exempt); MC
+                                 # receipts carry theirs as per-corner
                                  # result-lines.txt -- see the
                                  # committed-bytes rule below
       parity-compare.md          # parity_compare.py's full comparison table
