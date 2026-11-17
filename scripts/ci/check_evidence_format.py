@@ -69,7 +69,10 @@ by `klt signoff`, via scripts/ci/check-signoff-freshness.sh.
    8. `sim/testbenches.signoff.json` -- the T1 item 9 "Testbenches shipped"
       attestation -- pins an explicitly enumerated path set, and that
       enumeration must track what `sim/` actually ships: every tracked
-      `sim/<experiment>/testbench/tb_*` bench must appear in the wrapper's
+      `sim/<experiment...>/testbench/tb_*` bench (any experiment depth
+      under `sim/`, #392 -- the one-level #357 shape left the committed
+      `sim/pex/*/testbench/tb_*` post-layout family unattested) must
+      appear in the wrapper's
       `provenance.input.paths`. Nothing else couples the enumeration to
       the tree, so every new bench silently lands outside the verdict of
       record while item 9 keeps grading `met` -- the drift recurred three
@@ -580,17 +583,22 @@ TESTBENCH_ATTESTATION = "sim/testbenches.signoff.json"
 
 
 def is_bench_path(path: str) -> bool:
-    """A bench is `sim/<experiment>/testbench/tb_*`: exactly one experiment
-    level, a `testbench/` directory, and a `tb_` file prefix. The prefix
-    rule deliberately excludes the array-stripped DUT netlist copies
-    (`sram_256x32.noarray.spice`) that also live in testbench/ dirs -- item
-    9 attests benches, not derived design netlists."""
+    """A bench is `sim/<experiment...>/testbench/tb_*`: `sim/` then at
+    least one experiment level, a `testbench/` directory, and a `tb_`
+    file prefix. The prefix rule deliberately excludes the array-stripped
+    DUT netlist copies (`sram_256x32.noarray.spice`) that also live in
+    testbench/ dirs -- item 9 attests benches, not derived design
+    netlists. Depth is unbounded (#392): the post-layout `sim/pex/`
+    family (`sim/pex/<experiment>/testbench/tb_*`) is committed,
+    hand-written bench bodies the item-7 runs consume, so the one-level
+    #357 shape widened to span levels rather than leave them unattested.
+    """
     parts = path.split("/")
     return (
-        len(parts) == 4
+        len(parts) >= 4
         and parts[0] == "sim"
-        and parts[2] == "testbench"
-        and parts[3].startswith("tb_")
+        and parts[-2] == "testbench"
+        and parts[-1].startswith("tb_")
     )
 
 
@@ -628,7 +636,7 @@ def check_testbench_attestation(tracked: set[str], errors: list[str]) -> None:
     for path in gaps:
         errors.append(
             f"unattested testbench: {path} is tracked under "
-            "sim/<experiment>/testbench/ but absent from the T1 item-9 "
+            "sim/**/testbench/ (any depth) but absent from the T1 item-9 "
             f"wrapper {TESTBENCH_ATTESTATION} (provenance.input.paths) -- "
             'add it as {"path": ...} and re-run ./signoff/regenerate.sh '
             "so the verdict of record keeps covering every committed bench"
@@ -704,7 +712,7 @@ def main() -> int:
         + files_table_coverage_clause(coverage)
         + ", "
         + ", ".join(f"{d.committed} in sync with {d.generator}" for d in DERIVED_FILES)
-        + ", every tracked sim/<experiment>/testbench/tb_* bench pinned by "
+        + ", every tracked sim/**/testbench/tb_* bench (any depth, #392) pinned by "
         + TESTBENCH_ATTESTATION
         + "."
     )

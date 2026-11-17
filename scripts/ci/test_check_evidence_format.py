@@ -5,8 +5,9 @@ testbench-attestation gate (issue #357).
 
 The receipt gate resolves every backticked path in a receipt's "## Files
 in `<dir>/`" table against the committed file list. The attestation gate
-requires every tracked sim/*/testbench/tb_* bench to be pinned by
-sim/testbenches.signoff.json. These tests exercise the pure helpers in
+requires every tracked sim/**/testbench/tb_* bench (any depth under
+sim/, issue #392) to be pinned by sim/testbenches.signoff.json. These
+tests exercise the pure helpers in
 both directions -- a missing concrete path and a zero-match placeholder
 row fail; an exempt row and the repo's two real deck-parity receipts
 pass; an unpinned bench fails naming it while pinned non-bench paths and
@@ -405,18 +406,20 @@ class FilesTableCoverageTest(unittest.TestCase):
 
 class BenchAttestationTest(unittest.TestCase):
     """The item-9 gate (issue #357): every tracked
-    sim/<experiment>/testbench/tb_* bench must be pinned by
-    sim/testbenches.signoff.json."""
+    sim/**/testbench/tb_* bench -- any experiment depth under sim/
+    (issue #392) -- must be pinned by sim/testbenches.signoff.json."""
 
     PINNED = {
         "sim/README.md",
         "sim/lib/pdk_pin.txt",
         "sim/lib/run_corner_sweep.sh",
         "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
+        "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
         "sim/wordline-rc/testbench/tb_wl_rc_row64_x1.klt.spice",
     }
     BENCHES = {
         "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
+        "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
         "sim/wordline-rc/testbench/tb_wl_rc_row64_x1.klt.spice",
     }
 
@@ -452,25 +455,59 @@ class BenchAttestationTest(unittest.TestCase):
         }
         self.assertEqual(cef.bench_paths(tracked), self.BENCHES)
 
-    def test_bench_path_requires_one_experiment_level(self):
-        self.assertFalse(cef.is_bench_path("sim/macro-smoke/tb_x.spice"))
-        self.assertFalse(cef.is_bench_path("sim/a/b/testbench/tb_x.spice"))
-        self.assertFalse(cef.is_bench_path("design/testbench/tb_x.spice"))
+    def test_bench_path_requires_at_least_one_experiment_level(self):
+        # One experiment level (the classic shape) ...
         self.assertTrue(
             cef.is_bench_path(
                 "sim/min-clock-pulse/testbench/tb_min_clk_h10_l10.klt.spice"
             )
         )
+        # ... and any deeper nesting (issue #392: sim/pex/<experiment>/).
+        self.assertTrue(
+            cef.is_bench_path(
+                "sim/pex/access-time/testbench/tb_read_access_time.pex.spice"
+            )
+            and cef.is_bench_path(
+                "sim/a/b/c/testbench/tb_x.spice"
+            )
+        )
+        # Still not benches: no experiment level at all, or outside sim/.
+        self.assertFalse(cef.is_bench_path("sim/macro-smoke/tb_x.spice"))
+        self.assertFalse(cef.is_bench_path("sim/testbench/tb_x.spice"))
+        self.assertFalse(cef.is_bench_path("design/testbench/tb_x.spice"))
+
+    def test_double_extension_name_is_a_bench(self):
+        # The tb_ prefix rule is prefix-only: a `tb_*.pex.spice`
+        # double-extension name (the klt-pex-native access-time benches,
+        # issue #392) is a bench like any other.
+        self.assertTrue(
+            cef.is_bench_path(
+                "sim/pex/access-time/testbench/tb_read_access_time.pex.spice"
+            )
+        )
+
+    def test_testbench_dir_without_tb_files_yields_no_benches(self):
+        tracked = {
+            "sim/pex/write-margin/testbench/dut_copy.spice",
+            "sim/macro-smoke/testbench/sram_256x32.noarray.spice",
+        }
+        self.assertEqual(cef.bench_paths(tracked), set())
 
     def test_repo_wrapper_pins_every_committed_bench(self):
         # The shipped tree must satisfy the gate: walk the checkout (no
-        # git) and compare against the committed wrapper.
-        benches = {
+        # git) at every depth and compare against the committed wrapper.
+        tracked = {
             p.relative_to(REPO).as_posix()
-            for p in (REPO / "sim").glob("*/testbench/tb_*")
+            for p in (REPO / "sim").glob("**/testbench/*")
             if p.is_file()
         }
+        benches = cef.bench_paths(tracked)
         self.assertTrue(benches, "no benches found -- fixture broken")
+        self.assertIn(
+            "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
+            benches,
+            "nested walk missed the sim/pex benches -- fixture broken",
+        )
         pinned = set(cef.pinned_attestation_paths(cef.TESTBENCH_ATTESTATION))
         self.assertEqual(cef.attestation_gaps(benches, pinned), [])
 
