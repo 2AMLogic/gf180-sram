@@ -10,6 +10,16 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-17
 
+- **PR #447**: fix: resolve minter unit streams from the report's declared paths
+- **PR #445**: docs(pex): point write-margin status cell at deck-mode regeneration path
+- **PR #443**: docs(sim): finish the run_corner_sweep.sh tense cleanup in deck_adapter and snm_extract
+- **PR #442**: sim: port the pex write-margin legs to deck mode with a record minter
+- **PR #440**: docs(sim): sweep the stale run_corner_sweep.sh prose left by the #230 cutover
+- **PR #438**: Retire the local sim grid launchers at the deck-mode cutover
+- **Issue #444** (closed): sim: mint_corner_records.py hardcodes <corner>/stdout.bin instead of the report's declared stream paths
+- **Issue #441** (closed): Residual present-tense run_corner_sweep.sh prose in deck_adapter.py and snm_extract.py (outside #439's enumerated set)
+- **Issue #439** (closed): Sweep the stale run_corner_sweep.sh prose left in live sim/lib files after the #230 cutover
+- **Issue #230** (closed): Retire hand-rolled local ngspice corner/MC grid launchers in favour of klt sim
 - **PR #435**: docs: record the pinned hs a environment ruling and annotate the unpinned 2026-09-21 MC sample-sets
 - **PR #434**: chore(loom): resync installed Loom to v0.19.1306
 - **PR #433**: refactor: remove dead solve_inverse helper and its test-only caller
