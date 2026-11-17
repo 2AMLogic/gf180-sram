@@ -522,9 +522,18 @@ def ungated_receipt_headings(doc_text: str) -> list[tuple[str, str]]:
     on a fenced example tells the author to split it under its own
     heading, a no-op for text that is not a table. An unclosed fence
     runs to end of document (CommonMark), suppressing everything after
-    it. The gate's own walk (:func:`walk_files_table_sections`) stays
-    fence-blind: a fenced row never opens a table slot there, so the
-    two scans still agree on which rows are gated.
+    it. The gate's own walk (:func:`walk_files_table_sections`) remains
+    fence-blind: a fenced ``| File | What |`` row *can* open its
+    section's table slot there when no unfenced table precedes the
+    fence -- the walk takes the fenced row as the header and feeds it
+    to the resolver, a hard check 7 error on a fenced example (issue
+    #423). That shape is known but unreachable on the committed tree:
+    no receipt carries a fenced ``| File | What |`` row, and making the
+    walk fence-aware would change failing-gate behavior, which #420
+    deliberately left out of scope. For the rows this warning does
+    report, the two scans still agree on which are gated: a fenced row
+    the walk consumed lands in ``gated_headers``, so the forward scan
+    skips it either way.
     """
     lines = doc_text.splitlines()
     gated_headers = {
