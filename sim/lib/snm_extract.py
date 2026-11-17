@@ -138,29 +138,6 @@ def interp(pts: Curve, x: float) -> float:
     return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
 
 
-def solve_inverse(pts: Curve, target_y: float) -> float:
-    """Find x such that interp(pts, x) == target_y, via bisection.
-
-    Assumes `pts` (sorted ascending by x) is monotonic in y -- true for any
-    single-stage CMOS inverter's VTC. Bisection only ever evaluates the
-    well-behaved forward `interp`, so it is immune to the flat-tail
-    pathology a sorted-and-swapped inverse table hits (see module
-    docstring).
-    """
-    lo, hi = pts[0][0], pts[-1][0]
-    y_lo, y_hi = pts[0][1], pts[-1][1]
-    decreasing = y_lo >= y_hi
-    for _ in range(80):
-        mid = (lo + hi) / 2
-        y_mid = interp(pts, mid)
-        above = y_mid >= target_y
-        if above == decreasing:
-            lo = mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
-
-
 def find_crossings(pts1: Curve, pts2: Curve | None = None) -> list[float]:
     """x-values where f1(x) = f2^-1(x), found as the fixed points of f2 o f1.
 

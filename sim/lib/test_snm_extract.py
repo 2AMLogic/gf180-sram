@@ -210,15 +210,6 @@ def test_steep_symmetric_curve_has_equal_lobes() -> None:
         check(abs(lo - hi) < 1e-3, f"k={k}: lobes should match, got {lo} vs {hi}")
 
 
-def test_interp_and_solve_inverse_round_trip() -> None:
-    """solve_inverse must invert interp on a monotone curve, both rails included."""
-    curve = vtc(VDD / 2, 0.15)
-    for x in (0.4, 1.0, VDD / 2, 2.3, 2.9):
-        y = snm_extract.interp(curve, x)
-        x_back = snm_extract.solve_inverse(curve, y)
-        check(abs(x_back - x) < 1e-3, f"round trip at {x} came back as {x_back}")
-
-
 def test_read_xy_skips_comments_and_short_rows(tmp_path: Path | None = None) -> None:
     """`wrdata` output is parsed leniently but never silently reordered."""
     target = Path(__file__).resolve().parent / ".test_snm_extract_scratch.txt"
@@ -238,7 +229,6 @@ TESTS = [
     test_signed_margin_is_continuous_through_the_bifurcation,
     test_steep_vtc_matches_brute_force_square,
     test_steep_symmetric_curve_has_equal_lobes,
-    test_interp_and_solve_inverse_round_trip,
     test_read_xy_skips_comments_and_short_rows,
 ]
 
