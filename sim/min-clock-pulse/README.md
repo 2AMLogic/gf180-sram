@@ -50,7 +50,8 @@ smoke.py's exactly and the body is line-for-line `tb_macro_write_read.klt.spice`
 ## Grading
 
 `check-klt <report>` grades each corner against that corner's own VDD (a bit
-is defined if within 20 % of a rail — the smoke.py rule); a variant passes a
+is defined if within 20 % of a rail — the shared rule in
+`sim/lib/klt_bench.py`); a variant passes a
 corner only if all 7 sampled words match and no bit is undefined. A corner
 `klt sim` did not measure (errored/failed, missing values) is **OPEN**, never
 FAIL — bench evidence, not a macro failure.
