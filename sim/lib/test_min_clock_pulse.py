@@ -90,8 +90,14 @@ class DerivedConstantsTest(unittest.TestCase):
         self.assertEqual(pulse.derived(4.0, 4.0), {"PERIOD": 8.0, "SAMPLE": 3.0, "SETUP": 3.0})
 
 
-class OPSVerbatimTest(unittest.TestCase):
-    """The OPS table and reduced array are copied verbatim from smoke.py."""
+class OPSSharedWithSmokeTest(unittest.TestCase):
+    """The OPS table and reduced_array are imported from smoke.py, not
+    copied (since #405; the access_power.py pattern).
+
+    Decision: keep test_ops_table_identical / test_reduced_array_identical
+    as cheap anchors -- they fail loudly if a local copy is ever
+    reintroduced. Folding them into the gen_klt body pin was rejected:
+    that pin does not cover the OPS table or reduced_array() directly."""
 
     def test_ops_table_identical(self):
         self.assertEqual(pulse.OPS, smoke.OPS)
@@ -411,7 +417,7 @@ class FixtureGradingTest(unittest.TestCase):
         sorted(corner_id) the dropped corner sits at. #365's AC3 held for the
         uniform-corner case only; this makes it unconditional."""
         by_tag = self.fixture_reports_by_tag()
-        for drop in ("tt_25c_3.30v", "tt_-40c_3.63v"):  # sorts last / first
+        for drop in ("tt_25c_3.30v", "tt_-40c_3.63v"):  # sorts 7th of 7 / 5th of 7
             short = self.short_report("h14_l10", drop)
             argv = [p for t, p in by_tag.items() if t != "h14_l10"] + [short]
             try:
@@ -423,6 +429,79 @@ class FixtureGradingTest(unittest.TestCase):
                              f"MIN printed before the error (dropped {drop})")
             self.assertIn(drop, err)
             self.assertNotIn("Traceback", err)
+
+    def test_grade_set_corner_set_error_names_both_reports_when_short_is_first(self):
+        """The corner-set baseline seeds from whichever report arrives first,
+        so a short report placed FIRST in argv would make the error blame the
+        next (complete) report (#403). The message must name both reports --
+        the current tag and the report the baseline came from -- and keep
+        exit 1 with zero MIN lines."""
+        by_tag = self.fixture_reports_by_tag()
+        short = self.short_report("h14_l10", "tt_25c_3.30v")
+        argv = [short] + [p for t, p in by_tag.items() if t != "h14_l10"]
+        try:
+            code, out, err = self.grade_set_captured(argv)
+        finally:
+            Path(short).unlink()
+        self.assertEqual(code, 1)
+        self.assertEqual([l for l in out.splitlines() if l.startswith("MIN:")], [])
+        self.assertIn("corner set differs from h14_l10", err)  # baseline named
+        self.assertIn("unexpected: ['tt_25c_3.30v']", err)  # vs the short baseline
+        self.assertNotIn("missing:", err)  # empty half omitted, not "[]"
+        self.assertNotIn("unexpected: []", err)
+        self.assertNotIn("Traceback", err)
+
+    def test_grade_set_corner_set_error_halves_follow_set_difference(self):
+        """The cross-report error prints only the non-empty halves, relative
+        to the baseline report (#403): a short baseline facing a report with
+        an extra corner id prints only the unexpected half; a report with a
+        corner id renamed past the baseline prints both halves."""
+        def variant(src_tag, mutate):
+            rep = fixture(src_tag)
+            mutate(rep)
+            (tmp := tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)).write(
+                json.dumps(rep)
+            )
+            tmp.close()
+            return tmp.name
+
+        def add_corner(rep):
+            extra = json.loads(json.dumps(rep["corners"][0]))
+            extra["corner_id"] = "tt_99c_9.99v"
+            rep["corners"].append(extra)
+
+        def rename_corner(rep):
+            for c in rep["corners"]:
+                if c["corner_id"] == "tt_25c_3.30v":
+                    c["corner_id"] = "tt_99c_9.99v"
+
+        baseline = self.short_report("h14_l10", "tt_25c_3.30v")  # 6 of 7 corners
+        extra = variant("h04_l10", add_corner)  # 7 real + 1 bogus
+        try:
+            code, out, err = self.grade_set_captured([baseline, extra])
+            self.assertEqual(code, 1)
+            self.assertIn("corner set differs from h14_l10", err)
+            self.assertIn("unexpected: ['tt_25c_3.30v', 'tt_99c_9.99v']", err)
+            self.assertNotIn("missing:", err)
+            self.assertNotIn("Traceback", err)
+            self.assertNotIn("MIN:", out)
+        finally:
+            Path(baseline).unlink()
+            Path(extra).unlink()
+
+        full = self.fixture_reports_by_tag()["h14_l10"]  # complete, untouched
+        renamed = variant("h04_l10", rename_corner)
+        try:
+            code, out, err = self.grade_set_captured([full, renamed])
+            self.assertEqual(code, 1)
+            self.assertIn("corner set differs from h14_l10", err)
+            self.assertIn("missing: ['tt_25c_3.30v']", err)
+            self.assertIn("unexpected: ['tt_99c_9.99v']", err)
+            self.assertIn("; ", err)  # both halves, joined as in the per-corner error
+            self.assertNotIn("Traceback", err)
+            self.assertNotIn("MIN:", out)
+        finally:
+            Path(renamed).unlink()
 
     def test_grade_set_below_grid_substitution_is_structural_error(self):
         """A substitute below the grid floor (h03_l10 for an omitted h14_l10)

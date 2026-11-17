@@ -5,8 +5,9 @@ testbench-attestation gate (issue #357).
 
 The receipt gate resolves every backticked path in a receipt's "## Files
 in `<dir>/`" table against the committed file list. The attestation gate
-requires every tracked sim/*/testbench/tb_* bench to be pinned by
-sim/testbenches.signoff.json. These tests exercise the pure helpers in
+requires every tracked sim/**/testbench/tb_* bench (any depth under
+sim/, issue #392) to be pinned by sim/testbenches.signoff.json. These
+tests exercise the pure helpers in
 both directions -- a missing concrete path and a zero-match placeholder
 row fail; an exempt row and the repo's two real deck-parity receipts
 pass; an unpinned bench fails naming it while pinned non-bench paths and
@@ -234,20 +235,346 @@ class RealReceiptsTest(unittest.TestCase):
         )
 
 
+class FilesTableCoverageTest(unittest.TestCase):
+    """The coverage line and the ungated-table warning (issue #372)."""
+
+    def test_coverage_counts_from_the_error_walk(self):
+        # One walk returns the findings and the counts together: 2 tables,
+        # 1 non-exempt row, 1 exempt row, 1 unresolved token.
+        doc = (
+            receipt("run-a", "`missing.json`")
+            + "\n"
+            + receipt("run-b", "`ok.json`", "(none committed)")
+        )
+        findings, coverage = cef.walk_files_tables(
+            doc, "sim/deck-parity", ["sim/deck-parity/run-b/ok.json"]
+        )
+        self.assertEqual([t for t, _ in findings], ["missing.json"])
+        self.assertEqual(
+            coverage, cef.FilesTableCoverage(tables=2, rows=1, rows_exempt=1)
+        )
+
+    def test_coverage_clause_reports_counts(self):
+        clause = cef.files_table_coverage_clause(
+            cef.FilesTableCoverage(tables=3, rows=26, rows_exempt=1)
+        )
+        self.assertIn("3", clause)
+        self.assertIn('receipt "Files in" tables gated', clause)
+        self.assertIn("26 rows resolved", clause)
+        self.assertIn("1 exempt row skipped", clause)
+        zero = cef.files_table_coverage_clause(cef.FilesTableCoverage(0, 0, 0))
+        self.assertIn('0 receipt "Files in" tables gated', zero)
+        self.assertIn("0 rows resolved", zero)
+
+    def test_coverage_clause_pluralizes_exempt_rows(self):
+        clause = cef.files_table_coverage_clause(
+            cef.FilesTableCoverage(tables=1, rows=2, rows_exempt=2)
+        )
+        self.assertIn("2 exempt rows skipped", clause)
+
+    def test_main_success_line_uses_the_coverage_clause(self):
+        source = inspect.getsource(cef.main)
+        self.assertIn("files_table_coverage_clause", source)
+
+    def test_matching_heading_produces_no_warning(self):
+        self.assertEqual(
+            cef.ungated_receipt_headings(receipt("run-a", "`ok.json`")), []
+        )
+
+    def test_each_heading_deviation_warns_but_does_not_fail(self):
+        # The five measured deviations (issue #372): the identical table
+        # under each is invisible to the gate -- a warning naming the
+        # heading, and zero findings (so the run still exits 0).
+        deviations = [
+            "## Files in `run-a`",  # no trailing slash
+            "## Files in run-a/",  # no backticks
+            "### Files in `run-a/`",  # h3
+            "## Files committed in `run-a/`",  # extra words before
+            "## Files in `run-a/` (committed bytes)",  # extra words after
+        ]
+        table = "| File | What |\n|---|---|\n| `whatever.json` | x |\n"
+        for heading in deviations:
+            text = f"{heading}\n\n{table}\n"
+            unmatched = cef.ungated_receipt_headings(text)
+            self.assertEqual(
+                unmatched, [(heading, cef.UNGATED_REASON_GRAMMAR)], heading
+            )
+            warning = cef.ungated_files_table_warning(
+                "sim/deck-parity/r.md", *unmatched[0]
+            )
+            self.assertIn("sim/deck-parity/r.md", warning)
+            self.assertIn(heading, warning)
+            self.assertIn("Fix the heading", warning)
+            findings, _ = cef.walk_files_tables(
+                text, "sim/deck-parity", ["sim/deck-parity/run-a/whatever.json"]
+            )
+            self.assertEqual(findings, [], heading)
+
+    def test_table_with_no_preceding_heading_warns(self):
+        text = "| File | What |\n|---|---|\n| `a.json` | x |\n"
+        self.assertEqual(
+            cef.ungated_receipt_headings(text), [("", cef.UNGATED_REASON_GRAMMAR)]
+        )
+
+    def test_fenced_comment_between_heading_and_table_is_not_warned(self):
+        # Issue #408 shape (1): a bash fence between a gated heading and
+        # its table must not make the warning fire -- the gate gates this
+        # table, so the warning shadowing the gate stays silent.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "```bash\n"
+            "# regenerate\n"
+            "./x.sh\n"
+            "```\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `ok.json` | the thing |\n"
+        )
+        self.assertEqual(
+            cef.parse_files_tables(text), [("run-a", [(["ok.json"], False)])]
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_second_table_under_one_heading_warns(self):
+        # Issue #408 shape (2): the parser consumes only the FIRST table
+        # in a section, so a second "| File | What |" table under the same
+        # gated heading is ungated and must be warned about.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nSome prose.\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+        )
+        self.assertEqual(
+            cef.parse_files_tables(text), [("run-a", [(["a.json"], False)])]
+        )
+        self.assertEqual(
+            cef.ungated_receipt_headings(text),
+            [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
+        )
+
+    def test_second_table_message_tells_the_author_to_split_not_fix(self):
+        # Issue #415: for the #408 shape (2) the heading DOES match the
+        # gated grammar -- the ungated row is a SECOND table whose slot
+        # the parser already consumed. The warning must name that cause
+        # and the split-under-its-own-heading fix, not "Fix the heading"
+        # (a no-op here: the heading is already correct).
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nSome prose.\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+        )
+        unmatched = cef.ungated_receipt_headings(text)
+        self.assertEqual(
+            unmatched, [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)]
+        )
+        warning = cef.ungated_files_table_warning(
+            "sim/deck-parity/r.md", *unmatched[0]
+        )
+        self.assertIn("## Files in `run-a/`", warning)
+        self.assertNotIn("Fix the heading", warning)
+        self.assertIn("own '## Files in `<dir>/`' heading", warning)
+
+    def test_fenced_table_example_is_not_warned(self):
+        # Issue #420: a "| File | What |" row inside a fenced example
+        # after the section's real table is fenced text, not a second
+        # table -- the warning must stay silent for it.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nExample of the shape to avoid:\n\n"
+            "```\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "```\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_fenced_tilde_table_example_is_not_warned(self):
+        # Same shape with a ~~~ fence: fence tracking covers both fence
+        # characters.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\n~~~\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "~~~\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_fenced_info_string_fence_is_tracked(self):
+        # An opening fence with an info string (```markdown) still opens
+        # a fence; its content must be suppressed too.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\n```markdown\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "```\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_unterminated_fence_suppresses_later_rows(self):
+        # An unclosed fence runs to end of document (CommonMark), so the
+        # rows after it are fenced text, not tables.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nExample:\n\n"
+            "```\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_real_second_table_after_fenced_example_still_warns(self):
+        # Regression: fence suppression must not swallow a REAL second
+        # table sitting outside the fence -- only that one is ungated.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nExample of the shape to avoid:\n\n"
+            "```\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "```\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `c.json` | three |\n"
+        )
+        self.assertEqual(
+            cef.ungated_receipt_headings(text),
+            [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
+        )
+
+    def test_fenced_example_between_heading_and_real_table_warns_consumed(self):
+        # Issue #423: the gate's walk (walk_files_table_sections) is
+        # fence-blind, so a fenced "| File | What |" example between the
+        # gated heading and the section's real table OPENS the section's
+        # table slot -- the walk consumes the fenced rows as the table.
+        # The real table after the fence is then the "second table" shape
+        # and warns CONSUMED, exactly as it did before the #420
+        # forward-scan fix; #420 changed only which rows the forward scan
+        # itself reports, not what the walk consumes.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "~~~\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "~~~\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+        )
+        # header_line 3 is the FENCED "| File | What |" line: the fenced
+        # row did open the slot.
+        self.assertEqual(
+            list(cef.walk_files_table_sections(text)),
+            [("run-a", 3, [["File", "What"], ["`b.json`", "two"]])],
+        )
+        self.assertEqual(
+            cef.ungated_receipt_headings(text),
+            [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
+        )
+
+    def test_receipt_docs_scope(self):
+        tracked = {
+            "sim/deck-parity/20261114-tt_25c_3.30v.md",  # top-level receipt
+            "sim/deck-parity/README.md",  # excluded
+            "sim/deck-parity/20261115-full-grid/parity-compare.md",  # nested
+            "sim/macro-smoke/README.md",  # other experiment
+            "README.md",  # repo root
+        }
+        self.assertEqual(cef.receipt_docs(tracked), [
+            "sim/deck-parity/20261114-tt_25c_3.30v.md"
+        ])
+
+    def test_non_receipt_readme_tables_stay_silent(self):
+        # The three sim/*/README.md directory listings are not receipts:
+        # they carry | File | What | tables under unmatched headings, and
+        # the warning must emit nothing for them (issue #372 AC).
+        for readme in (
+            "sim/access-power/README.md",
+            "sim/macro-smoke/README.md",
+            "sim/min-clock-pulse/README.md",
+        ):
+            text = (REPO / readme).read_text(encoding="utf-8")
+            self.assertTrue(
+                cef.ungated_receipt_headings(text),
+                f"{readme} fixture: expected an ungated-shaped table",
+            )
+            self.assertEqual(
+                cef.receipt_docs({readme}), [], f"{readme} must be out of scope"
+            )
+
+    def test_live_receipts_emit_no_warnings(self):
+        tracked = set(p.relative_to(REPO).as_posix()
+                      for p in (REPO / "sim" / "deck-parity").glob("*.md"))
+        warnings: list[str] = []
+        cef.check_ungated_receipt_tables(tracked, warnings)
+        self.assertEqual(warnings, [])
+
+    def test_live_coverage_is_nonzero_and_consistent(self):
+        # Same walk, both outputs: the counts must equal the per-doc parse
+        # totals, and the shipped tree must gate every receipt table.
+        tracked = {
+            p.relative_to(REPO).as_posix()
+            for p in (REPO / "sim" / "deck-parity").rglob("*.md")
+        }
+        _, coverage = cef.walk_files_tables(
+            (REPO / "sim" / "deck-parity" / "20261115-full-grid.md").read_text(
+                encoding="utf-8"
+            ),
+            "sim/deck-parity",
+            [],
+        )
+        self.assertEqual(coverage.tables, 1)
+        self.assertEqual(coverage.rows + coverage.rows_exempt, 10)
+
+
 class BenchAttestationTest(unittest.TestCase):
     """The item-9 gate (issue #357): every tracked
-    sim/<experiment>/testbench/tb_* bench must be pinned by
-    sim/testbenches.signoff.json."""
+    sim/**/testbench/tb_* bench -- any experiment depth under sim/
+    (issue #392) -- must be pinned by sim/testbenches.signoff.json."""
 
     PINNED = {
         "sim/README.md",
         "sim/lib/pdk_pin.txt",
         "sim/lib/run_corner_sweep.sh",
         "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
+        "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
         "sim/wordline-rc/testbench/tb_wl_rc_row64_x1.klt.spice",
     }
     BENCHES = {
         "sim/macro-smoke/testbench/tb_ctrl_pulse.klt.spice",
+        "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
         "sim/wordline-rc/testbench/tb_wl_rc_row64_x1.klt.spice",
     }
 
@@ -283,25 +610,59 @@ class BenchAttestationTest(unittest.TestCase):
         }
         self.assertEqual(cef.bench_paths(tracked), self.BENCHES)
 
-    def test_bench_path_requires_one_experiment_level(self):
-        self.assertFalse(cef.is_bench_path("sim/macro-smoke/tb_x.spice"))
-        self.assertFalse(cef.is_bench_path("sim/a/b/testbench/tb_x.spice"))
-        self.assertFalse(cef.is_bench_path("design/testbench/tb_x.spice"))
+    def test_bench_path_requires_at_least_one_experiment_level(self):
+        # One experiment level (the classic shape) ...
         self.assertTrue(
             cef.is_bench_path(
                 "sim/min-clock-pulse/testbench/tb_min_clk_h10_l10.klt.spice"
             )
         )
+        # ... and any deeper nesting (issue #392: sim/pex/<experiment>/).
+        self.assertTrue(
+            cef.is_bench_path(
+                "sim/pex/access-time/testbench/tb_read_access_time.pex.spice"
+            )
+            and cef.is_bench_path(
+                "sim/a/b/c/testbench/tb_x.spice"
+            )
+        )
+        # Still not benches: no experiment level at all, or outside sim/.
+        self.assertFalse(cef.is_bench_path("sim/macro-smoke/tb_x.spice"))
+        self.assertFalse(cef.is_bench_path("sim/testbench/tb_x.spice"))
+        self.assertFalse(cef.is_bench_path("design/testbench/tb_x.spice"))
+
+    def test_double_extension_name_is_a_bench(self):
+        # The tb_ prefix rule is prefix-only: a `tb_*.pex.spice`
+        # double-extension name (the klt-pex-native access-time benches,
+        # issue #392) is a bench like any other.
+        self.assertTrue(
+            cef.is_bench_path(
+                "sim/pex/access-time/testbench/tb_read_access_time.pex.spice"
+            )
+        )
+
+    def test_testbench_dir_without_tb_files_yields_no_benches(self):
+        tracked = {
+            "sim/pex/write-margin/testbench/dut_copy.spice",
+            "sim/macro-smoke/testbench/sram_256x32.noarray.spice",
+        }
+        self.assertEqual(cef.bench_paths(tracked), set())
 
     def test_repo_wrapper_pins_every_committed_bench(self):
         # The shipped tree must satisfy the gate: walk the checkout (no
-        # git) and compare against the committed wrapper.
-        benches = {
+        # git) at every depth and compare against the committed wrapper.
+        tracked = {
             p.relative_to(REPO).as_posix()
-            for p in (REPO / "sim").glob("*/testbench/tb_*")
+            for p in (REPO / "sim").glob("**/testbench/*")
             if p.is_file()
         }
+        benches = cef.bench_paths(tracked)
         self.assertTrue(benches, "no benches found -- fixture broken")
+        self.assertIn(
+            "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
+            benches,
+            "nested walk missed the sim/pex benches -- fixture broken",
+        )
         pinned = set(cef.pinned_attestation_paths(cef.TESTBENCH_ATTESTATION))
         self.assertEqual(cef.attestation_gaps(benches, pinned), [])
 

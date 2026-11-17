@@ -6,11 +6,11 @@
   "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, and the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:7029dfa44bf057a154b99d202f5d0c2ab41d1361d600eb26aaf9000bfee0c36d",
+      "content_hash": "sha256:aefaf484e96bae09f7be051f4d62bf8729691582e9812db0918e49e7cbedd638",
       "paths": [
         {
           "path": "sim/README.md",
-          "content_hash": "sha256:cf9e419329faa86ade1b72a557557f4643fba41e98961694e9c78ebeac097d31"
+          "content_hash": "sha256:7e88e7e3380ca57a58334b1d2ebe0e8a5ea4cbb744f3fa8c2f599215b54e6491"
         },
         {
           "path": "sim/access-power/testbench/tb_access_power.klt.spice",

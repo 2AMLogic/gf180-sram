@@ -78,12 +78,21 @@ growth is not directly measurable on this receipt) -- all of it well under
 1% of the ~2 MB full stdout would add -- while omitting it leaves the three
 `RESULT:`-emitting families' numbers unverifiable: their raw lines lived in
 the per-unit `stdout.bin` this rule discards for clean runs, and only the two
-SNM families stay re-derivable, via their committed sweeps. The one-corner
-receipt (2026-11-14) predates this rule and committed each family's single
+SNM families stay re-derivable, via their committed sweeps. The two
+one-corner receipts (both 2026-11-14 -- the transport run and the
+spiceinit-pin run) predate this rule and committed each family's single
 `stdout.log`/`corner.inc`/sweep flat at the family level; the full-grid
 receipt (2026-11-15, 135 units) introduced the per-corner subdirectories and
 the rule, because committing all 135 engine stdout streams would add ~2 MB of
-raw stream that the graded `reduced.json` already summarises.
+raw stream that the graded `reduced.json` already summarises. The full-grid
+receipt predates the `corners[].result_lines` clause specifically (#374
+added that clause after the receipt was committed) and is exempt from it
+only: its committed `reduced.json` files carry no `result_lines`, so the
+three `RESULT:`-emitting families' graded numbers are not re-derivable from
+committed bytes (the two SNM families stay re-derivable via their committed
+sweeps, as above) -- the rule's other clauses (the five core files, the
+per-corner `corner.inc`, the committed SNM sweeps, the conditional
+`stdout.log`) it satisfies.
 
 **MC receipts do not commit one sweep per unit** (a rule that does not
 scale): one SNM sweep pair-side is ~22 KB, so per-unit sweeps would have been
@@ -109,6 +118,22 @@ family/corner pair). A row that documents artifacts deliberately **not**
 committed -- today, the full-grid `stdout.log` row above -- must carry the
 literal token `(none committed)` in its What cell; the gate skips such a row.
 This keeps a receipt from citing evidence it does not commit (issue #356).
+
+**Prose committed-bytes sections are deliberately out of scope for that
+gate** (issue #372). A receipt may additionally -- or instead -- document
+its artifacts in prose (both MC receipts do, under `## What is re-derivable
+from committed bytes`); CI does not resolve prose-cited paths. Prose claims
+are not machine-checkable: the receipt's machine-checkable inventory is its
+`## Files in` table, and a receipt that documents committed artifacts in
+prose only sits outside the gate. Two pieces of visibility keep that from
+being silent: the check's success line reports its coverage -- receipt
+`Files in` tables gated, rows resolved -- so a zero-coverage receipt shows
+up as a dropped count rather than the same green line as a fully-gated one;
+and a deck-parity receipt whose `| File | What |` table sits under a heading
+the gate cannot see (a one-character heading deviation) draws a warning,
+never a CI failure, naming the doc and the unmatched heading. Tables in the
+other experiments' READMEs are directory listings, not receipts, and are
+outside the warning.
 
 ## Receipts
 

@@ -9,8 +9,9 @@ content (#200); the spec's status table is dated and stays as is.
 ## What is swept
 
 The same reduced-array macro bench as `sim/macro-smoke` (identical `OPS`
-table, `reduced_array()` and 20 fF bit-line stand-in, copied verbatim —
-pinned by `sim/lib/test_min_clock_pulse.py`), with `(clk_high, clk_low)` as
+table, `reduced_array()` and 20 fF bit-line stand-in, imported from
+`smoke.py` per the `access_power.py` pattern — pinned by
+`sim/lib/test_min_clock_pulse.py`), with `(clk_high, clk_low)` as
 generator arguments. `klt sim`'s corner axes are PVT only, so the swept axis
 lives outside the request: one generated body + request per grid point, the
 `sim/wordline-rc/` shape. Two 1-D sweeps sharing the 10/10 ns baseline
@@ -49,7 +50,8 @@ smoke.py's exactly and the body is line-for-line `tb_macro_write_read.klt.spice`
 ## Grading
 
 `check-klt <report>` grades each corner against that corner's own VDD (a bit
-is defined if within 20 % of a rail — the smoke.py rule); a variant passes a
+is defined if within 20 % of a rail — the shared rule in
+`sim/lib/klt_bench.py`); a variant passes a
 corner only if all 7 sampled words match and no bit is undefined. A corner
 `klt sim` did not measure (errored/failed, missing values) is **OPEN**, never
 FAIL — bench evidence, not a macro failure.

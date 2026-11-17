@@ -8,8 +8,41 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-17
+
+- **PR #425**: refactor: single-owner klt request skeleton and Q-word grading for the three macro-netlist benches
+- **Issue #423** (closed): ungated_receipt_headings docstring asserts a false fence invariant (and hides a fenced-example hard error)
+- **PR #424**: fix: correct fenced-row slot invariant in ungated_receipt_headings docstring
+- **Issue #420** (closed): Evidence gate: ungated-receipt-table warning misreads a fenced `| File | What |` row as a second table
+- **PR #422**: fix: skip fenced "| File | What |" rows in the ungated-receipt warning
+- **Issue #415** (closed): Ungated-receipt-table warning text misdescribes the newly-surfaced second-table shape
+- **PR #419**: fix: name the second-table cause in the ungated-receipt warning
+- **Issue #392** (closed): Four committed sim/pex/*/testbench/tb_* benches are pinned by no signoff wrapper
+- **PR #418**: fix: pin the four nested sim/pex testbenches, widen the item-9 gate to any depth
+- **Issue #388** (closed): Consolidate duplicated klt request skeleton and Q-word grading across smoke, access-power, min-clock-pulse benches
+
 ### 2026-11-16
 
+- **PR #384**: chore(loom): resync installed Loom to v0.19.1302
+- **PR #349**: config: widen Guide doc-maintenance debounce windows to 6h/12h
+- **PR #413**: fix: decide ungated-table warning from the receipt parser's own walk
+- **Issue #408** (closed): Evidence gate: ungated-receipt-table warning's nearest-heading scan diverges from parse_files_tables in two measured shapes
+- **PR #336**: ci: run the evidence-format check once, in its own job only
+- **Issue #332** (closed): Remove the duplicated evidence-format CI run and the stale 'nothing has landed yet' scaffolding framing
+- **PR #411**: docs(sim): state the min-clock-pulse OPS table is imported, not copied
+- **Issue #406** (closed): Stale docstring: test_min_clock_pulse.py OPSVerbatimTest still says 'copied verbatim'
+- **PR #409**: fix(sim): name both reports and omit empty halves in grade-set corner-set error
+- **Issue #403** (closed): grade-set: cross-report corner-set error names the wrong report when the short one is first, and prints empty halves
+- **PR #407**: ci: report receipt files-table gate coverage, warn on ungated receipt tables
+- **Issue #372** (closed): Evidence gate: receipt "Files in" coverage is invisible — a receipt with no matching table heading is silently ungated
+- **PR #405**: refactor(sim): import smoke.py stimulus into pulse.py instead of copying
+- **Issue #394** (closed): Dedupe pulse.py's copied smoke.py stimulus/testbench code (~50-110 LOC)
+- **PR #402**: reports: guard --print templates like --set-format, naming the committed report
+- **Issue #393** (closed): commit_report.py: --print templates are unguarded, so a malformed one tracebacks AFTER out.json is already committed
+- **PR #401**: fix: grade-set completeness becomes a set test; validate before printing
+- **PR #398**: docs: scope deck-parity committed-bytes rule to reduce output, relabel byte figure as raw text
+- **Issue #382** (closed): sim: grade-set completeness is a distinct count, not a set — an off-grid variant can substitute for an omitted grid point
+- **Issue #381** (closed): Amended committed-bytes rule: MC receipts carry no preserved RESULT: lines, and the stated byte cost measures raw line text rather than committed growth
 - **PR #395**: ci: gate the item-9 testbench attestation on what sim/ ships
 - **PR #391**: reports: catch TypeError and AttributeError in --set-format template failures
 - **PR #387**: fix: label MC |delta| distribution stats from summary["unit"]

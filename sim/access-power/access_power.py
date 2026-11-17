@@ -35,19 +35,12 @@ sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 import smoke  # noqa: E402  (path-injected import, as measurements/generate_report.py does)
 
 # The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
-# (#331) -- imported here rather than re-listed, so the request this module
-# builds and the completeness this grader asserts cannot drift from the
-# ratified matrix. `klt sim` wants the two numeric axes as JSON numbers, so
-# they are converted at this consumer's own boundary: the owner holds every
-# axis point as the spec's literal label (see that module's "Axis element
-# type").
-from corner_matrix import (  # noqa: E402
-    LIB_SECTION,
-    PROCESSES,
-    TEMPS,
-    VDDS,
-    corners as ratified_corners,
-)
+# (#331) -- `expected_corners()` below is converted from it, so the
+# completeness this grader asserts cannot drift from the ratified matrix.
+from corner_matrix import corners as ratified_corners  # noqa: E402
+# The request skeleton and the Q-word grading rule (#388) have a single
+# owner, sim/lib/klt_bench.py, next to corner_matrix.
+from klt_bench import base_request, q_probes, read_word  # noqa: E402
 
 # The DUT include as `smoke.gen_klt()` writes it (resolved beside *its* body)
 # and as this body needs it (one checked-in copy, not a second one here).
@@ -134,7 +127,8 @@ def gen_klt():
 
 def klt_request():
     """The `klt sim` request for gen_klt(): 27 corners, two cycle-charge
-    integrals, and the read cycle's 32 functional `Q` probes."""
+    integrals, and the read cycle's 32 functional `Q` probes. The skeleton is
+    sim/lib/klt_bench.py's (#388); this bench adds its sharding block."""
     meas = []
     for name, label in (("q_write", WRITE_LABEL), ("q_read", READ_LABEL)):
         t0, t1 = window(op_index(label))
@@ -146,53 +140,20 @@ def klt_request():
             }
         )
     ts = smoke.edge(op_index(READ_LABEL)) + smoke.SAMPLE
-    for b in range(32):
-        meas.append(
-            {
-                "name": f"q{b}_rd",
-                "spice": f".meas tran q{b}_rd FIND v(Q[{b}]) AT={ts:g}n",
-                "unit": "V",
-            }
-        )
-    return {
-        "netlist": "../testbench/tb_access_power.klt.spice",
-        "engine": "ngspice",
-        "models": {"lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"},
-        "corners": {
-            "process": [{"name": p, "sections": [LIB_SECTION[p]]} for p in PROCESSES],
-            "supply_v": {"vvdd": [float(v) for v in VDDS]},
-            "temperature_c": [int(t) for t in TEMPS],
-        },
-        "analysis": {
-            "kind": "tran",
-            "args": f"0.02n {smoke.edge(len(smoke.OPS) - 1) + smoke.PERIOD:g}n",
-        },
-        "measurements": meas,
-        "netlist_source": "schematic",
-        "options": {"timeout_s": 1500},
-        # Each corner of this deck takes ~5-7 minutes, so 27 of them serially
-        # in one batch job (~2.6 h) is killed at the fleet's whole-job ceiling
-        # with every unit reported `batch_job_timeout`. Shard it: 14 hosts is
-        # at most 2 units per shard, each comfortably inside the ceiling. The
-        # same reason `sim/macro-smoke`'s 27-corner run of this deck went out
-        # as 9 shards (its record's fleet array).
-        "remote": {"hosts": 14},
-    }
-
-
-def read_word(meas, vdd):
-    """Rebuild the read cycle's 32-bit word against this corner's own VDD.
-    Returns (word, undefined_bits, unmeasured_bits)."""
-    word = undefined = unmeasured = 0
-    for b in range(32):
-        v = meas.get(f"q{b}_rd")
-        if v is None:
-            unmeasured += 1
-            continue
-        if not (v < 0.2 * vdd or v > 0.8 * vdd):
-            undefined += 1
-        word |= (1 if v > vdd / 2 else 0) << b
-    return word, undefined, unmeasured
+    meas += q_probes([("rd", ts)])
+    req = base_request(
+        "../testbench/tb_access_power.klt.spice",
+        f"0.02n {smoke.edge(len(smoke.OPS) - 1) + smoke.PERIOD:g}n",
+        meas,
+    )
+    # Each corner of this deck takes ~5-7 minutes, so 27 of them serially
+    # in one batch job (~2.6 h) is killed at the fleet's whole-job ceiling
+    # with every unit reported `batch_job_timeout`. Shard it: 14 hosts is
+    # at most 2 units per shard, each comfortably inside the ceiling. The
+    # same reason `sim/macro-smoke`'s 27-corner run of this deck went out
+    # as 9 shards (its record's fleet array).
+    req["remote"] = {"hosts": 14}
+    return req
 
 
 def grade_corner(c, expected_word):
@@ -221,7 +182,9 @@ def grade_corner(c, expected_word):
             bad.append(f"{name}={q:.4g}C non-physical")
         charges[name] = q
 
-    word, undefined, unmeasured = read_word(meas, vdd)
+    word, undefined, unmeasured = read_word(
+        [meas.get(f"q{b}_rd") for b in range(32)], vdd
+    )
     if unmeasured:
         return "OPEN", f"unmeasured_q_bits={unmeasured}"
     if undefined:

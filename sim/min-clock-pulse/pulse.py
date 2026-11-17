@@ -40,13 +40,17 @@ artifact:
                               phase; smoke.py's fixed 6.0 ns violates its own
                               setup discipline once clk_low < 6.0)
 
-Everything else is copied verbatim from `sim/macro-smoke/smoke.py` (its `OPS`
-table, `reduced_array()`, `pwl()` and grading rule): same reduced two-row
-array, same 20 fF bit-line stand-in, same 7 sampled words, so results stay
-comparable with the 10/10 ns baseline. At (10, 10) the derived constants
-reproduce smoke.py's exactly (PERIOD 20, SAMPLE 9, SETUP 6), and the generated
-body is line-for-line its `tb_macro_write_read.klt.spice` -- pinned by
-`sim/lib/test_min_clock_pulse.py`.
+Everything else is `sim/macro-smoke/smoke.py`'s own unchanged stimulus,
+imported rather than copied (the `sim/access-power/access_power.py` pattern,
+#394): its `OPS` table, `FIRST_EDGE`/`TRISE`/`BL_STANDIN_FF` constants and
+`reduced_array()` -- same reduced two-row array, same 20 fF bit-line
+stand-in, same 7 sampled words, so results stay comparable with the 10/10 ns
+baseline. `pwl()` and `gen_klt()` stay local because they thread the derived
+constants as arguments; the `gen_klt` body remains hand-synced with
+smoke.py's, pinned by `sim/lib/test_min_clock_pulse.py`. At (10, 10) the
+derived constants reproduce smoke.py's exactly (PERIOD 20, SAMPLE 9,
+SETUP 6), and the generated body is line-for-line its
+`tb_macro_write_read.klt.spice`.
 
 `check-klt` grades one variant's report per corner against that corner's own
 VDD (a bit is defined if within 20% of a rail); a variant passes a corner only
@@ -69,19 +73,33 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
-# The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
-# (#331); the request's `corners` block is derived from it, exactly as
-# sim/macro-smoke/smoke.py does. Numbers are converted at this consumer's own
-# boundary (see corner_matrix's "Axis element type").
-from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "macro-smoke"))
+# The request skeleton and the Q-word grading rule (#388) have a single
+# owner, sim/lib/klt_bench.py; its `corners` block is in turn derived from
+# the ratified matrix's own owner, sim/lib/corner_matrix.py (#331), exactly
+# as sim/macro-smoke/smoke.py does.
+from klt_bench import base_request, q_probes, read_word  # noqa: E402
+
+# The stimulus data and helpers shared with the 10/10 ns baseline are
+# imported, not copied (the sim/access-power/access_power.py pattern, #394):
+# smoke.py is the ratified generator and is not edited here, so its `OPS`
+# table, timing constants and `reduced_array()` cannot drift. Everything the
+# sweep varies stays local: `derived()` and `pwl()` below, and `gen_klt()`,
+# whose body remains hand-synced with smoke.py's (pinned by
+# `sim/lib/test_min_clock_pulse.py`).
+from smoke import (  # noqa: E402  (path-injected import, as access_power.py does)
+    BL_STANDIN_FF,
+    FIRST_EDGE,
+    M32,
+    OPS,
+    TRISE,
+    reduced_array,
+)
 
 HERE = Path(__file__).resolve().parent
 TB_DIR = HERE / "testbench"
 REQ_DIR = HERE / "requests"
 
-FIRST_EDGE = 5.0  # ns; edge 0 is an idle (CEN=1) initialisation cycle
-TRISE = 0.1
-BL_STANDIN_FF = 20  # lumped bit-line capacitance for the unpopulated rows
 DUT_COPY = "sram_256x32.noarray.spice"  # copied from sim/macro-smoke/testbench/
 
 # The swept grid: two 1-D sweeps sharing the 10/10 ns baseline (counted once,
@@ -92,25 +110,6 @@ CLK_LOW_HELD = 10.0
 CLK_HIGH_HELD = 10.0
 CLK_HIGH_GRID = (4.0, 6.0, 8.0, 10.0, 12.0, 14.0)
 CLK_LOW_GRID = (4.0, 6.0, 8.0, 10.0)
-
-# (label, CEN, GWEN, A, D, WEN, expected Q after this cycle's edge or None)
-# WEN[i] = 0 writes bit i. Q is only loaded by reads (CEN=0, GWEN=1).
-# Copied verbatim from sim/macro-smoke/smoke.py -- do not diverge.
-M32 = 0xFFFFFFFF
-OPS = [
-    ("idle-init", 1, 1, 0x00, 0x00000000, M32, None),
-    ("write A7", 0, 0, 0xA7, 0xDEADBEEF, 0x00000000, None),
-    ("write 3C", 0, 0, 0x3C, 0x12345678, 0x00000000, None),
-    ("read A7", 0, 1, 0xA7, 0x00000000, M32, 0xDEADBEEF),
-    ("read 3C", 0, 1, 0x3C, 0x00000000, M32, 0x12345678),
-    # per-bit mask: bits 15:0 masked (WEN=1), bits 31:16 written with ones
-    ("masked write A7", 0, 0, 0xA7, 0xFFFFFFFF, 0x0000FFFF, 0x12345678),
-    ("read A7 after mask", 0, 1, 0xA7, 0x00000000, M32, 0xFFFFBEEF),
-    ("read 3C neighbour", 0, 1, 0x3C, 0x00000000, M32, 0x12345678),
-    # CEN=1 with GWEN=0 and fresh data: no write, Q holds
-    ("idle (CEN=1) no write", 1, 0, 0xA7, 0x00000000, 0x00000000, 0x12345678),
-    ("read A7 after idle", 0, 1, 0xA7, 0x00000000, M32, 0xFFFFBEEF),
-]
 
 
 def variant_tag(clk_high: float, clk_low: float) -> str:
@@ -163,26 +162,6 @@ def pwl(values, period: float, setup: float, vdd="VDDC"):
             pts.append(f"{t + TRISE:g}n {vdd if v else 0}")
             prev = v
     return "PWL(" + " ".join(pts) + ")"
-
-
-def reduced_array(w):
-    """The reduced `sram_64x128_array`: only the rows OPS addresses, 20 fF stand-ins.
-
-    Copied verbatim from sim/macro-smoke/smoke.py so the array (and therefore
-    the result) stays comparable with the 10/10 ns baseline record.
-    """
-    rows = sorted({o[3] >> 2 for o in OPS})
-    pins = [f"WL{r}" for r in range(64)]
-    for p in range(128):
-        pins += [f"BL{p}", f"BLB{p}"]
-    w(".subckt sram_64x128_array " + " ".join(pins) + " VDD VSS")
-    for r in rows:
-        for p in range(128):
-            w(f"Xr{r}c{p} BL{p} BLB{p} WL{r} VDD VSS bitcell_6t")
-    for p in range(128):
-        w(f"Cbl{p} BL{p} VSS {BL_STANDIN_FF}f")
-        w(f"Cblb{p} BLB{p} VSS {BL_STANDIN_FF}f")
-    w(".ends")
 
 
 def gen_klt(clk_high: float, clk_low: float) -> str:
@@ -254,34 +233,19 @@ def gen_klt(clk_high: float, clk_low: float) -> str:
 
 def klt_request(clk_high: float, clk_low: float) -> dict:
     """The klt sim request for one grid point: the ratified 27-corner matrix
-    (derived from sim/lib/corner_matrix.py), one FIND per sampled Q bit, every
-    `.meas ... AT=` time derived from this variant's PERIOD."""
+    (via the shared sim/lib/klt_bench.py skeleton), one FIND per sampled Q
+    bit, every `.meas ... AT=` time derived from this variant's PERIOD."""
     d = derived(clk_high, clk_low)
-    meas = []
-    for i, o in enumerate(OPS):
-        if o[6] is None:
-            continue
-        ts = edge(i, d["PERIOD"]) + d["SAMPLE"]
-        for b in range(32):
-            meas.append({
-                "name": f"q{b}_op{i}",
-                "spice": f".meas tran q{b}_op{i} FIND v(Q[{b}]) AT={ts:g}n",
-                "unit": "V",
-            })
-    return {
-        "netlist": f"../testbench/tb_min_clk_{variant_tag(clk_high, clk_low)}.klt.spice",
-        "engine": "ngspice",
-        "models": {"lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"},
-        "corners": {
-            "process": [{"name": p, "sections": [LIB_SECTION[p]]} for p in PROCESSES],
-            "supply_v": {"vvdd": [float(v) for v in VDDS]},
-            "temperature_c": [int(t) for t in TEMPS],
-        },
-        "analysis": {"kind": "tran", "args": f"0.02n {edge(len(OPS) - 1, d['PERIOD']) + d['PERIOD']:g}n"},
-        "measurements": meas,
-        "netlist_source": "schematic",
-        "options": {"timeout_s": 1500},
-    }
+    meas = q_probes(
+        (f"op{i}", edge(i, d["PERIOD"]) + d["SAMPLE"])
+        for i, o in enumerate(OPS)
+        if o[6] is not None
+    )
+    return base_request(
+        f"../testbench/tb_min_clk_{variant_tag(clk_high, clk_low)}.klt.spice",
+        f"0.02n {edge(len(OPS) - 1, d['PERIOD']) + d['PERIOD']:g}n",
+        meas,
+    )
 
 
 # --- grading -----------------------------------------------------------------
@@ -291,8 +255,8 @@ PASS, FAIL, OPEN = "PASS", "FAIL", "OPEN"
 
 def grade_corner(corner) -> dict:
     """Grade one corner of a report: rebuild every sampled Q word against that
-    corner's own VDD (a bit is defined if within 20% of a rail, the smoke.py
-    rule). A corner klt sim did not measure is OPEN with its klt status named,
+    corner's own VDD (the shared defined-bit rule, sim/lib/klt_bench.py). A
+    corner klt sim did not measure is OPEN with its klt status named,
     never FAIL: an unmeasured corner is bench evidence, not a macro failure."""
     vdd = corner["supply_v"]["vvdd"]
     klt_status = corner.get("status", "?")
@@ -305,16 +269,8 @@ def grade_corner(corner) -> dict:
     for i, o in enumerate(OPS):
         if o[6] is None:
             continue
-        got = 0
-        und = 0
-        for b in range(32):
-            v = vals.get((i, b))
-            if v is None:
-                missing += 1
-                continue
-            if not (v < 0.2 * vdd or v > 0.8 * vdd):
-                und += 1
-            got |= (1 if v > vdd / 2 else 0) << b
+        got, und, unmeasured = read_word([vals.get((i, b)) for b in range(32)], vdd)
+        missing += unmeasured
         und_total += und
         if und or (not missing and got != o[6]):
             bad += 1
@@ -416,20 +372,29 @@ def grade_set(reports) -> int:
     seen_axes = {}  # corner_id -> {"high": [tags], "low": [tags]}: one append
     # per report-axis visit.
     corner_ids = None  # every report must carry the same corner-id set
+    first_tag = None  # the report corner_ids was seeded from (#403)
     sentinels = 0
     for path in reports:
         tag, verdicts = grade_report(path)
         ids = set(verdicts)
         if corner_ids is None:
             corner_ids = ids
+            first_tag = tag
         elif ids != corner_ids:
             # a short corners[] array (e.g. a reduced re-collection patch
-            # run) must be named at its source, not surface later as a
-            # per-corner axis shortfall (#382).
+            # run) must surface here, not later as a per-corner axis
+            # shortfall (#382). Without an expected corner set the code
+            # cannot tell which side is short, so the message names both
+            # reports -- the current tag and the baseline's -- instead of
+            # blaming whichever arrived second (#403).
+            parts = []
+            if missing := sorted(corner_ids - ids):
+                parts.append(f"missing: {missing}")
+            if unexpected := sorted(ids - corner_ids):
+                parts.append(f"unexpected: {unexpected}")
             print(
-                f"ERROR: {tag}: corner set differs from earlier reports"
-                f" (missing: {sorted(corner_ids - ids)},"
-                f" unexpected: {sorted(ids - corner_ids)})",
+                f"ERROR: {tag}: corner set differs from {first_tag}"
+                f" ({'; '.join(parts)})",
                 file=sys.stderr,
             )
             return 1
