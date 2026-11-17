@@ -2,7 +2,9 @@
 """sim/pex/write-margin/compare_records.py -- issue #95.
 
 Compute a per-corner schematic-vs-extracted delta for write margin (write
-trip voltage) from two sim/lib/run_corner_sweep.sh evidence records --
+trip voltage) from two evidence records minted by the since-retired
+`sim/lib/run_corner_sweep.sh` (removed at the #230 deck-mode cutover;
+compare itself only reads committed records and still works) --
 replicating, by hand, the same delta shape `klt pex`'s own JSON report
 produces for the access-time measurements in ../access-time/reports/ (see
 docs/cli/pex.md's `delta[]` schema), since `klt pex` itself cannot run

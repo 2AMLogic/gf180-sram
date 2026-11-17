@@ -2,10 +2,12 @@
 
 This directory holds the ngspice testbenches and simulation results for the
 four measurements `spec/sram.md`'s Characterization section ratifies (read
-SNM, hold SNM, write margin, read/write access time), plus the corner-sweep
-runner and evidence-record convention that ties a testbench to a recorded
-result. Per `CLAUDE.md`: "no claim without a testbench... `sim/` results are
-append-only evidence."
+SNM, hold SNM, write margin, read/write access time), plus the
+evidence-record convention that ties a testbench to a recorded result.
+Full grids run through `sim/lib/deck_adapter.py` and `klt sim` (see
+"Staged migration to `klt sim` deck mode" below); the retired local
+launchers' records are the committed evidence. Per `CLAUDE.md`: "no claim
+without a testbench... `sim/` results are append-only evidence."
 
 ## Testbench inventory
 
@@ -45,9 +47,11 @@ sim/
       <record-id>.md            # append-only summary record
 ```
 
-- **`<record-id>`** = `<YYYYMMDD>-<HHMMSS>-<short-git-sha>`, minted fresh by
-  `sim/lib/run_corner_sweep.sh` on every invocation. A re-run never edits an
-  existing record; it mints a new one. Nothing under `corners/`,
+- **`<record-id>`** = `<YYYYMMDD>-<HHMMSS>-<short-git-sha>`, minted fresh on
+  every sweep invocation. Every record currently committed under
+  `sim/*/records/` was minted by `sim/lib/run_corner_sweep.sh`, the local
+  corner-sweep launcher the #230 deck-mode cutover retired; a re-run never
+  edits an existing record, it mints a new one. Nothing under `corners/`,
   `netlist-snapshots/`, or `records/` is ever edited or deleted after being
   committed (see "Append-only rule" below).
 - **`<corner-id>`** = `<process>_<temp>c_<supply>v`, e.g. `ff_-40c_2.97v`,
@@ -73,8 +77,9 @@ testbenches sweep exhaustively, not as a subset):
 
 3 x 3 x 3 = 27 corners, every one of them run for every record -- a corner
 that fails to converge or measure is recorded as an **open result** (see
-each testbench's own comments and `sim/lib/run_corner_sweep.sh`'s record
-generation), never silently dropped from the set, per `spec/sram.md`'s
+each testbench's own comments and the record-generation convention in
+"Summary record format" below), never silently dropped from the set, per
+`spec/sram.md`'s
 Signoff definition.
 
 `spec/sram.md`'s "Corner set" section computed this same product as "9
@@ -86,9 +91,9 @@ records are never edited after the fact (see "Append-only rule" below).
 `process` labels `ff`/`tt`/`ss` map onto the PDK model file's own `.LIB`
 section names as `ff`->`ff`, `tt`->`typical`, `ss`->`ss` (gf180mcu's
 `sm141064.ngspice` calls its nominal corner "typical", not "tt" --
-`sim/lib/run_corner_sweep.sh` does this mapping so every record's
-`<corner-id>` still reads `tt_...`, matching the ratified spec's own
-vocabulary).
+`sim/lib/corner_matrix.py`'s `LIB_SECTION` owns this mapping, so every
+record's `<corner-id>` still reads `tt_...`, matching the ratified spec's
+own vocabulary).
 
 ## Pinned PDK revision
 
@@ -106,23 +111,38 @@ evidence; a re-run against `gf180mcuD` would reproduce the same values).
 `sim/lib/pdk_env.sh` resolves the installed PDK (via `PDK_ROOT`+`PDK`,
 `GF180_PDK_PATH`, or a standard install prefix -- same resolution order
 `design/xschemrc` already established) and reports the resolved
-`open_pdks` version at the top of every `run_corner_sweep.sh` invocation, so
-a drifted install is visible rather than silent: `pdk_env.sh` also **fails**
+`open_pdks` version whenever it is sourced (the retired
+`run_corner_sweep.sh` launcher printed it at the top of every invocation;
+`sim/pex/*/generate.sh` still do), so a drifted install is visible rather
+than silent: `pdk_env.sh` also **fails**
 (non-zero, naming found vs pinned revision) if the resolved tree's revision --
 read from the `/versions/<sha>/` path component, else a `SOURCES` file -- is
 not the pin, so a leftover `~/.volare` tree cannot be used silently. Reuse this same pin for
 consistency unless a documented reason requires bumping it.
 
-## Staged migration to `klt sim` deck mode (#230, in progress)
+## Staged migration to `klt sim` deck mode (#230, complete)
 
-`run_corner_sweep.sh` and the `run_mc_campaign.py` process pool are a
-hand-launched local grid, which dispatch workers must not run (host policy:
-grids go through `klt sim`). The four characterization families carry their own
-`.control` blocks (`wrdata`, bisection) and must run unmodified for comparability
-with the append-only records, so the migration target is `klt sim`'s
-**precomposed-deck** transport (`decks` request), not reshaping the testbenches.
+`run_corner_sweep.sh` (a serial 3x3x3 bash loop of `ngspice -b`) and the
+`run_mc_campaign.py` process pool were a hand-launched local grid, which
+dispatch workers must not run (host policy: grids go through `klt sim`).
+They were **retired at cutover** (the operator ruling of 2026-10-19's final
+gate): `sim/lib/run_corner_sweep.sh` and the pool/CLI in
+`sim/lib/run_mc_campaign.py` are gone as of the cutover PR, which the
+operator ruling's evidence requirements had gated on (a) the full parity
+receipts below and (b) the evidence-environment decision --
+[`spec/environment-pin-decision.md`](../spec/environment-pin-decision.md)
+(operator ruling, 2026-11-17: future campaigns run pinned). The four
+characterization families carry their own `.control` blocks (`wrdata`,
+bisection) and must run unmodified for comparability with the append-only
+records, so the migration target was `klt sim`'s **precomposed-deck**
+transport (`decks` request), not reshaping the testbenches. What survives
+of the retired MC launcher is its identity library -- `run_mc_campaign.py`
+now holds only `derive_seed`/`build_corner_inc`/the `RESULT:` grammar
+(imported by `deck_adapter.py`, so every fleet deck stays byte-identical
+to what the pool staged); running it as a CLI prints a tombstone that
+points here.
 
-**Ready (offline):** `sim/lib/deck_adapter.py`
+**The adapter (offline stageable, live-verified):** `sim/lib/deck_adapter.py`
 
 ```bash
 sim/lib/deck_adapter.py families
@@ -132,15 +152,16 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
   --request /tmp/stage/request.json                             # caller-owned grading
 ```
 
-* `build` stages the same per-corner scratch the launcher composes (testbench,
-  generated `corner.inc`, DUT netlist) and writes a deck-list request. The only
+* `build` stages the same per-corner scratch the retired launcher composed
+  (testbench, generated `corner.inc`, DUT netlist) and writes a deck-list
+  request. The only
   deck-byte change is `@@REPO_ROOT@@` -> `.` (deck mode refuses absolute includes);
   source and composed sha256 are in the request's `x_gf180_sram_adapter` block.
   `--corner process:temp:vdd` (repeatable) bounds the request to those ratified
   corners instead of all 27 -- how a parity run is kept to one corner. Only a
   corner the spec already ratifies can be named, and the selection is recorded
   in the request so `reduce` expects exactly it.
-* `reduce` re-applies the launcher's grading (`RESULT:`/`RESULT-ERROR:`,
+* `reduce` re-applies the retired launcher's grading (`RESULT:`/`RESULT-ERROR:`,
   `snm_extract.py`). Deck mode reports process success only: exit 0 is never a
   PASS, and missing corners, duplicate/unexpected ids, missing declared outputs
   and timeouts all come back `OPEN`. Pass `--request <the file build wrote>` to
@@ -149,14 +170,15 @@ sim/lib/deck_adapter.py reduce read-snm <klt-sim-report.json> \
   reports no `deck_sha256` is itself a coverage error -- so deck drift, or a
   deck whose bytes cannot be checked, is a coverage error rather than a
   silent pass.
-* `mc-build` / `mc-reduce` are the Monte Carlo counterpart for the
-  `run_mc_campaign.py` pool: one deck per (corner, kind, sample) -- two (L/R)
-  per sample for the `snm-pair` SNM families -- with `corner.inc` bytes from
-  `run_mc_campaign.build_corner_inc` and seeds from its `derive_seed` (imported,
-  not re-derived; the request records every unit's seed and `mc-reduce` refuses
-  a request whose seeds drifted). `mc-reduce` regroups a deck report into the
-  per-seed `(index, results, errors)` tuples `run_batch`/`run_batch_pair`
-  return plus the `klt yield` sample-set measurement blocks. Same fail-closed
+* `mc-build` / `mc-reduce` are the Monte Carlo counterpart (what the retired
+  `run_mc_campaign.py` pool used to do): one deck per (corner, kind, sample)
+  -- two (L/R) per sample for the `snm-pair` SNM families -- with
+  `corner.inc` bytes from `run_mc_campaign.build_corner_inc` and seeds from
+  its `derive_seed` (imported, not re-derived; the request records every
+  unit's seed and `mc-reduce` refuses a request whose seeds drifted).
+  `mc-reduce` regroups a deck report into the per-seed `(index, results,
+  errors)` tuples the pool's `run_batch`/`run_batch_pair` returned, plus
+  the `klt yield` sample-set measurement blocks. Same fail-closed
   rules as `reduce`, including the deck check: every unit's `deck_sha256`
   must equal the request's composed deck, and a unit that reports none is
   itself a coverage error; exit 0 is never a PASS. Example:
@@ -231,30 +253,31 @@ arrays.
    draws under the pin; the 20261116 receipt attributes every such delta to
    the pin by a committed local A/B (the committed MC campaign ran
    unpinned) -- an evidence-environment question, not a transport gap.
-   `run_mc_campaign.py` and its pool are untouched. The mechanical
-   comparison lives in `sim/lib/parity_compare.py` (corner and `mc` modes,
-   + `test_parity_compare.py` offline fixtures), driven per family with the
-   record bindings from `RECORD_CLAIMS` and the MC sample-set bindings from
-   `MC_SAMPLE_SETS` in `render_signoff_table.py`.
-3. *Cutover* -- **parity-complete; two decisions gate the switch.** Retiring
-   `run_corner_sweep.sh`/the MC pool, switching defaults, and updating the
+   `run_mc_campaign.py`'s pool is retired (cutover, below); the identity
+   functions the receipts asserted with live on in that module. The
+   mechanical comparison lives in `sim/lib/parity_compare.py` (corner and
+   `mc` modes, + `test_parity_compare.py` offline fixtures), driven per
+   family with the record bindings from `RECORD_CLAIMS` and the MC
+   sample-set bindings from `MC_SAMPLE_SETS` in `render_signoff_table.py`.
+3. *Cutover* -- **done.** Retiring `run_corner_sweep.sh`/the MC pool,
+   switching the full-grid default to the deck-mode path, and rewriting the
    cold-start section below were gated on "the full MC matrix has its own
-   receipt", which the 2026-11-16 receipt now is. Two things were called
-   out before the switch itself: (a) the evidence-environment decision the
-   20261116 receipt records -- deterministic evidence was taken with
-   compatibility modes, MC evidence unpinned, and future campaigns must
-   standardize on one -- **decided** (operator ruling, 2026-11-17): future
-   campaigns, deterministic and Monte Carlo, run under the pinned `hs a`
-   environment, recorded as
+   receipt" (the 2026-11-16 receipt), on (a) the evidence-environment
+   decision -- **decided** (operator ruling, 2026-11-17): future campaigns,
+   deterministic and Monte Carlo, run under the pinned `hs a` environment,
+   recorded as
    [`spec/environment-pin-decision.md`](../spec/environment-pin-decision.md)
    (the 2026-09-21 MC sample-sets are annotated unpinned by
    `sim/deck-parity/20261117-mc-unpinned-environment-annotation.md` and are
-   re-qualified under the pin via #272); and (b) the operator ruling's own
-   final gate ("equivalent measurements and supported execution are
-   established"), which the receipts now evidence -- the retirement PR
-   should cite both receipts and the decision. Single-point probes stay
-   local. Until cutover lands, the cold-start section below is the
-   historical procedure and is not to be run on dispatch workers.
+   re-qualified under the pin via #272) -- and on (b) the operator
+   ruling's own final gate ("equivalent measurements and supported
+   execution are established"), evidenced by the four receipts above. The
+   retirement PR cites `sim/deck-parity/20261115-full-grid.md`,
+   `sim/deck-parity/20261116-mc-9corner.md` and the decision record.
+   Single-point probes stay local (see cold-start). The retired launcher's
+   committed records are untouched, append-only evidence; minting *new*
+   records (deterministic or MC) through the deck-mode path is future
+   work, and the MC re-qualification under the pin is #272's.
 
 The compat-mode history, measured rather than assumed: the committed 2026-08
 deterministic logs carry `Note: Compatibility modes selected: hs a`; the
@@ -284,18 +307,24 @@ input, not the option, is the pin.
 
 ## The pinned ngspice environment (`.spiceinit`, issue #338)
 
-Every ngspice invocation in this repo -- the `klt sim` deck-mode path
-(`sim/lib/deck_adapter.py`), `sim/lib/run_corner_sweep.sh`, and the
-`sim/lib/run_mc_campaign.py` pool -- stages the same `.spiceinit` into the
-run directory before the engine starts, so the environment a measurement ran
-under is a property of the repo rather than of whichever host executes it.
-ngspice reads `.spiceinit` from its current working directory, and all three
-paths set that cwd to a per-unit scratch directory; without the staged file
-the mode in force came from the executing host's `~/.spiceinit` -- the
-committed 2026-08 corpus's corner logs carry
-`Note: Compatibility modes selected: hs a`, while a 2026-11 fleet deck-mode
-run of the same corner carried `Note: No compatibility mode selected!`
-(see `sim/deck-parity/`).
+Every ngspice invocation in this repo stages the same `.spiceinit` into the
+run directory before the engine starts, so the environment a measurement
+runs under is a property of the repo rather than of whichever host executes
+it. Since the #230 cutover retired the two local launchers, the one
+execution path is the `klt sim` deck-mode route (`sim/lib/deck_adapter.py`),
+which stages the file into every unit directory as a declared deck input;
+a hand-composed local single-point probe stages it via
+`deck_adapter.py spiceinit` (see cold-start). Historically the retired
+`run_corner_sweep.sh` and `run_mc_campaign.py` pool staged the same bytes,
+and `sim/lib/test_deck_adapter.py` executed the launcher against a fake
+ngspice shim to assert all three paths stayed byte-identical; the deck
+staging and the CLI bytes remain asserted today. ngspice reads `.spiceinit`
+from its current working directory, and every path sets that cwd to a
+per-unit scratch directory; without the staged file the mode in force came
+from the executing host's `~/.spiceinit` -- the committed 2026-08 corpus's
+corner logs carry `Note: Compatibility modes selected: hs a`, while a
+2026-11 fleet deck-mode run of the same corner carried `Note: No
+compatibility mode selected!` (see `sim/deck-parity/`).
 
 Two facts make the staged file load-bearing:
 
@@ -310,11 +339,10 @@ Two facts make the staged file load-bearing:
   option stays unset in every request this repo emits.
 
 The pinned lines -- single source of truth `SPICEINIT_TEXT` in
-`sim/lib/deck_adapter.py`; `run_corner_sweep.sh` writes the same bytes via
-`deck_adapter.py spiceinit`, the MC pool imports the constant, and
-`sim/lib/test_deck_adapter.py` asserts the three paths stay byte-identical
-(the launcher path is executed against a fake ngspice shim, the MC scratch
-dirs captured at call time):
+`sim/lib/deck_adapter.py`; both builders stage it as a per-unit deck input
+and record its sha256 in the request, and `sim/lib/test_deck_adapter.py`
+asserts the staged bytes and the `spiceinit` CLI stdout stay identical to
+the constant:
 
 | Line | Why |
 |---|---|
@@ -330,9 +358,14 @@ value reproduced exactly).
 
 ## Cold-start invocation
 
-Prerequisites: `ngspice` and `python3` on `PATH`; a gf180mcu PDK install
-(ciel-installed, or any location `sim/lib/pdk_env.sh` resolves -- see that
-file's header for the exact resolution order).
+Prerequisites: `klt` (klayout-tools) and `python3` on `PATH`; a gf180mcu
+PDK install resolvable by `sim/lib/pdk_env.sh` (ciel-installed, or any
+location it resolves -- see that file's header for the exact resolution
+order). Since the #230 cutover, full grids go through `klt sim` deck mode
+on the batch fleet -- never a hand-launched local `ngspice -b` loop (host
+policy). The migrated path's measurement parity against the committed
+records is evidenced by `sim/deck-parity/` (all 27 deterministic corners x
+5 families, and the full committed 9-corner Monte Carlo matrix).
 
 ```bash
 # 1. Install/point at the pinned PDK revision via ciel 2.6.1 (use
@@ -342,32 +375,49 @@ file's header for the exact resolution order).
 export PDK_ROOT="$HOME/.ciel"        # parent of gf180mcuD/ -- adjust to your install
 export PDK=gf180mcuD
 
-# 2. From a clean checkout, run any one testbench across the full 27-corner
-#    matrix (each of the 5 testbenches below takes well under a minute; a
-#    single-bitcell circuit has no reason to be slow):
-./sim/lib/run_corner_sweep.sh sim/read-snm      sim/read-snm/testbench/tb_read_snm.spice           "snm:read_snm_sweep.txt:read_snm"   "spec/sram.md Characterization -- read SNM"
-./sim/lib/run_corner_sweep.sh sim/hold-snm      sim/hold-snm/testbench/tb_hold_snm.spice           "snm:hold_snm_sweep.txt:hold_snm"   "spec/sram.md Characterization -- hold SNM"
-./sim/lib/run_corner_sweep.sh sim/write-margin  sim/write-margin/testbench/tb_write_margin.spice   "direct"                            "spec/sram.md Characterization -- write margin (write trip voltage)"
-./sim/lib/run_corner_sweep.sh sim/access-time   sim/access-time/testbench/tb_read_access_time.spice  "direct"                          "spec/sram.md Characterization -- read access time (bit-line differential proxy)"
-./sim/lib/run_corner_sweep.sh sim/access-time   sim/access-time/testbench/tb_write_access_time.spice "direct"                          "spec/sram.md Characterization -- write access time"
+# 2. Stage one full-grid request per family (no --corner: the all-27
+#    default; add --corner process:temp:vdd, repeatable, to bound one):
+mkdir -p /tmp/stage /tmp/out
+for fam in read-snm hold-snm write-margin read-access write-access; do
+  python3 sim/lib/deck_adapter.py build "$fam" \
+    --stage-dir "/tmp/stage/$fam" --request-out "/tmp/stage/$fam/request.json"
+done
 
-# 3. Inspect a corner's raw log or the generated record:
-cat sim/read-snm/corners/<record-id>/tt_25c_3.30v.log
-cat sim/read-snm/records/<record-id>.md
+# 3. Submit the whole grid as one batch set to the fleet (this is the grid
+#    step: it goes through `klt sim`, never a local loop):
+klt sim --batch-set /tmp/stage/*/request.json \
+  --max-in-flight 5 --wait-for-capacity 600 \
+  -o /tmp/out --report-out /tmp/out/batch-set-envelope.json --format json
+
+# 4. Grade each family with the caller-owned reducer (exit 0 is never a
+#    PASS; `overall: recorded` is). With five members the per-family
+#    reports land at /tmp/out/request-<0..4>/report.json -- the family ->
+#    member mapping is in the set envelope's manifest:
+python3 sim/lib/deck_adapter.py reduce <family> /tmp/out/request-<i>/report.json \
+  --request "/tmp/stage/<family>/request.json" \
+  --outdir "/tmp/out/request-<i>" --json-out "/tmp/out/<family>-reduced.json"
+
+# 5. (optional) compare against the committed record mechanically:
+python3 sim/lib/parity_compare.py <family> /tmp/out/<family>-reduced.json \
+  --request "/tmp/stage/<family>/request.json"
 ```
 
-Expected output: each run prints one line per corner
-(`  tt_25c_3.30v: RESULT: read_snm_v = 0.381267;`, etc.), then reports the
-paths it wrote. Every `RESULT: <key>_v = <value>` line is in volts; every
-`RESULT: <key>_s = <value>` line (access time) is in seconds. A corner that
-instead prints `RESULT-ERROR: ...` did not produce a valid measurement --
-that is reported in the generated record as an explicit **open result**, not
-papered over.
+Expected output: step 2 reports `wrote 27 decks` per family; step 4 prints
+one line per corner (`tt_25c_3.30v: recorded {...}`, or the coverage error
+that makes it `OPEN`). Every `RESULT: <key>_v = <value>` line is in volts;
+every `RESULT: <key>_s = <value>` line (access time) is in seconds. A
+corner that produced no valid measurement grades `OPEN` -- reported, never
+silently dropped from the set, per `spec/sram.md`'s Signoff definition.
 
-To run a single testbench/corner by hand (e.g. while iterating on the
-testbench itself), see "ngspice control-language notes" below for the two
-substitutions (`corner.inc`, `@@REPO_ROOT@@`) `run_corner_sweep.sh` performs
-that a bare `ngspice -b tb_*.spice` invocation needs done manually first.
+**Single-point probes stay local** (a debug probe, one operating point):
+`klt sim /tmp/stage/<family>.json --backend local` runs one request's units
+on the host, and `deck_adapter.py build <family> --corner tt:25:3.30`
+bounds a request to one corner first. To drive a testbench completely by
+hand instead (e.g. while iterating on the testbench itself), see "ngspice
+control-language notes" below for the two substitutions (`corner.inc`,
+`@@REPO_ROOT@@`) a bare `ngspice -b tb_*.spice` invocation needs done
+manually first -- and stage the pinned environment into that scratch
+directory: `python3 sim/lib/deck_adapter.py spiceinit > <scratch>/.spiceinit`.
 
 ## Why two of the testbenches don't `.include` the DUT
 
@@ -453,19 +503,22 @@ rather than a clear error):
 `sim/write-margin/testbench/tb_write_margin.spice` and both
 `sim/access-time/testbench/*.spice` files `.include` the DUT via a
 `@@REPO_ROOT@@/design/netlist/bitcell_6t.spice` placeholder, not a
-repo-relative path. `sim/lib/run_corner_sweep.sh` substitutes
-`@@REPO_ROOT@@` with this checkout's absolute path before copying the
+repo-relative path. The retired `sim/lib/run_corner_sweep.sh` substituted
+`@@REPO_ROOT@@` with the checkout's absolute path before copying the
 testbench into each corner's scratch working directory (a `mktemp -d`
 outside the repo tree, so a repo-relative `.include` would not resolve
-there). Running one of these three files directly with a bare
-`ngspice -b tb_*.spice` (bypassing the runner) requires substituting that
-token yourself first, e.g.
+there); `sim/lib/deck_adapter.py`'s builders make the same substitution
+with `.` (deck mode refuses absolute includes, and the DUT netlist is
+staged beside the deck). Running one of these three files directly with a
+bare `ngspice -b tb_*.spice` (a single-point probe, bypassing the adapter)
+requires substituting that token yourself first, e.g.
 `sed "s|@@REPO_ROOT@@|$(pwd)|g" tb_write_margin.spice > /tmp/tb.spice`.
 
 ## Summary record format
 
-Each `records/<record-id>.md` (auto-generated by `run_corner_sweep.sh`)
-carries:
+Each `records/<record-id>.md` (every committed one was auto-generated by
+the retired `run_corner_sweep.sh`; a future re-run mints a new record the
+same way through whatever generator supersedes it) carries:
 
 - **Record ID** -- matches the filename and the corresponding
   `netlist-snapshots/`/`corners/` subdirectory.
@@ -515,34 +568,38 @@ testbench, the bitcell sizing, or the corner itself) gets verified by a
 ## Provenance hygiene in evidence records (issue #109)
 
 Because every record here is committed, published, and append-only, whatever
-a harness writes into one is permanent -- so `run_corner_sweep.sh` and
-`run_mc_campaign.py` never embed this host's absolute filesystem paths (e.g.
-`/Users/<name>/...`, or an agent's `.loom/worktrees/issue-N/...` checkout
-path) into a newly-generated record. This follows the model
+a harness writes into one is permanent -- so the record-generating harnesses
+(historically `run_corner_sweep.sh` and `run_mc_campaign.py`, and any
+generator that supersedes them) never embed this host's absolute filesystem
+paths (e.g. `/Users/<name>/...`, or an agent's `.loom/worktrees/issue-N/...`
+checkout path) into a newly-generated record. This follows the model
 `klt env-provenance` (2AMLogic/klayout-tools,
 `docs/cli/env-provenance.md`) documents -- repo-relative paths for anything
 inside this repo, and *identity, never location* (name + version, no path
 at all) for anything genuinely external, like a PDK install:
 
-- **No env-provenance shim**: `run_mc_campaign.py` builds the `pdk`
-  identity block inline. `klt env-provenance emit` (host/OS/tool-version
-  blocks, `--path` normalisation) does not pin PDK variant/version, so it
-  is not a drop-in for that block.
+- **No env-provenance shim**: `run_mc_campaign.py` (retired at cutover;
+  its committed sample-sets are the pattern) built the `pdk` identity block
+  inline. `klt env-provenance emit` (host/OS/tool-version blocks,
+  `--path` normalisation) does not pin PDK variant/version, so it is not a
+  drop-in for that block -- a future MC record minter reproduces the block
+  the same way.
 - **PDK identity, not location**: every `**PDK**:`/`pdk` field records the
   PDK variant name and its resolved `open_pdks` version (e.g. `gf180mcuD`,
   `f6eeac7...`), never the absolute install path (`~/.ciel/gf180mcuD` on
   one host, something else on another) -- the same `{name, source, version}`
   shape `klt extract`/`klt pex`'s own `provenance.pdk` block already uses.
-- **`klt yield`'s echoed `samples` field**: `run_mc_campaign.py` invokes
-  `klt yield` from inside the `yield-reports/` directory (`cwd`) with a
-  report-relative sample-set path (`../samples/<id>.json`), so the
+- **`klt yield`'s echoed `samples` field**: the retired `run_mc_campaign.py`
+  invoked `klt yield` from inside the `yield-reports/` directory (`cwd`)
+  with a report-relative sample-set path (`../samples/<id>.json`), so the
   `samples: ...` line `klt yield` echoes into its own JSON/text report is
   relative to the report itself. The `klt signoff` grader (0.6.0+) resolves
   that path beside the report before its own working directory, so the
   cited report verifies from any grader working directory (issue #160).
-  Reports minted earlier carry a repo-relative form and are kept
-  append-only; the `<id>.relpath.{json,txt}` pairs are re-renders of the
-  same sample documents in the report-relative form.
+  Any future MC record minter must keep this invocation shape. Reports
+  minted earlier carry a repo-relative form and are kept append-only; the
+  `<id>.relpath.{json,txt}` pairs are re-renders of the same sample
+  documents in the report-relative form.
 - **Documented exceptions** (absolute by necessity, never committed as a
   recorded value): the `@@REPO_ROOT@@` substitution above (used only inside
   a `mktemp -d` scratch directory outside the repo, never written into a
@@ -596,24 +653,42 @@ new id and never edits an existing record.
 
 ### Running a campaign
 
-`sim/lib/run_mc_campaign.py` drives it (`--help` documents every flag). The
-three campaigns whose records are committed here were produced by:
+The three campaigns whose records are committed here were produced by the
+retired local pool (`sim/lib/run_mc_campaign.py --experiment ...`); each
+committed record's own "Reproduce" section carries its exact command line,
+kept as the historical provenance of that evidence. Since the #230 cutover
+the generator is the deck-mode path, proven end to end by
+`sim/deck-parity/20261115-mc-2corner.md` and
+`sim/deck-parity/20261116-mc-9corner.md` (the latter is the full committed
+9-corner matrix, 13,680 units):
 
 ```bash
-C9="--corner ff:-40:2.97 --corner ff:25:3.30 --corner ff:125:2.97 \
-    --corner tt:-40:3.63 --corner tt:25:3.30 --corner tt:125:2.97 \
-    --corner ss:-40:3.63 --corner ss:25:2.97 --corner ss:125:3.63"
+# one request per family -- at least two --corner points (never
+# nominal-only); each family's own negative-control parameters are in its
+# committed record's Reproduce block
+python3 sim/lib/deck_adapter.py mc-build read-snm \
+  --corner tt:25:3.30 --corner ff:125:2.97 \
+  --n 200 --n-control 4 --n-nc 100 --nc-mismatch-scale 20 \
+  --seed 20260817 --stage-dir /tmp/mc/read-snm --request-out /tmp/mc/read-snm.json
 
-./sim/lib/run_mc_campaign.py --experiment read-snm \
-  --testbench sim/read-snm/testbench/tb_read_snm.spice \
-  --mode snm-pair:read_snm_sweep.txt:read_snm --key read_snm_v \
-  $C9 --n 200 --n-control 4 --n-nc 100 --nc-mismatch-scale 20 \
-  --seed 20260817 --claim "spec/sram.md Characterization -- read SNM (Monte Carlo ...)"
+# the grid goes to the batch fleet as one batch set (never a local pool):
+klt sim --batch-set /tmp/mc/read-snm.json /tmp/mc/hold-snm.json \
+  /tmp/mc/write-margin.json --wait-for-capacity 600 \
+  -o /tmp/mc/out --report-out /tmp/mc/out/envelope.json --format json
+
+# caller-owned grading (seed identity, deck bytes, OPEN-never-PASS):
+python3 sim/lib/deck_adapter.py mc-reduce read-snm /tmp/mc/read-snm.json \
+  /tmp/mc/out/request-0/report.json --outdir /tmp/receipt/read-snm \
+  --json-out /tmp/receipt/read-snm/reduced.json
 ```
 
-(the hold-SNM and write-margin invocations differ only in testbench, mode,
-key, and negative-control defect — each committed record's own "Reproduce"
-section carries its exact command line).
+`mc-reduce`'s output carries the `klt yield` sample-set measurement blocks,
+so a future record minter can build a sample-set document, run `klt yield`
+on it (from inside the report directory, report-relative samples path --
+see "Provenance hygiene" above) and mint the next `Supersedes` record.
+Minting new MC records under the pinned environment (re-qualifying the
+2026-09-21 sample-sets, which were taken unpinned) is #272's
+re-qualification, deliberately not done by the cutover.
 
 ### Which corners, and why not all of them
 

@@ -79,11 +79,16 @@ issue yet.
 - **Macro LEF abstract** (#199). Done when `klt lef-abstract` emits a LEF with
   the ratified 109 pins and `klt socket-check` is clean. Needs the macro GDS
   (Now item 1); whether it should also wait for the macro LVS verdict is open.
-- **Launcher retirement** (#230). `sim/lib/deck_adapter.py` and its offline
-  tests are done. Done when one corner per family through `klt sim` deck mode
-  matches the committed record, then `run_corner_sweep.sh` and the Monte Carlo
-  pool are removed. The tool-side prerequisite klayout-tools#4109 is closed;
-  the parity run itself is held for an operator decision.
+- **Launcher retirement** (#230). Done at the 2026-11-17 cutover:
+  `sim/lib/deck_adapter.py` + `parity_compare.py` are done, the parity
+  receipts landed for the full 27-corner deterministic grid
+  (`sim/deck-parity/20261115-full-grid.md`) and the full 9-corner MC matrix
+  (`sim/deck-parity/20261116-mc-9corner.md`), the environment decision is
+  `spec/environment-pin-decision.md`, and `run_corner_sweep.sh` and the
+  Monte Carlo pool are removed (`run_mc_campaign.py` reduced to the
+  identity library the adapter imports). Residue: the pex write-margin
+  by-hand workflow's sweep step lost its launcher and is tracked for a
+  deck-mode port (#437).
 - **Re-qualify reference records under `f6eeac7`** (#272). Done when each of the
   five claims and three Monte Carlo families has a new record with a
   **Supersedes** line and `sim/signoff-summary.md` is regenerated. After #230.

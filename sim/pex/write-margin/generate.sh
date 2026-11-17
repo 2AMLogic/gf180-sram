@@ -12,7 +12,30 @@
 #
 # Run from the repo root:
 #     ./sim/pex/write-margin/generate.sh
+#
+# RETIRED CONSUMER (2026-11-17, #230 cutover): step 2 drove the
+# characterization sweep launcher `sim/lib/run_corner_sweep.sh`, which was
+# retired once the deck-mode parity receipts covered the five ratified
+# families -- receipts that do NOT cover this workflow's two testbenches.
+# Until a verified deck-mode port of these by-hand legs exists (#437), this
+# script refuses up front rather than half-running. The
+# committed records, deltas and conclusions stay valid, append-only
+# evidence of the workflow as it existed. See sim/pex/README.md and
+# sim/README.md "Staged migration to `klt sim` deck mode".
 set -euo pipefail
+
+cat >&2 <<'EOF'
+sim/pex/write-margin/generate.sh: interrupted at the #230 deck-mode cutover.
+
+Step 2 of this workflow drove sim/lib/run_corner_sweep.sh, which has been
+retired; no deck-mode parity receipt covers this workflow's testbenches
+yet, so there is no verified replacement path to run here. The committed
+records under sim/pex/write-margin/ remain valid, append-only evidence.
+
+See sim/pex/README.md ("Regeneration is currently interrupted") and
+sim/README.md "Staged migration to `klt sim` deck mode".
+EOF
+exit 2
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT"

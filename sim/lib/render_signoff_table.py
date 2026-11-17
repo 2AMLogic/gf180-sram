@@ -2,8 +2,9 @@
 """Render an explicit per-corner, per-metric PASS/FAIL signoff table.
 
 Closes the one remaining gap the 2026-08-17 curator pass on issue #25
-identified against the five append-only evidence records `run_corner_sweep.sh`
-already produced under `sim/*/records/` (read SNM, hold SNM, write margin,
+identified against the five append-only evidence records the (since-retired,
+#230 cutover) `run_corner_sweep.sh` launcher produced under `sim/*/records/`
+(read SNM, hold SNM, write margin,
 read access time, write access time -- all covering the ratified
 process x temperature x voltage PVT matrix, `spec/sram.md` "Corner set",
 27 distinct corner points): those records list raw measured values plus a
@@ -51,9 +52,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 # voltage. Imported from its single owner (#331), never re-derived here: the
 # "Note on corner count" paragraph below renders the axis product into the
 # committed sim/signoff-summary.md, so a private copy would let that artifact
-# keep asserting a stale product after an axis change. Same order
-# sim/lib/run_corner_sweep.sh iterates, so every record's corner ordering
-# already matches this.
+# keep asserting a stale product after an axis change. Same order the
+# retired `run_corner_sweep.sh` launcher iterated (and `deck_adapter.py`
+# stages), so every record's corner ordering already matches this.
 from corner_matrix import PROCESSES, TEMPS, VDDS, corner_ids  # noqa: E402
 from repo_root import find_repo_root  # noqa: E402 (path-injected sibling import)
 
@@ -306,9 +307,12 @@ def main() -> int:
     lines.append(
         f"**Note on corner count**: the table below has {len(CORNER_ORDER)}"
         " rows, one per distinct `process x temperature x voltage`"
-        " combination actually swept by `sim/lib/run_corner_sweep.sh`"
-        f" (`{len(PROCESSES)} x {len(TEMPS)} x {len(VDDS)} ="
-        f" {len(CORNER_ORDER)}`), matching every one of the five source"
+        " combination in the ratified corner matrix"
+        f" `sim/lib/corner_matrix.py` (`{len(PROCESSES)} x {len(TEMPS)} x"
+        f" {len(VDDS)} = {len(CORNER_ORDER)}`; the committed records were"
+        " swept by the `run_corner_sweep.sh` launcher that #230's deck-mode"
+        " cutover retired, over this same matrix), matching every one of the"
+        " five source"
         " records above (each has exactly this many `- **<corner-id>**:`"
         " rows) and `spec/sram.md`'s \"Corner set\" section. That section"
         " computed the same product as \"9 corners\" until #53 corrected"

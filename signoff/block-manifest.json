@@ -32,15 +32,15 @@
     },
     "8": {
       "file": "measurements/characterization.signoff.json",
-      "content_hash": "sha256:30594ad1284d3973c7f86f4555e977917882db4f2d3e025ef00d469d618c55d9"
+      "content_hash": "sha256:87092e5a162ddc82ec535db0e5115493891c45459fccc05e17796a210e49770f"
     },
     "9": {
       "file": "sim/testbenches.signoff.json",
-      "content_hash": "sha256:8bde049a965d1b70d0d361c96a771ca6ae65666c758a1ef3c554f6edba2b7c25"
+      "content_hash": "sha256:2118e1a735f9ceb1c78b4a5b99e2f92a4218fa622709cc6b427d4b5edf90cc01"
     },
     "10": {
       "file": "repo-hygiene.signoff.json",
-      "content_hash": "sha256:1c73d53d7a80f1d3b424843c7831dc01622822e71bfa5e8fae1b4133610fdf9f"
+      "content_hash": "sha256:cbdc19640967477e8c38039403e5ccbf86b2e48d69ed7a14533689937c80b2b3"
     },
     "11": [
       {
