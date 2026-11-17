@@ -19,7 +19,7 @@ artifacts -- none of the ratified #24 testbench sources were modified:
 | --- | --- | --- |
 | Write access time | `klt pex`-native (`access-time/`) | **Closed** -- genuine 27-corner schematic-vs-extracted delta, `status: pass`, `delta` non-empty, `reference_netlist` names the real DUT. |
 | Read access time | `klt pex`-native (`access-time/`) | **Closed** -- same, 27/27 corners. |
-| Write margin (write trip voltage) | By-hand extraction workflow (`write-margin/`) | **Closed** -- `klt pex` itself cannot run this testbench's bisection search (no `.meas`-only equivalent), so this replicated its intent by hand: `klt extract --parasitics` + `sim/lib/run_corner_sweep.sh` run twice (schematic SUBCKT vs extracted netlist), diffed per corner. 27/27 corners, genuine non-vacuous delta. (The sweep launcher was retired at the #230 cutover; regeneration is interrupted pending a deck-mode port -- see the note below.) |
+| Write margin (write trip voltage) | By-hand extraction workflow (`write-margin/`) | **Closed** -- `klt pex` itself cannot run this testbench's bisection search (no `.meas`-only equivalent), so this replicated its intent by hand: `klt extract --parasitics` + the since-retired `sim/lib/run_corner_sweep.sh` run twice (schematic SUBCKT vs extracted netlist), diffed per corner. 27/27 corners, genuine non-vacuous delta. (Regeneration now runs through the deck-mode path since #437 -- see the regeneration note below; the parity receipt against the launcher-era records is still pending an operator-authorized fleet run.) |
 | Read SNM / hold SNM | N/A | **No PEX-compatible path exists** -- structural, not a tooling gap; see "read-snm/hold-snm: no PEX-compatible path" below. |
 
 Issue #106 re-ran every measurement above against the post-issue-#103
