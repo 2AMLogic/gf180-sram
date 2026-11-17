@@ -87,10 +87,12 @@ the rule, because committing all 135 engine stdout streams would add ~2 MB of
 raw stream that the graded `reduced.json` already summarises. The full-grid
 receipt predates the `corners[].result_lines` clause specifically (#374
 added that clause after the receipt was committed) and is exempt from it
-only: its committed `reduced.json` files carry no `result_lines`, so its
-families' graded numbers are not re-derivable from committed bytes -- the
-rule's other clauses (the five core files, the per-corner `corner.inc`, the
-committed SNM sweeps, the conditional `stdout.log`) it satisfies.
+only: its committed `reduced.json` files carry no `result_lines`, so the
+three `RESULT:`-emitting families' graded numbers are not re-derivable from
+committed bytes (the two SNM families stay re-derivable via their committed
+sweeps, as above) -- the rule's other clauses (the five core files, the
+per-corner `corner.inc`, the committed SNM sweeps, the conditional
+`stdout.log`) it satisfies.
 
 **MC receipts do not commit one sweep per unit** (a rule that does not
 scale): one SNM sweep pair-side is ~22 KB, so per-unit sweeps would have been
