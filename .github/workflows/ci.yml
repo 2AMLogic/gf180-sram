@@ -5,9 +5,10 @@ name: CI
 # (T1 checklist item 10, issue #28). Six jobs run here:
 #
 #   harness                    -- `npm run check:ci`: the pure-Python unit
-#                                 tests under sim/lib/ (the extraction and
-#                                 campaign math the ngspice testbenches feed)
-#                                 plus the Loom guard-hook tests
+#                                 tests (mostly under sim/lib/, the extraction
+#                                 and campaign math the ngspice testbenches
+#                                 feed, plus sim/access-power/ and
+#                                 scripts/ci/) plus the Loom guard-hook tests
 #                                 (`npm run test:guards`).
 #   evidence-record format     -- scripts/ci/check-evidence-format.sh: repo
 #                                 hygiene (per-directory READMEs, no raw
