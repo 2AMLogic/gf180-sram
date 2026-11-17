@@ -494,12 +494,17 @@ def receipt_docs(tracked: set[str]) -> list[str]:
     )
 
 
-def ungated_receipt_headings(doc_text: str) -> list[str]:
+def ungated_receipt_headings(doc_text: str) -> list[tuple[str, str]]:
     """Headings a ``| File | What |`` table sits under in a receipt doc
     that the receipt files gate does NOT gate (issue #372). The table
     under such a heading is invisible to check 7; the caller warns, it
-    does not fail. Returns the nearest heading line per offending table
-    (empty string when the table has no preceding heading at all).
+    does not fail. Returns one ``(heading, reason)`` pair per offending
+    table -- the nearest heading line (empty string when the table has no
+    preceding heading at all) and why the row is ungated (issue #415):
+    :data:`UNGATED_REASON_GRAMMAR` when the heading itself does not match
+    the gated grammar, :data:`UNGATED_REASON_CONSUMED` when the heading
+    is fine but the section's single table slot is already taken, so the
+    row is a second table the parser never consumed.
 
     Gated-ness is decided by :func:`walk_files_table_sections` itself, not
     re-derived: every ``| File | What |`` header row whose line index the
@@ -517,7 +522,7 @@ def ungated_receipt_headings(doc_text: str) -> list[str]:
         for _, header_line, _ in walk_files_table_sections(doc_text)
         if header_line >= 0
     }
-    unmatched: list[str] = []
+    unmatched: list[tuple[str, str]] = []
     for i, line in enumerate(lines):
         stripped = line.strip()
         if not stripped.startswith("|"):
@@ -533,11 +538,33 @@ def ungated_receipt_headings(doc_text: str) -> list[str]:
             if candidate.startswith("#"):
                 heading = candidate
                 break
-        unmatched.append(heading)
+        if FILES_TABLE_HEADING_RE.match(heading):
+            reason = UNGATED_REASON_CONSUMED
+        else:
+            reason = UNGATED_REASON_GRAMMAR
+        unmatched.append((heading, reason))
     return unmatched
 
 
-def ungated_files_table_warning(doc: str, heading: str) -> str:
+# Why a "| File | What |" header row is ungated (issue #415): the nearest
+# heading does not match the gated heading grammar ("grammar"), or the
+# heading is fine but the section's single table slot is already consumed
+# ("consumed" -- a second table in one section).
+UNGATED_REASON_GRAMMAR = "grammar"
+UNGATED_REASON_CONSUMED = "consumed"
+
+
+def ungated_files_table_warning(doc: str, heading: str, reason: str) -> str:
+    if reason == UNGATED_REASON_CONSUMED:
+        return (
+            f'ungated receipt table in {doc}: a second "| File | What |" '
+            f"table sits under heading {heading!r}, which does match the "
+            "gated heading grammar -- but only the section's first table "
+            "is checked by the receipt files gate, so this one is NOT "
+            "checked. Split it under its own '## Files in `<dir>/`' "
+            "heading, or document the artifacts in prose if they are not "
+            "a committed-bytes inventory"
+        )
     return (
         f'ungated receipt table in {doc}: a "| File | What |" table sits '
         f"under heading {heading!r}, which does not match the gated "
@@ -556,8 +583,8 @@ def check_ungated_receipt_tables(tracked: set[str], warnings: list[str]) -> None
             text = (REPO_ROOT / doc).read_text(encoding="utf-8")
         except OSError:
             continue
-        for heading in ungated_receipt_headings(text):
-            warnings.append(ungated_files_table_warning(doc, heading))
+        for heading, reason in ungated_receipt_headings(text):
+            warnings.append(ungated_files_table_warning(doc, heading, reason))
 
 
 def files_table_coverage_clause(coverage: FilesTableCoverage) -> str:

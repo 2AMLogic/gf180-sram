@@ -296,10 +296,15 @@ class FilesTableCoverageTest(unittest.TestCase):
         for heading in deviations:
             text = f"{heading}\n\n{table}\n"
             unmatched = cef.ungated_receipt_headings(text)
-            self.assertEqual(unmatched, [heading], heading)
-            warning = cef.ungated_files_table_warning("sim/deck-parity/r.md", heading)
+            self.assertEqual(
+                unmatched, [(heading, cef.UNGATED_REASON_GRAMMAR)], heading
+            )
+            warning = cef.ungated_files_table_warning(
+                "sim/deck-parity/r.md", *unmatched[0]
+            )
             self.assertIn("sim/deck-parity/r.md", warning)
             self.assertIn(heading, warning)
+            self.assertIn("Fix the heading", warning)
             findings, _ = cef.walk_files_tables(
                 text, "sim/deck-parity", ["sim/deck-parity/run-a/whatever.json"]
             )
@@ -307,7 +312,9 @@ class FilesTableCoverageTest(unittest.TestCase):
 
     def test_table_with_no_preceding_heading_warns(self):
         text = "| File | What |\n|---|---|\n| `a.json` | x |\n"
-        self.assertEqual(cef.ungated_receipt_headings(text), [""])
+        self.assertEqual(
+            cef.ungated_receipt_headings(text), [("", cef.UNGATED_REASON_GRAMMAR)]
+        )
 
     def test_fenced_comment_between_heading_and_table_is_not_warned(self):
         # Issue #408 shape (1): a bash fence between a gated heading and
@@ -346,8 +353,36 @@ class FilesTableCoverageTest(unittest.TestCase):
             cef.parse_files_tables(text), [("run-a", [(["a.json"], False)])]
         )
         self.assertEqual(
-            cef.ungated_receipt_headings(text), ["## Files in `run-a/`"]
+            cef.ungated_receipt_headings(text),
+            [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
         )
+
+    def test_second_table_message_tells_the_author_to_split_not_fix(self):
+        # Issue #415: for the #408 shape (2) the heading DOES match the
+        # gated grammar -- the ungated row is a SECOND table whose slot
+        # the parser already consumed. The warning must name that cause
+        # and the split-under-its-own-heading fix, not "Fix the heading"
+        # (a no-op here: the heading is already correct).
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nSome prose.\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+        )
+        unmatched = cef.ungated_receipt_headings(text)
+        self.assertEqual(
+            unmatched, [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)]
+        )
+        warning = cef.ungated_files_table_warning(
+            "sim/deck-parity/r.md", *unmatched[0]
+        )
+        self.assertIn("## Files in `run-a/`", warning)
+        self.assertNotIn("Fix the heading", warning)
+        self.assertIn("own '## Files in `<dir>/`' heading", warning)
 
     def test_receipt_docs_scope(self):
         tracked = {
