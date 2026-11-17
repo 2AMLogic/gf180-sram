@@ -384,6 +384,95 @@ class FilesTableCoverageTest(unittest.TestCase):
         self.assertNotIn("Fix the heading", warning)
         self.assertIn("own '## Files in `<dir>/`' heading", warning)
 
+    def test_fenced_table_example_is_not_warned(self):
+        # Issue #420: a "| File | What |" row inside a fenced example
+        # after the section's real table is fenced text, not a second
+        # table -- the warning must stay silent for it.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nExample of the shape to avoid:\n\n"
+            "```\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "```\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_fenced_tilde_table_example_is_not_warned(self):
+        # Same shape with a ~~~ fence: fence tracking covers both fence
+        # characters.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\n~~~\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "~~~\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_fenced_info_string_fence_is_tracked(self):
+        # An opening fence with an info string (```markdown) still opens
+        # a fence; its content must be suppressed too.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\n```markdown\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "```\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_unterminated_fence_suppresses_later_rows(self):
+        # An unclosed fence runs to end of document (CommonMark), so the
+        # rows after it are fenced text, not tables.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nExample:\n\n"
+            "```\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+        )
+        self.assertEqual(cef.ungated_receipt_headings(text), [])
+
+    def test_real_second_table_after_fenced_example_still_warns(self):
+        # Regression: fence suppression must not swallow a REAL second
+        # table sitting outside the fence -- only that one is ungated.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+            "\nExample of the shape to avoid:\n\n"
+            "```\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "```\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `c.json` | three |\n"
+        )
+        self.assertEqual(
+            cef.ungated_receipt_headings(text),
+            [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
+        )
+
     def test_receipt_docs_scope(self):
         tracked = {
             "sim/deck-parity/20261114-tt_25c_3.30v.md",  # top-level receipt
