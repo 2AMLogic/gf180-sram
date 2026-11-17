@@ -169,7 +169,7 @@ def compare(family, reduced, record_path, *, request=None, sweep_dir=None,
     if family not in RECORD_CLAIMS:
         raise SystemExit(f"unknown family {family!r}; known: {sorted(RECORD_CLAIMS)}")
     records_rel, _claim, metric, unit = RECORD_CLAIMS[family]
-    _exp_dir, _tb, mode = deck_adapter.FAMILIES[family]
+    _exp_dir, _tb, mode, _staged = deck_adapter.FAMILIES[family]
     kind, datafile, label = deck_adapter.parse_mode(mode)
 
     problems = []          # global (coverage / deck-bytes) failures

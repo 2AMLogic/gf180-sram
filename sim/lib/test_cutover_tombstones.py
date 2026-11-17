@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Regression tests for the #230 deck-mode cutover's two exit-2 tombstones.
+"""Regression tests for the #230 deck-mode cutover's exit-2 tombstones.
 
-The cutover retired the local sim grid launchers. Two entry points that
+The cutover retired the local sim grid launchers. Entry points that
 committed records' "Reproduce" blocks still name were reduced to loud
 tombstones -- exit 2 with an explanation, never a silent exit 0:
 
@@ -9,7 +9,12 @@ tombstones -- exit 2 with an explanation, never a silent exit 0:
   deck-mode replacement is `sim/lib/deck_adapter.py mc-build` +
   `klt sim --backend batch`).
 - `sim/pex/write-margin/generate.sh` (the by-hand PEX write-margin
-  workflow; its deck-mode port is tracked as #437).
+  workflow; its deck-mode port was tracked as #437 and has landed --
+  that script now runs the real deck-mode workflow again, so its
+  tombstone test was retired with the tombstone and the port's offline
+  behavior is pinned by `test_deck_adapter.py` +
+  `test_mint_corner_records.py` instead; the live end-to-end run needs
+  the pinned PDK and the batch fleet).
 
 Both were verified by hand at cutover review and pinned by nothing, so an
 edit that made either exit 0 silently would strand a reader following a
@@ -49,24 +54,6 @@ class RunMcCampaignTombstoneTest(unittest.TestCase):
         self.assertIn("retired", stderr)
         # The message must route the reader to the deck-mode replacement.
         self.assertIn("deck_adapter.py", stderr)
-
-
-class WriteMarginGenerateTombstoneTest(unittest.TestCase):
-    """`./sim/pex/write-margin/generate.sh` refuses with exit 2."""
-
-    def test_script_exits_2_naming_the_interruption(self):
-        proc = subprocess.run(
-            ["./sim/pex/write-margin/generate.sh"],
-            capture_output=True,
-            cwd=REPO,
-            timeout=60,
-        )
-        self.assertEqual(proc.returncode, 2, proc.stderr.decode())
-        stderr = proc.stderr.decode()
-        self.assertIn("deck-mode cutover", stderr)
-        # Refusal happens up front: nothing ran, so stdout stays empty and
-        # the dead legs below the tombstone never execute.
-        self.assertEqual(proc.stdout, b"")
 
 
 if __name__ == "__main__":

@@ -296,13 +296,13 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:07c9c24326f6cbaf2c85a08882b2076a5836a3fe896ea0d154949383f4b70ac0",
+        "content_hash": "sha256:24cdeb4e7b90d89f974785c81d85ef3fc4d6677e49d74e91393216128e5b07b5",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 9,
           "path": null,
-          "content_hash": "sha256:07c9c24326f6cbaf2c85a08882b2076a5836a3fe896ea0d154949383f4b70ac0",
+          "content_hash": "sha256:24cdeb4e7b90d89f974785c81d85ef3fc4d6677e49d74e91393216128e5b07b5",
           "input_verified": true,
           "members": [
             {
@@ -342,7 +342,7 @@
             },
             {
               "path": "sim/lib/deck_adapter.py",
-              "content_hash": "sha256:f0d1da1a87505c8e3aa009b8501c59856ed2fe0a2caefe4bc050f0f0d086d211",
+              "content_hash": "sha256:d30a3f2b1cde49c7dd7a5159aa903225585470f0e336d883514fdb622af74dd8",
               "status": "verified"
             },
             {

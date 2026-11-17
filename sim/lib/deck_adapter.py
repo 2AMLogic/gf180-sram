@@ -17,10 +17,10 @@ does NOT run ngspice, submit anything, or mint a record:
 * `build` composes, for each of the 27 ratified corners (or the subset
   `--corner` names, for a bounded parity run), exactly the scratch
   directory the retired `run_corner_sweep.sh` launcher composed (the
-  testbench, a generated
-  `corner.inc`, the staged DUT netlist) and writes a `klt sim` *deck-list*
-  request that transports those decks unchanged (`klayout_tools.sim_decks`).
-  The testbench's own `.control`/`wrdata`/bisection logic is untouched.
+  testbench, a generated `corner.inc`, the family's staged DUT file(s))
+  and writes a `klt sim` *deck-list* request that transports those decks
+  unchanged (`klayout_tools.sim_decks`). The testbench's own
+  `.control`/`wrdata`/bisection logic is untouched.
 * `reduce` is the caller-owned reducer. `klt sim` deck mode reports process
   success only (no measurement parsing, no grading), so this applies the
   launcher's grading -- `RESULT:` / `RESULT-ERROR:` lines, `snm_extract.py`
@@ -33,11 +33,13 @@ does NOT run ngspice, submit anything, or mint a record:
   check cannot silently not-run.
 
 The only byte-level difference from the launcher's scratch deck is the
-`@@REPO_ROOT@@` token, which becomes `.` (the DUT netlist is staged at
-`./design/netlist/bitcell_6t.spice` inside the unit) instead of this
+`@@REPO_ROOT@@` token, which becomes `.` (each family's staged DUT files
+land at their repo-relative paths inside the unit) instead of this
 checkout's absolute path: deck mode refuses absolute includes it would have to
 rewrite, and a relative include is host-independent. `build` records both the
-source-testbench and composed-deck sha256 so that is auditable.
+source-testbench and composed-deck sha256 so that is auditable, and a family
+staging anything beyond the legacy single DUT netlist records exactly what it
+stages (path + sha256) in `x_gf180_sram_adapter.staged_inputs`.
 
 `mc-build` / `mc-reduce` are the same pair for the Monte Carlo pool in
 `run_mc_campaign.py`: one deck per (corner, kind, sample[, L/R side]) whose
@@ -135,14 +137,35 @@ SPICEINIT_TEXT = (
 )
 
 # The five characterization families the retired `run_corner_sweep.sh`
-# launcher drove (sim/README.md "Cold-start invocation"). `mode` is the
-# launcher's grading mode.
+# launcher drove (sim/README.md "Cold-start invocation"), plus the two
+# by-hand pex write-margin legs the #230 cutover interrupted (#437). The
+# first three elements are the launcher's own invocation shape: experiment
+# dir, testbench, grading mode. The fourth is the repo-relative file(s)
+# staged into every unit dir when the testbench references @@REPO_ROOT@@ --
+# the DUT file(s) the deck's `.include`s must resolve against once the
+# token becomes `.`. The five ratified families stage the flat bitcell
+# netlist (the launcher's hard-coded behavior, kept as the default so their
+# requests stay byte-identical); each pex leg stages the DUT its own
+# testbench `.include`s, so the existing token rewrite resolves it.
 FAMILIES = {
-    "read-snm": ("sim/read-snm", "tb_read_snm.spice", "snm:read_snm_sweep.txt:read_snm"),
-    "hold-snm": ("sim/hold-snm", "tb_hold_snm.spice", "snm:hold_snm_sweep.txt:hold_snm"),
-    "write-margin": ("sim/write-margin", "tb_write_margin.spice", "direct"),
-    "read-access": ("sim/access-time", "tb_read_access_time.spice", "direct"),
-    "write-access": ("sim/access-time", "tb_write_access_time.spice", "direct"),
+    "read-snm": ("sim/read-snm", "tb_read_snm.spice", "snm:read_snm_sweep.txt:read_snm", (DUT_NETLIST,)),
+    "hold-snm": ("sim/hold-snm", "tb_hold_snm.spice", "snm:hold_snm_sweep.txt:hold_snm", (DUT_NETLIST,)),
+    "write-margin": ("sim/write-margin", "tb_write_margin.spice", "direct", (DUT_NETLIST,)),
+    "read-access": ("sim/access-time", "tb_read_access_time.spice", "direct", (DUT_NETLIST,)),
+    "write-access": ("sim/access-time", "tb_write_access_time.spice", "direct", (DUT_NETLIST,)),
+    # By-hand pex write-margin legs (issue #95, deck port #437): direct mode,
+    # same ratified 27-corner matrix as the launcher ran them. The schematic
+    # leg reuses the klt-pex-compatible .SUBCKT wrapper from the access-time
+    # workflow; the extracted leg includes the --pdk-bound parasitic netlist
+    # write-margin/dut/generate.sh produces.
+    "pex-write-margin-schematic": (
+        "sim/pex/write-margin", "tb_write_margin_schematic.spice", "direct",
+        ("sim/pex/access-time/dut/bitcell_6t_subckt.spice",),
+    ),
+    "pex-write-margin-extracted": (
+        "sim/pex/write-margin", "tb_write_margin_extracted.spice", "direct",
+        ("sim/pex/write-margin/dut/extracted-netlist.spice",),
+    ),
 }
 
 
@@ -230,15 +253,20 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
     way; only which corners are staged changes, and the selection is recorded
     in `x_gf180_sram_adapter.corners` so `reduce` expects exactly that set.
     """
-    exp_dir, tb_name, mode = FAMILIES[family]
+    exp_dir, tb_name, mode, staged_files = FAMILIES[family]
     kind, datafile, _label = parse_mode(mode)
     tb_path = Path(repo_root) / exp_dir / "testbench" / tb_name
     tb_bytes = tb_path.read_bytes()
-    deck_text = compose_deck(tb_bytes.decode("utf-8"))
+    tb_text = tb_bytes.decode("utf-8")
+    deck_text = compose_deck(tb_text)
     deck_bytes = deck_text.encode("utf-8")
-    dut_path = Path(repo_root) / DUT_NETLIST
-    if REPO_ROOT_TOKEN in tb_bytes.decode("utf-8") and not dut_path.is_file():
-        raise FileNotFoundError(f"DUT netlist not found: {dut_path}")
+    needs_staging = REPO_ROOT_TOKEN in tb_text
+    staged = []  # (repo-relative path, absolute source) in FAMILIES order
+    for rel in staged_files:
+        src = Path(repo_root) / rel
+        if needs_staging and not src.is_file():
+            raise FileNotFoundError(f"staged deck input not found: {src}")
+        staged.append((rel, src))
 
     if pdk_dir is not None:
         pdk_dir = os.path.abspath(pdk_dir)
@@ -263,10 +291,11 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
         # deck input (decks[].inputs[] IS carried into the worker request,
         # unlike options.ngspice_init, which the deck path silently drops).
         (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
-        if REPO_ROOT_TOKEN in tb_bytes.decode("utf-8"):
-            dest = unit / DUT_NETLIST
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(dut_path, dest)
+        if needs_staging:
+            for rel, src in staged:
+                dest = unit / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(src, dest)
         entry = {
             "id": cid,
             "deck": f"units/{cid}/{tb_name}",
@@ -284,7 +313,7 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
     request = {"engine": "ngspice", "decks": units, "options": {"timeout_s": DECK_TIMEOUT_S}}
     if pdk_dir is not None:
         request["models"] = {"pdk_root": os.path.dirname(pdk_dir)}
-    request["x_gf180_sram_adapter"] = {
+    meta = {
         "family": family,
         "mode": mode,
         "testbench": f"{exp_dir}/testbench/{tb_name}",
@@ -297,6 +326,15 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
         "spiceinit_sha256": _sha256(SPICEINIT_TEXT.encode("utf-8")),
         "full_grid": len(selected) == len(corners()),
     }
+    # Per-family DUT staging audit (#437): the launcher-equivalent default
+    # (the flat bitcell netlist only) adds no key, so the five ratified
+    # families' requests stay byte-identical; a family staging anything else
+    # records exactly what it stages, with the staged bytes' sha256.
+    if list(staged_files) != [DUT_NETLIST]:
+        meta["staged_inputs"] = [
+            {"path": rel, "sha256": _sha256(src.read_bytes())} for rel, src in staged
+        ]
+    request["x_gf180_sram_adapter"] = meta
     return request
 
 
@@ -358,7 +396,7 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
     itself a coverage error ("deck_sha256 not reported for: [...]"): a check
     that cannot run must never look like one that passed.
     """
-    _exp, _tb, mode = FAMILIES[family]
+    _exp, _tb, mode, _staged = FAMILIES[family]
     kind, datafile, label = parse_mode(mode)
     if expected_ids is None:
         expected = corner_ids()
@@ -545,17 +583,20 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
     """
     if len(corner_specs) < 2:
         raise ValueError("at least two corners are required (nominal-only is not an MC campaign)")
-    exp_dir, tb_name, _ = FAMILIES[family]
+    exp_dir, tb_name, _, staged_files = FAMILIES[family]
     mode, key = MC_FAMILIES[family]
     kind, datafile, _label = parse_mc_mode(mode)
     tb_path = Path(repo_root) / exp_dir / "testbench" / tb_name
     tb_bytes = tb_path.read_bytes()
     tb_text = tb_bytes.decode("utf-8")
     deck_bytes = compose_deck(tb_text).encode("utf-8")
-    needs_dut = REPO_ROOT_TOKEN in tb_text
-    dut_path = Path(repo_root) / DUT_NETLIST
-    if needs_dut and not dut_path.is_file():
-        raise FileNotFoundError(f"DUT netlist not found: {dut_path}")
+    needs_staging = REPO_ROOT_TOKEN in tb_text
+    staged = []
+    for rel in staged_files:
+        src = Path(repo_root) / rel
+        if needs_staging and not src.is_file():
+            raise FileNotFoundError(f"staged deck input not found: {src}")
+        staged.append((rel, src))
     if pdk_dir is not None:
         pdk_dir = os.path.abspath(pdk_dir)
         model_file = f"{pdk_dir}/libs.tech/ngspice/sm141064.ngspice"
@@ -578,10 +619,11 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
         # one unit per (corner, kind, sample[, side]), so the same bytes are
         # staged once per unit and named once in that unit's inputs[].
         (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
-        if needs_dut:
-            dest = unit / DUT_NETLIST
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(dut_path, dest)
+        if needs_staging:
+            for rel, src in staged:
+                dest = unit / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(src, dest)
         entry = {
             "id": m["id"],
             "deck": f"units/{m['id']}/{tb_name}",
@@ -899,8 +941,8 @@ def main(argv=None):
         return 0 if result["overall"] == "recorded" else 1
 
     if args.cmd == "families":
-        for name, (d, tb, mode) in sorted(FAMILIES.items()):
-            print(f"{name}\t{d}/testbench/{tb}\t{mode}")
+        for name, (d, tb, mode, staged) in sorted(FAMILIES.items()):
+            print(f"{name}\t{d}/testbench/{tb}\t{mode}\t{','.join(staged)}")
         return 0
     if args.cmd == "spiceinit":
         # Byte-exact stdout (no print()'s trailing-newline doubling): a

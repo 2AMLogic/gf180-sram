@@ -203,19 +203,25 @@ per-corner `RESULT: write_trip_voltage_v = ...` lines and writes a
 -- deliberately mirroring `klt pex`'s own JSON `delta[]` schema in
 Markdown form, since `klt pex` itself never runs this measurement).
 
-**Regeneration is currently interrupted (2026-11-17, #230 cutover):**
-`run_corner_sweep.sh` was retired with the characterization launchers once
-the deck-mode parity receipts covered the five ratified families -- and
-those receipts do **not** cover this workflow's two testbenches, so no
-verified deck-mode replacement exists here yet. `generate.sh` therefore
-refuses up front (exit 2) rather than half-running; the committed records,
-deltas and conclusions below stay valid, append-only evidence, produced by
-the workflow as it existed. Migrating the by-hand legs to the deck path
-(plus the parity receipt that migration needs before it can claim
-equivalence) is tracked as #437.
+**Regeneration path (deck mode, since #437):** the launcher this workflow
+originally drove (`run_corner_sweep.sh`) was retired at the #230 cutover;
+`generate.sh` now runs each leg through the deck-mode path instead. Each
+leg is a `FAMILIES` entry in `sim/lib/deck_adapter.py` whose DUT file is
+staged into every unit at its repo-relative path (the testbench's
+`@@REPO_ROOT@@` include becomes `.`), so `deck_adapter.py build` →
+`klt sim --backend batch --wait-for-capacity 600` → `deck_adapter.py
+reduce` → `sim/lib/mint_corner_records.py` reproduces the launcher's
+scratch directory, grid, grading and append-only record format. A leg
+mints only when its full-grid grading is `recorded` (an OPEN grid refuses
+rather than minting partially-open evidence). The **parity receipt** that
+would let the deck path claim equivalence with the launcher-era records
+(one bounded live run per leg against a committed record value, under
+`sim/deck-parity/`) still requires its own operator-authorized fleet run
+(#437 criterion 4); until it lands, this is the regeneration mechanism,
+not yet a parity-verified equivalence claim.
 
-**Known cosmetic limitation**: the retired `run_corner_sweep.sh` (reused
-unmodified,
+**Known cosmetic limitation (launcher-era records)**: the retired
+`run_corner_sweep.sh` (reused unmodified,
 per this issue's own guardrails and its "Affected Files" note that it is
 "existing PVT sweep machinery, reusable for a by-hand extraction
 workflow") always writes its generated record's own **Netlist provenance**
@@ -228,7 +234,9 @@ carry that same boilerplate string even for the extracted-leg record
 `design/netlist/bitcell_6t.spice`); each record's own **Claim** line and
 the testbench *path* in that same provenance field (`tb_write_margin_extracted.spice`
 vs `tb_write_margin_schematic.spice`) are the authoritative signal, not the
-auto-generated "DUT per ..." clause.
+auto-generated "DUT per ..." clause. (Records minted after #437 close this:
+`sim/lib/mint_corner_records.py` names the family's real staged DUT file and
+uses the leg's own provenance word -- `extracted` for the extracted leg.)
 
 ### Why `--pdk` binding matters
 
