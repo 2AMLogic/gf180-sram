@@ -5,15 +5,22 @@
 The #230 cutover retired the two launchers that minted this repo's evidence
 (`run_corner_sweep.sh` for the deterministic 27-corner records, the
 `run_mc_campaign.py` pool for the Monte Carlo records) and replaced the *run*
-path with `sim/lib/deck_adapter.py` + `klt sim`. Minting stayed undone by the
-cutover -- deliberately: the first minting customer is issue #272's
-re-qualification of the reference records under the `f6eeac7` PDK pin
-(`sim/lib/pdk_pin.txt`), where every new record carries a **Supersedes** line
-naming the record it replaces and the retired records stay committed,
-append-only, untouched (sim/README.md "Append-only rule").
+path with `sim/lib/deck_adapter.py` + `klt sim`. The minting the cutover
+left undone is now split between two modules: `sim/lib/mint_corner_records.py`
+(landed from the #437 deck port while #272 was in flight) mints the
+`direct`-mode pex-write-margin legs (#95) with their per-family staged-DUT
+provenance, while this module mints the #272 reference families -- the SNM
+families, the `direct` reference families, and the whole Monte Carlo path.
+The `corner` CLI below mints exactly the families FAMILY_CLAIMS names; the
+families outside it are `mint_corner_records.py`'s domain, not missing here.
+#272's re-qualification of the reference records under the `f6eeac7` PDK pin
+(`sim/lib/pdk_pin.txt`) is this module's first customer: every new record
+carries a **Supersedes** line naming the record it replaces and the retired
+records stay committed, append-only, untouched (sim/README.md "Append-only
+rule").
 
-This module is that generator. It writes exactly the artifacts the retired
-launchers wrote, into the same directory shapes sim/README.md documents:
+It writes exactly the artifacts the retired launchers wrote, into the same
+directory shapes sim/README.md documents:
 
 * `corner` -- one deterministic record per family:
     `sim/<exp>/netlist-snapshots/<record-id>.spice`,
@@ -230,7 +237,7 @@ def mint_corner(family: str, request_path: Path, reduced_path: Path, report_path
     _check_request_pair(family, request, reduced)
 
     exp_dir, claim = FAMILY_CLAIMS[family]
-    _exp, tb_name, mode = deck_adapter.FAMILIES[family]
+    _exp, tb_name, mode, _staged = deck_adapter.FAMILIES[family]
     meta = request["x_gf180_sram_adapter"]
     pdk = pdk_identity()
 
@@ -802,7 +809,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("corner", help="mint one deterministic corner record")
-    c.add_argument("family", choices=sorted(deck_adapter.FAMILIES))
+    c.add_argument("family", choices=sorted(FAMILY_CLAIMS))
     c.add_argument("--request", required=True, type=Path)
     c.add_argument("--reduced", required=True, type=Path)
     c.add_argument("--report", required=True, type=Path)

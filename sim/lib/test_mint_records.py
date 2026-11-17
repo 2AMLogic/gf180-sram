@@ -195,6 +195,38 @@ def test_corner_mint(tmp: Path) -> None:
     check("no absolute host path in the record", str(tmp) not in text)
 
 
+def test_claimed_families_mint(tmp: Path) -> None:
+    """Every FAMILY_CLAIMS family mints against deck_adapter.FAMILIES'
+    current shape. The #437 deck port widened FAMILIES to a 4-tuple and
+    added the pex-write-margin families after this module's merge-base;
+    both broke the corner path only at the merge. This loop fails on
+    either drift: a claim that no longer resolves in FAMILIES (KeyError),
+    an arity change at the unpack, or an MC claim off MC_FAMILIES."""
+    cids = ["tt_25c_3.30v", "ss_125c_3.63v"]
+    for i, (family, (exp_dir, claim)) in enumerate(sorted(mint_records.FAMILY_CLAIMS.items())):
+        t = tmp / family
+        tb = t / "repo" / "sim" / exp_dir / "testbench" / deck_adapter.FAMILIES[family][1]
+        tb.parent.mkdir(parents=True)
+        tb.write_text(TB_TEXT)
+        deck_sha = sha(deck_adapter.compose_deck(TB_TEXT).encode())
+        unit_dir = t / "units"
+        write_unit_tree(unit_dir, cids, with_data=True)
+        (t / "request.json").write_text(json.dumps(stub_request(family, cids, deck_sha)))
+        (t / "reduced.json").write_text(json.dumps(stub_corner_reduced(family, cids, deck_sha)))
+        (t / "report.json").write_text(json.dumps(stub_report(cids)))
+        rid = f"20270101-000000-{i:08d}"
+        record = mint_records.mint_corner(
+            family, t / "request.json", t / "reduced.json", t / "report.json",
+            unit_dir, supersedes="", record_id=rid, repo_root=t / "repo",
+            now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
+        )
+        text = record.read_text()
+        check(f"claimed family {family} mints with its claim line", claim in text)
+    for family in mint_records.MC_CLAIMS:
+        check(f"mc claimed family {family} resolves in MC_FAMILIES",
+              family in deck_adapter.MC_FAMILIES)
+
+
 def test_corner_rejects_bad_grading(tmp: Path) -> None:
     family = "write-margin"
     cids = ["tt_25c_3.30v"]
@@ -410,6 +442,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         test_corner_mint(tmp / "t1")
+        test_claimed_families_mint(tmp / "t1b")
         test_corner_rejects_bad_grading(tmp / "t2")
         test_mc_mint(tmp / "t3")
         test_infra_accounted()
