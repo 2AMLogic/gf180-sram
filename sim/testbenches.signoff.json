@@ -3,10 +3,10 @@
   "kind": "generic",
   "t1_item": 9,
   "status": "pass",
-  "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, and the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
+  "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point), and the four nested post-layout (PEX) benches under sim/pex/<experiment>/testbench/ -- tb_read_access_time.pex.spice and tb_write_access_time.pex.spice (the klt-pex-native access-time pair) and tb_write_margin_schematic.spice and tb_write_margin_extracted.spice (the by-hand schematic-vs-extracted write-margin pair) -- the parallel benches the T1 item-7 runs consume (issue #392). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:aefaf484e96bae09f7be051f4d62bf8729691582e9812db0918e49e7cbedd638",
+      "content_hash": "sha256:e3da4c7327651e5375713761d792b5f80cef249eb421b19462884c14d4204023",
       "paths": [
         {
           "path": "sim/README.md",
@@ -83,6 +83,22 @@
         {
           "path": "sim/min-clock-pulse/testbench/tb_min_clk_h14_l10.klt.spice",
           "content_hash": "sha256:772e445f58b4abf1f5b464fd19bfcd35df36e0c2e1b485082436007b3a1f6c16"
+        },
+        {
+          "path": "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
+          "content_hash": "sha256:160ca790e5f16e2f9d8d130492a8ddb1bc672cd32aa9b2fc390a9be965c4aeac"
+        },
+        {
+          "path": "sim/pex/access-time/testbench/tb_write_access_time.pex.spice",
+          "content_hash": "sha256:5455ea8aaa75e2a78d1f29ee0fd1bd1d194fc604a4d4435e5d693328dfa0aac0"
+        },
+        {
+          "path": "sim/pex/write-margin/testbench/tb_write_margin_extracted.spice",
+          "content_hash": "sha256:81b1b860f2eba1ab87b50d47fe7af91009af8bf4cc7a0c99dd12fe906fe81de8"
+        },
+        {
+          "path": "sim/pex/write-margin/testbench/tb_write_margin_schematic.spice",
+          "content_hash": "sha256:4f321b2570b32b8877d170575532fec5c80eec90ba8a9cca5f2e080c548fe9ad"
         },
         {
           "path": "sim/read-snm/testbench/tb_read_snm.spice",
