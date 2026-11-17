@@ -410,7 +410,7 @@ corner that produced no valid measurement grades `OPEN` -- reported, never
 silently dropped from the set, per `spec/sram.md`'s Signoff definition.
 
 **Single-point probes stay local** (a debug probe, one operating point):
-`klt sim /tmp/stage/<family>.json --backend local` runs one request's units
+`klt sim /tmp/stage/<family>/request.json --backend local` runs one request's units
 on the host, and `deck_adapter.py build <family> --corner tt:25:3.30`
 bounds a request to one corner first. To drive a testbench completely by
 hand instead (e.g. while iterating on the testbench itself), see "ngspice
