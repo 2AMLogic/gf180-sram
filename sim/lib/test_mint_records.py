@@ -156,12 +156,21 @@ def test_corner_mint(tmp: Path) -> None:
     report_path = tmp / "report.json"
     report_path.write_text(json.dumps(stub_report(cids)))
 
-    record = mint_records.mint_corner(
-        family, request_path, reduced_path, report_path, unit_dir,
-        supersedes="20200101-000000-abc1234 (PDK re-pin, issue #272)",
-        record_id="20270101-000000-def5678", repo_root=tmp / "repo",
-        now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
-    )
+    saved = mint_records.pdk_identity
+    mint_records.pdk_identity = lambda: {
+        "variant": "gf180mcuD", "version": "f6eeac7" + "0" * 56,
+        "design_inc_rel": "libs.tech/ngspice/design.ngspice",
+        "model_file_rel": "libs.tech/ngspice/sm141064.ngspice",
+    }
+    try:
+        record = mint_records.mint_corner(
+            family, request_path, reduced_path, report_path, unit_dir,
+            supersedes="20200101-000000-abc1234 (PDK re-pin, issue #272)",
+            record_id="20270101-000000-def5678", repo_root=tmp / "repo",
+            now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
+        )
+    finally:
+        mint_records.pdk_identity = saved
     text = record.read_text()
 
     exp = tmp / "repo" / "sim" / family
@@ -203,25 +212,34 @@ def test_claimed_families_mint(tmp: Path) -> None:
     either drift: a claim that no longer resolves in FAMILIES (KeyError),
     an arity change at the unpack, or an MC claim off MC_FAMILIES."""
     cids = ["tt_25c_3.30v", "ss_125c_3.63v"]
-    for i, (family, (exp_dir, claim)) in enumerate(sorted(mint_records.FAMILY_CLAIMS.items())):
-        t = tmp / family
-        tb = t / "repo" / "sim" / exp_dir / "testbench" / deck_adapter.FAMILIES[family][1]
-        tb.parent.mkdir(parents=True)
-        tb.write_text(TB_TEXT)
-        deck_sha = sha(deck_adapter.compose_deck(TB_TEXT).encode())
-        unit_dir = t / "units"
-        write_unit_tree(unit_dir, cids, with_data=True)
-        (t / "request.json").write_text(json.dumps(stub_request(family, cids, deck_sha)))
-        (t / "reduced.json").write_text(json.dumps(stub_corner_reduced(family, cids, deck_sha)))
-        (t / "report.json").write_text(json.dumps(stub_report(cids)))
-        rid = f"20270101-000000-{i:08d}"
-        record = mint_records.mint_corner(
-            family, t / "request.json", t / "reduced.json", t / "report.json",
-            unit_dir, supersedes="", record_id=rid, repo_root=t / "repo",
-            now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
-        )
-        text = record.read_text()
-        check(f"claimed family {family} mints with its claim line", claim in text)
+    saved = mint_records.pdk_identity
+    mint_records.pdk_identity = lambda: {
+        "variant": "gf180mcuD", "version": "f6eeac7" + "0" * 56,
+        "design_inc_rel": "libs.tech/ngspice/design.ngspice",
+        "model_file_rel": "libs.tech/ngspice/sm141064.ngspice",
+    }
+    try:
+        for i, (family, (exp_dir, claim)) in enumerate(sorted(mint_records.FAMILY_CLAIMS.items())):
+            t = tmp / family
+            tb = t / "repo" / "sim" / exp_dir / "testbench" / deck_adapter.FAMILIES[family][1]
+            tb.parent.mkdir(parents=True)
+            tb.write_text(TB_TEXT)
+            deck_sha = sha(deck_adapter.compose_deck(TB_TEXT).encode())
+            unit_dir = t / "units"
+            write_unit_tree(unit_dir, cids, with_data=True)
+            (t / "request.json").write_text(json.dumps(stub_request(family, cids, deck_sha)))
+            (t / "reduced.json").write_text(json.dumps(stub_corner_reduced(family, cids, deck_sha)))
+            (t / "report.json").write_text(json.dumps(stub_report(cids)))
+            rid = f"20270101-000000-{i:08d}"
+            record = mint_records.mint_corner(
+                family, t / "request.json", t / "reduced.json", t / "report.json",
+                unit_dir, supersedes="", record_id=rid, repo_root=t / "repo",
+                now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
+            )
+            text = record.read_text()
+            check(f"claimed family {family} mints with its claim line", claim in text)
+    finally:
+        mint_records.pdk_identity = saved
     for family in mint_records.MC_CLAIMS:
         check(f"mc claimed family {family} resolves in MC_FAMILIES",
               family in deck_adapter.MC_FAMILIES)
