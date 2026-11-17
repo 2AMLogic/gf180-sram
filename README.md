@@ -141,8 +141,8 @@ pinned PDK revision, a released `klt`) are stated in the linked section.
 | Result | How to reproduce | Documented in |
 |---|---|---|
 | Schematics and netlists | `design/generate_array.py`, then `xschem` batch netlisting | [`design/README.md`](design/README.md) § "Regenerating the netlists" |
-| PVT corner simulations | `sim/lib/run_corner_sweep.sh` per testbench | [`sim/README.md`](sim/README.md) § "Cold-start invocation" |
-| Monte Carlo / yield | `sim/lib/run_mc_campaign.py` | [`sim/README.md`](sim/README.md) § "Running a campaign" |
+| PVT corner simulations | `sim/lib/deck_adapter.py build` + `klt sim --batch-set` (batch fleet; single-point probes `--backend local`) | [`sim/README.md`](sim/README.md) § "Cold-start invocation" |
+| Monte Carlo / yield | `sim/lib/deck_adapter.py mc-build` + `klt sim` + `mc-reduce` | [`sim/README.md`](sim/README.md) § "Running a campaign" |
 | Layout, DRC, LVS, extraction | `./layout/verify.sh` (`--quick` for a subset) | [`layout/README.md`](layout/README.md) § "Reproducing and re-checking" |
 | LEF abstract | `./views/verify.sh` | [`views/README.md`](views/README.md) § "Reproducing and re-checking" |
 | Characterization report | `python3 measurements/generate_report.py > measurements/characterization-report.md` | [`measurements/README.md`](measurements/README.md) |

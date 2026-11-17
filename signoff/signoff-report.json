@@ -276,7 +276,7 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:30594ad1284d3973c7f86f4555e977917882db4f2d3e025ef00d469d618c55d9",
+        "content_hash": "sha256:87092e5a162ddc82ec535db0e5115493891c45459fccc05e17796a210e49770f",
         "input_verified": null,
         "exit_status": 0
       }
@@ -296,18 +296,18 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:8bde049a965d1b70d0d361c96a771ca6ae65666c758a1ef3c554f6edba2b7c25",
+        "content_hash": "sha256:2118e1a735f9ceb1c78b4a5b99e2f92a4218fa622709cc6b427d4b5edf90cc01",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 9,
           "path": null,
-          "content_hash": "sha256:8bde049a965d1b70d0d361c96a771ca6ae65666c758a1ef3c554f6edba2b7c25",
+          "content_hash": "sha256:2118e1a735f9ceb1c78b4a5b99e2f92a4218fa622709cc6b427d4b5edf90cc01",
           "input_verified": true,
           "members": [
             {
               "path": "sim/README.md",
-              "content_hash": "sha256:d781e5d4ba7664509ce8fa9a3e24baec7f50c7b27870664b84341df108de3154",
+              "content_hash": "sha256:9d48ed6d403b64a29598f8b005178f903c7a842f1072c64dbe8f41f438636ce2",
               "status": "verified"
             },
             {
@@ -341,8 +341,8 @@
               "status": "verified"
             },
             {
-              "path": "sim/lib/run_corner_sweep.sh",
-              "content_hash": "sha256:db9855eb941827a94afb50f5cfe2f8620097950f48b72030a91a16843e717f0a",
+              "path": "sim/lib/deck_adapter.py",
+              "content_hash": "sha256:7dad97452fdaecf5a017745ce5ff859753782d012462057c969597003ed5a4f0",
               "status": "verified"
             },
             {
@@ -461,7 +461,7 @@
               "status": "verified"
             }
           ],
-          "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point), and the four nested post-layout (PEX) benches under sim/pex/<experiment>/testbench/ -- tb_read_access_time.pex.spice and tb_write_access_time.pex.spice (the klt-pex-native access-time pair) and tb_write_margin_schematic.spice and tb_write_margin_extracted.spice (the by-hand schematic-vs-extracted write-margin pair) -- the parallel benches the T1 item-7 runs consume (issue #392). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI."
+          "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/deck_adapter.py (the deck-mode adapter the cold-start section invokes: it stages the testbenches' decks, the generated corner.inc and the pinned run-directory .spiceinit for `klt sim`) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point), and the four nested post-layout (PEX) benches under sim/pex/<experiment>/testbench/ -- tb_read_access_time.pex.spice and tb_write_access_time.pex.spice (the klt-pex-native access-time pair) and tb_write_margin_schematic.spice and tb_write_margin_extracted.spice (the by-hand schematic-vs-extracted write-margin pair) -- the parallel benches the T1 item-7 runs consume (issue #392). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the adapter stages the pinned run-directory .spiceinit itself); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI."
         }
       }
     },
@@ -480,18 +480,18 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:1c73d53d7a80f1d3b424843c7831dc01622822e71bfa5e8fae1b4133610fdf9f",
+        "content_hash": "sha256:cbdc19640967477e8c38039403e5ccbf86b2e48d69ed7a14533689937c80b2b3",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 10,
           "path": null,
-          "content_hash": "sha256:1c73d53d7a80f1d3b424843c7831dc01622822e71bfa5e8fae1b4133610fdf9f",
+          "content_hash": "sha256:cbdc19640967477e8c38039403e5ccbf86b2e48d69ed7a14533689937c80b2b3",
           "input_verified": true,
           "members": [
             {
               "path": "README.md",
-              "content_hash": "sha256:166f57e43093f67ca38aed17a5c2d87b66ef7f789f16ec3e5a81db8953b6a002",
+              "content_hash": "sha256:bcada4d7f881c3a823ea25bd324c09c875e09d7eb4eb0efa9509956122e455ad",
               "status": "verified"
             },
             {

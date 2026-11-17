@@ -2,20 +2,25 @@
 """Drift tests for the ratified corner matrix's single owner (#331).
 
 No ngspice, no PDK, no fleet: every check here is a pure comparison between
-`sim/lib/corner_matrix.py`, `sim/lib/run_corner_sweep.sh` (the shell copy that
-cannot import Python and is deliberately the reference), the three Python
-consumers, and the one **committed** artifact that renders the axis product.
+`sim/lib/corner_matrix.py`, the Python consumers, and the one **committed**
+artifact that renders the axis product.
 
-Why these tests exist. The matrix used to live in four independent places and
-only `deck_adapter.py` was guarded against the launcher
-(`test_deck_adapter.py::test_corner_inc_matches_launcher` /
-`::test_launcher_loop_axes_match`, both still in force and unweakened). The
-product had already drifted once -- `spec/sram.md`'s prose said "9" until #53
-corrected it to 27 (`spec/corner-count-correction.md`) -- and
-`render_signoff_table.py` renders `3 x 3 x 3 = 27` into the committed
-`sim/signoff-summary.md`. Change an axis with nothing watching and that
-committed artifact keeps asserting the old product, silently. These tests are
-what makes that loud.
+Why these tests exist. The matrix used to live in four independent places.
+Until the #230 deck-mode cutover retired it, `sim/lib/run_corner_sweep.sh`
+(a shell copy that cannot import Python) was deliberately kept as the
+reference and this suite compared the owner against it
+(`test_axes_match_launcher` & co., plus
+`test_deck_adapter.py::test_corner_inc_matches_launcher`); the cutover
+replaced those cross-copy guards with literal pins
+(`test_deck_adapter.py::test_corner_inc_shape` pins the corner.inc
+composition; the class below pins the axes, the `tt -> typical` mapping
+and the nesting order), so `corner_matrix.py` is now the sole owner with
+nothing to drift against unnoticed. The product had already drifted once
+-- `spec/sram.md`'s prose said "9" until #53 corrected it to 27
+(`spec/corner-count-correction.md`) -- and `render_signoff_table.py`
+renders `3 x 3 x 3 = 27` into the committed `sim/signoff-summary.md`.
+Change an axis with nothing watching and that committed artifact keeps
+asserting the old product, silently. These tests are what makes that loud.
 
 Run: python3 sim/lib/test_corner_matrix.py   (or via `npm run test`)
 """
@@ -39,36 +44,12 @@ import smoke  # noqa: E402
 from repo_root import find_repo_root  # noqa: E402
 
 REPO = find_repo_root(Path(__file__))
-LAUNCHER = REPO / "sim/lib/run_corner_sweep.sh"
 
 
-def launcher_axis(name: str) -> list[str]:
-    """The launcher's own `NAME=(...)` shell array, as word tokens."""
-    m = re.search(rf"^{name}=\((.*?)\)", LAUNCHER.read_text(), re.M)
-    if m is None:  # pragma: no cover - a missing array is itself the failure
-        raise AssertionError(f"{LAUNCHER} has no {name}=(...) array")
-    return m.group(1).split()
-
-
-def launcher_lib_section() -> dict[str, str]:
-    """The launcher's own `declare -A LIB_SECTION=([k]=v ...)` mapping."""
-    text = LAUNCHER.read_text()
-    m = re.search(r"^declare -A LIB_SECTION=\((.*?)\)\s*$", text, re.M)
-    if m is None:  # pragma: no cover
-        raise AssertionError(f"{LAUNCHER} has no LIB_SECTION mapping")
-    return dict(re.findall(r"\[(\w+)\]=(\S+)", m.group(1)))
-
-
-class OwnerMatchesLauncherTest(unittest.TestCase):
-    """The owner is compared against the shell copy, which stays the reference."""
-
-    def test_axes_match_launcher(self):
-        for name, axis in (("PROCESSES", cm.PROCESSES), ("TEMPS", cm.TEMPS), ("VDDS", cm.VDDS)):
-            self.assertEqual(
-                launcher_axis(name), list(axis),
-                f"{name} drifted from {LAUNCHER.name}; both own the ratified "
-                'spec/sram.md "Corner set" axis',
-            )
+class OwnerAxesTest(unittest.TestCase):
+    """The owner's own axes, pinned literally now that the launcher's shell
+    copy (the pre-cutover reference) is gone: values, type, mapping keys,
+    count-as-product and nesting order each get their own loud failure."""
 
     def test_axis_points_are_text(self):
         """Every axis point is the spec's literal label (corner_matrix's rule).
@@ -81,8 +62,17 @@ class OwnerMatchesLauncherTest(unittest.TestCase):
             for point in axis:
                 self.assertIsInstance(point, str, f"{name} point {point!r} is not text")
 
-    def test_lib_section_matches_launcher(self):
-        self.assertEqual(launcher_lib_section(), cm.LIB_SECTION)
+    def test_axes_are_the_ratified_sets(self):
+        """The spec/sram.md 'Corner set' axes, verbatim (order included)."""
+        self.assertEqual(list(cm.PROCESSES), ["ff", "tt", "ss"])
+        self.assertEqual(list(cm.TEMPS), ["-40", "25", "125"])
+        self.assertEqual(list(cm.VDDS), ["2.97", "3.30", "3.63"])
+
+    def test_lib_section_mapping(self):
+        """`tt` is this repo's label for gf180mcu's `typical` model section
+        (sm141064.ngspice has no `.LIB tt`); pinned so the owner cannot
+        silently rename a section label away from the records' vocabulary."""
+        self.assertEqual(cm.LIB_SECTION, {"ff": "ff", "tt": "typical", "ss": "ss"})
         self.assertEqual(sorted(cm.LIB_SECTION), sorted(cm.PROCESSES))
 
     def test_corner_count_is_the_axis_product(self):
@@ -90,22 +80,14 @@ class OwnerMatchesLauncherTest(unittest.TestCase):
         ids = cm.corner_ids()
         self.assertEqual(len(ids), product)
         self.assertEqual(len(set(ids)), product, "corner ids are not distinct")
-        # The launcher derives its count from its own arrays rather than
-        # hardcoding it (run_corner_sweep.sh, "Derived, never hardcoded");
-        # confirm it still does, so the two counts cannot disagree.
-        self.assertRegex(
-            LAUNCHER.read_text(),
-            r"CORNER_COUNT=\$\(\(\s*\$\{#PROCESSES\[@\]\}\s*\*\s*\$\{#TEMPS\[@\]\}\s*\*\s*\$\{#VDDS\[@\]\}\s*\)\)",
-            "run_corner_sweep.sh no longer derives CORNER_COUNT from its axes",
-        )
 
-    def test_corner_order_is_the_launcher_loop_order(self):
+    def test_corner_order_nests_process_temp_vdd(self):
         """process outermost, then temperature, then voltage."""
         expected = [
             cm.corner_id(p, t, v)
-            for p in launcher_axis("PROCESSES")
-            for t in launcher_axis("TEMPS")
-            for v in launcher_axis("VDDS")
+            for p in cm.PROCESSES
+            for t in cm.TEMPS
+            for v in cm.VDDS
         ]
         self.assertEqual(cm.corner_ids(), expected)
 

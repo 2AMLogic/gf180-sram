@@ -1,10 +1,16 @@
 # sim/deck-parity -- parity receipts for the `klt sim` deck-mode migration (#230)
 
-Evidence that `klt sim`'s **precomposed-deck** transport reproduces what the
+Evidence that `klt sim`'s **precomposed-deck** transport reproduced what the
 hand-rolled local launchers (`sim/lib/run_corner_sweep.sh`, the
-`sim/lib/run_mc_campaign.py` process pool) measure, at the same corner, from
-the same unmodified testbench decks. This is blocker 2 of the staged migration
-described in `sim/README.md` "Staged migration to `klt sim` deck mode".
+`sim/lib/run_mc_campaign.py` process pool) measured, at the same corner,
+from the same unmodified testbench decks -- blocker 2 of the staged
+migration described in `sim/README.md` "Staged migration to `klt sim` deck
+mode". That migration completed at cutover: the receipts below are the
+evidence the operator rulings gated the launchers' retirement on, and both
+launchers are now retired (the deterministic one deleted outright; the MC
+one reduced to the identity library `deck_adapter.py` imports), so these
+receipts are also the standing proof the fleet generator and the retired
+local generators are the same measurement.
 
 **These are not characterization records.** Nothing here mints, edits or
 supersedes a record under `sim/*/records/`, and no value here may be quoted as

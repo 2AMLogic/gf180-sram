@@ -828,9 +828,10 @@ def main(argv=None):
     sub.add_parser(
         "spiceinit",
         help="print SPICEINIT_TEXT -- the pinned run-directory .spiceinit "
-        "(#338); run_corner_sweep.sh writes it into each corner's scratch "
-        "directory so the launcher path pins the same environment deck mode "
-        "stages",
+        "(#338). Both builders stage it as a per-unit deck input; a local "
+        "single-point probe redirects this verb's stdout into its scratch "
+        "directory's .spiceinit so a hand-run pins the same environment "
+        "deck mode stages",
     )
     b = sub.add_parser("build")
     b.add_argument("family", choices=sorted(FAMILIES))
@@ -899,9 +900,10 @@ def main(argv=None):
             print(f"{name}\t{d}/testbench/{tb}\t{mode}")
         return 0
     if args.cmd == "spiceinit":
-        # Byte-exact stdout (no print()'s trailing-newline doubling): the
-        # bash launcher redirects this straight into the scratch .spiceinit,
-        # and the test suite asserts those bytes equal SPICEINIT_TEXT.
+        # Byte-exact stdout (no print()'s trailing-newline doubling): a
+        # local single-point probe redirects this straight into its scratch
+        # .spiceinit, and the test suite asserts those bytes equal
+        # SPICEINIT_TEXT.
         sys.stdout.write(SPICEINIT_TEXT)
         return 0
     if args.cmd == "build":
