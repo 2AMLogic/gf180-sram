@@ -18,14 +18,14 @@ Every number in this report traces to exactly one of the source records below --
 
 | Row | Kind | Source record | Record ID | Git sha | Timestamp |
 |---|---|---|---|---|---|
-| Read SNM | 27-corner PVT | `sim/read-snm/records/20260817-011523-4448966.md` | `20260817-011523-4448966` | `4448966` | 2026-08-17T01:15:53Z |
-| Hold SNM | 27-corner PVT | `sim/hold-snm/records/20260817-011558-4448966.md` | `20260817-011558-4448966` | `4448966` | 2026-08-17T01:16:20Z |
-| Write margin (WTV) | 27-corner PVT | `sim/write-margin/records/20260817-105029-ce56f59.md` | `20260817-105029-ce56f59` | `ce56f59` | 2026-08-17T10:50:50Z |
-| Read access time (slowest) | 27-corner PVT | `sim/access-time/records/20260817-011948-4448966.md` | `20260817-011948-4448966` | `4448966` | 2026-08-17T01:20:00Z |
-| Write access time (slowest) | 27-corner PVT | `sim/access-time/records/20260817-012005-4448966.md` | `20260817-012005-4448966` | `4448966` | 2026-08-17T01:20:17Z |
-| Read SNM | Monte Carlo / yield (9-corner subset) | `sim/read-snm/mc/records/20260921-124232-cf5e975.md` | `20260921-124232-cf5e975` | `cf5e975` | 2026-09-21T12:44:29Z |
-| Hold SNM | Monte Carlo / yield (9-corner subset) | `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` | `20260921-124534-cf5e975` | `cf5e975` | 2026-09-21T12:47:16Z |
-| Write margin | Monte Carlo / yield (9-corner subset) | `sim/write-margin/mc/records/20260921-124804-cf5e975.md` | `20260921-124804-cf5e975` | `cf5e975` | 2026-09-21T12:51:14Z |
+| Read SNM | 27-corner PVT | `sim/read-snm/records/20261117-122606-3aa0490.md` | `20261117-122606-3aa0490` | `3aa0490` | 2026-11-17T12:26:06Z |
+| Hold SNM | 27-corner PVT | `sim/hold-snm/records/20261117-122607-3aa0490.md` | `20261117-122607-3aa0490` | `3aa0490` | 2026-11-17T12:26:07Z |
+| Write margin (WTV) | 27-corner PVT | `sim/write-margin/records/20261117-122609-3aa0490.md` | `20261117-122609-3aa0490` | `3aa0490` | 2026-11-17T12:26:09Z |
+| Read access time (slowest) | 27-corner PVT | `sim/access-time/records/20261117-122724-3aa0490.md` | `20261117-122724-3aa0490` | `3aa0490` | 2026-11-17T12:27:24Z |
+| Write access time (slowest) | 27-corner PVT | `sim/access-time/records/20261117-122726-3aa0490.md` | `20261117-122726-3aa0490` | `3aa0490` | 2026-11-17T12:27:26Z |
+| Read SNM | Monte Carlo / yield (9-corner subset) | `sim/read-snm/mc/records/20261117-124156-3aa0490.md` | `20261117-124156-3aa0490` | `3aa0490` | 2026-11-17T12:41:56Z |
+| Hold SNM | Monte Carlo / yield (9-corner subset) | `sim/hold-snm/mc/records/20261117-124200-3aa0490.md` | `20261117-124200-3aa0490` | `3aa0490` | 2026-11-17T12:42:00Z |
+| Write margin | Monte Carlo / yield (9-corner subset) | `sim/write-margin/mc/records/20261117-124203-3aa0490.md` | `20261117-124203-3aa0490` | `3aa0490` | 2026-11-17T12:42:03Z |
 
 ## Per-spec-row summary (worst case across all 27 corners)
 
@@ -33,11 +33,11 @@ The extreme value across the full 27-corner matrix for each spec-row measurement
 
 | Measurement | Extreme value | Corner | Verdict | Source record |
 |---|---|---|---|---|
-| Read SNM | 0.214599 V | `ff_125c_2.97v` | PASS | `sim/read-snm/records/20260817-011523-4448966.md` |
-| Hold SNM | 0.930461 V | `ff_125c_2.97v` | PASS | `sim/hold-snm/records/20260817-011558-4448966.md` |
-| Write margin (WTV) | 1.640530 V | `ff_125c_2.97v` | PASS | `sim/write-margin/records/20260817-105029-ce56f59.md` |
-| Read access time (slowest) | 3.5718e-10 s | `ss_-40c_2.97v` | RECORDED | `sim/access-time/records/20260817-011948-4448966.md` |
-| Write access time (slowest) | 8.4931e-11 s | `ss_125c_2.97v` | RECORDED | `sim/access-time/records/20260817-012005-4448966.md` |
+| Read SNM | 0.143420 V | `ff_125c_2.97v` | PASS | `sim/read-snm/records/20261117-122606-3aa0490.md` |
+| Hold SNM | 0.761125 V | `ff_125c_2.97v` | PASS | `sim/hold-snm/records/20261117-122607-3aa0490.md` |
+| Write margin (WTV) | 1.640530 V | `ff_125c_2.97v` | PASS | `sim/write-margin/records/20261117-122609-3aa0490.md` |
+| Read access time (slowest) | 3.5718e-10 s | `ss_-40c_2.97v` | RECORDED | `sim/access-time/records/20261117-122724-3aa0490.md` |
+| Write access time (slowest) | 8.4931e-11 s | `ss_125c_2.97v` | RECORDED | `sim/access-time/records/20261117-122726-3aa0490.md` |
 
 ## Monte Carlo / yield summary (9-corner subset)
 
@@ -45,15 +45,15 @@ Device-mismatch statistical evidence (issue #26), combined with -- not instead o
 
 | Measurement | Corners sampled | Min Cpk | Min sigma-to-spec | Negative control | Source record |
 |---|---|---|---|---|---|
-| Read SNM | 9 | 2.5579 | 7.6739 | 9/9 detected | `sim/read-snm/mc/records/20260921-124232-cf5e975.md` |
-| Hold SNM | 9 | 16.3717 | 49.1151 | 9/9 detected | `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` |
-| Write margin | 9 | 77.8920 | 233.6760 | 9/9 detected | `sim/write-margin/mc/records/20260921-124804-cf5e975.md` |
+| Read SNM | 9 | 3.6987 | 11.0961 | 9/9 detected | `sim/read-snm/mc/records/20261117-124156-3aa0490.md` |
+| Hold SNM | 9 | 21.5482 | 64.6447 | 9/9 detected | `sim/hold-snm/mc/records/20261117-124200-3aa0490.md` |
+| Write margin | 9 | 77.8920 | 233.6760 | 9/9 detected | `sim/write-margin/mc/records/20261117-124203-3aa0490.md` |
 
 ### Read SNM -- Monte Carlo / yield detail
 
-Source: `sim/read-snm/mc/records/20260921-124232-cf5e975.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
+Source: `sim/read-snm/mc/records/20261117-124156-3aa0490.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
 
-- **Record ID**: `20260921-124232-cf5e975`
+- **Record ID**: `20261117-124156-3aa0490`
 - **Kind**: Monte Carlo mismatch campaign + `klt yield` report (statistical evidence, klayout-tools `docs/design-evidence-tiers.md` item 6)
 - **Claim**: spec/sram.md Characterization -- read SNM (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)
 - **Testbench**: `sim/read-snm/testbench/tb_read_snm.spice`
@@ -63,24 +63,26 @@ Source: `sim/read-snm/mc/records/20260921-124232-cf5e975.md` (full record; raw p
 - **Seed**: `20260817` (base). Per-sample seed = sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer; delivered to ngspice as `.options seed=<derived>, one independent ngspice invocation per sample`.
 - **Sample count**: 200 mismatch samples per corner, 4 determinism-control samples per corner, 100 negative-control samples per corner.
 - **Spec limits**: `min = 0.0` V -- spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner. No `target_yield` is declared: `spec/sram.md` ratifies no yield target for these rows (that is exactly the open operator decision tracked as issue #20), and this harness does not invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, with Cpk / sigma-to-spec as the quantitative margin statement.
-- **PDK**: `gf180mcuD`, open_pdks `c6d73a35f524070e85faff4a6a9eef49553ebc2b` -- **`klt`**: `klt 0.5.0+gfe6fe526388f.dirty` -- **git**: `cf5e975`
+- **PDK**: `gf180mcuD`, open_pdks `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (issue #173 pin, `sim/lib/pdk_pin.txt`) -- **`klt`**: `klt 0.9.2` -- **git**: `3aa0490`
+- **Engine environment**: pinned run-directory .spiceinit staged per deck unit (issue #338; spec/environment-pin-decision.md); `.spiceinit` sha256 `e1a1d1767609427159244035b5a761f1bf43df653e7cfd0cd40a6f762829dffc`
 - **`klt yield` overall status**: `reported` (exit code 0)
-- **Timestamp / author**: 2026-09-21T12:44:29Z / agent-builder
-- **Supersedes**: (none)
+- **Timestamp / author**: 2026-11-17T12:41:56Z / agent-builder
+- **Supersedes**: 20260921-124232-cf5e975 (recorded under open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b, unpinned ngspice environment; re-qualified under the f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7 pin and the pinned hs a environment per spec/environment-pin-decision.md, issue #272)
+- **Transport grading note**: 48 known-bad negative-control draw(s) aborted the engine before producing their declared sweep output (reducer: `declared outputs missing`); each is accounted as one of the errored negative-control draws counted above -- the same draws the superseded record's own negative-control errored set contains. No mismatch or determinism-control draw is implicated.
 
 #### Per-corner result (verbatim from the `klt yield` JSON report)
 
 | Corner | N | errored | mean (V) | stddev (V) | empirical yield, 95% lower bound | Cpk | sigma-to-spec | sample-size verdict | negative control |
 |---|---|---|---|---|---|---|---|---|---|
-| `ff_-40c_2.97v` | 200 | 0 | 0.347325 | 0.0226316 | 0.981725 | 5.11564 | 15.3469 | sufficient | detected |
-| `ff_25c_3.30v` | 200 | 0 | 0.293314 | 0.030682 | 0.981725 | 3.18661 | 9.55983 | sufficient | detected |
-| `ff_125c_2.97v` | 200 | 0 | 0.214422 | 0.0279419 | 0.981725 | 2.55795 | 7.67386 | sufficient | detected |
-| `tt_-40c_3.63v` | 200 | 0 | 0.457688 | 0.0212328 | 0.981725 | 7.18525 | 21.5557 | sufficient | detected |
-| `tt_25c_3.30v` | 200 | 0 | 0.382673 | 0.0235576 | 0.981725 | 5.41472 | 16.2442 | sufficient | detected |
-| `tt_125c_2.97v` | 200 | 0 | 0.293317 | 0.0230081 | 0.981725 | 4.24947 | 12.7484 | sufficient | detected |
-| `ss_-40c_3.63v` | 200 | 0 | 0.562762 | 0.0212834 | 0.981725 | 8.81381 | 26.4414 | sufficient | detected |
-| `ss_25c_2.97v` | 200 | 0 | 0.47458 | 0.0224131 | 0.981725 | 7.05806 | 21.1742 | sufficient | detected |
-| `ss_125c_3.63v` | 200 | 0 | 0.406407 | 0.0240491 | 0.981725 | 5.63303 | 16.8991 | sufficient | detected |
+| `ff_-40c_2.97v` | 200 | 0 | 0.251972 | 0.0124297 | 0.981725 | 6.75726 | 20.2718 | sufficient | detected |
+| `ff_25c_3.30v` | 200 | 0 | 0.192593 | 0.0132477 | 0.981725 | 4.84595 | 14.5379 | sufficient | detected |
+| `ff_125c_2.97v` | 200 | 0 | 0.131088 | 0.0118138 | 0.981725 | 3.6987 | 11.0961 | sufficient | detected |
+| `tt_-40c_3.63v` | 200 | 0 | 0.336084 | 0.0117488 | 0.981725 | 9.53523 | 28.6057 | sufficient | detected |
+| `tt_25c_3.30v` | 200 | 0 | 0.276635 | 0.0123234 | 0.981725 | 7.48265 | 22.4479 | sufficient | detected |
+| `tt_125c_2.97v` | 200 | 0 | 0.208392 | 0.0132353 | 0.981725 | 5.24837 | 15.7451 | sufficient | detected |
+| `ss_-40c_3.63v` | 200 | 0 | 0.421355 | 0.0119187 | 0.981725 | 11.7841 | 35.3523 | sufficient | detected |
+| `ss_25c_2.97v` | 200 | 0 | 0.353848 | 0.0132933 | 0.981725 | 8.87284 | 26.6185 | sufficient | detected |
+| `ss_125c_3.63v` | 200 | 0 | 0.292089 | 0.0123994 | 0.981725 | 7.85225 | 23.5568 | sufficient | detected |
 
 `errored` counts draws that produced no usable measurement (for the SNM fixtures: a draw whose butterfly was not bistable, so no square exists to measure). `klt yield` excludes them from every statistic, so a record with a non-zero `errored` column states a yield estimate *conditioned on a measurable draw* -- read the errored count alongside it, never the yield alone.
 
@@ -90,15 +92,15 @@ With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically f
 
 | Corner | N | errored | distinct value(s) (V) | verdict |
 |---|---|---|---|---|
-| `ff_-40c_2.97v` | 4 | 0 | 0.346745 | PINNED |
-| `ff_25c_3.30v` | 4 | 0 | 0.29104 | PINNED |
-| `ff_125c_2.97v` | 4 | 0 | 0.214599 | PINNED |
-| `tt_-40c_3.63v` | 4 | 0 | 0.45802 | PINNED |
-| `tt_25c_3.30v` | 4 | 0 | 0.381267 | PINNED |
-| `tt_125c_2.97v` | 4 | 0 | 0.295443 | PINNED |
-| `ss_-40c_3.63v` | 4 | 0 | 0.56375 | PINNED |
-| `ss_25c_2.97v` | 4 | 0 | 0.475538 | PINNED |
-| `ss_125c_3.63v` | 4 | 0 | 0.40862 | PINNED |
+| `ff_-40c_2.97v` | 4 | 0 | 0.264687 | PINNED |
+| `ff_25c_3.30v` | 4 | 0 | 0.205996 | PINNED |
+| `ff_125c_2.97v` | 4 | 0 | 0.14342 | PINNED |
+| `tt_-40c_3.63v` | 4 | 0 | 0.347065 | PINNED |
+| `tt_25c_3.30v` | 4 | 0 | 0.28912 | PINNED |
+| `tt_125c_2.97v` | 4 | 0 | 0.2223 | PINNED |
+| `ss_-40c_3.63v` | 4 | 0 | 0.433142 | PINNED |
+| `ss_25c_2.97v` | 4 | 0 | 0.36583 | PINNED |
+| `ss_125c_3.63v` | 4 | 0 | 0.30576 | PINNED |
 
 #### Negative control
 
@@ -110,9 +112,9 @@ Deliberate defect: **known-bad variant: sw_stat_mismatch=20 (20x the PDK's per-i
 
 ### Hold SNM -- Monte Carlo / yield detail
 
-Source: `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
+Source: `sim/hold-snm/mc/records/20261117-124200-3aa0490.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
 
-- **Record ID**: `20260921-124534-cf5e975`
+- **Record ID**: `20261117-124200-3aa0490`
 - **Kind**: Monte Carlo mismatch campaign + `klt yield` report (statistical evidence, klayout-tools `docs/design-evidence-tiers.md` item 6)
 - **Claim**: spec/sram.md Characterization -- hold SNM (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)
 - **Testbench**: `sim/hold-snm/testbench/tb_hold_snm.spice`
@@ -122,24 +124,26 @@ Source: `sim/hold-snm/mc/records/20260921-124534-cf5e975.md` (full record; raw p
 - **Seed**: `20260817` (base). Per-sample seed = sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer; delivered to ngspice as `.options seed=<derived>, one independent ngspice invocation per sample`.
 - **Sample count**: 200 mismatch samples per corner, 4 determinism-control samples per corner, 100 negative-control samples per corner.
 - **Spec limits**: `min = 0.0` V -- spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner. No `target_yield` is declared: `spec/sram.md` ratifies no yield target for these rows (that is exactly the open operator decision tracked as issue #20), and this harness does not invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, with Cpk / sigma-to-spec as the quantitative margin statement.
-- **PDK**: `gf180mcuD`, open_pdks `c6d73a35f524070e85faff4a6a9eef49553ebc2b` -- **`klt`**: `klt 0.5.0+gfe6fe526388f.dirty` -- **git**: `cf5e975`
+- **PDK**: `gf180mcuD`, open_pdks `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (issue #173 pin, `sim/lib/pdk_pin.txt`) -- **`klt`**: `klt 0.9.2` -- **git**: `3aa0490`
+- **Engine environment**: pinned run-directory .spiceinit staged per deck unit (issue #338; spec/environment-pin-decision.md); `.spiceinit` sha256 `e1a1d1767609427159244035b5a761f1bf43df653e7cfd0cd40a6f762829dffc`
 - **`klt yield` overall status**: `reported` (exit code 0)
-- **Timestamp / author**: 2026-09-21T12:47:16Z / agent-builder
-- **Supersedes**: (none)
+- **Timestamp / author**: 2026-11-17T12:42:00Z / agent-builder
+- **Supersedes**: 20260921-124534-cf5e975 (recorded under open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b, unpinned ngspice environment; re-qualified under the f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7 pin and the pinned hs a environment per spec/environment-pin-decision.md, issue #272)
+- **Transport grading note**: 2 known-bad negative-control draw(s) aborted the engine before producing their declared sweep output (reducer: `declared outputs missing`); each is accounted as one of the errored negative-control draws counted above -- the same draws the superseded record's own negative-control errored set contains. No mismatch or determinism-control draw is implicated.
 
 #### Per-corner result (verbatim from the `klt yield` JSON report)
 
 | Corner | N | errored | mean (V) | stddev (V) | empirical yield, 95% lower bound | Cpk | sigma-to-spec | sample-size verdict | negative control |
 |---|---|---|---|---|---|---|---|---|---|
-| `ff_-40c_2.97v` | 200 | 0 | 1.00011 | 0.0173984 | 0.981725 | 19.161 | 57.4829 | sufficient | detected |
-| `ff_25c_3.30v` | 200 | 0 | 1.05079 | 0.0196891 | 0.981725 | 17.7897 | 53.3692 | sufficient | detected |
-| `ff_125c_2.97v` | 200 | 0 | 0.92988 | 0.0189327 | 0.981725 | 16.3717 | 49.1151 | sufficient | detected |
-| `tt_-40c_3.63v` | 200 | 0 | 1.2129 | 0.017096 | 0.981725 | 23.6489 | 70.9466 | sufficient | detected |
-| `tt_25c_3.30v` | 200 | 0 | 1.11069 | 0.0190448 | 0.981725 | 19.4399 | 58.3196 | sufficient | detected |
-| `tt_125c_2.97v` | 200 | 0 | 0.993329 | 0.0166241 | 0.981725 | 19.9175 | 59.7524 | sufficient | detected |
-| `ss_-40c_3.63v` | 200 | 0 | 1.26824 | 0.0168795 | 0.981725 | 25.0449 | 75.1348 | sufficient | detected |
-| `ss_25c_2.97v` | 200 | 0 | 1.08155 | 0.0173882 | 0.981725 | 20.7335 | 62.2005 | sufficient | detected |
-| `ss_125c_3.63v` | 200 | 0 | 1.215 | 0.0179754 | 0.981725 | 22.5308 | 67.5924 | sufficient | detected |
+| `ff_-40c_2.97v` | 200 | 0 | 0.843539 | 0.0125026 | 0.981725 | 22.4897 | 67.4692 | sufficient | detected |
+| `ff_25c_3.30v` | 200 | 0 | 0.863412 | 0.011932 | 0.981725 | 24.1204 | 72.3612 | sufficient | detected |
+| `ff_125c_2.97v` | 200 | 0 | 0.751435 | 0.0116241 | 0.981725 | 21.5482 | 64.6447 | sufficient | detected |
+| `tt_-40c_3.63v` | 200 | 0 | 1.02676 | 0.0106335 | 0.981725 | 32.1864 | 96.5592 | sufficient | detected |
+| `tt_25c_3.30v` | 200 | 0 | 0.931752 | 0.0112178 | 0.981725 | 27.6867 | 83.06 | sufficient | detected |
+| `tt_125c_2.97v` | 200 | 0 | 0.818132 | 0.0110424 | 0.981725 | 24.6967 | 74.0902 | sufficient | detected |
+| `ss_-40c_3.63v` | 200 | 0 | 1.09633 | 0.0111723 | 0.981725 | 32.7096 | 98.1289 | sufficient | detected |
+| `ss_25c_2.97v` | 200 | 0 | 0.940882 | 0.0115696 | 0.981725 | 27.1078 | 81.3235 | sufficient | detected |
+| `ss_125c_3.63v` | 200 | 0 | 1.00691 | 0.0107953 | 0.981725 | 31.091 | 93.2731 | sufficient | detected |
 
 `errored` counts draws that produced no usable measurement (for the SNM fixtures: a draw whose butterfly was not bistable, so no square exists to measure). `klt yield` excludes them from every statistic, so a record with a non-zero `errored` column states a yield estimate *conditioned on a measurable draw* -- read the errored count alongside it, never the yield alone.
 
@@ -149,15 +153,15 @@ With `sw_stat_mismatch=0` the campaign must reproduce, exactly and identically f
 
 | Corner | N | errored | distinct value(s) (V) | verdict |
 |---|---|---|---|---|
-| `ff_-40c_2.97v` | 4 | 0 | 0.999016 | PINNED |
-| `ff_25c_3.30v` | 4 | 0 | 1.04859 | PINNED |
-| `ff_125c_2.97v` | 4 | 0 | 0.930461 | PINNED |
-| `tt_-40c_3.63v` | 4 | 0 | 1.21357 | PINNED |
-| `tt_25c_3.30v` | 4 | 0 | 1.11081 | PINNED |
-| `tt_125c_2.97v` | 4 | 0 | 0.99341 | PINNED |
-| `ss_-40c_3.63v` | 4 | 0 | 1.26881 | PINNED |
-| `ss_25c_2.97v` | 4 | 0 | 1.08238 | PINNED |
-| `ss_125c_3.63v` | 4 | 0 | 1.21645 | PINNED |
+| `ff_-40c_2.97v` | 4 | 0 | 0.853046 | PINNED |
+| `ff_25c_3.30v` | 4 | 0 | 0.873619 | PINNED |
+| `ff_125c_2.97v` | 4 | 0 | 0.761125 | PINNED |
+| `tt_-40c_3.63v` | 4 | 0 | 1.03589 | PINNED |
+| `tt_25c_3.30v` | 4 | 0 | 0.942795 | PINNED |
+| `tt_125c_2.97v` | 4 | 0 | 0.828578 | PINNED |
+| `ss_-40c_3.63v` | 4 | 0 | 1.10484 | PINNED |
+| `ss_25c_2.97v` | 4 | 0 | 0.950414 | PINNED |
+| `ss_125c_3.63v` | 4 | 0 | 1.0183 | PINNED |
 
 #### Negative control
 
@@ -169,9 +173,9 @@ Deliberate defect: **known-bad variant: sw_stat_mismatch=12 (12x the PDK's per-i
 
 ### Write margin -- Monte Carlo / yield detail
 
-Source: `sim/write-margin/mc/records/20260921-124804-cf5e975.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
+Source: `sim/write-margin/mc/records/20261117-124203-3aa0490.md` (full record; raw per-sample logs, sample-set JSON, and the verbatim `klt yield` text report are linked from that file, not reproduced here).
 
-- **Record ID**: `20260921-124804-cf5e975`
+- **Record ID**: `20261117-124203-3aa0490`
 - **Kind**: Monte Carlo mismatch campaign + `klt yield` report (statistical evidence, klayout-tools `docs/design-evidence-tiers.md` item 6)
 - **Claim**: spec/sram.md Characterization -- write margin, as write trip voltage (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)
 - **Testbench**: `sim/write-margin/testbench/tb_write_margin.spice`
@@ -181,10 +185,11 @@ Source: `sim/write-margin/mc/records/20260921-124804-cf5e975.md` (full record; r
 - **Seed**: `20260817` (base). Per-sample seed = sha256(base_seed:corner_id:kind:sample_index), truncated to a positive 31-bit integer; delivered to ngspice as `.options seed=<derived>, one independent ngspice invocation per sample`.
 - **Sample count**: 200 mismatch samples per corner, 4 determinism-control samples per corner, 100 negative-control samples per corner.
 - **Spec limits**: `min = 0.0` V -- spec/sram.md 'Characterization' -- read SNM / hold SNM / write margin must be strictly positive at every corner. No `target_yield` is declared: `spec/sram.md` ratifies no yield target for these rows (that is exactly the open operator decision tracked as issue #20), and this harness does not invent one. The estimates below are therefore *reported* against the spec's own `> 0` limit, with Cpk / sigma-to-spec as the quantitative margin statement.
-- **PDK**: `gf180mcuD`, open_pdks `c6d73a35f524070e85faff4a6a9eef49553ebc2b` -- **`klt`**: `klt 0.5.0+gfe6fe526388f.dirty` -- **git**: `cf5e975`
+- **PDK**: `gf180mcuD`, open_pdks `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` (issue #173 pin, `sim/lib/pdk_pin.txt`) -- **`klt`**: `klt 0.9.2` -- **git**: `3aa0490`
+- **Engine environment**: pinned run-directory .spiceinit staged per deck unit (issue #338; spec/environment-pin-decision.md); `.spiceinit` sha256 `e1a1d1767609427159244035b5a761f1bf43df653e7cfd0cd40a6f762829dffc`
 - **`klt yield` overall status**: `reported` (exit code 0)
-- **Timestamp / author**: 2026-09-21T12:51:14Z / agent-builder
-- **Supersedes**: (none)
+- **Timestamp / author**: 2026-11-17T12:42:03Z / agent-builder
+- **Supersedes**: 20260921-124804-cf5e975 (recorded under open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b, unpinned ngspice environment; re-qualified under the f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7 pin and the pinned hs a environment per spec/environment-pin-decision.md, issue #272)
 
 #### Per-corner result (verbatim from the `klt yield` JSON report)
 
@@ -242,11 +247,11 @@ This document derives an explicit **per-corner, per-metric PASS/FAIL verdict** f
 
 #### Source records
 
-- Read SNM: `sim/read-snm/records/20260817-011523-4448966.md`
-- Hold SNM: `sim/hold-snm/records/20260817-011558-4448966.md`
-- Write margin: `sim/write-margin/records/20260817-105029-ce56f59.md` (margin is `write_trip_voltage_v` (WTV) directly -- the minimum write-driver drive that still flips the cell)
-- Read access time: `sim/access-time/records/20260817-011948-4448966.md`
-- Write access time: `sim/access-time/records/20260817-012005-4448966.md`
+- Read SNM: `sim/read-snm/records/20261117-122606-3aa0490.md`
+- Hold SNM: `sim/hold-snm/records/20261117-122607-3aa0490.md`
+- Write margin: `sim/write-margin/records/20261117-122609-3aa0490.md` (margin is `write_trip_voltage_v` (WTV) directly -- the minimum write-driver drive that still flips the cell)
+- Read access time: `sim/access-time/records/20261117-122724-3aa0490.md`
+- Write access time: `sim/access-time/records/20261117-122726-3aa0490.md`
 
 #### Verdict rule (`spec/sram.md`, "### Signoff definition")
 
@@ -259,38 +264,38 @@ This document derives an explicit **per-corner, per-metric PASS/FAIL verdict** f
 
 | Corner | Read SNM (V) | Verdict | Hold SNM (V) | Verdict | Write margin (V) | Verdict | Read access time (s) | Verdict | Write access time (s) | Verdict | Row overall (SNM + margin) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ff_-40c_2.97v | 0.346745 | PASS | 0.999014 | PASS | 1.695460 | PASS | 1.4094e-10 | RECORDED | 4.7116e-11 | RECORDED | PASS |
-| ff_-40c_3.30v | 0.348079 | PASS | 1.075028 | PASS | 1.891500 | PASS | 1.1791e-10 | RECORDED | 4.4605e-11 | RECORDED | PASS |
-| ff_-40c_3.63v | 0.378868 | PASS | 1.150509 | PASS | 2.087960 | PASS | 1.0357e-10 | RECORDED | 4.2459e-11 | RECORDED | PASS |
-| ff_25c_2.97v | 0.279259 | PASS | 0.972353 | PASS | 1.672980 | PASS | 1.4785e-10 | RECORDED | 5.0519e-11 | RECORDED | PASS |
-| ff_25c_3.30v | 0.291040 | PASS | 1.048587 | PASS | 1.870750 | PASS | 1.2610e-10 | RECORDED | 4.7849e-11 | RECORDED | PASS |
-| ff_25c_3.63v | 0.322552 | PASS | 1.124406 | PASS | 2.068910 | PASS | 1.1195e-10 | RECORDED | 4.5613e-11 | RECORDED | PASS |
-| ff_125c_2.97v | 0.214599 | PASS | 0.930461 | PASS | 1.640530 | PASS | 1.5703e-10 | RECORDED | 5.7246e-11 | RECORDED | PASS |
-| ff_125c_3.30v | 0.237829 | PASS | 1.008552 | PASS | 1.838120 | PASS | 1.3761e-10 | RECORDED | 5.3928e-11 | RECORDED | PASS |
-| ff_125c_3.63v | 0.265005 | PASS | 1.087062 | PASS | 2.036110 | PASS | 1.2389e-10 | RECORDED | 5.1521e-11 | RECORDED | PASS |
-| tt_-40c_2.97v | 0.443117 | PASS | 1.055088 | PASS | 1.738240 | PASS | 2.0899e-10 | RECORDED | 5.5771e-11 | RECORDED | PASS |
-| tt_-40c_3.30v | 0.450044 | PASS | 1.134683 | PASS | 1.935810 | PASS | 1.6117e-10 | RECORDED | 5.2198e-11 | RECORDED | PASS |
-| tt_-40c_3.63v | 0.458020 | PASS | 1.213568 | PASS | 2.132710 | PASS | 1.3429e-10 | RECORDED | 4.9423e-11 | RECORDED | PASS |
-| tt_25c_2.97v | 0.377941 | PASS | 1.031028 | PASS | 1.711050 | PASS | 2.1229e-10 | RECORDED | 6.0738e-11 | RECORDED | PASS |
-| tt_25c_3.30v | 0.381267 | PASS | 1.110807 | PASS | 1.910030 | PASS | 1.7014e-10 | RECORDED | 5.6764e-11 | RECORDED | PASS |
-| tt_25c_3.63v | 0.385058 | PASS | 1.189934 | PASS | 2.109230 | PASS | 1.4485e-10 | RECORDED | 5.3568e-11 | RECORDED | PASS |
-| tt_125c_2.97v | 0.295443 | PASS | 0.993408 | PASS | 1.677510 | PASS | 2.1819e-10 | RECORDED | 6.9354e-11 | RECORDED | PASS |
-| tt_125c_3.30v | 0.296711 | PASS | 1.074566 | PASS | 1.877400 | PASS | 1.8293e-10 | RECORDED | 6.4782e-11 | RECORDED | PASS |
-| tt_125c_3.63v | 0.318427 | PASS | 1.155746 | PASS | 2.077770 | PASS | 1.5948e-10 | RECORDED | 6.1280e-11 | RECORDED | PASS |
-| ss_-40c_2.97v | 0.540536 | PASS | 1.105024 | PASS | 1.769780 | PASS | 3.5718e-10 | RECORDED | 6.7146e-11 | RECORDED | PASS |
-| ss_-40c_3.30v | 0.550840 | PASS | 1.187215 | PASS | 1.972470 | PASS | 2.4039e-10 | RECORDED | 6.2505e-11 | RECORDED | PASS |
-| ss_-40c_3.63v | 0.563750 | PASS | 1.268808 | PASS | 2.172590 | PASS | 1.8532e-10 | RECORDED | 5.8880e-11 | RECORDED | PASS |
-| ss_25c_2.97v | 0.475538 | PASS | 1.082379 | PASS | 1.742410 | PASS | 3.3581e-10 | RECORDED | 7.3637e-11 | RECORDED | PASS |
-| ss_25c_3.30v | 0.483481 | PASS | 1.165266 | PASS | 1.943660 | PASS | 2.4585e-10 | RECORDED | 6.8305e-11 | RECORDED | PASS |
-| ss_25c_3.63v | 0.493503 | PASS | 1.247287 | PASS | 2.144230 | PASS | 1.9717e-10 | RECORDED | 6.4215e-11 | RECORDED | PASS |
-| ss_125c_2.97v | 0.394239 | PASS | 1.048438 | PASS | 1.706340 | PASS | 3.2326e-10 | RECORDED | 8.4931e-11 | RECORDED | PASS |
-| ss_125c_3.30v | 0.400760 | PASS | 1.132542 | PASS | 1.908220 | PASS | 2.5525e-10 | RECORDED | 7.8579e-11 | RECORDED | PASS |
-| ss_125c_3.63v | 0.408620 | PASS | 1.216449 | PASS | 2.109670 | PASS | 2.1346e-10 | RECORDED | 7.3752e-11 | RECORDED | PASS |
+| ff_-40c_2.97v | 0.264687 | PASS | 0.853046 | PASS | 1.695460 | PASS | 1.4094e-10 | RECORDED | 4.7116e-11 | RECORDED | PASS |
+| ff_-40c_3.30v | 0.262503 | PASS | 0.909126 | PASS | 1.891500 | PASS | 1.1791e-10 | RECORDED | 4.4605e-11 | RECORDED | PASS |
+| ff_-40c_3.63v | 0.259602 | PASS | 0.965199 | PASS | 2.087960 | PASS | 1.0357e-10 | RECORDED | 4.2459e-11 | RECORDED | PASS |
+| ff_25c_2.97v | 0.210573 | PASS | 0.816614 | PASS | 1.672980 | PASS | 1.4785e-10 | RECORDED | 5.0519e-11 | RECORDED | PASS |
+| ff_25c_3.30v | 0.205996 | PASS | 0.873619 | PASS | 1.870750 | PASS | 1.2610e-10 | RECORDED | 4.7849e-11 | RECORDED | PASS |
+| ff_25c_3.63v | 0.202005 | PASS | 0.930665 | PASS | 2.068910 | PASS | 1.1195e-10 | RECORDED | 4.5613e-11 | RECORDED | PASS |
+| ff_125c_2.97v | 0.143420 | PASS | 0.761125 | PASS | 1.640530 | PASS | 1.5703e-10 | RECORDED | 5.7246e-11 | RECORDED | PASS |
+| ff_125c_3.30v | 0.147533 | PASS | 0.820324 | PASS | 1.838120 | PASS | 1.3761e-10 | RECORDED | 5.3928e-11 | RECORDED | PASS |
+| ff_125c_3.63v | 0.160360 | PASS | 0.879850 | PASS | 2.036110 | PASS | 1.2389e-10 | RECORDED | 5.1521e-11 | RECORDED | PASS |
+| tt_-40c_2.97v | 0.342037 | PASS | 0.921044 | PASS | 1.738240 | PASS | 2.0899e-10 | RECORDED | 5.5771e-11 | RECORDED | PASS |
+| tt_-40c_3.30v | 0.345030 | PASS | 0.978421 | PASS | 1.935810 | PASS | 1.6117e-10 | RECORDED | 5.2198e-11 | RECORDED | PASS |
+| tt_-40c_3.63v | 0.347065 | PASS | 1.035891 | PASS | 2.132710 | PASS | 1.3429e-10 | RECORDED | 4.9423e-11 | RECORDED | PASS |
+| tt_25c_2.97v | 0.289197 | PASS | 0.884387 | PASS | 1.711050 | PASS | 2.1229e-10 | RECORDED | 6.0738e-11 | RECORDED | PASS |
+| tt_25c_3.30v | 0.289120 | PASS | 0.942795 | PASS | 1.910030 | PASS | 1.7014e-10 | RECORDED | 5.6764e-11 | RECORDED | PASS |
+| tt_25c_3.63v | 0.288792 | PASS | 1.001230 | PASS | 2.109230 | PASS | 1.4485e-10 | RECORDED | 5.3568e-11 | RECORDED | PASS |
+| tt_125c_2.97v | 0.222300 | PASS | 0.828578 | PASS | 1.677510 | PASS | 2.1819e-10 | RECORDED | 6.9354e-11 | RECORDED | PASS |
+| tt_125c_3.30v | 0.220417 | PASS | 0.889070 | PASS | 1.877400 | PASS | 1.8293e-10 | RECORDED | 6.4782e-11 | RECORDED | PASS |
+| tt_125c_3.63v | 0.219429 | PASS | 0.949915 | PASS | 2.077770 | PASS | 1.5948e-10 | RECORDED | 6.1280e-11 | RECORDED | PASS |
+| ss_-40c_2.97v | 0.417602 | PASS | 0.987397 | PASS | 1.769780 | PASS | 3.5718e-10 | RECORDED | 6.7146e-11 | RECORDED | PASS |
+| ss_-40c_3.30v | 0.425517 | PASS | 1.046025 | PASS | 1.972470 | PASS | 2.4039e-10 | RECORDED | 6.2505e-11 | RECORDED | PASS |
+| ss_-40c_3.63v | 0.433142 | PASS | 1.104843 | PASS | 2.172590 | PASS | 1.8532e-10 | RECORDED | 5.8880e-11 | RECORDED | PASS |
+| ss_25c_2.97v | 0.365830 | PASS | 0.950414 | PASS | 1.742410 | PASS | 3.3581e-10 | RECORDED | 7.3637e-11 | RECORDED | PASS |
+| ss_25c_3.30v | 0.370756 | PASS | 1.010217 | PASS | 1.943660 | PASS | 2.4585e-10 | RECORDED | 6.8305e-11 | RECORDED | PASS |
+| ss_25c_3.63v | 0.375427 | PASS | 1.070079 | PASS | 2.144230 | PASS | 1.9717e-10 | RECORDED | 6.4215e-11 | RECORDED | PASS |
+| ss_125c_2.97v | 0.300385 | PASS | 0.894282 | PASS | 1.706340 | PASS | 3.2326e-10 | RECORDED | 8.4931e-11 | RECORDED | PASS |
+| ss_125c_3.30v | 0.302829 | PASS | 0.956122 | PASS | 1.908220 | PASS | 2.5525e-10 | RECORDED | 7.8579e-11 | RECORDED | PASS |
+| ss_125c_3.63v | 0.305760 | PASS | 1.018300 | PASS | 2.109670 | PASS | 2.1346e-10 | RECORDED | 7.3752e-11 | RECORDED | PASS |
 
 #### Aggregate
 
-- Read SNM: 27/27 PASS (min 0.214599 V)
-- Hold SNM: 27/27 PASS (min 0.930461 V)
+- Read SNM: 27/27 PASS (min 0.143420 V)
+- Hold SNM: 27/27 PASS (min 0.761125 V)
 - Write margin: 27/27 PASS (min 1.640530 V)
 - Read access time: 27/27 RECORDED
 - Write access time: 27/27 RECORDED

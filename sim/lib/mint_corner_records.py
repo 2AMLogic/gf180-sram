@@ -9,7 +9,10 @@ The #230 cutover retired `sim/lib/run_corner_sweep.sh`, which both ran the
 half: `deck_adapter.py build` stages, `klt sim` runs, `deck_adapter.py
 reduce` grades. This module is the second half -- the record minter the
 by-hand pex write-margin legs (#95, deck port #437) need to regenerate
-their append-only evidence, and the same gap #272 faces.
+their append-only evidence. The reference-record half of the same gap is
+filled by `sim/lib/mint_records.py` (#272), which also mints the SNM and
+Monte Carlo families this module deliberately refuses -- see its docstring
+for the split.
 
 It writes exactly the record format every `sim/<experiment>/` directory
 uses (sim/README.md "Summary record format"; the byte template is the
