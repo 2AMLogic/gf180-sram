@@ -24,6 +24,8 @@ an engine exit status, and never from an offline stub. Fail-closed rules:
   this path (their deck-mode migration went through the parity receipts);
 * every corner graded `recorded` must have its raw engine stdout/stderr
   under the unit dir -- a record whose raw log is missing is not minted;
+* a report-declared stream path that is absolute or resolves outside the
+  unit dir refuses -- evidence is read from the run's own output only (#448);
 * any existing artifact for the record id (record, snapshot, corners dir)
   makes the mint refuse: append-only means never overwrite.
 
@@ -53,7 +55,8 @@ declare each unit's stream paths); `--unit-dir` is the same outdir
 stdout/stderr resolve through `deck_adapter.unit_stream_relpath` -- the
 report's declared `units[].stdout`/`.stderr`, falling back to the default
 per-unit layout `<corner-id>/stdout.bin` + `stderr.bin` -- the identical
-rule the grader used (#444). The experiment directory defaults to the
+rule the grader used (#444), containment-checked against the unit dir (#448).
+The experiment directory defaults to the
 family's own under the repo root; `--exp-dir` exists for offline tests.
 Prints `record-id: <id>` on success.
 """
@@ -221,7 +224,7 @@ def mint_record(
         unit_entry = report_units.get(cid, {})
         streams = []
         for stream in ("stdout", "stderr"):
-            rel = da.unit_stream_relpath(unit_entry, cid, stream)
+            rel = da.unit_stream_relpath(unit_entry, cid, stream, base=unit)
             p = unit / rel
             if p.is_file():
                 streams.append(p.read_bytes().decode("utf-8", errors="replace"))
