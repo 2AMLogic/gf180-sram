@@ -46,14 +46,19 @@ launcher's copy said `schematic`.
 
 Usage:
     mint_corner_records.py <family> <reduced.json> --request REQUEST.json
-                           --unit-dir DIR --claim TEXT
+                           --report REPORT.json --unit-dir DIR --claim TEXT
                            [--supersedes TEXT] [--exp-dir DIR]
 
 `reduced.json` is `deck_adapter.py reduce ... --json-out`'s output;
-`--unit-dir` is the same outdir `klt sim -o` wrote (default per-unit layout
-`<corner-id>/stdout.bin` + `stderr.bin`) and `reduce --outdir` read. The
-experiment directory defaults to the family's own under the repo root;
-`--exp-dir` exists for offline tests. Prints `record-id: <id>` on success.
+`--report` is the same `klt sim` report `reduce` graded (its `units[]`
+declare each unit's stream paths); `--unit-dir` is the same outdir
+`klt sim -o` wrote and `reduce --outdir` read. Each unit's raw
+stdout/stderr resolve through `deck_adapter.unit_stream_relpath` -- the
+report's declared `units[].stdout`/`.stderr`, falling back to the default
+per-unit layout `<corner-id>/stdout.bin` + `stderr.bin` -- the identical
+rule the grader used (#444). The experiment directory defaults to the
+family's own under the repo root; `--exp-dir` exists for offline tests.
+Prints `record-id: <id>` on success.
 """
 from __future__ import annotations
 
@@ -122,6 +127,7 @@ def mint_record(
     reduced,
     request,
     *,
+    report,
     unit_dir,
     exp_dir,
     record_id,
@@ -133,8 +139,12 @@ def mint_record(
     """Write the three append-only artifacts; returns the record's Path.
 
     Refuses (ValueError) on every fail-closed rule in the module docstring.
-    `record_id` and `timestamp` are parameters only so offline tests are
-    deterministic; the CLI derives both from the clock/git.
+    `report` is the `klt sim` deck report `reduced` was graded from -- the
+    minter resolves each unit's raw streams from its `units[]` declaration
+    with the same rule as the grader (`deck_adapter.unit_stream_relpath`),
+    never from a second hardcoded layout. `record_id` and `timestamp` are
+    parameters only so offline tests are deterministic; the CLI derives
+    both from the clock/git.
     """
     exp_dir_default, tb_name, mode, staged_files = da.FAMILIES[family]
     kind, _datafile, _label = da.parse_mode(mode)
@@ -172,6 +182,14 @@ def mint_record(
             f"({len(graded)} graded) -- refusing to mint a record with a "
             "missing corner row"
         )
+    if report.get("mode") != "decks" or not isinstance(report.get("units"), list):
+        raise ValueError(
+            "report is not a deck-list report (mode != 'decks') -- cannot "
+            "resolve unit stream paths"
+        )
+    report_units = {}
+    for u in report["units"]:
+        report_units.setdefault(u.get("id"), u)
 
     exp = Path(exp_dir)
     tb_path = exp / "testbench" / tb_name
@@ -198,13 +216,20 @@ def mint_record(
     log_bodies = {}
     for cid, (process, temp, vdd) in axes.items():
         entry = by_id.get(cid)
+        if entry is not None and entry.get("status") == "recorded" and cid not in report_units:
+            raise ValueError(
+                f"recorded corner {cid} has no unit in the report -- the "
+                "reduced grading and the report disagree; refusing"
+            )
+        unit_entry = report_units.get(cid, {})
         streams = []
-        for name in ("stdout.bin", "stderr.bin"):
-            p = unit / cid / name
+        for stream in ("stdout", "stderr"):
+            rel = da.unit_stream_relpath(unit_entry, cid, stream)
+            p = unit / rel
             if p.is_file():
                 streams.append(p.read_bytes().decode("utf-8", errors="replace"))
             elif entry is not None and entry.get("status") == "recorded":
-                raise ValueError(f"raw {name} missing for recorded corner {cid} under {unit}")
+                raise ValueError(f"raw {rel} missing for recorded corner {cid} under {unit}")
         streams.append(f"=== corner: {cid} (process={process} temp={temp}C vdd={vdd}V) ===\n")
         streams.append(f"=== ngspice exit status: {entry.get('engine_exit_code') if entry else None} ===\n")
         log_bodies[cid] = "".join(streams)
@@ -287,8 +312,13 @@ def main(argv=None):
     ap.add_argument("family", choices=sorted(da.FAMILIES))
     ap.add_argument("reduced", help="deck_adapter.py reduce --json-out output")
     ap.add_argument("--request", required=True, help="the request `build` wrote")
+    ap.add_argument("--report", required=True,
+                    help="the `klt sim` report `reduce` graded (its units[] "
+                         "declare each unit's stream paths)")
     ap.add_argument("--unit-dir", required=True,
-                    help="klt sim's -o outdir (and reduce's --outdir): per-unit <cid>/stdout.bin")
+                    help="klt sim's -o outdir (and reduce's --outdir); stream "
+                         "paths resolve per the report's declaration, "
+                         "defaulting to per-unit <cid>/stdout.bin")
     ap.add_argument("--claim", required=True,
                     help="the spec/sram.md claim this record substantiates (written verbatim)")
     ap.add_argument("--supersedes", default="",
@@ -300,9 +330,11 @@ def main(argv=None):
 
     reduced = json.loads(Path(args.reduced).read_text())
     request = json.loads(Path(args.request).read_text())
+    report = json.loads(Path(args.report).read_text())
     exp_dir = args.exp_dir or str(Path(REPO_ROOT) / da.FAMILIES[args.family][0])
     record_md = mint_record(
         args.family, reduced, request,
+        report=report,
         unit_dir=args.unit_dir, exp_dir=exp_dir,
         record_id=new_record_id(), claim=args.claim, supersedes=args.supersedes,
     )
