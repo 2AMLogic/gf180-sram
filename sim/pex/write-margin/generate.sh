@@ -61,6 +61,7 @@ EOF
 
   python3 sim/lib/mint_corner_records.py "$family" "$scratch/reduced-$family.json" \
     --request "$scratch/$family/request.json" \
+    --report "$scratch/report-$family.json" \
     --unit-dir "$scratch/out-$family" \
     --claim "$claim"
 }
