@@ -74,11 +74,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "macro-smoke"))
-# The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
-# (#331); the request's `corners` block is derived from it, exactly as
-# sim/macro-smoke/smoke.py does. Numbers are converted at this consumer's own
-# boundary (see corner_matrix's "Axis element type").
-from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
+# The request skeleton and the Q-word grading rule (#388) have a single
+# owner, sim/lib/klt_bench.py; its `corners` block is in turn derived from
+# the ratified matrix's own owner, sim/lib/corner_matrix.py (#331), exactly
+# as sim/macro-smoke/smoke.py does.
+from klt_bench import base_request, q_probes, read_word  # noqa: E402
 
 # The stimulus data and helpers shared with the 10/10 ns baseline are
 # imported, not copied (the sim/access-power/access_power.py pattern, #394):
@@ -233,34 +233,19 @@ def gen_klt(clk_high: float, clk_low: float) -> str:
 
 def klt_request(clk_high: float, clk_low: float) -> dict:
     """The klt sim request for one grid point: the ratified 27-corner matrix
-    (derived from sim/lib/corner_matrix.py), one FIND per sampled Q bit, every
-    `.meas ... AT=` time derived from this variant's PERIOD."""
+    (via the shared sim/lib/klt_bench.py skeleton), one FIND per sampled Q
+    bit, every `.meas ... AT=` time derived from this variant's PERIOD."""
     d = derived(clk_high, clk_low)
-    meas = []
-    for i, o in enumerate(OPS):
-        if o[6] is None:
-            continue
-        ts = edge(i, d["PERIOD"]) + d["SAMPLE"]
-        for b in range(32):
-            meas.append({
-                "name": f"q{b}_op{i}",
-                "spice": f".meas tran q{b}_op{i} FIND v(Q[{b}]) AT={ts:g}n",
-                "unit": "V",
-            })
-    return {
-        "netlist": f"../testbench/tb_min_clk_{variant_tag(clk_high, clk_low)}.klt.spice",
-        "engine": "ngspice",
-        "models": {"lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"},
-        "corners": {
-            "process": [{"name": p, "sections": [LIB_SECTION[p]]} for p in PROCESSES],
-            "supply_v": {"vvdd": [float(v) for v in VDDS]},
-            "temperature_c": [int(t) for t in TEMPS],
-        },
-        "analysis": {"kind": "tran", "args": f"0.02n {edge(len(OPS) - 1, d['PERIOD']) + d['PERIOD']:g}n"},
-        "measurements": meas,
-        "netlist_source": "schematic",
-        "options": {"timeout_s": 1500},
-    }
+    meas = q_probes(
+        (f"op{i}", edge(i, d["PERIOD"]) + d["SAMPLE"])
+        for i, o in enumerate(OPS)
+        if o[6] is not None
+    )
+    return base_request(
+        f"../testbench/tb_min_clk_{variant_tag(clk_high, clk_low)}.klt.spice",
+        f"0.02n {edge(len(OPS) - 1, d['PERIOD']) + d['PERIOD']:g}n",
+        meas,
+    )
 
 
 # --- grading -----------------------------------------------------------------
@@ -270,8 +255,8 @@ PASS, FAIL, OPEN = "PASS", "FAIL", "OPEN"
 
 def grade_corner(corner) -> dict:
     """Grade one corner of a report: rebuild every sampled Q word against that
-    corner's own VDD (a bit is defined if within 20% of a rail, the smoke.py
-    rule). A corner klt sim did not measure is OPEN with its klt status named,
+    corner's own VDD (the shared defined-bit rule, sim/lib/klt_bench.py). A
+    corner klt sim did not measure is OPEN with its klt status named,
     never FAIL: an unmeasured corner is bench evidence, not a macro failure."""
     vdd = corner["supply_v"]["vvdd"]
     klt_status = corner.get("status", "?")
@@ -284,16 +269,8 @@ def grade_corner(corner) -> dict:
     for i, o in enumerate(OPS):
         if o[6] is None:
             continue
-        got = 0
-        und = 0
-        for b in range(32):
-            v = vals.get((i, b))
-            if v is None:
-                missing += 1
-                continue
-            if not (v < 0.2 * vdd or v > 0.8 * vdd):
-                und += 1
-            got |= (1 if v > vdd / 2 else 0) << b
+        got, und, unmeasured = read_word([vals.get((i, b)) for b in range(32)], vdd)
+        missing += unmeasured
         und_total += und
         if und or (not missing and got != o[6]):
             bad += 1

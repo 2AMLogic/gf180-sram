@@ -19,14 +19,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
-# The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
-# (#331). The `klt sim` request's `corners` block below is derived from it
-# rather than hand-listed, so this request cannot sweep a different matrix
-# than sim/lib/run_corner_sweep.sh and the deck adapter do. `klt sim` wants
-# the two numeric axes as JSON numbers, so they are converted here, at this
-# consumer's own boundary -- the owner holds every axis point as the spec's
-# literal label (see that module's "Axis element type").
-from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
+# The request skeleton and the Q-word grading rule (#388) have a single
+# owner, sim/lib/klt_bench.py; its `corners` block is in turn derived from
+# the ratified matrix's own owner, sim/lib/corner_matrix.py (#331), so this
+# request cannot sweep a different matrix than sim/lib/run_corner_sweep.sh
+# and the deck adapter do.
+from klt_bench import base_request, q_probes, read_word  # noqa: E402
 
 PERIOD = 20.0  # ns
 FIRST_EDGE = 5.0  # ns; edge 0 is an idle (CEN=1) initialisation cycle
@@ -149,28 +147,16 @@ def gen_klt():
 
 def klt_request():
     """The klt sim request for gen_klt(): the ratified corner matrix (27 corners
-    today, derived from sim/lib/corner_matrix.py), one FIND per sampled Q bit."""
-    meas = []
-    for i, o in enumerate(OPS):
-        if o[6] is None:
-            continue
-        ts = edge(i) + SAMPLE
-        for b in range(32):
-            meas.append({"name": f"q{b}_op{i}", "spice": f".meas tran q{b}_op{i} FIND v(Q[{b}]) AT={ts:g}n", "unit": "V"})
-    return {
-        "netlist": "../testbench/tb_macro_write_read.klt.spice",
-        "engine": "ngspice",
-        "models": {"lib": "$PDK_ROOT/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"},
-        "corners": {
-            "process": [{"name": p, "sections": [LIB_SECTION[p]]} for p in PROCESSES],
-            "supply_v": {"vvdd": [float(v) for v in VDDS]},
-            "temperature_c": [int(t) for t in TEMPS],
-        },
-        "analysis": {"kind": "tran", "args": f"0.02n {edge(len(OPS) - 1) + PERIOD:g}n"},
-        "measurements": meas,
-        "netlist_source": "schematic",
-        "options": {"timeout_s": 1500},
-    }
+    today, via the shared sim/lib/klt_bench.py skeleton), one FIND per sampled
+    Q bit."""
+    meas = q_probes(
+        (f"op{i}", edge(i) + SAMPLE) for i, o in enumerate(OPS) if o[6] is not None
+    )
+    return base_request(
+        "../testbench/tb_macro_write_read.klt.spice",
+        f"0.02n {edge(len(OPS) - 1) + PERIOD:g}n",
+        meas,
+    )
 
 
 def check_klt(report):
@@ -192,16 +178,8 @@ def check_klt(report):
         for i, o in enumerate(OPS):
             if o[6] is None:
                 continue
-            got = 0
-            und = 0
-            for b in range(32):
-                v = vals.get((i, b))
-                if v is None:
-                    missing += 1
-                    continue
-                if not (v < 0.2 * vdd or v > 0.8 * vdd):
-                    und += 1
-                got |= (1 if v > vdd / 2 else 0) << b
+            got, und, unmeasured = read_word([vals.get((i, b)) for b in range(32)], vdd)
+            missing += unmeasured
             if und or (not missing and got != o[6]):
                 bad += 1
         status = "OPEN" if missing else ("FAIL" if bad else "PASS")
