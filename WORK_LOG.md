@@ -11,14 +11,14 @@ by the Guide role's document maintenance phase. Newest entries first.
 ### 2026-11-17
 
 - **PR #425**: refactor: single-owner klt request skeleton and Q-word grading for the three macro-netlist benches
-- **PR #424**: fix: correct fenced-row slot invariant in ungated_receipt_headings docstring
-- **PR #422**: fix: skip fenced "| File | What |" rows in the ungated-receipt warning
-- **PR #419**: fix: name the second-table cause in the ungated-receipt warning
-- **PR #418**: fix: pin the four nested sim/pex testbenches, widen the item-9 gate to any depth
 - **Issue #423** (closed): ungated_receipt_headings docstring asserts a false fence invariant (and hides a fenced-example hard error)
+- **PR #424**: fix: correct fenced-row slot invariant in ungated_receipt_headings docstring
 - **Issue #420** (closed): Evidence gate: ungated-receipt-table warning misreads a fenced `| File | What |` row as a second table
+- **PR #422**: fix: skip fenced "| File | What |" rows in the ungated-receipt warning
 - **Issue #415** (closed): Ungated-receipt-table warning text misdescribes the newly-surfaced second-table shape
+- **PR #419**: fix: name the second-table cause in the ungated-receipt warning
 - **Issue #392** (closed): Four committed sim/pex/*/testbench/tb_* benches are pinned by no signoff wrapper
+- **PR #418**: fix: pin the four nested sim/pex testbenches, widen the item-9 gate to any depth
 - **Issue #388** (closed): Consolidate duplicated klt request skeleton and Q-word grading across smoke, access-power, min-clock-pulse benches
 
 ### 2026-11-16
