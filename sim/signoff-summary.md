@@ -10,11 +10,11 @@ This document derives an explicit **per-corner, per-metric PASS/FAIL verdict** f
 
 ## Source records
 
-- Read SNM: `sim/read-snm/records/20260817-011523-4448966.md`
-- Hold SNM: `sim/hold-snm/records/20260817-011558-4448966.md`
-- Write margin: `sim/write-margin/records/20260817-105029-ce56f59.md` (margin is `write_trip_voltage_v` (WTV) directly -- the minimum write-driver drive that still flips the cell)
-- Read access time: `sim/access-time/records/20260817-011948-4448966.md`
-- Write access time: `sim/access-time/records/20260817-012005-4448966.md`
+- Read SNM: `sim/read-snm/records/20261117-122606-3aa0490.md`
+- Hold SNM: `sim/hold-snm/records/20261117-122607-3aa0490.md`
+- Write margin: `sim/write-margin/records/20261117-122609-3aa0490.md` (margin is `write_trip_voltage_v` (WTV) directly -- the minimum write-driver drive that still flips the cell)
+- Read access time: `sim/access-time/records/20261117-122724-3aa0490.md`
+- Write access time: `sim/access-time/records/20261117-122726-3aa0490.md`
 
 ## Verdict rule (`spec/sram.md`, "### Signoff definition")
 
@@ -27,38 +27,38 @@ This document derives an explicit **per-corner, per-metric PASS/FAIL verdict** f
 
 | Corner | Read SNM (V) | Verdict | Hold SNM (V) | Verdict | Write margin (V) | Verdict | Read access time (s) | Verdict | Write access time (s) | Verdict | Row overall (SNM + margin) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ff_-40c_2.97v | 0.346745 | PASS | 0.999014 | PASS | 1.695460 | PASS | 1.4094e-10 | RECORDED | 4.7116e-11 | RECORDED | PASS |
-| ff_-40c_3.30v | 0.348079 | PASS | 1.075028 | PASS | 1.891500 | PASS | 1.1791e-10 | RECORDED | 4.4605e-11 | RECORDED | PASS |
-| ff_-40c_3.63v | 0.378868 | PASS | 1.150509 | PASS | 2.087960 | PASS | 1.0357e-10 | RECORDED | 4.2459e-11 | RECORDED | PASS |
-| ff_25c_2.97v | 0.279259 | PASS | 0.972353 | PASS | 1.672980 | PASS | 1.4785e-10 | RECORDED | 5.0519e-11 | RECORDED | PASS |
-| ff_25c_3.30v | 0.291040 | PASS | 1.048587 | PASS | 1.870750 | PASS | 1.2610e-10 | RECORDED | 4.7849e-11 | RECORDED | PASS |
-| ff_25c_3.63v | 0.322552 | PASS | 1.124406 | PASS | 2.068910 | PASS | 1.1195e-10 | RECORDED | 4.5613e-11 | RECORDED | PASS |
-| ff_125c_2.97v | 0.214599 | PASS | 0.930461 | PASS | 1.640530 | PASS | 1.5703e-10 | RECORDED | 5.7246e-11 | RECORDED | PASS |
-| ff_125c_3.30v | 0.237829 | PASS | 1.008552 | PASS | 1.838120 | PASS | 1.3761e-10 | RECORDED | 5.3928e-11 | RECORDED | PASS |
-| ff_125c_3.63v | 0.265005 | PASS | 1.087062 | PASS | 2.036110 | PASS | 1.2389e-10 | RECORDED | 5.1521e-11 | RECORDED | PASS |
-| tt_-40c_2.97v | 0.443117 | PASS | 1.055088 | PASS | 1.738240 | PASS | 2.0899e-10 | RECORDED | 5.5771e-11 | RECORDED | PASS |
-| tt_-40c_3.30v | 0.450044 | PASS | 1.134683 | PASS | 1.935810 | PASS | 1.6117e-10 | RECORDED | 5.2198e-11 | RECORDED | PASS |
-| tt_-40c_3.63v | 0.458020 | PASS | 1.213568 | PASS | 2.132710 | PASS | 1.3429e-10 | RECORDED | 4.9423e-11 | RECORDED | PASS |
-| tt_25c_2.97v | 0.377941 | PASS | 1.031028 | PASS | 1.711050 | PASS | 2.1229e-10 | RECORDED | 6.0738e-11 | RECORDED | PASS |
-| tt_25c_3.30v | 0.381267 | PASS | 1.110807 | PASS | 1.910030 | PASS | 1.7014e-10 | RECORDED | 5.6764e-11 | RECORDED | PASS |
-| tt_25c_3.63v | 0.385058 | PASS | 1.189934 | PASS | 2.109230 | PASS | 1.4485e-10 | RECORDED | 5.3568e-11 | RECORDED | PASS |
-| tt_125c_2.97v | 0.295443 | PASS | 0.993408 | PASS | 1.677510 | PASS | 2.1819e-10 | RECORDED | 6.9354e-11 | RECORDED | PASS |
-| tt_125c_3.30v | 0.296711 | PASS | 1.074566 | PASS | 1.877400 | PASS | 1.8293e-10 | RECORDED | 6.4782e-11 | RECORDED | PASS |
-| tt_125c_3.63v | 0.318427 | PASS | 1.155746 | PASS | 2.077770 | PASS | 1.5948e-10 | RECORDED | 6.1280e-11 | RECORDED | PASS |
-| ss_-40c_2.97v | 0.540536 | PASS | 1.105024 | PASS | 1.769780 | PASS | 3.5718e-10 | RECORDED | 6.7146e-11 | RECORDED | PASS |
-| ss_-40c_3.30v | 0.550840 | PASS | 1.187215 | PASS | 1.972470 | PASS | 2.4039e-10 | RECORDED | 6.2505e-11 | RECORDED | PASS |
-| ss_-40c_3.63v | 0.563750 | PASS | 1.268808 | PASS | 2.172590 | PASS | 1.8532e-10 | RECORDED | 5.8880e-11 | RECORDED | PASS |
-| ss_25c_2.97v | 0.475538 | PASS | 1.082379 | PASS | 1.742410 | PASS | 3.3581e-10 | RECORDED | 7.3637e-11 | RECORDED | PASS |
-| ss_25c_3.30v | 0.483481 | PASS | 1.165266 | PASS | 1.943660 | PASS | 2.4585e-10 | RECORDED | 6.8305e-11 | RECORDED | PASS |
-| ss_25c_3.63v | 0.493503 | PASS | 1.247287 | PASS | 2.144230 | PASS | 1.9717e-10 | RECORDED | 6.4215e-11 | RECORDED | PASS |
-| ss_125c_2.97v | 0.394239 | PASS | 1.048438 | PASS | 1.706340 | PASS | 3.2326e-10 | RECORDED | 8.4931e-11 | RECORDED | PASS |
-| ss_125c_3.30v | 0.400760 | PASS | 1.132542 | PASS | 1.908220 | PASS | 2.5525e-10 | RECORDED | 7.8579e-11 | RECORDED | PASS |
-| ss_125c_3.63v | 0.408620 | PASS | 1.216449 | PASS | 2.109670 | PASS | 2.1346e-10 | RECORDED | 7.3752e-11 | RECORDED | PASS |
+| ff_-40c_2.97v | 0.264687 | PASS | 0.853046 | PASS | 1.695460 | PASS | 1.4094e-10 | RECORDED | 4.7116e-11 | RECORDED | PASS |
+| ff_-40c_3.30v | 0.262503 | PASS | 0.909126 | PASS | 1.891500 | PASS | 1.1791e-10 | RECORDED | 4.4605e-11 | RECORDED | PASS |
+| ff_-40c_3.63v | 0.259602 | PASS | 0.965199 | PASS | 2.087960 | PASS | 1.0357e-10 | RECORDED | 4.2459e-11 | RECORDED | PASS |
+| ff_25c_2.97v | 0.210573 | PASS | 0.816614 | PASS | 1.672980 | PASS | 1.4785e-10 | RECORDED | 5.0519e-11 | RECORDED | PASS |
+| ff_25c_3.30v | 0.205996 | PASS | 0.873619 | PASS | 1.870750 | PASS | 1.2610e-10 | RECORDED | 4.7849e-11 | RECORDED | PASS |
+| ff_25c_3.63v | 0.202005 | PASS | 0.930665 | PASS | 2.068910 | PASS | 1.1195e-10 | RECORDED | 4.5613e-11 | RECORDED | PASS |
+| ff_125c_2.97v | 0.143420 | PASS | 0.761125 | PASS | 1.640530 | PASS | 1.5703e-10 | RECORDED | 5.7246e-11 | RECORDED | PASS |
+| ff_125c_3.30v | 0.147533 | PASS | 0.820324 | PASS | 1.838120 | PASS | 1.3761e-10 | RECORDED | 5.3928e-11 | RECORDED | PASS |
+| ff_125c_3.63v | 0.160360 | PASS | 0.879850 | PASS | 2.036110 | PASS | 1.2389e-10 | RECORDED | 5.1521e-11 | RECORDED | PASS |
+| tt_-40c_2.97v | 0.342037 | PASS | 0.921044 | PASS | 1.738240 | PASS | 2.0899e-10 | RECORDED | 5.5771e-11 | RECORDED | PASS |
+| tt_-40c_3.30v | 0.345030 | PASS | 0.978421 | PASS | 1.935810 | PASS | 1.6117e-10 | RECORDED | 5.2198e-11 | RECORDED | PASS |
+| tt_-40c_3.63v | 0.347065 | PASS | 1.035891 | PASS | 2.132710 | PASS | 1.3429e-10 | RECORDED | 4.9423e-11 | RECORDED | PASS |
+| tt_25c_2.97v | 0.289197 | PASS | 0.884387 | PASS | 1.711050 | PASS | 2.1229e-10 | RECORDED | 6.0738e-11 | RECORDED | PASS |
+| tt_25c_3.30v | 0.289120 | PASS | 0.942795 | PASS | 1.910030 | PASS | 1.7014e-10 | RECORDED | 5.6764e-11 | RECORDED | PASS |
+| tt_25c_3.63v | 0.288792 | PASS | 1.001230 | PASS | 2.109230 | PASS | 1.4485e-10 | RECORDED | 5.3568e-11 | RECORDED | PASS |
+| tt_125c_2.97v | 0.222300 | PASS | 0.828578 | PASS | 1.677510 | PASS | 2.1819e-10 | RECORDED | 6.9354e-11 | RECORDED | PASS |
+| tt_125c_3.30v | 0.220417 | PASS | 0.889070 | PASS | 1.877400 | PASS | 1.8293e-10 | RECORDED | 6.4782e-11 | RECORDED | PASS |
+| tt_125c_3.63v | 0.219429 | PASS | 0.949915 | PASS | 2.077770 | PASS | 1.5948e-10 | RECORDED | 6.1280e-11 | RECORDED | PASS |
+| ss_-40c_2.97v | 0.417602 | PASS | 0.987397 | PASS | 1.769780 | PASS | 3.5718e-10 | RECORDED | 6.7146e-11 | RECORDED | PASS |
+| ss_-40c_3.30v | 0.425517 | PASS | 1.046025 | PASS | 1.972470 | PASS | 2.4039e-10 | RECORDED | 6.2505e-11 | RECORDED | PASS |
+| ss_-40c_3.63v | 0.433142 | PASS | 1.104843 | PASS | 2.172590 | PASS | 1.8532e-10 | RECORDED | 5.8880e-11 | RECORDED | PASS |
+| ss_25c_2.97v | 0.365830 | PASS | 0.950414 | PASS | 1.742410 | PASS | 3.3581e-10 | RECORDED | 7.3637e-11 | RECORDED | PASS |
+| ss_25c_3.30v | 0.370756 | PASS | 1.010217 | PASS | 1.943660 | PASS | 2.4585e-10 | RECORDED | 6.8305e-11 | RECORDED | PASS |
+| ss_25c_3.63v | 0.375427 | PASS | 1.070079 | PASS | 2.144230 | PASS | 1.9717e-10 | RECORDED | 6.4215e-11 | RECORDED | PASS |
+| ss_125c_2.97v | 0.300385 | PASS | 0.894282 | PASS | 1.706340 | PASS | 3.2326e-10 | RECORDED | 8.4931e-11 | RECORDED | PASS |
+| ss_125c_3.30v | 0.302829 | PASS | 0.956122 | PASS | 1.908220 | PASS | 2.5525e-10 | RECORDED | 7.8579e-11 | RECORDED | PASS |
+| ss_125c_3.63v | 0.305760 | PASS | 1.018300 | PASS | 2.109670 | PASS | 2.1346e-10 | RECORDED | 7.3752e-11 | RECORDED | PASS |
 
 ## Aggregate
 
-- Read SNM: 27/27 PASS (min 0.214599 V)
-- Hold SNM: 27/27 PASS (min 0.930461 V)
+- Read SNM: 27/27 PASS (min 0.143420 V)
+- Hold SNM: 27/27 PASS (min 0.761125 V)
 - Write margin: 27/27 PASS (min 1.640530 V)
 - Read access time: 27/27 RECORDED
 - Write access time: 27/27 RECORDED

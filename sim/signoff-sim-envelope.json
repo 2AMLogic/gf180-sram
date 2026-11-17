@@ -17,30 +17,30 @@
     "verdict_rule": "spec/sram.md '### Signoff definition' -- the same rule sim/lib/render_signoff_table.py applies: read SNM, hold SNM, and write margin PASS iff strictly > 0 V at all 27 corners; read/write access time are recorded only, never bounded.",
     "recorded_from": [
       {
-        "file": "sim/read-snm/records/20260817-011523-4448966.md",
-        "sha256": "10037c0c670f765d16ee2050b2af297908639c3e2027fe0ea719f688f41196e8"
+        "file": "sim/read-snm/records/20261117-122606-3aa0490.md",
+        "sha256": "c0a7ea77c2415fef189b6c4a74234040014c6a5b59763cc126707af32acd561a"
       },
       {
-        "file": "sim/hold-snm/records/20260817-011558-4448966.md",
-        "sha256": "562637bff10fa37e8043ccadc74b66ec4bf7ac07b5eabd7dfe75c26db659bb3f"
+        "file": "sim/hold-snm/records/20261117-122607-3aa0490.md",
+        "sha256": "d0c94bc61290a07bc19b4aa9395a3cf7bfcd1d04c3fe5575261a6a24e10ad7b9"
       },
       {
-        "file": "sim/write-margin/records/20260817-105029-ce56f59.md",
-        "sha256": "6745a77ee2438863ca8c72ec99da1ff5fbbdda9bce61eec545373d7b269d1b28"
+        "file": "sim/write-margin/records/20261117-122609-3aa0490.md",
+        "sha256": "6a55536ac7f3964cee1ccc11d117685749cd87f6a034f452a96985bbe3611215"
       },
       {
-        "file": "sim/access-time/records/20260817-011948-4448966.md",
-        "sha256": "b26ba55f2154fb3f96084a95bc646111fc9f406aefd1ffb9b8e20909e7803964"
+        "file": "sim/access-time/records/20261117-122724-3aa0490.md",
+        "sha256": "dc03c797e7c70d84a8b1687dabb7277fda0c826e748b791f1c35aa29e4dcb307"
       },
       {
-        "file": "sim/access-time/records/20260817-012005-4448966.md",
-        "sha256": "0d4de0d52ace75cebb1fbf0bb3eb7f8d649a49021a8c14d416260a6e4fc655b5"
+        "file": "sim/access-time/records/20261117-122726-3aa0490.md",
+        "sha256": "03c77fc9d914cdaaffae061ac6ae4076c34dedb53ba240d202c2ebe5b5b017c9"
       }
     ]
   },
   "provenance": {
     "input": {
-      "content_hash": "sha256:cd76812bf96c97ab6151a0dbf6a7d344fb0aeb2cb2c6ff3e356075945da8d597",
+      "content_hash": "sha256:0dd3ecb282bbfe95828a05c9f8b58f96606f3e7f0f0c88dcbce5a21afa7353b2",
       "role": "corner-records"
     },
     "note": "no klt_version here on purpose: no klt invocation produced this envelope (see the mint block); the input pin is the sha256 of the five record files' bytes concatenated in mint.recorded_from order"
@@ -54,8 +54,8 @@
       },
       "worst_case": {
         "corner_id": "ff_125c_2.97v",
-        "value": 0.214599,
-        "margin": 0.214599
+        "value": 0.14342,
+        "margin": 0.14342
       },
       "status": "pass"
     },
@@ -67,8 +67,8 @@
       },
       "worst_case": {
         "corner_id": "ff_125c_2.97v",
-        "value": 0.930461,
-        "margin": 0.930461
+        "value": 0.761125,
+        "margin": 0.761125
       },
       "status": "pass"
     },
@@ -119,16 +119,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.346745,
+          "value": 0.264687,
           "status": "pass",
-          "margin": 0.346745
+          "margin": 0.264687
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 0.999014,
+          "value": 0.853046,
           "status": "pass",
-          "margin": 0.999014
+          "margin": 0.853046
         },
         {
           "name": "write_trip_voltage_v",
@@ -170,16 +170,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.348079,
+          "value": 0.262503,
           "status": "pass",
-          "margin": 0.348079
+          "margin": 0.262503
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.075028,
+          "value": 0.909126,
           "status": "pass",
-          "margin": 1.075028
+          "margin": 0.909126
         },
         {
           "name": "write_trip_voltage_v",
@@ -221,16 +221,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.378868,
+          "value": 0.259602,
           "status": "pass",
-          "margin": 0.378868
+          "margin": 0.259602
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.150509,
+          "value": 0.965199,
           "status": "pass",
-          "margin": 1.150509
+          "margin": 0.965199
         },
         {
           "name": "write_trip_voltage_v",
@@ -272,16 +272,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.279259,
+          "value": 0.210573,
           "status": "pass",
-          "margin": 0.279259
+          "margin": 0.210573
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 0.972353,
+          "value": 0.816614,
           "status": "pass",
-          "margin": 0.972353
+          "margin": 0.816614
         },
         {
           "name": "write_trip_voltage_v",
@@ -323,16 +323,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.29104,
+          "value": 0.205996,
           "status": "pass",
-          "margin": 0.29104
+          "margin": 0.205996
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.048587,
+          "value": 0.873619,
           "status": "pass",
-          "margin": 1.048587
+          "margin": 0.873619
         },
         {
           "name": "write_trip_voltage_v",
@@ -374,16 +374,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.322552,
+          "value": 0.202005,
           "status": "pass",
-          "margin": 0.322552
+          "margin": 0.202005
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.124406,
+          "value": 0.930665,
           "status": "pass",
-          "margin": 1.124406
+          "margin": 0.930665
         },
         {
           "name": "write_trip_voltage_v",
@@ -425,16 +425,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.214599,
+          "value": 0.14342,
           "status": "pass",
-          "margin": 0.214599
+          "margin": 0.14342
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 0.930461,
+          "value": 0.761125,
           "status": "pass",
-          "margin": 0.930461
+          "margin": 0.761125
         },
         {
           "name": "write_trip_voltage_v",
@@ -476,16 +476,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.237829,
+          "value": 0.147533,
           "status": "pass",
-          "margin": 0.237829
+          "margin": 0.147533
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.008552,
+          "value": 0.820324,
           "status": "pass",
-          "margin": 1.008552
+          "margin": 0.820324
         },
         {
           "name": "write_trip_voltage_v",
@@ -527,16 +527,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.265005,
+          "value": 0.16036,
           "status": "pass",
-          "margin": 0.265005
+          "margin": 0.16036
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.087062,
+          "value": 0.87985,
           "status": "pass",
-          "margin": 1.087062
+          "margin": 0.87985
         },
         {
           "name": "write_trip_voltage_v",
@@ -578,16 +578,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.443117,
+          "value": 0.342037,
           "status": "pass",
-          "margin": 0.443117
+          "margin": 0.342037
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.055088,
+          "value": 0.921044,
           "status": "pass",
-          "margin": 1.055088
+          "margin": 0.921044
         },
         {
           "name": "write_trip_voltage_v",
@@ -629,16 +629,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.450044,
+          "value": 0.34503,
           "status": "pass",
-          "margin": 0.450044
+          "margin": 0.34503
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.134683,
+          "value": 0.978421,
           "status": "pass",
-          "margin": 1.134683
+          "margin": 0.978421
         },
         {
           "name": "write_trip_voltage_v",
@@ -680,16 +680,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.45802,
+          "value": 0.347065,
           "status": "pass",
-          "margin": 0.45802
+          "margin": 0.347065
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.213568,
+          "value": 1.035891,
           "status": "pass",
-          "margin": 1.213568
+          "margin": 1.035891
         },
         {
           "name": "write_trip_voltage_v",
@@ -731,16 +731,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.377941,
+          "value": 0.289197,
           "status": "pass",
-          "margin": 0.377941
+          "margin": 0.289197
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.031028,
+          "value": 0.884387,
           "status": "pass",
-          "margin": 1.031028
+          "margin": 0.884387
         },
         {
           "name": "write_trip_voltage_v",
@@ -782,16 +782,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.381267,
+          "value": 0.28912,
           "status": "pass",
-          "margin": 0.381267
+          "margin": 0.28912
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.110807,
+          "value": 0.942795,
           "status": "pass",
-          "margin": 1.110807
+          "margin": 0.942795
         },
         {
           "name": "write_trip_voltage_v",
@@ -833,16 +833,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.385058,
+          "value": 0.288792,
           "status": "pass",
-          "margin": 0.385058
+          "margin": 0.288792
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.189934,
+          "value": 1.00123,
           "status": "pass",
-          "margin": 1.189934
+          "margin": 1.00123
         },
         {
           "name": "write_trip_voltage_v",
@@ -884,16 +884,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.295443,
+          "value": 0.2223,
           "status": "pass",
-          "margin": 0.295443
+          "margin": 0.2223
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 0.993408,
+          "value": 0.828578,
           "status": "pass",
-          "margin": 0.993408
+          "margin": 0.828578
         },
         {
           "name": "write_trip_voltage_v",
@@ -935,16 +935,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.296711,
+          "value": 0.220417,
           "status": "pass",
-          "margin": 0.296711
+          "margin": 0.220417
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.074566,
+          "value": 0.88907,
           "status": "pass",
-          "margin": 1.074566
+          "margin": 0.88907
         },
         {
           "name": "write_trip_voltage_v",
@@ -986,16 +986,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.318427,
+          "value": 0.219429,
           "status": "pass",
-          "margin": 0.318427
+          "margin": 0.219429
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.155746,
+          "value": 0.949915,
           "status": "pass",
-          "margin": 1.155746
+          "margin": 0.949915
         },
         {
           "name": "write_trip_voltage_v",
@@ -1037,16 +1037,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.540536,
+          "value": 0.417602,
           "status": "pass",
-          "margin": 0.540536
+          "margin": 0.417602
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.105024,
+          "value": 0.987397,
           "status": "pass",
-          "margin": 1.105024
+          "margin": 0.987397
         },
         {
           "name": "write_trip_voltage_v",
@@ -1088,16 +1088,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.55084,
+          "value": 0.425517,
           "status": "pass",
-          "margin": 0.55084
+          "margin": 0.425517
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.187215,
+          "value": 1.046025,
           "status": "pass",
-          "margin": 1.187215
+          "margin": 1.046025
         },
         {
           "name": "write_trip_voltage_v",
@@ -1139,16 +1139,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.56375,
+          "value": 0.433142,
           "status": "pass",
-          "margin": 0.56375
+          "margin": 0.433142
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.268808,
+          "value": 1.104843,
           "status": "pass",
-          "margin": 1.268808
+          "margin": 1.104843
         },
         {
           "name": "write_trip_voltage_v",
@@ -1190,16 +1190,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.475538,
+          "value": 0.36583,
           "status": "pass",
-          "margin": 0.475538
+          "margin": 0.36583
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.082379,
+          "value": 0.950414,
           "status": "pass",
-          "margin": 1.082379
+          "margin": 0.950414
         },
         {
           "name": "write_trip_voltage_v",
@@ -1241,16 +1241,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.483481,
+          "value": 0.370756,
           "status": "pass",
-          "margin": 0.483481
+          "margin": 0.370756
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.165266,
+          "value": 1.010217,
           "status": "pass",
-          "margin": 1.165266
+          "margin": 1.010217
         },
         {
           "name": "write_trip_voltage_v",
@@ -1292,16 +1292,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.493503,
+          "value": 0.375427,
           "status": "pass",
-          "margin": 0.493503
+          "margin": 0.375427
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.247287,
+          "value": 1.070079,
           "status": "pass",
-          "margin": 1.247287
+          "margin": 1.070079
         },
         {
           "name": "write_trip_voltage_v",
@@ -1343,16 +1343,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.394239,
+          "value": 0.300385,
           "status": "pass",
-          "margin": 0.394239
+          "margin": 0.300385
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.048438,
+          "value": 0.894282,
           "status": "pass",
-          "margin": 1.048438
+          "margin": 0.894282
         },
         {
           "name": "write_trip_voltage_v",
@@ -1394,16 +1394,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.40076,
+          "value": 0.302829,
           "status": "pass",
-          "margin": 0.40076
+          "margin": 0.302829
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.132542,
+          "value": 0.956122,
           "status": "pass",
-          "margin": 1.132542
+          "margin": 0.956122
         },
         {
           "name": "write_trip_voltage_v",
@@ -1445,16 +1445,16 @@
         {
           "name": "read_snm_v",
           "unit": "V",
-          "value": 0.40862,
+          "value": 0.30576,
           "status": "pass",
-          "margin": 0.40862
+          "margin": 0.30576
         },
         {
           "name": "hold_snm_v",
           "unit": "V",
-          "value": 1.216449,
+          "value": 1.0183,
           "status": "pass",
-          "margin": 1.216449
+          "margin": 1.0183
         },
         {
           "name": "write_trip_voltage_v",

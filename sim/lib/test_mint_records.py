@@ -372,12 +372,47 @@ def test_mc_mint(tmp: Path) -> None:
     check("no absolute host path in the record", str(tmp) not in text)
 
 
+def test_infra_accounted() -> None:
+    """Infra failures mint only when every one is a counted negative-control
+    errored draw; any mm/ctrl failure or unaccounted nc failure aborts."""
+    def reduced(infra):
+        return {
+            "batches": {
+                "ff_25c_3.30v": {
+                    "mm": {"seed_labels": ["s1"], "samples": [(0, {"k": 1.0}, [])]},
+                    "ctrl": {"seed_labels": ["s2"], "samples": [(0, {"k": 1.0}, [])]},
+                    "nc": {"seed_labels": ["s3", "s4"],
+                           "samples": [(11, {}, ["R: expected data file not produced"]),
+                                       (12, {"k": -0.5}, [])]},
+                },
+            },
+            "infra_failures": infra,
+        }
+
+    ok = reduced([{"id": "mc.ff_25c_3.30v.nc.00011.R", "reason": "declared outputs missing"}])
+    out = mint_records._check_infra_accounted({}, ok)
+    check("accounted nc infra failure classifies", len(out) == 1)
+
+    for name, infra in [
+        ("unaccounted nc infra aborts",
+         [{"id": "mc.ff_25c_3.30v.nc.00012.L", "reason": "declared outputs missing"}]),
+        ("mm infra aborts", [{"id": "mc.ff_25c_3.30v.mm.00003.L", "reason": "timed out"}]),
+        ("ctrl infra aborts", [{"id": "mc.ff_25c_3.30v.ctrl.00000.R", "reason": "timed out"}]),
+    ]:
+        try:
+            mint_records._check_infra_accounted({}, reduced(infra))
+            check(name, False)
+        except SystemExit:
+            check(name, True)
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         test_corner_mint(tmp / "t1")
         test_corner_rejects_bad_grading(tmp / "t2")
         test_mc_mint(tmp / "t3")
+        test_infra_accounted()
     if FAILURES:
         print(f"\n{len(FAILURES)} failure(s)")
         return 1

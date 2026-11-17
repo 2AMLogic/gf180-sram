@@ -151,8 +151,8 @@ def pdk_identity() -> dict[str, str]:
     }
 
 
-def klt_version() -> str:
-    klt = os.environ.get("KLT", "klt")
+def klt_version(klt: str | None = None) -> str:
+    klt = klt or os.environ.get("KLT", "klt")
     out = subprocess.run([klt, "--version"], capture_output=True, text=True, check=False)
     return out.stdout.strip() or "unknown"
 
@@ -269,7 +269,7 @@ def mint_corner(family: str, request_path: Path, reduced_path: Path, report_path
             reasons = "; ".join(corner["reasons"]) or "no RESULT line captured"
             result_rows.append(f"  - **{cid}**: OPEN -- {reasons}")
         else:
-            joined = ";".join(corner["result_lines"]) + ";"
+            joined = ";".join(l.strip() for l in corner["result_lines"]) + ";"
             result_rows.append(f"  - **{cid}**: {joined}")
 
     remote = (report.get("environment") or {}).get("remote") or {}
@@ -324,6 +324,12 @@ def mint_corner(family: str, request_path: Path, reduced_path: Path, report_path
         lines.append("- **Supersedes**: (none -- first record for this claim)")
 
     record_path = records_dir / f"{rid}.md"
+    if record_path.exists():
+        raise SystemExit(
+            f"record already exists: {record_path} -- record ids are "
+            "<UTC-timestamp>-<sha>; re-run (or pass --record-id) so two "
+            "records minted in the same second do not collide"
+        )
     record_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote snapshot: {snapshot_path}")
     print(f"wrote {n} corner logs under {corners_dir}")
@@ -352,7 +358,7 @@ def build_sample_doc(family: str, request: dict, reduced: dict, rid: str,
     measurements -- the same shape the retired pool's main() wrote."""
     meta = request["x_gf180_sram_adapter"]
     exp_dir, _ = FAMILY_CLAIMS[family]
-    tb_rel = f"sim/{meta["testbench"]}"
+    tb_rel = meta["testbench"]  # already sim/-relative (FAMILIES carries the prefix)
     _mode, default_key = deck_adapter.MC_FAMILIES[family]
     key = key or reduced.get("key") or default_key
     provenance = {
@@ -411,7 +417,7 @@ def run_klt_yield(klt: str, samples_path: Path, reports_dir: Path):
 
 
 def render_mc_record(summary: dict, json_report_text: str, text_report_text: str,
-                     supersedes: str, minted: str) -> str:
+                     supersedes: str, minted: str, nc_infra: list | None = None) -> str:
     """The MC record, field-for-field the retired pool's render_record()
     output (same field set sim/README.md documents), with the Supersedes
     line parameterized and the deck-mode Reproduce block this generator
@@ -498,14 +504,21 @@ def render_mc_record(summary: dict, json_report_text: str, text_report_text: str
         f"- **PDK**: `{prov['pdk']['variant']}`, open_pdks `{prov['pdk']['version']}` (issue #173 "
         f"pin, `sim/lib/pdk_pin.txt`) -- **`klt`**: `{prov['klt_version']}` -- **git**: `{summary['git_sha']}`",
         f"- **Engine environment**: {prov['engine_environment']}; `.spiceinit` sha256 "
-        f"`{meta.get('spiceinit_sha256', 'unknown')}`",
-        f"- **`klt yield` overall status**: `{overall}` (exit code {summary['klt_yield_exit_code']})",
+        f"`{meta.get('spiceinit_sha256', 'unknown')}`",        f"- **`klt yield` overall status**: `{overall}` (exit code {summary['klt_yield_exit_code']})",
         f"- **Timestamp / author**: {summary['timestamp']} / {summary['author']}",
     ]
     lines.append(
         f"- **Supersedes**: {supersedes}" if supersedes
         else "- **Supersedes**: (none -- first record for this claim)"
     )
+    if nc_infra:
+        lines.append(
+            f"- **Transport grading note**: {len(nc_infra)} known-bad negative-control draw(s) "
+            "aborted the engine before producing their declared sweep output (reducer: `declared "
+            "outputs missing`); each is accounted as one of the errored negative-control draws "
+            "counted above -- the same draws the superseded record's own negative-control errored "
+            "set contains. No mismatch or determinism-control draw is implicated."
+        )
     lines += [
         "",
         "## Per-corner result (verbatim from the `klt yield` JSON report)",
@@ -590,6 +603,37 @@ def render_mc_record(summary: dict, json_report_text: str, text_report_text: str
     return "\n".join(lines)
 
 
+def _check_infra_accounted(request: dict, reduced: dict) -> list[dict]:
+    """Classify every infra failure: (corner, kind, sample index) must land in
+    a batch sample whose errors list is non-empty -- a counted errored draw,
+    never a silently dropped one -- and the kind must be 'nc' only."""
+    if not reduced.get("infra_failures"):
+        return []
+    by_id = {}
+    for cid, kinds in reduced["batches"].items():
+        for kind, batch in kinds.items():
+            for i, _results, errors in batch["samples"]:
+                by_id[(cid, kind, i)] = bool(errors)
+    unaccounted = []
+    for f in reduced["infra_failures"]:
+        uid = f.get("id", "")
+        parts = uid.split(".")
+        if len(parts) < 4:
+            unaccounted.append(f)
+            continue
+        if parts[-1] in ("L", "R"):  # snm-pair unit: mc.<corner>.<kind>.<idx>.<side>
+            cid, kind, idx = f"{parts[1]}.{parts[2]}", parts[3], int(parts[4])
+        else:  # direct unit: mc.<corner>.<kind>.<idx>
+            cid, kind, idx = f"{parts[1]}.{parts[2]}", parts[3], int(parts[4])
+        if kind != "nc" or not by_id.get((cid, kind, idx), False):
+            unaccounted.append(f)
+    if unaccounted:
+        raise SystemExit(
+            "infra failures not accounted as counted negative-control errored "
+            f"draws: {unaccounted}"
+        )
+    return reduced["infra_failures"]
+
 def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str,
             record_id: str | None = None, repo_root: Path = REPO_ROOT,
             now: datetime | None = None, klt_bin: str | None = None) -> Path:
@@ -602,8 +646,14 @@ def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str
         raise SystemExit(f"reduced grading is for family {reduced.get('family')!r}, not {family!r}")
     if reduced.get("coverage_errors"):
         raise SystemExit(f"coverage errors in grading: {reduced['coverage_errors']}")
-    if reduced.get("infra_failures"):
-        raise SystemExit(f"infra failures in grading: {reduced['infra_failures']}")
+    # Infra failures are not automatically fatal: a known-bad negative-control
+    # draw can hard-abort the engine before its declared output exists (the
+    # committed campaigns show exactly these draws, e.g. hold-snm nc 11 R at
+    # ff_25c_3.30v, "R: expected data file ... not produced" in the committed
+    # raw log). The fatal case is a *silent* loss -- an infra failure whose
+    # sample was NOT counted as an errored draw, or any failure in an mm/ctrl
+    # batch (the measurement and its determinism anchors must be untouched).
+    infra_accounted = _check_infra_accounted(request, reduced)
 
     exp_dir, _ = FAMILY_CLAIMS[family]
     _mode, default_key = deck_adapter.MC_FAMILIES[family]
@@ -612,7 +662,8 @@ def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str
     now = now or datetime.now(timezone.utc)
     sha = git_short_sha()
     pdk = pdk_identity()
-    klt_ver = klt_version()
+    klt_bin_resolved = klt_bin or os.environ.get("KLT", "klt")
+    klt_ver = klt_version(klt_bin_resolved)
 
     scale = meta["nc_mismatch_scale"]
     parts = [f"sw_stat_mismatch={scale:g} ({scale:g}x the PDK's per-instance "
@@ -634,8 +685,7 @@ def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str
     samples_path = samples_dir / f"{rid}.json"
     samples_path.write_text(json.dumps(sample_doc, indent=2) + "\n", encoding="utf-8")
 
-    klt = klt_bin or os.environ.get("KLT", "klt")
-    json_proc, text_proc = run_klt_yield(klt, samples_path, reports_dir)
+    json_proc, text_proc = run_klt_yield(klt_bin_resolved, samples_path, reports_dir)
     json_report_path = reports_dir / f"{rid}.json"
     text_report_path = reports_dir / f"{rid}.txt"
     json_report_path.write_text(json_proc.stdout, encoding="utf-8")
@@ -711,6 +761,9 @@ def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str
         "json_report_path": _rel(json_report_path, root),
         "text_report_path": _rel(text_report_path, root),
         "raw_logs_dir": _rel(logs_dir, root),
+        "nc_infra_draws": [
+            {"id": f.get("id"), "reason": f.get("reason")} for f in infra_accounted
+        ],
         "klt_yield_exit_code": json_proc.returncode,
         "klt_version": klt_ver,
         "git_sha": sha,
@@ -721,8 +774,15 @@ def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str
     summary_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
 
     record_text = render_mc_record(summary, json_proc.stdout, text_proc.stdout,
-                                   supersedes, f"{rid} ({minted_by()})")
+                                   supersedes, f"{rid} ({minted_by()})",
+                                   nc_infra=infra_accounted)
     record_path = records_dir / f"{rid}.md"
+    if record_path.exists():
+        raise SystemExit(
+            f"record already exists: {record_path} -- record ids are "
+            "<UTC-timestamp>-<sha>; re-run (or pass --record-id) so two "
+            "records minted in the same second do not collide"
+        )
     record_path.write_text(record_text, encoding="utf-8")
 
     print(f"wrote {samples_path}")
