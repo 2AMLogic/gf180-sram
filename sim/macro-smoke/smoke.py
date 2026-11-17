@@ -22,8 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
 # The request skeleton and the Q-word grading rule (#388) have a single
 # owner, sim/lib/klt_bench.py; its `corners` block is in turn derived from
 # the ratified matrix's own owner, sim/lib/corner_matrix.py (#331), so this
-# request cannot sweep a different matrix than sim/lib/run_corner_sweep.sh
-# and the deck adapter do.
+# request sweeps exactly the matrix the deck adapter's requests sweep.
 from klt_bench import base_request, q_probes, read_word  # noqa: E402
 
 PERIOD = 20.0  # ns

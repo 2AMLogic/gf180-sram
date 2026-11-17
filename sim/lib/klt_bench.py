@@ -41,8 +41,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 # The ratified corner matrix has a single owner, sim/lib/corner_matrix.py
 # (#331). The `corners` block every macro-netlist request declares is derived
-# from it rather than hand-listed, so no bench can sweep a different matrix
-# than sim/lib/run_corner_sweep.sh and the deck adapter do.
+# from it rather than hand-listed, so every bench sweeps exactly the matrix
+# the deck adapter's requests sweep.
 from corner_matrix import LIB_SECTION, PROCESSES, TEMPS, VDDS  # noqa: E402
 
 # The model library every macro-netlist request points at, and the per-unit

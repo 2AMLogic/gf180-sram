@@ -60,7 +60,7 @@ def test_corner_inc_shape():
 
 
 def test_build_all_families():
-    for family, (exp_dir, tb, mode) in da.FAMILIES.items():
+    for family, (exp_dir, tb, mode, staged) in da.FAMILIES.items():
         with tempfile.TemporaryDirectory() as td:
             req = da.build_request(family, td)
             check(f"{family} unit count", len(req["decks"]) == 27)
@@ -77,12 +77,69 @@ def test_build_all_families():
                       "deck differs from source beyond the REPO_ROOT token")
                 check(f"{family} corner.inc", (unit / "corner.inc").is_file())
                 if b"@@REPO_ROOT@@" in src:
-                    check(f"{family} DUT staged", (unit / da.DUT_NETLIST).is_file())
+                    for rel in staged:
+                        check(f"{family} {d['id']} staged {rel}", (unit / rel).is_file())
             first = Path(td) / "units" / da.corner_ids()[0] / tb
             check(f"{family} deck hash", meta["composed_deck_sha256"] == hashlib.sha256(first.read_bytes()).hexdigest())
             kind, datafile, _ = da.parse_mode(mode)
             has_outputs = all(d.get("outputs") == [datafile] for d in req["decks"]) if datafile else all("outputs" not in d for d in req["decks"])
             check(f"{family} outputs", has_outputs)
+
+
+LEGACY_FAMILIES = ("read-snm", "hold-snm", "write-margin", "read-access", "write-access")
+PEX_FAMILIES = ("pex-write-margin-schematic", "pex-write-margin-extracted")
+
+
+def test_legacy_families_unchanged_requests():
+    """The five ratified families keep the launcher's staging contract: the
+    flat bitcell netlist, staged at DUT_NETLIST, and -- because the default
+    staging adds no metadata -- requests whose bytes do not change (#437's
+    byte-identical-requests criterion)."""
+    for family in LEGACY_FAMILIES:
+        exp_dir, tb, mode, staged = da.FAMILIES[family]
+        check(f"{family} staged list", staged == (da.DUT_NETLIST,), str(staged))
+        with tempfile.TemporaryDirectory() as td:
+            req = da.build_request(family, td)
+            check(f"{family} no staged_inputs key",
+                  "staged_inputs" not in json.dumps(req), "staged_inputs leaked into a legacy request")
+            for d in req["decks"]:
+                unit = Path(td) / "units" / d["id"]
+                staged_files = sorted(p.relative_to(unit).as_posix() for p in unit.rglob("*") if p.is_file())
+                # read-snm/hold-snm's testbenches carry no @@REPO_ROOT@@ (no
+                # DUT .include), so nothing but the deck inputs is staged --
+                # the launcher's behavior, kept.
+                expect = [da.DUT_NETLIST, tb, "corner.inc", da.SPICEINIT_NAME] \
+                    if b"@@REPO_ROOT@@" in (REPO / exp_dir / "testbench" / tb).read_bytes() \
+                    else [tb, "corner.inc", da.SPICEINIT_NAME]
+                check(f"{family} {d['id']} staged exactly DUT + deck inputs",
+                      staged_files == sorted(expect), str(staged_files))
+
+
+def test_pex_family_staging():
+    """The pex legs stage exactly the DUT file each testbench `.include`s
+    (#437): every `@@REPO_ROOT@@`-rooted include in the deck resolves inside
+    the staged unit dir after the token -> `.` rewrite, at its repo-relative
+    path, with the staged bytes pinned in the request's staged_inputs."""
+    token_re = __import__("re").compile(r"\.include '\./([^']+)'")
+    for family in PEX_FAMILIES:
+        exp_dir, tb, mode, staged = da.FAMILIES[family]
+        check(f"{family} direct mode", mode == "direct", mode)
+        with tempfile.TemporaryDirectory() as td:
+            req = da.build_request(family, td)
+            meta = req["x_gf180_sram_adapter"]
+            check(f"{family} staged_inputs recorded",
+                  meta.get("staged_inputs") == [{"path": rel, "sha256": hashlib.sha256((REPO / rel).read_bytes()).hexdigest()}
+                                                for rel in staged],
+                  json.dumps(meta.get("staged_inputs")))
+            unit = Path(td) / "units" / da.corner_ids()[0]
+            deck_text = (unit / tb).read_text()
+            deck_includes = {m for m in token_re.findall(deck_text) if m.startswith("sim/")}
+            check(f"{family} includes == staged set", deck_includes == set(staged),
+                  f"includes {sorted(deck_includes)} vs staged {sorted(staged)}")
+            for rel in staged:
+                staged_bytes = (unit / rel).read_bytes()
+                check(f"{family} staged bytes {rel}",
+                      staged_bytes == (REPO / rel).read_bytes(), "staged copy differs from source")
 
 
 def test_klt_accepts_requests():
@@ -670,7 +727,8 @@ def test_spiceinit_cli_matches_constant():
 
 def main():
     for t in (test_corner_matrix, test_corner_inc_shape,
-              test_build_all_families, test_klt_accepts_requests, test_reducer_direct, test_reducer_snm,
+              test_build_all_families, test_legacy_families_unchanged_requests,
+              test_pex_family_staging, test_klt_accepts_requests, test_reducer_direct, test_reducer_snm,
               test_bounded_corner_selection, test_bounded_reduce_scopes_coverage,
               test_mc_seed_pins, test_mc_build_identity, test_mc_n1_and_guard,
               test_mc_reduce_shapes, test_mc_reduce_fails_closed,
