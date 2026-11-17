@@ -515,6 +515,16 @@ def ungated_receipt_headings(doc_text: str) -> list[tuple[str, str]]:
     under one heading (silently skipped, the exact case #372 exists to
     surface). The backward scan remains only to name a heading in the
     warning text; it is message text, not a gate.
+
+    The forward scan tracks fenced-code-block state (issue #420): a
+    ``| File | What |`` header row inside a ``` or ~~~ fence is
+    illustrative text, not a table, so it is skipped entirely -- warning
+    on a fenced example tells the author to split it under its own
+    heading, a no-op for text that is not a table. An unclosed fence
+    runs to end of document (CommonMark), suppressing everything after
+    it. The gate's own walk (:func:`walk_files_table_sections`) stays
+    fence-blind: a fenced row never opens a table slot there, so the
+    two scans still agree on which rows are gated.
     """
     lines = doc_text.splitlines()
     gated_headers = {
@@ -523,8 +533,22 @@ def ungated_receipt_headings(doc_text: str) -> list[tuple[str, str]]:
         if header_line >= 0
     }
     unmatched: list[tuple[str, str]] = []
+    fence_char = ""
+    fence_len = 0
     for i, line in enumerate(lines):
         stripped = line.strip()
+        if fence_char:
+            if (
+                stripped
+                and set(stripped) == {fence_char}
+                and len(stripped) >= fence_len
+            ):
+                fence_char = ""
+            continue
+        if stripped.startswith(("```", "~~~")):
+            fence_char = stripped[0]
+            fence_len = len(stripped) - len(stripped.lstrip(fence_char))
+            continue
         if not stripped.startswith("|"):
             continue
         cells = [c.strip() for c in stripped.strip("|").split("|")]
