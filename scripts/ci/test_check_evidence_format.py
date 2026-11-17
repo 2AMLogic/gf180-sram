@@ -473,6 +473,37 @@ class FilesTableCoverageTest(unittest.TestCase):
             [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
         )
 
+    def test_fenced_example_between_heading_and_real_table_warns_consumed(self):
+        # Issue #423: the gate's walk (walk_files_table_sections) is
+        # fence-blind, so a fenced "| File | What |" example between the
+        # gated heading and the section's real table OPENS the section's
+        # table slot -- the walk consumes the fenced rows as the table.
+        # The real table after the fence is then the "second table" shape
+        # and warns CONSUMED, exactly as it did before the #420
+        # forward-scan fix; #420 changed only which rows the forward scan
+        # itself reports, not what the walk consumes.
+        text = (
+            "## Files in `run-a/`\n\n"
+            "~~~\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `b.json` | two |\n"
+            "~~~\n\n"
+            "| File | What |\n"
+            "|---|---|\n"
+            "| `a.json` | one |\n"
+        )
+        # header_line 3 is the FENCED "| File | What |" line: the fenced
+        # row did open the slot.
+        self.assertEqual(
+            list(cef.walk_files_table_sections(text)),
+            [("run-a", 3, [["File", "What"], ["`b.json`", "two"]])],
+        )
+        self.assertEqual(
+            cef.ungated_receipt_headings(text),
+            [("## Files in `run-a/`", cef.UNGATED_REASON_CONSUMED)],
+        )
+
     def test_receipt_docs_scope(self):
         tracked = {
             "sim/deck-parity/20261114-tt_25c_3.30v.md",  # top-level receipt
