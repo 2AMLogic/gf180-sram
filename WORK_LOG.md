@@ -10,6 +10,13 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-17
 
+- **PR #435**: docs: record the pinned hs a environment ruling and annotate the unpinned 2026-09-21 MC sample-sets
+- **PR #434**: chore(loom): resync installed Loom to v0.19.1306
+- **PR #433**: refactor: remove dead solve_inverse helper and its test-only caller
+- **PR #414**: docs(ci): name array-schematics in attestation and fix harness test locations
+- **Issue #421** (closed): Remove dead solve_inverse from sim/lib/snm_extract.py (test-only caller)
+- **Issue #389** (closed): Decide which ngspice environment future sim campaigns standardize on (deterministic 'hs a' vs unpinned MC)
+- **Issue #379** (closed): ci.yml header and repo-hygiene attestation prose: two residual accuracy gaps (1 of 5 jobs unnamed; harness suites not all under sim/lib/)
 - **PR #431**: docs: state corners[].result_lines as a required clause in the deck-parity tree listing
 - **PR #430**: fix: mc-reduce fails closed on deck-bytes drift
 - **PR #426**: docs: exempt the full-grid receipt from the corners[].result_lines clause only
