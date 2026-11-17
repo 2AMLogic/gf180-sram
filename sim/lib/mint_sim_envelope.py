@@ -274,11 +274,12 @@ def main() -> int:
                 "butterfly-square fit over two independently swept VTC "
                 "curves, sim/lib/snm_extract.py --pair; write margin is a "
                 "write-trip bisection inside the testbench's own .control "
-                "block), so the ratified sweep runner "
-                "sim/lib/run_corner_sweep.sh cannot be hosted by the verb. "
-                "Every value below is transcribed verbatim from the named "
-                "records; re-run those methodologies under a future `klt "
-                "sim` able to host them and retire this mint."
+                "block), so no `klt sim` request can host them; the "
+                "committed records were swept by the since-retired "
+                "sim/lib/run_corner_sweep.sh launcher (#230 deck-mode "
+                "cutover). Every value below is transcribed verbatim from "
+                "the named records; re-run those methodologies under a "
+                "future `klt sim` able to host them and retire this mint."
             ),
             "verdict_rule": (
                 "spec/sram.md '### Signoff definition' -- the same rule "
