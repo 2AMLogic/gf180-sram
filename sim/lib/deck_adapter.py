@@ -42,7 +42,10 @@ source-testbench and composed-deck sha256 so that is auditable.
 `corner.inc` is `run_mc_campaign.build_corner_inc`'s output and whose seed is
 `run_mc_campaign.derive_seed`'s (both imported, never re-derived), and a
 reducer that regroups a deck report into the per-seed `(index, results,
-errors)` tuples `run_batch`/`run_batch_pair` return.
+errors)` tuples `run_batch`/`run_batch_pair` return. `mc-reduce` makes the
+same fail-closed deck check `reduce` makes: every unit's `deck_sha256` must
+equal the request's composed bytes, and a unit that reports none is itself a
+coverage error, so the check cannot silently not-run.
 
 Nothing produced here is new physical evidence; `sim/*/records/` is
 append-only and untouched.
@@ -655,24 +658,31 @@ def reduce_mc_report(family, request, report, *, outdir=None, key=None, limit_mi
 
     Returns {"batches": {corner_id: {kind: {"seed_labels": [...],
     "samples": [(index, results, errors), ...]}}}, "measurements": [...],
-    "coverage_errors", "infra_failures", "overall"}. `samples` is in sample
-    order (seed order) exactly as run_batch returns it; `measurements` is the
-    `klt yield` sample-set measurement list run_mc_campaign.main() builds.
-    `overall` is "recorded" only if coverage is exact and no unit timed out,
-    never ran, lacked a declared output, or exited without any RESULT line;
-    a RESULT-ERROR (e.g. a non-bistable draw) stays an errored sample, as in
-    the pool. Exit 0 is never read as a PASS.
+    "coverage_errors", "infra_failures", "expected_deck_sha256", "overall"}.
+    `samples` is in sample order (seed order) exactly as run_batch returns it;
+    `measurements` is the `klt yield` sample-set measurement list
+    run_mc_campaign.main() builds. `overall` is "recorded" only if coverage
+    is exact, every unit's `deck_sha256` equals the request's composed deck
+    bytes, and no unit timed out, never ran, lacked a declared output, or
+    exited without any RESULT line; a RESULT-ERROR (e.g. a non-bistable
+    draw) stays an errored sample, as in the pool. A request without a
+    `composed_deck_sha256` -- or a unit that reports none -- is itself a
+    coverage error, so the deck check cannot silently not-run. Exit 0 is
+    never read as a PASS.
     """
     meta = request.get("x_gf180_sram_adapter") or {}
     mode, default_key = MC_FAMILIES[family]
     kind, datafile, label = parse_mc_mode(mode)
     key = key or default_key
     manifest = meta.get("units") or []
+    composed = meta.get("composed_deck_sha256") or None
     base = Path(outdir or report.get("outdir") or ".")
 
     coverage_errors = []
     if meta.get("campaign") != "monte-carlo" or meta.get("family") != family:
         coverage_errors.append("request is not a Monte Carlo request for this family")
+    if composed is None:
+        coverage_errors.append("request has no x_gf180_sram_adapter.composed_deck_sha256")
     for m in manifest:  # seed identity: the request must still carry derive_seed's values
         k = f"{m['kind']}-{m['side']}" if m.get("side") else m["kind"]
         if m["seed"] != mc.derive_seed(meta.get("base_seed"), m["corner_id"], k, m["index"]):
@@ -693,6 +703,20 @@ def reduce_mc_report(family, request, report, *, outdir=None, key=None, limit_mi
         coverage_errors.append(f"missing units: {missing}")
     if extra:
         coverage_errors.append(f"unexpected unit ids: {extra}")
+    if composed is not None:
+        drifted = sorted(
+            (u.get("id") for u in units
+             if u.get("deck_sha256") is not None and u.get("deck_sha256") != composed),
+            key=str,
+        )
+        if drifted:
+            coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
+        unreported = sorted(
+            (u.get("id") for u in units if u.get("deck_sha256") is None),
+            key=str,
+        )
+        if unreported:
+            coverage_errors.append(f"deck_sha256 not reported for: {unreported}")
     by_id = {}
     for u in units:
         by_id.setdefault(u.get("id"), u)
@@ -790,6 +814,7 @@ def reduce_mc_report(family, request, report, *, outdir=None, key=None, limit_mi
     ok = not coverage_errors and not infra
     return {
         "family": family, "mode": mode, "key": key, "expected_units": len(expected),
+        "expected_deck_sha256": composed,
         "coverage_errors": coverage_errors, "infra_failures": infra,
         "batches": batches, "measurements": measurements,
         "overall": "recorded" if ok else "OPEN",

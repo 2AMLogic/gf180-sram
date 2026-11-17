@@ -461,8 +461,18 @@ def test_mc_n1_and_guard():
             pass
 
 
-def _mc_stub(family, request, outdir, *, drop=(), dup=None, timeouts=(), nostdout=(), nodata=()):
-    """Hand-built stub deck report. NOT a measurement."""
+_FROM_REQUEST = object()  # _mc_stub default: stamp the request's composed_deck_sha256
+
+
+def _mc_stub(family, request, outdir, *, drop=(), dup=None, timeouts=(), nostdout=(), nodata=(),
+             deck_sha256=_FROM_REQUEST):
+    """Hand-built stub deck report. NOT a measurement.
+
+    Every unit is stamped with the request's real `composed_deck_sha256` by
+    default (the value `mc-reduce` asserts); `deck_sha256=_OMIT` omits the
+    key from every unit entirely, and any other value -- None included -- is
+    written as given.
+    """
     kind, datafile, label = da.parse_mc_mode(da.MC_FAMILIES[family][0])
     key = da.MC_FAMILIES[family][1]
     units = []
@@ -483,9 +493,14 @@ def _mc_stub(family, request, outdir, *, drop=(), dup=None, timeouts=(), nostdou
                 rows = [f"{x:.4f} {3.3 * (1 - x / 3.3) ** 3:.6f}" for x in [i * 3.3 / 40 for i in range(41)]]
                 (ud / datafile).write_text("\n".join(rows) + "\n")
         timed = uid in timeouts
-        units.append({"id": uid, "status": "timeout" if timed else "pass", "exit_code": None if timed else 0,
-                      "timed_out": timed, "stdout": f"{uid}/stdout.bin", "stderr": f"{uid}/stderr.bin",
-                      "missing_outputs": missing, "deck_sha256": "0" * 64})
+        unit = {"id": uid, "status": "timeout" if timed else "pass", "exit_code": None if timed else 0,
+                "timed_out": timed, "stdout": f"{uid}/stdout.bin", "stderr": f"{uid}/stderr.bin",
+                "missing_outputs": missing}
+        sha = (request["x_gf180_sram_adapter"].get("composed_deck_sha256")
+               if deck_sha256 is _FROM_REQUEST else deck_sha256)
+        if sha is not _OMIT:
+            unit["deck_sha256"] = sha
+        units.append(unit)
     if dup:
         units.append(dict(units[0], id=dup))
     return {"mode": "decks", "status": "pass", "unit_count": len(units), "units": units, "outdir": str(outdir)}
@@ -497,6 +512,8 @@ def test_mc_reduce_shapes():
             req = _mc_build(family, bd)
             r = da.reduce_mc_report(family, req, _mc_stub(family, req, rd), outdir=rd)
             check(f"{family} mc recorded", r["overall"] == "recorded", json.dumps(r["coverage_errors"] + r["infra_failures"])[:300])
+            check(f"{family} expected deck sha", r.get("expected_deck_sha256") == req["x_gf180_sram_adapter"]["composed_deck_sha256"],
+                  str(r.get("expected_deck_sha256")))
             b = r["batches"]["tt_25c_3.30v"]
             check(f"{family} kinds", set(b) == {"mm", "ctrl", "nc"})
             check(f"{family} sample counts", [len(b[k]["samples"]) for k in ("mm", "ctrl", "nc")] == [3, 2, 2])
@@ -523,15 +540,65 @@ def test_mc_reduce_fails_closed():
         req = _mc_build(fam, bd)
     first = req["x_gf180_sram_adapter"]["units"][0]["id"]
     cases = {
-        "missing unit": dict(drop=(first,)),
-        "duplicate id": dict(dup=first),
+        "missing unit": dict(drop=(first,), want="missing units:"),
+        "duplicate id": dict(dup=first, want="duplicate unit ids:"),
         "timeout": dict(timeouts=(first,)),
         "exit 0 without RESULT": dict(nostdout=(first,)),
+        "deck bytes drift": dict(deck_sha256="f" * 64, want="deck bytes differ from the composed deck for:"),
+        "deck_sha256 None": dict(deck_sha256=None, want="deck_sha256 not reported for:"),
+        "deck_sha256 absent": dict(deck_sha256=_OMIT, want="deck_sha256 not reported for:"),
     }
     for name, kw in cases.items():
+        want = kw.pop("want", None)
         with tempfile.TemporaryDirectory() as rd:
             r = da.reduce_mc_report(fam, req, _mc_stub(fam, req, rd, **kw), outdir=rd)
             check(f"mc {name} => OPEN", r["overall"] == "OPEN", name)
+            if want:
+                check(f"mc {name} coverage text", any(want in e for e in r["coverage_errors"]), str(r["coverage_errors"]))
+    # one aggregated, sorted error per category -- not one error per unit
+    with tempfile.TemporaryDirectory() as rd:
+        r = da.reduce_mc_report(fam, req, _mc_stub(fam, req, rd, deck_sha256="f" * 64), outdir=rd)
+        drift = [e for e in r["coverage_errors"] if e.startswith("deck bytes differ from the composed deck for:")]
+        want_ids = str(sorted(m["id"] for m in req["x_gf180_sram_adapter"]["units"]))
+        check("mc deck drift one aggregated sorted error", len(drift) == 1 and drift[0].endswith(want_ids), str(drift))
+    # one drifted and one unreported unit: both categories reported
+    with tempfile.TemporaryDirectory() as rd:
+        rep = _mc_stub(fam, req, rd)
+        rep["units"][0]["deck_sha256"] = "f" * 64
+        rep["units"][1]["deck_sha256"] = None
+        r = da.reduce_mc_report(fam, req, rep, outdir=rd)
+        check("mc mixed deck categories => OPEN",
+              r["overall"] == "OPEN"
+              and any(e.startswith("deck bytes differ from the composed deck for:") for e in r["coverage_errors"])
+              and any(e.startswith("deck_sha256 not reported for:") for e in r["coverage_errors"]),
+              str(r["coverage_errors"]))
+    # zero-unit report: coverage breaks, no deck category fires
+    with tempfile.TemporaryDirectory() as rd:
+        empty = _mc_stub(fam, req, rd, drop=tuple(m["id"] for m in req["x_gf180_sram_adapter"]["units"]))
+        r = da.reduce_mc_report(fam, req, empty, outdir=rd)
+        check("mc zero-unit report => OPEN",
+              r["overall"] == "OPEN" and not any("deck" in e for e in r["coverage_errors"]),
+              str(r["coverage_errors"]))
+    # snm-pair family: both (L, R) units of every sample drift, one aggregated error
+    with tempfile.TemporaryDirectory() as bd, tempfile.TemporaryDirectory() as rd:
+        sreq = _mc_build("read-snm", bd)
+        r = da.reduce_mc_report("read-snm", sreq, _mc_stub("read-snm", sreq, rd, deck_sha256="f" * 64), outdir=rd)
+        pair_drift = [e for e in r["coverage_errors"] if e.startswith("deck bytes differ from the composed deck for:")]
+        check("mc snm-pair deck drift => OPEN", r["overall"] == "OPEN" and len(pair_drift) == 1, str(pair_drift))
+    # a request that cannot be checked grades OPEN -- the check never silently skips (#362 lesson)
+    for name, mutate in (
+        ("missing composed sha", lambda m: m.pop("composed_deck_sha256", None)),
+        ("null composed sha", lambda m: m.update(composed_deck_sha256=None)),
+        ("empty composed sha", lambda m: m.update(composed_deck_sha256="")),
+    ):
+        with tempfile.TemporaryDirectory() as rd:
+            bad = json.loads(json.dumps(req))
+            mutate(bad["x_gf180_sram_adapter"])
+            r = da.reduce_mc_report(fam, bad, _mc_stub(fam, bad, rd), outdir=rd)
+            check(f"mc {name} => OPEN", r["overall"] == "OPEN", name)
+            check(f"mc {name} coverage text",
+                  any("request has no x_gf180_sram_adapter.composed_deck_sha256" in e for e in r["coverage_errors"]),
+                  str(r["coverage_errors"]))
     with tempfile.TemporaryDirectory() as rd:
         rep = _mc_stub(fam, req, rd)
         rep["units"].append(dict(rep["units"][0], id="mc.bogus"))

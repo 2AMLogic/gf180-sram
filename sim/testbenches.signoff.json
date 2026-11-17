@@ -6,11 +6,11 @@
   "summary": "Testbenches-shipped attestation: the pinned set is sim/README.md (testbench inventory, pinned PDK revision, cold-start invocation), sim/lib/pdk_pin.txt (the pinned PDK revision), sim/lib/run_corner_sweep.sh (the corner-sweep runner the cold-start section invokes) and the committed ngspice testbenches for read SNM, hold SNM, write margin, read/write access time, standby bitcell leakage, dynamic access energy, the macro smoke and control-pulse benches, the wordline-RC benches, the min-clock-pulse sweep family (one generated body per swept CLK high/low grid point), and the four nested post-layout (PEX) benches under sim/pex/<experiment>/testbench/ -- tb_read_access_time.pex.spice and tb_write_access_time.pex.spice (the klt-pex-native access-time pair) and tb_write_margin_schematic.spice and tb_write_margin_extracted.spice (the by-hand schematic-vs-extracted write-margin pair) -- the parallel benches the T1 item-7 runs consume (issue #392). The pins prove these files are the ones attested; running the testbenches needs ngspice, python3 and the pinned PDK (python3 in every mode: the runner stages its pinned run-directory .spiceinit via sim/lib/deck_adapter.py); CI installs neither ngspice nor the pinned PDK, so no run is re-verified by CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:18ffe700af2c0c6e072eaf4942edc34cd1aeb585141840f0b11444b7918ad570",
+      "content_hash": "sha256:e3da4c7327651e5375713761d792b5f80cef249eb421b19462884c14d4204023",
       "paths": [
         {
           "path": "sim/README.md",
-          "content_hash": "sha256:a1319db9a531371aa48cbcbdbbce2c6e8688d706a49d8c6222342cd5117cd7e0"
+          "content_hash": "sha256:7e88e7e3380ca57a58334b1d2ebe0e8a5ea4cbb744f3fa8c2f599215b54e6491"
         },
         {
           "path": "sim/access-power/testbench/tb_access_power.klt.spice",
