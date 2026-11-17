@@ -102,3 +102,12 @@ Ratified spec and decision records for this block.
   the LEF/GDS (24.08 µm² bitcell, 24.16 µm²/bit core, no periphery); macro
   area, minimum pulse and power are "not yet measured". Proposed, not
   ratified; no existing row, corner or Signoff threshold changes.
+- [`environment-pin-decision.md`](environment-pin-decision.md) — resolves
+  #389: records the operator ruling (2026-11-17) that future sim campaigns,
+  deterministic and Monte Carlo, standardize on the pinned `hs a` ngspice
+  environment (options `b` unpinned and `c` per-record-family declined). The
+  2026-08 deterministic records are unchanged; the 2026-09-21 MC sample-sets
+  are kept append-only, annotated unpinned by
+  [`sim/deck-parity/20261117-mc-unpinned-environment-annotation.md`](../sim/deck-parity/20261117-mc-unpinned-environment-annotation.md),
+  and re-qualified under the pin via #272. Evidence: PR #386's receipt
+  `sim/deck-parity/20261116-mc-9corner.md`. No `sim/` evidence is edited.

@@ -190,9 +190,10 @@ committed negative-control **errored sets** match on every
 minority of known-bad draws; a committed local A/B attributes every such
 delta to the pin itself -- the committed MC campaign ran **unpinned** while
 the deterministic campaign ran with compatibility modes -- so which
-environment future campaigns standardize on is now an open
-evidence-policy decision (recorded in that receipt; a spec/ decision
-record, not a transport gap). `parity_compare.py mc` mechanically asserts
+environment future campaigns standardize on is **decided** (operator
+ruling, 2026-11-17): the pinned `hs a` environment, recorded as
+[`spec/environment-pin-decision.md`](../spec/environment-pin-decision.md).
+`parity_compare.py mc` mechanically asserts
 deck bytes and per-unit seeds against the *returned* units (independently
 of `mc-reduce`'s own checks, as defense in depth) and compares per-sample
 arrays.
@@ -238,12 +239,18 @@ arrays.
 3. *Cutover* -- **parity-complete; two decisions gate the switch.** Retiring
    `run_corner_sweep.sh`/the MC pool, switching defaults, and updating the
    cold-start section below were gated on "the full MC matrix has its own
-   receipt", which the 2026-11-16 receipt now is. Two things remain before
-   the switch itself: (a) the evidence-environment decision the 20261116
-   receipt records -- deterministic evidence was taken with compatibility
-   modes, MC evidence unpinned, and future campaigns must standardize on
-   one (a spec/ decision record); and (b) the operator ruling's own final
-   gate ("equivalent measurements and supported execution are
+   receipt", which the 2026-11-16 receipt now is. Two things were called
+   out before the switch itself: (a) the evidence-environment decision the
+   20261116 receipt records -- deterministic evidence was taken with
+   compatibility modes, MC evidence unpinned, and future campaigns must
+   standardize on one -- **decided** (operator ruling, 2026-11-17): future
+   campaigns, deterministic and Monte Carlo, run under the pinned `hs a`
+   environment, recorded as
+   [`spec/environment-pin-decision.md`](../spec/environment-pin-decision.md)
+   (the 2026-09-21 MC sample-sets are annotated unpinned by
+   `sim/deck-parity/20261117-mc-unpinned-environment-annotation.md` and are
+   re-qualified under the pin via #272); and (b) the operator ruling's own
+   final gate ("equivalent measurements and supported execution are
    established"), which the receipts now evidence -- the retirement PR
    should cite both receipts and the decision. Single-point probes stay
    local. Until cutover lands, the cold-start section below is the
@@ -264,8 +271,10 @@ samples). The same receipt shows the pin is not value-neutral everywhere:
 the committed *MC* campaign (2026-09-21) ran unpinned, so the pin moves the
 SNM negative-control surviving values off those records (attributed by a
 committed local A/B in that receipt) -- the two committed evidence families
-were taken under different ngspice environments, and standardizing is the
-open evidence-policy decision noted under blocker 3.
+were taken under different ngspice environments; which one future campaigns
+standardize on is decided by
+[`spec/environment-pin-decision.md`](../spec/environment-pin-decision.md)
+(the pinned `hs a` environment).
 
 This is issue #338, and the section below is its fix: a run-directory
 `.spiceinit` staged onto every execution path. The request-level
