@@ -26,6 +26,8 @@ Run: `python3 sim/lib/test_mint_records.py` (in `npm test`).
 """
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import stat
@@ -210,7 +212,9 @@ def test_claimed_families_mint(tmp: Path) -> None:
     added the pex-write-margin families after this module's merge-base;
     both broke the corner path only at the merge. This loop fails on
     either drift: a claim that no longer resolves in FAMILIES (KeyError),
-    an arity change at the unpack, or an MC claim off MC_FAMILIES."""
+    an arity change at the unpack, an MC claim off MC_FAMILIES, or an mc
+    CLI offer with no claim (#446: unclaimed families must be refused at
+    argparse, not die inside mint_mc on a bare KeyError)."""
     cids = ["tt_25c_3.30v", "ss_125c_3.63v"]
     saved = mint_records.pdk_identity
     mint_records.pdk_identity = lambda: {
@@ -243,6 +247,37 @@ def test_claimed_families_mint(tmp: Path) -> None:
     for family in mint_records.MC_CLAIMS:
         check(f"mc claimed family {family} resolves in MC_FAMILIES",
               family in deck_adapter.MC_FAMILIES)
+    # #446: the mc CLI offered every MC_FAMILIES family while MC_CLAIMS
+    # covered a subset, so read-access/write-access were accepted and died
+    # inside mint_mc on MC_CLAIMS[family] with a bare KeyError. Refusal of
+    # an unclaimed family must happen at argparse (readable "invalid
+    # choice"), never inside the minter; every claimed family must still
+    # get past the CLI.
+    for family in sorted(deck_adapter.MC_FAMILIES):
+        if family in mint_records.MC_CLAIMS:
+            continue
+        err = io.StringIO()
+        refused = False
+        try:
+            with contextlib.redirect_stderr(err):
+                mint_records.main(["mc", family, "--request", "nonexistent.json",
+                                   "--reduced", "nonexistent.json"])
+        except SystemExit:
+            refused = "invalid choice" in err.getvalue()
+        except Exception:
+            refused = False
+        check(f"mc CLI refuses unclaimed family {family} before mint_mc",
+              refused)
+    for family in sorted(mint_records.MC_CLAIMS):
+        offered = False
+        try:
+            mint_records.main(["mc", family, "--request", "nonexistent.json",
+                               "--reduced", "nonexistent.json"])
+        except SystemExit:
+            offered = False
+        except Exception:
+            offered = True
+        check(f"mc CLI still offers claimed family {family}", offered)
 
 
 def test_corner_rejects_bad_grading(tmp: Path) -> None:

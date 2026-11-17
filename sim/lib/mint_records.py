@@ -817,7 +817,7 @@ def main(argv=None) -> int:
     c.add_argument("--supersedes", default="")
     c.add_argument("--record-id")
     m = sub.add_parser("mc", help="mint one Monte Carlo campaign record + artifacts")
-    m.add_argument("family", choices=sorted(deck_adapter.MC_FAMILIES))
+    m.add_argument("family", choices=sorted(MC_CLAIMS))
     m.add_argument("--request", required=True, type=Path)
     m.add_argument("--reduced", required=True, type=Path)
     m.add_argument("--supersedes", default="")
