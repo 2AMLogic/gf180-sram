@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -667,6 +668,72 @@ def test_mc_reduce_fails_closed():
 
 
 # --------------------------------------------------------------------------
+# Report-declared stream paths stay inside the outdir (#448)
+# --------------------------------------------------------------------------
+
+
+def test_unit_stream_containment():
+    """unit_stream_relpath refuses a declared path that is absolute or
+    resolves outside the report outdir, for all three readers (reduce
+    grader, MC log reader, record minter share the one check)."""
+    cid = "tt_25c_3.30v"
+    with tempfile.TemporaryDirectory() as td:
+        base = Path(td)
+        check("relative declared path passes through",
+              da.unit_stream_relpath({"stdout": f"{cid}/stdout.bin"}, cid, "stdout", base=base)
+              == f"{cid}/stdout.bin")
+        check("omitted field keeps the default layout",
+              da.unit_stream_relpath({}, cid, "stderr", base=base) == f"{cid}/stderr.bin")
+        for bad in ("/etc/passwd", str(base / f"{cid}/stdout.bin")):
+            try:
+                da.unit_stream_relpath({"stdout": bad}, cid, "stdout", base=base)
+                check(f"absolute declared path refused ({bad})", False)
+            except ValueError as ve:
+                check(f"absolute declared path refused ({bad})",
+                      cid in str(ve) and bad in str(ve) and "outdir" in str(ve), str(ve))
+        try:
+            da.unit_stream_relpath({"stdout": "../../elsewhere/stdout.bin"}, cid, "stdout", base=base)
+            check("traversal refused", False)
+        except ValueError as ve:
+            check("traversal refused",
+                  cid in str(ve) and "../../elsewhere/stdout.bin" in str(ve), str(ve))
+        # a symlink under the outdir pointing outside is caught by the same
+        # resolve()-semantics containment rule
+        with tempfile.TemporaryDirectory() as od:
+            (Path(od) / "secret.bin").write_bytes(b"x")
+            os.symlink(Path(od) / "secret.bin", base / "link.bin")
+            try:
+                da.unit_stream_relpath({"stdout": "link.bin"}, cid, "stdout", base=base)
+                check("symlink escape refused", False)
+            except ValueError as ve:
+                check("symlink escape refused", "link.bin" in str(ve), str(ve))
+    # the reduce grader shares the refusal end-to-end: a report declaring
+    # an absolute stdout grades nothing, it refuses
+    with tempfile.TemporaryDirectory() as td:
+        rep = _stub_report("write-margin", td)
+        rep["units"][0]["stdout"] = "/etc/passwd"
+        bad_cid = rep["units"][0]["id"]
+        try:
+            da.reduce_report("write-margin", rep)
+            check("grader refuses escaping declared path", False)
+        except ValueError as ve:
+            check("grader refuses escaping declared path",
+                  bad_cid in str(ve) and "/etc/passwd" in str(ve), str(ve))
+    # and so does the MC log reader
+    with tempfile.TemporaryDirectory() as bd, tempfile.TemporaryDirectory() as rd:
+        req = _mc_build("write-margin", bd)
+        rep = _mc_stub("write-margin", req, rd)
+        rep["units"][0]["stdout"] = "/etc/passwd"
+        bad_uid = rep["units"][0]["id"]
+        try:
+            da.reduce_mc_report("write-margin", req, rep, outdir=rd)
+            check("mc reader refuses escaping declared path", False)
+        except ValueError as ve:
+            check("mc reader refuses escaping declared path",
+                  bad_uid in str(ve) and "/etc/passwd" in str(ve), str(ve))
+
+
+# --------------------------------------------------------------------------
 # Pinned run-directory .spiceinit (#338)
 # --------------------------------------------------------------------------
 
@@ -731,7 +798,7 @@ def main():
               test_pex_family_staging, test_klt_accepts_requests, test_reducer_direct, test_reducer_snm,
               test_bounded_corner_selection, test_bounded_reduce_scopes_coverage,
               test_mc_seed_pins, test_mc_build_identity, test_mc_n1_and_guard,
-              test_mc_reduce_shapes, test_mc_reduce_fails_closed,
+              test_mc_reduce_shapes, test_mc_reduce_fails_closed, test_unit_stream_containment,
               test_spiceinit_staged_in_requests, test_spiceinit_cli_matches_constant):
         t()
     if FAILURES:

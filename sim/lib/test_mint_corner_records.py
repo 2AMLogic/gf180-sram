@@ -11,6 +11,7 @@ and that `compare_records.py` consumes the minted output unchanged.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 import tempfile
@@ -414,9 +415,46 @@ def test_mint_declared_stream_paths():
               sorted(p.name for p in exp.iterdir()) == before)
 
 
+def test_mint_refuses_escaping_stream_path():
+    """A report-declared stream path that is absolute or traverses out of
+    the unit dir never reaches the minted evidence: the minter refuses
+    fail-closed, writing nothing (#448)."""
+    with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory() as ud:
+        req = da.build_request(SCH_KEY, ud)
+        values = {c: 1.0 for c in req["x_gf180_sram_adapter"]["corners"]}
+        reduced = _graded(SCH_KEY, req, values)
+        exp = Path(td)
+        _seed_exp_dir(td, SCH_KEY)
+        outside = Path(tempfile.mkdtemp(prefix="outside-outdir-"))
+        try:
+            (outside / "secret.log").write_bytes(b"RESULT: write_trip_voltage_v = 9.9\n")
+            outdir = reduced["_stub_report_outdir"]
+            for name, bad in (
+                ("absolute (passwd-style)", str(outside / "secret.log")),
+                ("upward traversal", os.path.relpath(outside / "secret.log", outdir)),
+            ):
+                rep = json.loads(json.dumps(reduced["_stub_report"]))
+                rep["units"][0]["stdout"] = bad
+                cid0 = rep["units"][0]["id"]
+                before = sorted(p.name for p in exp.iterdir())
+                try:
+                    mcr.mint_record(SCH_KEY, reduced, req, report=rep,
+                                    unit_dir=Path(outdir), exp_dir=exp,
+                                    record_id="20261117-120300-deadbee", claim="c")
+                    check(f"{name} refused", False)
+                except ValueError as ve:
+                    check(f"{name} refused",
+                          cid0 in str(ve) and bad in str(ve) and "outdir" in str(ve), str(ve))
+                check(f"{name} wrote nothing",
+                      sorted(p.name for p in exp.iterdir()) == before)
+        finally:
+            shutil.rmtree(outside)
+
+
 def main():
     for t in (test_mint_recorded, test_mint_refusals, test_mint_open_and_append_only,
-              test_mint_declared_stream_paths, test_compare_records_consumes_minted):
+              test_mint_declared_stream_paths, test_mint_refuses_escaping_stream_path,
+              test_compare_records_consumes_minted):
         t()
     if FAILURES:
         for f in FAILURES[:10]:

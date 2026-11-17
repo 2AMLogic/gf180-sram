@@ -381,15 +381,31 @@ def expected_from_request(family, request):
     return ids, sha
 
 
-def unit_stream_relpath(unit, cid, stream):
+def unit_stream_relpath(unit, cid, stream, *, base):
     """A unit's raw engine stream location, relative to the report's
     outdir: the path the report's `units[]` entry declares
     (`unit['stdout']` / `unit['stderr']`), falling back to the per-unit
     default layout `<cid>/<stream>.bin`. Every reader of a deck report's
     streams -- the reduce grader, the MC log reader, the record minter
     (`mint_corner_records.py`) -- resolves streams through this one rule,
-    so the grading and the evidence minting cannot drift apart (#444)."""
-    return unit.get(stream, f"{cid}/{stream}.bin")
+    so the grading and the evidence minting cannot drift apart (#444).
+
+    `base` is the report's outdir the path resolves against, and the
+    resolved path must stay inside it: a declared path that is absolute,
+    or whose resolved form is not inside the outdir, refuses fail-closed
+    (ValueError) rather than reading outside the run's own output (#448).
+    Containment is judged on `Path.resolve()`d paths, so a symlink under
+    the outdir pointing outside is caught by the same rule -- resolve()
+    semantics is the chosen behaviour."""
+    rel = unit.get(stream, f"{cid}/{stream}.bin")
+    root = Path(base).resolve()
+    resolved = (Path(base) / rel).resolve()
+    if Path(rel).is_absolute() or not resolved.is_relative_to(root):
+        raise ValueError(
+            f"declared {stream} path {rel!r} for unit {cid} is absolute or "
+            f"resolves outside the report outdir {root} -- refusing"
+        )
+    return rel
 
 
 def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_deck_sha256=None):
@@ -463,8 +479,8 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
             continue
         reasons = []
         unit_dir = base / cid
-        stdout_path = base / unit_stream_relpath(unit, cid, "stdout")
-        stderr_path = base / unit_stream_relpath(unit, cid, "stderr")
+        stdout_path = base / unit_stream_relpath(unit, cid, "stdout", base=base)
+        stderr_path = base / unit_stream_relpath(unit, cid, "stderr", base=base)
         log = ""
         for p in (stdout_path, stderr_path):
             if p.is_file():
@@ -674,7 +690,7 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
 def _read_log(base, unit, uid):
     log = ""
     for stream in ("stdout", "stderr"):
-        p = base / unit_stream_relpath(unit, uid, stream)
+        p = base / unit_stream_relpath(unit, uid, stream, base=base)
         if p.is_file():
             log += p.read_bytes().decode("utf-8", errors="replace")
     return log
