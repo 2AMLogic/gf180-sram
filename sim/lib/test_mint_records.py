@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-"""sim/lib/test_mint_records.py -- offline contract tests for the record
-minter (#272).
+"""sim/lib/test_mint_records.py -- offline contract tests for the Monte
+Carlo record minter and the corner-minting delegation (#272, #452).
 
-`mint_records.py` is the generator the #230 cutover left to #272: it mints
-append-only evidence records (deterministic + Monte Carlo) from a
-`klt sim` deck-mode run's request/reduced/report artifacts. These tests pin
-its contract with stub artifacts -- the same stub-report discipline
-test_deck_adapter.py documents. They are contract checks, **not** physical
-evidence: nothing here ran ngspice.
+`mint_records.py` owns the Monte Carlo path (`mint_mc`) since the #452
+consolidation; its `corner` CLI subcommand delegates the deterministic
+minting to `sim/lib/mint_corner_records.py`'s single minter (whose own
+contract is pinned by test_mint_corner_records.py). These tests pin, with
+stub artifacts -- the same stub-report discipline test_deck_adapter.py
+documents -- the MC contract and the delegation. They are contract checks,
+**not** physical evidence: nothing here ran ngspice.
 
 Covered:
-  * corner minting writes the snapshot (composed-deck bytes, sha-pinned),
-    per-corner logs in the retired launcher's byte shape (engine stdout,
-    the two header lines, the SNM extractor's output), and a record whose
-    Result rows/Overall/Supersedes/PDK/Run lines match the convention;
-  * a grading that does not pin the request's composed deck sha256, a
-    family mismatch, or coverage errors abort before anything is written;
+  * the `corner` CLI delegates: it mints the family's canonical
+    FAMILY_CLAIMS claim through mint_corner_records.mint_record (PDK and
+    Run lines included) into the family's experiment dir, and prints
+    `record-id:`;
   * mc minting rebuilds the sample-set document from the reducer's
     measurements, writes per-draw raw logs (seed + value, or the OPEN
     reason), summary.json, and renders the record from the `klt yield`
     report a stub `klt` emits (KLT/--klt injectable, so CI needs no real
-    klt and no PDK: pdk_identity is stubbed too).
+    klt and no PDK: pdk_identity is stubbed too);
+  * the mc CLI offers exactly the claimed families at argparse (#446).
 
 Run: `python3 sim/lib/test_mint_records.py` (in `npm test`).
 """
@@ -30,290 +30,111 @@ import contextlib
 import io
 import json
 import os
+import shutil
 import stat
 import sys
 import tempfile
-import textwrap
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import deck_adapter  # noqa: E402 (path-injected sibling import)
+import deck_adapter  # noqa: E402
+import deck_adapter as da  # noqa: E402
+import mint_corner_records as mcr  # noqa: E402
 import mint_records  # noqa: E402
 
+REPO = da.REPO_ROOT
 FAILURES: list[str] = []
 
+STUB_PDK = {
+    "variant": "gf180mcuD", "version": "f6eeac7" + "0" * 33,
+    "design_inc_rel": "libs.tech/ngspice/design.ngspice",
+    "model_file_rel": "libs.tech/ngspice/sm141064.ngspice",
+}
 
-def check(name: str, cond: bool) -> None:
+
+def check(name: str, cond: bool, detail: str = "") -> None:
     if not cond:
-        FAILURES.append(name)
-        print(f"FAIL: {name}")
-    else:
-        print(f"ok: {name}")
+        FAILURES.append(f"{name}: {detail}")
 
 
-TB_TEXT = textwrap.dedent(
-    """
-    * stub testbench
-    .control
-    echo "RESULT: stub_v = 1.000000"
-    quit
-    .endc
-    """
-)
-DATAFILE = "stub_sweep.txt"
+def _full_grid_stub(family: str, tmp: Path) -> tuple[dict, dict, dict, Path]:
+    """Full-grid request + real reduce grading over stub unit outputs.
+
+    NOT a measurement: every corner's stdout carries one stub RESULT line.
+    Returns (request, report, reduced, unit-dir) -- the artifact triple the
+    `corner` subcommand consumes."""
+    req = da.build_request(family, str(tmp / "stage"))
+    outdir = tmp / "units"
+    units = []
+    for cid in req["x_gf180_sram_adapter"]["corners"]:
+        (outdir / cid).mkdir(parents=True, exist_ok=True)
+        (outdir / cid / "stdout.bin").write_text("RESULT: stub_v = 1.0\n")
+        (outdir / cid / "stderr.bin").write_bytes(b"")
+        units.append({"id": cid, "status": "pass", "exit_code": 0, "timed_out": False,
+                      "missing_outputs": [], "stdout": f"{cid}/stdout.bin",
+                      "stderr": f"{cid}/stderr.bin",
+                      "deck_sha256": req["x_gf180_sram_adapter"]["composed_deck_sha256"]})
+    report = {"mode": "decks", "status": "pass", "unit_count": len(units), "units": units,
+              "outdir": str(outdir),
+              "environment": {"engine_version": "47",
+                              "remote": {"job_id": "klt-sim-stub", "ami_id": "ami-stub"}}}
+    exp_ids, exp_sha = da.expected_from_request(family, req)
+    reduced = da.reduce_report(family, report, outdir=outdir,
+                               expected_ids=exp_ids, expected_deck_sha256=exp_sha)
+    return req, report, reduced, outdir
 
 
-def sha(b: bytes) -> str:
-    return deck_adapter._sha256(b)
-
-
-def write_unit_tree(root: Path, cids: list[str], *, with_data: bool) -> None:
-    for cid in cids:
-        d = root / cid
-        d.mkdir(parents=True, exist_ok=True)
-        (d / "stdout.bin").write_text("stub engine stdout\n")
-        (d / "stderr.bin").write_bytes(b"")
-        if with_data:
-            (d / DATAFILE).write_text(
-                "\n".join(f"{i * 0.1} {1.0 - i * 0.1}" for i in range(6)) + "\n"
-            )
-
-
-def stub_request(family: str, cids: list[str], deck_sha: str) -> dict:
-    return {
-        "engine": "ngspice",
-        "decks": [],
-        "options": {"timeout_s": 300},
-        "x_gf180_sram_adapter": {
-            "family": family,
-            "mode": deck_adapter.FAMILIES[family][2],
-            "testbench": f"{family}/testbench/tb.spice",
-            "testbench_sha256": sha(TB_TEXT.encode()),
-            "composed_deck_sha256": deck_sha,
-            "corners": cids,
-            "corner_count": len(cids),
-            "spiceinit_sha256": "f" * 64,
-            "full_grid": False,
-        },
-    }
-
-
-def stub_corner_reduced(family: str, cids: list[str], deck_sha: str) -> dict:
-    corners = []
-    for i, cid in enumerate(cids):
-        if i == 0:
-            corners.append({
-                "id": cid, "status": "OPEN",
-                "reasons": ["no RESULT line captured (engine exit 0)"],
-                "results": {}, "result_lines": [], "engine_exit_code": 0,
-                "deck_sha256": deck_sha,
-            })
-        else:
-            lines = [f"RESULT: stub_v = {0.1 * i:.6f}"]
-            corners.append({
-                "id": cid, "status": "recorded", "reasons": [],
-                "results": {"stub_v": 0.1 * i},
-                "result_lines": lines, "engine_exit_code": 0,
-                "deck_sha256": deck_sha,
-            })
-    return {
-        "family": family, "mode": deck_adapter.FAMILIES[family][2],
-        "expected": cids, "expected_deck_sha256": deck_sha,
-        "coverage_errors": [], "corners": corners, "overall": "OPEN",
-    }
-
-
-def stub_report(cids: list[str]) -> dict:
-    return {
-        "mode": "decks",
-        "environment": {
-            "engine_version": "47",
-            "remote": {"job_id": "klt-sim-stub", "ami_id": "ami-stub",
-                       "provider": "aws-batch-fleet", "region": "us-east-1"},
-        },
-        "units": [
-            {"id": cid, "status": "pass", "exit_code": 0, "timed_out": False,
-             "stdout": f"{cid}/stdout.bin", "stderr": f"{cid}/stderr.bin",
-             "deck_sha256": "x"}
-            for cid in cids
-        ],
-    }
-
-
-def test_corner_mint(tmp: Path) -> None:
-    family = "read-snm"  # an snm-mode family: exercises the extractor path
-    cids = ["tt_25c_3.30v", "ss_125c_3.63v"]
-    tb = tmp / "repo" / "sim" / family / "testbench" / deck_adapter.FAMILIES[family][1]
-    tb.parent.mkdir(parents=True)
-    tb.write_text(TB_TEXT)
-    deck_sha = sha(deck_adapter.compose_deck(TB_TEXT).encode())
-
-    unit_dir = tmp / "units"
-    write_unit_tree(unit_dir, cids, with_data=True)
-
-    request_path = tmp / "request.json"
-    request_path.write_text(json.dumps(stub_request(family, cids, deck_sha)))
-    reduced_path = tmp / "reduced.json"
-    reduced_path.write_text(json.dumps(stub_corner_reduced(family, cids, deck_sha)))
-    report_path = tmp / "report.json"
-    report_path.write_text(json.dumps(stub_report(cids)))
-
-    saved = mint_records.pdk_identity
-    mint_records.pdk_identity = lambda: {
-        "variant": "gf180mcuD", "version": "f6eeac7" + "0" * 56,
-        "design_inc_rel": "libs.tech/ngspice/design.ngspice",
-        "model_file_rel": "libs.tech/ngspice/sm141064.ngspice",
-    }
-    try:
-        record = mint_records.mint_corner(
-            family, request_path, reduced_path, report_path, unit_dir,
-            supersedes="20200101-000000-abc1234 (PDK re-pin, issue #272)",
-            record_id="20270101-000000-def5678", repo_root=tmp / "repo",
-            now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
-        )
-    finally:
-        mint_records.pdk_identity = saved
-    text = record.read_text()
-
-    exp = tmp / "repo" / "sim" / family
-    snapshot = (exp / "netlist-snapshots" / "20270101-000000-def5678.spice").read_bytes()
-    check("snapshot is the composed deck bytes",
-          snapshot == deck_adapter.compose_deck(TB_TEXT).encode())
-    check("request deck sha matches snapshot",
-          sha(snapshot) == deck_sha)
-
-    log0 = (exp / "corners" / "20270101-000000-def5678" / f"{cids[0]}.log").read_text()
-    check("corner log carries engine stdout", "stub engine stdout" in log0)
-    check("corner log header lines in launcher shape",
-          "=== corner: tt_25c_3.30v (process=tt temp=25C vdd=3.30V) ===\n"
-          "=== ngspice exit status: 0 ===" in log0)
-    log1 = (exp / "corners" / "20270101-000000-def5678" / f"{cids[1]}.log").read_text()
-    check("snm corner log carries extractor RESULT lines",
-          "RESULT: stub_snm" in log1 or "RESULT-ERROR" in log1 or "RESULT:" in log1)
-
-    check("record Claim line", "spec/sram.md Characterization -- read SNM" in text)
-    check("record Supersedes line verbatim",
-          "- **Supersedes**: 20200101-000000-abc1234 (PDK re-pin, issue #272)" in text)
-    check("record PDK identity line (f6eeac7 pin)", "open_pdks `" in text)
-    check("record Run line carries the fleet job id", "klt-sim-stub" in text)
-    check("record Run line carries the spiceinit pin",
-          "spiceinit" in text and "f" * 64 in text)
-    check("record Result rows verbatim with launcher join",
-          f"- **{cids[1]}**: RESULT: stub_v = 0.100000;" in text)
-    check("OPEN corner renders OPEN, never a value",
-          f"- **{cids[0]}**: OPEN -- no RESULT line captured" in text)
-    check("Overall OPEN rollup", "**Overall: OPEN**" in text)
-    check("no absolute host path in the record", str(tmp) not in text)
-
-
-def test_claimed_families_mint(tmp: Path) -> None:
-    """Every FAMILY_CLAIMS family mints against deck_adapter.FAMILIES'
-    current shape. The #437 deck port widened FAMILIES to a 4-tuple and
-    added the pex-write-margin families after this module's merge-base;
-    both broke the corner path only at the merge. This loop fails on
-    either drift: a claim that no longer resolves in FAMILIES (KeyError),
-    an arity change at the unpack, an MC claim off MC_FAMILIES, or an mc
-    CLI offer with no claim (#446: unclaimed families must be refused at
-    argparse, not die inside mint_mc on a bare KeyError)."""
-    cids = ["tt_25c_3.30v", "ss_125c_3.63v"]
-    saved = mint_records.pdk_identity
-    mint_records.pdk_identity = lambda: {
-        "variant": "gf180mcuD", "version": "f6eeac7" + "0" * 56,
-        "design_inc_rel": "libs.tech/ngspice/design.ngspice",
-        "model_file_rel": "libs.tech/ngspice/sm141064.ngspice",
-    }
-    try:
-        for i, (family, (exp_dir, claim)) in enumerate(sorted(mint_records.FAMILY_CLAIMS.items())):
-            t = tmp / family
-            tb = t / "repo" / "sim" / exp_dir / "testbench" / deck_adapter.FAMILIES[family][1]
-            tb.parent.mkdir(parents=True)
-            tb.write_text(TB_TEXT)
-            deck_sha = sha(deck_adapter.compose_deck(TB_TEXT).encode())
-            unit_dir = t / "units"
-            write_unit_tree(unit_dir, cids, with_data=True)
-            (t / "request.json").write_text(json.dumps(stub_request(family, cids, deck_sha)))
-            (t / "reduced.json").write_text(json.dumps(stub_corner_reduced(family, cids, deck_sha)))
-            (t / "report.json").write_text(json.dumps(stub_report(cids)))
-            rid = f"20270101-000000-{i:08d}"
-            record = mint_records.mint_corner(
-                family, t / "request.json", t / "reduced.json", t / "report.json",
-                unit_dir, supersedes="", record_id=rid, repo_root=t / "repo",
-                now=mint_records.datetime(2027, 1, 1, tzinfo=mint_records.timezone.utc),
-            )
-            text = record.read_text()
-            check(f"claimed family {family} mints with its claim line", claim in text)
-    finally:
-        mint_records.pdk_identity = saved
-    for family in mint_records.MC_CLAIMS:
-        check(f"mc claimed family {family} resolves in MC_FAMILIES",
-              family in deck_adapter.MC_FAMILIES)
-    # #446: the mc CLI offered every MC_FAMILIES family while MC_CLAIMS
-    # covered a subset, so read-access/write-access were accepted and died
-    # inside mint_mc on MC_CLAIMS[family] with a bare KeyError. Refusal of
-    # an unclaimed family must happen at argparse (readable "invalid
-    # choice"), never inside the minter; every claimed family must still
-    # get past the CLI.
-    for family in sorted(deck_adapter.MC_FAMILIES):
-        if family in mint_records.MC_CLAIMS:
-            continue
-        err = io.StringIO()
-        refused = False
-        try:
-            with contextlib.redirect_stderr(err):
-                mint_records.main(["mc", family, "--request", "nonexistent.json",
-                                   "--reduced", "nonexistent.json"])
-        except SystemExit:
-            refused = "invalid choice" in err.getvalue()
-        except Exception:
-            refused = False
-        check(f"mc CLI refuses unclaimed family {family} before mint_mc",
-              refused)
-    for family in sorted(mint_records.MC_CLAIMS):
-        offered = False
-        try:
-            mint_records.main(["mc", family, "--request", "nonexistent.json",
-                               "--reduced", "nonexistent.json"])
-        except SystemExit:
-            offered = False
-        except Exception:
-            offered = True
-        check(f"mc CLI still offers claimed family {family}", offered)
-
-
-def test_corner_rejects_bad_grading(tmp: Path) -> None:
+def test_corner_cli_delegates(tmp: Path) -> None:
+    """`mint_records.py corner` mints through the single corner minter
+    (mint_corner_records.mint_record) with the family's canonical
+    FAMILY_CLAIMS claim, PDK and Run lines included, and prints
+    `record-id:` (#452)."""
     family = "write-margin"
-    cids = ["tt_25c_3.30v"]
-    tb = tmp / "repo2" / "sim" / family / "testbench" / deck_adapter.FAMILIES[family][1]
-    tb.parent.mkdir(parents=True)
-    tb.write_text(TB_TEXT)
-    deck_sha = sha(deck_adapter.compose_deck(TB_TEXT).encode())
-    request_path = tmp / "req2.json"
-    request_path.write_text(json.dumps(stub_request(family, cids, deck_sha)))
-    reduced_path = tmp / "red2.json"
-    reduced_path.write_text(json.dumps(stub_corner_reduced(family, cids, deck_sha)))
-    report_path = tmp / "rep2.json"
-    report_path.write_text(json.dumps(stub_report(cids)))
-    unit_dir = tmp / "units2"
-    write_unit_tree(unit_dir, cids, with_data=False)
+    req, report, reduced, units = _full_grid_stub(family, tmp)
+    exp = tmp / "exp"
+    (exp / "testbench").mkdir(parents=True)
+    exp_dir, tb, _mode, _staged = da.FAMILIES[family]
+    shutil.copyfile(REPO / exp_dir / "testbench" / tb, exp / "testbench" / tb)
+    (tmp / "request.json").write_text(json.dumps(req))
+    (tmp / "reduced.json").write_text(json.dumps(reduced))
+    (tmp / "report.json").write_text(json.dumps(report))
 
-    other = stub_corner_reduced(family, cids, deck_sha)
-    other["expected_deck_sha256"] = "0" * 64
-    (tmp / "red_drift.json").write_text(json.dumps(other))
+    rid = "20270101-000000-def5678"
+    saved = mcr.pdk_identity
+    mcr.pdk_identity = lambda: dict(STUB_PDK)
+    out = io.StringIO()
     try:
-        mint_records.mint_corner(family, request_path, tmp / "red_drift.json",
-                                 report_path, unit_dir, supersedes="",
-                                 repo_root=tmp / "repo2")
-        check("deck-sha drift aborts minting", False)
-    except SystemExit:
-        check("deck-sha drift aborts minting", True)
-
-    try:
-        mint_records.mint_corner("read-snm", request_path, reduced_path,
-                                 report_path, unit_dir, supersedes="",
-                                 repo_root=tmp / "repo2")
-        check("family mismatch aborts minting", False)
-    except SystemExit:
-        check("family mismatch aborts minting", True)
+        with contextlib.redirect_stdout(out):
+            rc = mint_records.main([
+                "corner", family,
+                "--request", str(tmp / "request.json"),
+                "--reduced", str(tmp / "reduced.json"),
+                "--report", str(tmp / "report.json"),
+                "--unit-dir", str(units),
+                "--supersedes", "20200101-000000-abc1234 (PDK re-pin, issue #272)",
+                "--record-id", rid,
+                "--exp-dir", str(exp),
+            ])
+    finally:
+        mcr.pdk_identity = saved
+    check("corner CLI exits 0", rc == 0, str(rc))
+    check("corner CLI prints record-id", f"record-id: {rid}" in out.getvalue(),
+          out.getvalue())
+    record = exp / "records" / f"{rid}.md"
+    check("corner CLI wrote the record", record.is_file(), str(record))
+    text = record.read_text()
+    canonical = mint_records.FAMILY_CLAIMS[family][1]
+    check("delegated mint carries the canonical claim",
+          f"- **Claim**: {canonical}" in text, text[:400])
+    check("delegated mint carries the PDK line",
+          f"- **PDK**: `{STUB_PDK['variant']}`, open_pdks `{STUB_PDK['version']}`" in text)
+    check("delegated mint carries the Run line with the fleet job",
+          "job `klt-sim-stub`" in text)
+    check("delegated mint carries Supersedes verbatim",
+          "- **Supersedes**: 20200101-000000-abc1234 (PDK re-pin, issue #272)" in text)
+    check("delegated snapshot is the composed deck",
+          (exp / "netlist-snapshots" / f"{rid}.spice").read_bytes()
+          == da.compose_deck((REPO / exp_dir / "testbench" / tb).read_text(encoding="utf-8")).encode())
 
 
 CANNED_YIELD_JSON = json.dumps({
@@ -397,16 +218,12 @@ def test_mc_mint(tmp: Path) -> None:
     cid = "tt_25c_3.30v"
     tb = tmp / "repo3" / "sim" / family / "testbench" / deck_adapter.FAMILIES[family][1]
     tb.parent.mkdir(parents=True)
-    tb.write_text(TB_TEXT)
+    tb.write_text("* stub\n")
     request_path, reduced_path, _seed = stub_mc_request(tmp)
     shim = install_stub_klt(tmp)
     os.environ["KLT"] = str(shim)
     saved = mint_records.pdk_identity
-    mint_records.pdk_identity = lambda: {
-        "variant": "gf180mcuD", "version": "f6eeac7" + "0" * 56,
-        "design_inc_rel": "libs.tech/ngspice/design.ngspice",
-        "model_file_rel": "libs.tech/ngspice/sm141064.ngspice",
-    }
+    mint_records.pdk_identity = lambda: dict(STUB_PDK)
     try:
         record = mint_records.mint_mc(
             family, request_path, reduced_path,
@@ -491,16 +308,52 @@ def test_infra_accounted() -> None:
             check(name, True)
 
 
+def test_mc_cli_claim_gating() -> None:
+    """Every MC_CLAIMS family resolves in MC_FAMILIES, the mc CLI offers
+    exactly the claimed families at argparse, and an unclaimed family is
+    refused with a readable 'invalid choice' -- never a bare KeyError
+    inside mint_mc (#446)."""
+    for family in mint_records.MC_CLAIMS:
+        check(f"mc claimed family {family} resolves in MC_FAMILIES",
+              family in deck_adapter.MC_FAMILIES)
+    for family in sorted(deck_adapter.MC_FAMILIES):
+        if family in mint_records.MC_CLAIMS:
+            continue
+        err = io.StringIO()
+        refused = False
+        try:
+            with contextlib.redirect_stderr(err):
+                mint_records.main(["mc", family, "--request", "nonexistent.json",
+                                   "--reduced", "nonexistent.json"])
+        except SystemExit:
+            refused = "invalid choice" in err.getvalue()
+        except Exception:
+            refused = False
+        check(f"mc CLI refuses unclaimed family {family} before mint_mc",
+              refused)
+    for family in sorted(mint_records.MC_CLAIMS):
+        offered = False
+        try:
+            mint_records.main(["mc", family, "--request", "nonexistent.json",
+                               "--reduced", "nonexistent.json"])
+        except SystemExit:
+            offered = False
+        except Exception:
+            offered = True
+        check(f"mc CLI still offers claimed family {family}", offered)
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
-        test_corner_mint(tmp / "t1")
-        test_claimed_families_mint(tmp / "t1b")
-        test_corner_rejects_bad_grading(tmp / "t2")
+        test_corner_cli_delegates(tmp / "t1")
         test_mc_mint(tmp / "t3")
         test_infra_accounted()
+        test_mc_cli_claim_gating()
     if FAILURES:
-        print(f"\n{len(FAILURES)} failure(s)")
+        print(f"\n{len(FAILURES)} failure(s):")
+        for f in FAILURES:
+            print(f"  - {f}")
         return 1
     print("\nall mint_records contract checks passed")
     return 0

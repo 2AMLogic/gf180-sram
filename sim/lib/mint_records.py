@@ -1,36 +1,23 @@
 #!/usr/bin/env python3
-"""sim/lib/mint_records.py -- mint append-only evidence records from a
-`klt sim` deck-mode run.
+"""sim/lib/mint_records.py -- mint append-only Monte Carlo evidence records
+from a `klt sim` deck-mode run.
 
 The #230 cutover retired the two launchers that minted this repo's evidence
 (`run_corner_sweep.sh` for the deterministic 27-corner records, the
 `run_mc_campaign.py` pool for the Monte Carlo records) and replaced the *run*
 path with `sim/lib/deck_adapter.py` + `klt sim`. The minting the cutover
-left undone is now split between two modules: `sim/lib/mint_corner_records.py`
-(landed from the #437 deck port while #272 was in flight) mints the
-`direct`-mode pex-write-margin legs (#95) with their per-family staged-DUT
-provenance, while this module mints the #272 reference families -- the SNM
-families, the `direct` reference families, and the whole Monte Carlo path.
-The `corner` CLI below mints exactly the families FAMILY_CLAIMS names; the
-families outside it are `mint_corner_records.py`'s domain, not missing here.
-#272's re-qualification of the reference records under the `f6eeac7` PDK pin
-(`sim/lib/pdk_pin.txt`) is this module's first customer: every new record
-carries a **Supersedes** line naming the record it replaces and the retired
-records stay committed, append-only, untouched (sim/README.md "Append-only
-rule").
-
-It writes exactly the artifacts the retired launchers wrote, into the same
-directory shapes sim/README.md documents:
-
-* `corner` -- one deterministic record per family:
-    `sim/<exp>/netlist-snapshots/<record-id>.spice`,
-    `sim/<exp>/corners/<record-id>/<corner-id>.log`,
-    `sim/<exp>/records/<record-id>.md`.
-  Inputs: the `deck_adapter.py build` request, the `deck_adapter.py reduce`
-  --json-out grading, the deck report, and the collected unit tree (the
-  `klt sim -o` directory holding each unit's stdout/stderr and SNM sweep
-  data). Nothing is re-simulated: the grading is `reduce`'s, the raw engine
-  bytes are the fleet's own.
+left undone then grew in two modules at once (2026-11-17, while #272 and
+#437 were both in flight): this module and
+`sim/lib/mint_corner_records.py` each carried its own deterministic corner
+minter, and the two copies drifted apart (netlist provenance,
+fail-closed coverage rules, record line shapes). #452 consolidated the
+deterministic path into `mint_corner_records.mint_record` -- the single
+corner minter for every family in `deck_adapter.FAMILIES`, whose Claim
+strings its `FAMILY_CLAIMS` owns -- leaving this module what has no
+counterpart there: the Monte Carlo path (`mint_mc`) and its artifacts.
+The `corner` CLI subcommand below remains as the #272 re-qualification
+flow's entry point and delegates to that single minter, so there is one
+corner-record template and one set of corner fail-closed rules.
 
 * `mc` -- one Monte Carlo record per family plus the artifact set
   sim/README.md's MC convention requires:
@@ -47,16 +34,18 @@ directory shapes sim/README.md documents:
 
 Provenance hygiene (sim/README.md, issue #109): every path this module
 writes into a record or JSON document is repo-relative; the PDK is recorded
-by identity (variant + resolved open_pdks version from `sim/lib/pdk_env.sh`),
-never by install location. `--supersedes` is written verbatim into the
-record's Supersedes field and is how #272's records point at the `c6d73a3`
-records they replace.
+by identity (variant + resolved open_pdks version from `sim/lib/pdk_env.sh`
+via `pdk_identity`, owned by `mint_corner_records.py` since #452), never by
+install location. `--supersedes` is written verbatim into the record's
+Supersedes field and is how #272's records point at the `c6d73a3` records
+they replace.
 
-Deterministic-record fields the retired launcher did not have (and #272's
-records need): a **PDK** identity line and a **Run** line carrying the fleet
-`environment.remote` job id and the pinned run-directory `.spiceinit` the
-units executed under (issue #338; spec/environment-pin-decision.md) -- the
-acceptance test for the re-qualification reads both from the record.
+The deterministic-record fields the retired launcher did not have (and
+#272's records need) -- a **PDK** identity line and a **Run** line carrying
+the fleet `environment.remote` job id and the pinned run-directory
+`.spiceinit` (issue #338; spec/environment-pin-decision.md) -- are part of
+the single corner minter's template; the `corner` subcommand below mints
+records that carry both.
 
 Usage:
     python3 sim/lib/mint_records.py corner <family> \
@@ -71,8 +60,11 @@ Usage:
         --reduced <scratch>/<family>-reduced.json \
         --supersedes "<record-id> (<reason>)"
 
-`--record-id` overrides the freshly minted `<YYYYMMDD>-<HHMMSS>-<sha>` id
-(tests use this; live runs should not).
+`corner` accepts exactly the families FAMILY_CLAIMS names and mints each
+one's canonical Claim string; `mint_corner_records.py`'s CLI is the single
+minter's own surface (it also serves the by-hand pex legs, whose claims
+arrive via `--claim`). `--record-id` overrides the freshly minted
+`<YYYYMMDD>-<HHMMSS>-<sha>` id (tests use this; live runs should not).
 """
 from __future__ import annotations
 
@@ -88,26 +80,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 # Single owners, never re-derived: the ratified matrix (#331), the repo-root
 # helper (#337), the deck composer / SNM grading the fleet run itself used
 # (#230), and the MC identity library (derive_seed / RESULT grammar) the
-# cutover kept alive.
+# cutover kept alive. The deterministic corner-record machinery -- the
+# single minter, FAMILY_CLAIMS, record-id/git-sha/PDK-identity helpers --
+# lives in mint_corner_records.py since #452; this module imports it rather
+# than keeping a second copy.
 import deck_adapter  # noqa: E402 (path-injected sibling import)
-from corner_matrix import PROCESSES, TEMPS, VDDS  # noqa: E402
+import mint_corner_records as mcr  # noqa: E402
+from mint_corner_records import (  # noqa: E402
+    FAMILY_CLAIMS,
+    git_short_sha,
+    new_record_id,
+    pdk_identity,
+)
 from repo_root import find_repo_root  # noqa: E402
 
 REPO_ROOT = find_repo_root(Path(__file__))
 
 AUTHOR = "agent-builder"
-
-# family -> (experiment dir under sim/, Claim text). The Claim text is the
-# exact string the current records carry (RECORD_CLAIMS in
-# render_signoff_table.py matches its substring against whatever minting
-# writes, so a reword here would silently retarget the rollups).
-FAMILY_CLAIMS = {
-    "read-snm": ("read-snm", "spec/sram.md Characterization -- read SNM"),
-    "hold-snm": ("hold-snm", "spec/sram.md Characterization -- hold SNM"),
-    "write-margin": ("write-margin", "spec/sram.md Characterization -- write margin (write trip voltage)"),
-    "read-access": ("access-time", "spec/sram.md Characterization -- read access time (bit-line differential proxy)"),
-    "write-access": ("access-time", "spec/sram.md Characterization -- write access time"),
-}
 
 MC_CLAIMS = {
     "read-snm": "spec/sram.md Characterization -- read SNM (Monte Carlo device mismatch, combined with the ratified 9-corner PVT matrix)",
@@ -121,228 +110,18 @@ SPEC_LIMITS_SOURCE = (
 )
 
 
-def git_short_sha() -> str:
-    out = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "rev-parse", "--short", "HEAD"],
-        capture_output=True, text=True, check=False,
-    )
-    return out.stdout.strip() or "nogit"
-
-
-def pdk_identity() -> dict[str, str]:
-    """Resolve the PDK by identity via sim/lib/pdk_env.sh (never a path).
-
-    The env file fails non-zero when the resolved install is not the pin, so
-    a drifted tree cannot be minted into a record silently.
-    """
-    out = subprocess.run(
-        ["bash", "-c",
-         'source sim/lib/pdk_env.sh >/dev/null 2>&1; '
-         'printf "%s\\t%s\\t%s\\t%s" "$GF180_VARIANT_DIR" "$GF180_PDK_VERSION" '
-         '"$GF180_DESIGN_INC" "$GF180_MODEL_FILE"'],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=False,
-    )
-    if out.returncode != 0:
-        raise SystemExit(
-            f"pdk_env.sh failed ({out.returncode}): {out.stderr.strip()}"
-        )
-    variant_dir, version, design_inc, model_file = out.stdout.split("\t")
-    if not variant_dir or not version:
-        raise SystemExit("pdk_env.sh resolved no PDK identity")
-    model_rel = os.path.relpath(model_file, variant_dir)
-    return {
-        "variant": Path(variant_dir).name,
-        "version": version,
-        "design_inc_rel": os.path.relpath(design_inc, variant_dir),
-        "model_file_rel": model_rel,
-    }
-
-
 def klt_version(klt: str | None = None) -> str:
     klt = klt or os.environ.get("KLT", "klt")
     out = subprocess.run([klt, "--version"], capture_output=True, text=True, check=False)
     return out.stdout.strip() or "unknown"
 
 
-def mint_record_id(now: datetime | None = None) -> str:
-    now = now or datetime.now(timezone.utc)
-    return f"{now:%Y%m%d-%H%M%S}-{git_short_sha()}"
-
-
 def _rel(path: Path, repo_root: Path = REPO_ROOT) -> str:
     return str(Path(path).resolve().relative_to(Path(repo_root).resolve()))
 
 
-def _corner_axes(cid: str) -> tuple[str, str, str]:
-    """('ff_-40c_2.97v') -> ('ff', '-40', '2.97')."""
-    process, rest = cid.split("_", 1)
-    temp, vdd = rest.split("c_")
-    return process, temp, vdd[:-1]
-
-
 def _load(json_path: Path) -> dict:
     return json.loads(Path(json_path).read_text(encoding="utf-8"))
-
-
-def _check_request_pair(family: str, request: dict, reduced: dict) -> None:
-    """Fail closed before anything is written: the grading must be this
-    request's, the decks must be the composed bytes, and the coverage must
-    be exact (exit 0 is never a PASS -- sim/README.md)."""
-    meta = request.get("x_gf180_sram_adapter") or {}
-    if meta.get("family") != family:
-        raise SystemExit(f"request is for family {meta.get('family')!r}, not {family!r}")
-    if reduced.get("family") != family:
-        raise SystemExit(f"reduced grading is for family {reduced.get('family')!r}, not {family!r}")
-    sha = meta.get("composed_deck_sha256")
-    if reduced.get("expected_deck_sha256") != sha:
-        raise SystemExit("reduced grading does not pin this request's composed deck sha256")
-    if reduced.get("coverage_errors"):
-        raise SystemExit(f"coverage errors in grading: {reduced['coverage_errors']}")
-
-
-# --------------------------------------------------------------------------
-# Deterministic corner records
-# --------------------------------------------------------------------------
-
-
-def _corner_log_text(unit: dict, unit_dir: Path, cid: str, mode: str) -> str:
-    """One corner's log, byte-shaped like run_corner_sweep.sh wrote it:
-    the engine's own stdout/stderr, then the two header lines, then (SNM
-    families) the extractor's output over the unit's own sweep data."""
-    log = ""
-    for field, default in (("stdout", f"{cid}/stdout.bin"), ("stderr", f"{cid}/stderr.bin")):
-        p = unit_dir / unit.get(field, default)
-        if p.is_file():
-            log += p.read_bytes().decode("utf-8", errors="replace")
-    process, temp, vdd = _corner_axes(cid)
-    log += f"=== corner: {cid} (process={process} temp={temp}C vdd={vdd}V) ===\n"
-    exit_code = unit.get("exit_code")
-    log += f"=== ngspice exit status: {'none' if exit_code is None else exit_code} ===\n"
-    kind, datafile, label = deck_adapter.parse_mode(mode)
-    if kind == "snm":
-        data = unit_dir / cid / datafile
-        if data.is_file():
-            log += deck_adapter._snm_lines(data, label)
-        else:
-            log += f"RESULT-ERROR: {label} -- expected data file {datafile} not produced\n"
-    return log
-
-
-def mint_corner(family: str, request_path: Path, reduced_path: Path, report_path: Path,
-                unit_dir: Path, supersedes: str, record_id: str | None = None,
-                repo_root: Path = REPO_ROOT, now: datetime | None = None) -> Path:
-    request = _load(request_path)
-    reduced = _load(reduced_path)
-    report = _load(report_path)
-    _check_request_pair(family, request, reduced)
-
-    exp_dir, claim = FAMILY_CLAIMS[family]
-    _exp, tb_name, mode, _staged = deck_adapter.FAMILIES[family]
-    meta = request["x_gf180_sram_adapter"]
-    pdk = pdk_identity()
-
-    # The snapshot is the composed deck -- the bytes that actually ran --
-    # re-composed from the committed testbench and checked against the
-    # sha256 the request recorded (and the reducer asserted per unit).
-    tb_path = repo_root / "sim" / exp_dir / "testbench" / tb_name
-    deck_bytes = deck_adapter.compose_deck(tb_path.read_text(encoding="utf-8")).encode("utf-8")
-    if deck_adapter._sha256(deck_bytes) != meta["composed_deck_sha256"]:
-        raise SystemExit("committed testbench no longer composes to the request's deck bytes")
-
-    rid = record_id or mint_record_id(now)
-    ts = f"{(now or datetime.now(timezone.utc)):%Y-%m-%dT%H:%M:%SZ}"
-    root = Path(repo_root)
-    snapshot_path = root / "sim" / exp_dir / "netlist-snapshots" / f"{rid}.spice"
-    corners_dir = root / "sim" / exp_dir / "corners" / rid
-    records_dir = root / "sim" / exp_dir / "records"
-    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-    corners_dir.mkdir(parents=True, exist_ok=True)
-    records_dir.mkdir(parents=True, exist_ok=True)
-    snapshot_path.write_bytes(deck_bytes)
-
-    units_by_id = {u.get("id"): u for u in report.get("units", [])}
-    result_rows = []
-    overall_open = False
-    for corner in reduced["corners"]:
-        cid = corner["id"]
-        unit = units_by_id.get(cid)
-        if unit is None:
-            raise SystemExit(f"corner {cid} graded but absent from the deck report")
-        (corners_dir / f"{cid}.log").write_text(
-            _corner_log_text(unit, Path(unit_dir), cid, mode), encoding="utf-8"
-        )
-        if corner["status"] != "recorded":
-            overall_open = True
-            reasons = "; ".join(corner["reasons"]) or "no RESULT line captured"
-            result_rows.append(f"  - **{cid}**: OPEN -- {reasons}")
-        else:
-            joined = ";".join(l.strip() for l in corner["result_lines"]) + ";"
-            result_rows.append(f"  - **{cid}**: {joined}")
-
-    remote = (report.get("environment") or {}).get("remote") or {}
-    job_id = remote.get("job_id") or "unknown"
-    engine_version = (report.get("environment") or {}).get("engine_version") or "unknown"
-    n = len(reduced["corners"])
-    if overall_open:
-        overall = (
-            f"  - **Overall: OPEN** -- at least one corner did not produce a valid measured result "
-            f"(see per-corner notes above); per spec/sram.md's Signoff definition this corner is "
-            f"recorded as an open result, not dropped from the corner set."
-        )
-    else:
-        overall = (
-            f"  - **Overall: recorded** -- all {n} corners produced a measured result; see "
-            f"sim/README.md for how to interpret sign-off against spec/sram.md's positive-margin "
-            f"requirement."
-        )
-
-    spiceinit_sha = meta.get("spiceinit_sha256", "unknown")
-    lines = [
-        f"# Record {rid}",
-        "",
-        f"- **Record ID**: {rid}",
-        f"- **Claim**: {claim}",
-        f"- **Netlist provenance**: schematic (`{_rel(tb_path, root)}`, DUT per "
-        f"`design/netlist/bitcell_6t.spice` at `{git_short_sha()}`)",
-        f"- **PDK**: `{pdk['variant']}`, open_pdks `{pdk['version']}` (issue #173 pin, `sim/lib/pdk_pin.txt`)",
-        f"- **Run**: `klt sim` deck mode on the batch fleet (#230 cutover path), job `{job_id}` "
-        f"(ngspice {engine_version}, `{remote.get('ami_id', 'unknown')}`); pinned run-directory "
-        f"`.spiceinit` staged per unit (issue #338, sha256 `{spiceinit_sha}`; "
-        f"spec/environment-pin-decision.md)",
-        "- **Corner matrix run**:",
-        f"  - Process: {' '.join(PROCESSES)}",
-        f"  - Temperature: {' '.join(TEMPS)} C",
-        f"  - Supply: {' '.join(VDDS)} V",
-        f"  - ({n} corner points total -- full process x temp x supply matrix, per spec/sram.md's "
-        f"ratified corner set)",
-        "- **Statistical convention**: N/A (corner-matrix claim, not a distribution claim)",
-        "- **Result**:",
-        *result_rows,
-        overall,
-        "- **Links**:",
-        f"  - Testbench: `{_rel(tb_path, root)}`",
-        f"  - Netlist snapshot: `{_rel(snapshot_path, root)}`",
-        f"  - Raw logs: `{_rel(corners_dir, root)}/`",
-        f"- **Timestamp / author**: {ts}, {AUTHOR}",
-    ]
-    if supersedes:
-        lines.append(f"- **Supersedes**: {supersedes}")
-    else:
-        lines.append("- **Supersedes**: (none -- first record for this claim)")
-
-    record_path = records_dir / f"{rid}.md"
-    if record_path.exists():
-        raise SystemExit(
-            f"record already exists: {record_path} -- record ids are "
-            "<UTC-timestamp>-<sha>; re-run (or pass --record-id) so two "
-            "records minted in the same second do not collide"
-        )
-    record_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"wrote snapshot: {snapshot_path}")
-    print(f"wrote {n} corner logs under {corners_dir}")
-    print(f"wrote record: {record_path}")
-    print(f"record-id: {rid}")
-    return record_path
 
 
 # --------------------------------------------------------------------------
@@ -435,6 +214,10 @@ def render_mc_record(summary: dict, json_report_text: str, text_report_text: str
         report = {}
     payload = report.get("payload") or report
     by_name = {m.get("name"): m for m in (payload.get("measurements") or [])}
+    # The Reproduce block's --corner flags carry each corner's axis values,
+    # taken from the one ratified source (corner_matrix, via the single
+    # corner minter's grid) -- never re-parsed from the corner id here.
+    axes = mcr._corner_axes()
 
     rows = []
     for corner in summary["corners"]:
@@ -583,7 +366,7 @@ def render_mc_record(summary: dict, json_report_text: str, text_report_text: str
         "```bash",
         "# deck-mode path (#230 cutover); the retired run_mc_campaign.py CLI is a tombstone",
         f"python3 sim/lib/deck_adapter.py mc-build {summary['experiment']} \\",
-        *[f"  --corner {':'.join(_corner_axes(c))} \\" for c in meta["corners"]],
+        *[f"  --corner {':'.join(axes[c])} \\" for c in meta["corners"]],
         f"  --n {prov['n_mismatch']} --n-control {prov['n_determinism_control']} "
         f"--n-nc {prov['n_negative_control']} \\",
         f"  --nc-mismatch-scale {meta['nc_mismatch_scale']:g}"
@@ -665,7 +448,7 @@ def mint_mc(family: str, request_path: Path, reduced_path: Path, supersedes: str
     exp_dir, _ = FAMILY_CLAIMS[family]
     _mode, default_key = deck_adapter.MC_FAMILIES[family]
     key = reduced.get("key") or default_key
-    rid = record_id or mint_record_id(now)
+    rid = record_id or new_record_id()
     now = now or datetime.now(timezone.utc)
     sha = git_short_sha()
     pdk = pdk_identity()
@@ -816,6 +599,9 @@ def main(argv=None) -> int:
     c.add_argument("--unit-dir", required=True, type=Path)
     c.add_argument("--supersedes", default="")
     c.add_argument("--record-id")
+    c.add_argument("--exp-dir", type=Path,
+                   help="experiment dir (default: the family's own under the "
+                        "repo root; offline tests override)")
     m = sub.add_parser("mc", help="mint one Monte Carlo campaign record + artifacts")
     m.add_argument("family", choices=sorted(MC_CLAIMS))
     m.add_argument("--request", required=True, type=Path)
@@ -826,8 +612,17 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     if args.cmd == "corner":
-        mint_corner(args.family, args.request, args.reduced, args.report,
-                    args.unit_dir, args.supersedes, record_id=args.record_id)
+        # #452: the single corner minter is mint_corner_records.mint_record;
+        # this subcommand stays as the #272 re-qualification flow's entry
+        # point, minting each family's canonical FAMILY_CLAIMS claim.
+        exp_dir = args.exp_dir or (REPO_ROOT / "sim" / FAMILY_CLAIMS[args.family][0])
+        record_md = mcr.mint_record(
+            args.family, _load(args.reduced), _load(args.request),
+            report=_load(args.report), unit_dir=args.unit_dir,
+            exp_dir=exp_dir, record_id=args.record_id or mcr.new_record_id(),
+            supersedes=args.supersedes,
+        )
+        print(f"record-id: {record_md.stem}")
     else:
         mint_mc(args.family, args.request, args.reduced, args.supersedes,
                 record_id=args.record_id, klt_bin=args.klt)
