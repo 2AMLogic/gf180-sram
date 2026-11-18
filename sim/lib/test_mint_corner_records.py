@@ -6,13 +6,15 @@ fed through the real `deck_adapter.py reduce` grading; nothing here is
 physical evidence and no stub value may be quoted as a measurement. What is
 under test is the minting CONTRACT: record format (including the PDK/Run
 lines folded in from the retired mint_records.py corner path at the #452
-consolidation), append-only refusals, fail-closed coverage rules, canonical
+consolidation), append-only refusals, fail-closed coverage rules, PDK
+identity resolution fail-closed on a drifted tree (#454), canonical
 Claim ownership (FAMILY_CLAIMS), SNM-family support, report-declared
 stream-path resolution (#444), and that `compare_records.py` consumes the
 minted output unchanged.
 """
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 import tempfile
@@ -326,6 +328,69 @@ def test_mint_refusals():
         restore_pdk(saved)
 
 
+def _fake_pdk_tree(root, sha):
+    """Scratch gf180mcuD tree (no real PDK): model + design files and a
+    SOURCES file declaring `sha` -- the shape `pdk_env.sh` resolves."""
+    ng = root / "gf180mcuD" / "libs.tech" / "ngspice"
+    ng.mkdir(parents=True)
+    (ng / "sm141064.ngspice").write_text("*\n")
+    (ng / "design.ngspice").write_text("*\n")
+    (root / "gf180mcuD" / "SOURCES").write_text(f"open_pdks {sha}\n")
+    return root / "gf180mcuD"
+
+
+def test_pdk_identity_fail_closed():
+    """`pdk_identity()` propagates pdk_env.sh's failure: a drifted tree (the
+    #454 reproduction -- SOURCES declaring a non-pinned revision) and a
+    missing install both refuse with pdk_env.sh's own stderr text, and a
+    pinned scratch tree still resolves the identity dict."""
+    pin = (REPO / "sim" / "lib" / "pdk_pin.txt").read_text().strip()
+    saved_env = os.environ.pop("GF180_PDK_PATH", None)
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            # drifted revision: must refuse, naming the mismatch pdk_env.sh printed
+            drifted = _fake_pdk_tree(Path(td) / "drifted", "deadbeef" * 5)
+            os.environ["GF180_PDK_PATH"] = str(drifted)
+            try:
+                mcr.pdk_identity()
+                check("drifted tree refuses", False,
+                      "pdk_identity() returned a dict instead of SystemExit")
+            except SystemExit as e:
+                msg = str(e.code)
+                check("drifted refusal carries pdk_env.sh stderr",
+                      "PDK revision mismatch" in msg, msg)
+                check("drifted refusal names found revision",
+                      "deadbeef" in msg, msg)
+                check("drifted refusal names the pin", pin in msg, msg)
+            # missing install: refusal message carries pdk_env.sh's stderr
+            os.environ["GF180_PDK_PATH"] = str(Path(td) / "nonexistent" / "gf180mcuD")
+            try:
+                mcr.pdk_identity()
+                check("missing install refuses", False,
+                      "pdk_identity() returned a dict instead of SystemExit")
+            except SystemExit as e:
+                msg = str(e.code)
+                check("missing-install refusal carries stderr",
+                      "libs.tech/ngspice" in msg, msg)
+            # pinned scratch tree: SOURCES carries the pin -- identity resolves
+            pinned = _fake_pdk_tree(Path(td) / "pinned", pin)
+            os.environ["GF180_PDK_PATH"] = str(pinned)
+            ident = mcr.pdk_identity()
+            check("pinned tree resolves variant",
+                  ident.get("variant") == "gf180mcuD", str(ident))
+            check("pinned tree resolves version",
+                  ident.get("version") == pin, str(ident))
+            check("pinned tree resolves model/design rels",
+                  ident.get("design_inc_rel") == "libs.tech/ngspice/design.ngspice"
+                  and ident.get("model_file_rel") == "libs.tech/ngspice/sm141064.ngspice",
+                  str(ident))
+    finally:
+        if saved_env is None:
+            os.environ.pop("GF180_PDK_PATH", None)
+        else:
+            os.environ["GF180_PDK_PATH"] = saved_env
+
+
 def test_claim_ownership():
     """FAMILY_CLAIMS owns the ratified families' Claim strings: no claim
     mints the canonical one, a divergent claim refuses (the signoff rollup
@@ -577,6 +642,7 @@ def test_mint_declared_stream_paths():
 def main() -> int:
     test_mint_recorded()
     test_mint_refusals()
+    test_pdk_identity_fail_closed()
     test_claim_ownership()
     test_mint_claimed_families()
     test_mint_open_and_append_only()
