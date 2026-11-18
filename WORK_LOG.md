@@ -10,6 +10,10 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-17
 
+- **PR #449**: sim: refuse report-declared stream paths escaping the outdir in unit_stream_relpath
+- **PR #446**: sim: re-qualify reference sim records under the f6eeac7 PDK pin (new records, Supersedes)
+- **Issue #448** (closed): Minter/grader resolve report-declared stream paths with no outdir containment check
+- **Issue #272** (closed): Re-qualify reference sim records under open_pdks f6eeac7 (new records, Supersedes)
 - **PR #447**: fix: resolve minter unit streams from the report's declared paths
 - **PR #445**: docs(pex): point write-margin status cell at deck-mode regeneration path
 - **PR #443**: docs(sim): finish the run_corner_sweep.sh tense cleanup in deck_adapter and snm_extract
