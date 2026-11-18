@@ -8,6 +8,13 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-18
+
+- **PR #455**: fix: pdk_identity() fail-closed on a drifted PDK revision (propagate sourced exit status)
+- **Issue #454** (closed): sim: pdk_identity() does not fail closed on a drifted PDK revision (sourced exit status is discarded)
+- **PR #453**: sim: make mint_corner_records the single corner-record minter
+- **Issue #452** (closed): Consolidate duplicated corner-record minters in sim/lib (mint_records vs mint_corner_records)
+
 ### 2026-11-17
 
 - **PR #449**: sim: refuse report-declared stream paths escaping the outdir in unit_stream_relpath
