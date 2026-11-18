@@ -43,8 +43,10 @@ an engine exit status, and never from an offline stub. Fail-closed rules:
 * a report-declared stream path that is absolute or resolves outside the
   unit dir refuses -- evidence is read from the run's own output only (#448);
 * the PDK is resolved by identity (`sim/lib/pdk_env.sh`, which fails
-  non-zero on a drifted tree) before anything is written -- an unpinned
-  environment never mints;
+  non-zero on a drifted tree, a missing install, or a missing
+  model/design file -- `pdk_identity()` propagates that status and
+  message, #454) before anything is written -- an unpinned environment
+  never mints;
 * any existing artifact for the record id (record, snapshot, corners dir)
   makes the mint refuse: append-only means never overwrite.
 
@@ -145,12 +147,14 @@ def new_record_id(repo_root: Path = REPO_ROOT) -> str:
 def pdk_identity() -> dict[str, str]:
     """Resolve the PDK by identity via sim/lib/pdk_env.sh (never a path).
 
-    The env file fails non-zero when the resolved install is not the pin, so
-    a drifted tree cannot be minted into a record silently.
+    The env file fails non-zero when the resolved install is not the pin
+    (and on no install, or missing model/design files); that status and
+    pdk_env.sh's own stderr message propagate here as a SystemExit (#454),
+    so a drifted tree cannot be minted into a record silently.
     """
     out = subprocess.run(
         ["bash", "-c",
-         'source sim/lib/pdk_env.sh >/dev/null 2>&1; '
+         'source sim/lib/pdk_env.sh >/dev/null || exit 1; '
          'printf "%s\\t%s\\t%s\\t%s" "$GF180_VARIANT_DIR" "$GF180_PDK_VERSION" '
          '"$GF180_DESIGN_INC" "$GF180_MODEL_FILE"'],
         cwd=REPO_ROOT, capture_output=True, text=True, check=False,
