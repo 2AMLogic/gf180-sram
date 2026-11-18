@@ -480,13 +480,13 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:cbdc19640967477e8c38039403e5ccbf86b2e48d69ed7a14533689937c80b2b3",
+        "content_hash": "sha256:1a29c93cb915265b224b7f7eb3398ba8c9fad1ac19fbbf0ee086452fdf104562",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 10,
           "path": null,
-          "content_hash": "sha256:cbdc19640967477e8c38039403e5ccbf86b2e48d69ed7a14533689937c80b2b3",
+          "content_hash": "sha256:1a29c93cb915265b224b7f7eb3398ba8c9fad1ac19fbbf0ee086452fdf104562",
           "input_verified": true,
           "members": [
             {
@@ -501,11 +501,11 @@
             },
             {
               "path": ".github/workflows/ci.yml",
-              "content_hash": "sha256:17e0c00b3313c9b6606b98b2b499801dca0882ce95e6822d5af00d1213edc343",
+              "content_hash": "sha256:fb3db642005f61f77105f692318cf1f360d3b66490ab0e3a5fe6e8186efd82a0",
               "status": "verified"
             }
           ],
-          "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request and push to main, plus the signoff re-grade, the provenance-hygiene host-path-leak guard, the generated-array-schematics drift check, and the repo-hygiene tracked-tree gate). The pins prove these files are the ones attested; they do not run CI."
+          "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request, push to main, and merge-queue group, plus the signoff re-grade, the provenance-hygiene host-path-leak guard, the generated-array-schematics drift check, and the repo-hygiene tracked-tree gate). The pins prove these files are the ones attested; they do not run CI."
         }
       }
     },
