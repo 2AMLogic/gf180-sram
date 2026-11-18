@@ -29,7 +29,12 @@ by the item-10 wrapper `repo-hygiene.signoff.json`, so editing any of them —
 including a comment-only edit to `ci.yml` — moves a pin and needs the same
 `./signoff/regenerate.sh` plus a commit of the refreshed pins and report in
 the same PR (#459). The warning also lives in `ci.yml`'s own header comment,
-where an editor of that file will see it.
+where an editor of that file will see it. These three are not the complete
+set of pinned ordinary files: the item-1 design wrapper
+(`design/design.signoff.json`) and the item-9 testbenches wrapper
+(`sim/testbenches.signoff.json`) content-hash-pin their directories' READMEs
+too — each carries the same warning in a note at the top of the file it pins
+(#461).
 
 ## Grader distribution discipline
 
