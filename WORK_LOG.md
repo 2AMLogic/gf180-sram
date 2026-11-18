@@ -10,6 +10,10 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-18
 
+- **PR #460**: docs: flag ci.yml as hash-pinned by the T1 item-10 attestation
+- **Issue #459** (closed): ci.yml is pinned by the T1 item-10 attestation, but nothing says so before you edit it (2nd recurrence)
+- **PR #458**: ci: add merge_group trigger so the merge queue can report required checks
+- **Issue #457** (closed): Merge queue: add the merge_group trigger to the required-check workflow(s)
 - **PR #455**: fix: pdk_identity() fail-closed on a drifted PDK revision (propagate sourced exit status)
 - **Issue #454** (closed): sim: pdk_identity() does not fail closed on a drifted PDK revision (sourced exit status is discarded)
 - **PR #453**: sim: make mint_corner_records the single corner-record minter
