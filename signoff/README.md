@@ -23,6 +23,14 @@ document, characterization report) fails CI instead of silently rotting. The
 fix is always the same one-liner: `./signoff/regenerate.sh`, then commit the
 refreshed report.
 
+Three pinned inputs are ordinary repo files rather than graded artifacts:
+`README.md`, `LICENSE` and `.github/workflows/ci.yml` are content-hash-pinned
+by the item-10 wrapper `repo-hygiene.signoff.json`, so editing any of them —
+including a comment-only edit to `ci.yml` — moves a pin and needs the same
+`./signoff/regenerate.sh` plus a commit of the refreshed pins and report in
+the same PR (#459). The warning also lives in `ci.yml`'s own header comment,
+where an editor of that file will see it.
+
 ## Grader distribution discipline
 
 Regeneration and CI grade with the **released PyPI registry wheel** of

@@ -1,5 +1,13 @@
 name: CI
 
+# PINNED INPUT -- read this before editing the file (#459): ci.yml is
+# content-hash-pinned by the T1 item-10 repo-hygiene attestation
+# (`repo-hygiene.signoff.json`, which pins `README.md`, `LICENSE` and this
+# file). ANY edit -- even to this comment -- moves the pin and turns the
+# `klt signoff (T1 tier-verdict freshness)` job red until you run
+# `./signoff/regenerate.sh` and commit the refreshed pins plus
+# `signoff/signoff-report.json` in the same PR.
+#
 # Validates the design harness, the evidence-record format, and the freshness
 # of every committed derived artifact on each PR, each push to `main`, and
 # each merge-queue group on `main` (the `merge_group` trigger is what lets
