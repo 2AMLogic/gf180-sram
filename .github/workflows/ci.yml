@@ -1,8 +1,10 @@
 name: CI
 
 # Validates the design harness, the evidence-record format, and the freshness
-# of every committed derived artifact on each PR and each push to `main`
-# (T1 checklist item 10, issue #28). Six jobs run here:
+# of every committed derived artifact on each PR, each push to `main`, and
+# each merge-queue group on `main` (the `merge_group` trigger is what lets
+# the repo's merge queue report its required checks; T1 checklist item 10,
+# issue #28). Six jobs run here:
 #
 #   harness                    -- `npm run check:ci`: the pure-Python unit
 #                                 tests (mostly under sim/lib/, the extraction
@@ -47,6 +49,7 @@ on:
   push:
     branches:
       - main
+  merge_group:
 
 permissions:
   contents: read
