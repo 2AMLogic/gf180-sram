@@ -8,6 +8,11 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-19
+
+- **PR #462**: docs: flag design/README.md and sim/README.md as hash-pinned by their T1 wrappers
+- **Issue #461** (closed): Two more pinned ordinary-markdown files (design/README.md, sim/README.md) still carry no pin warning
+
 ### 2026-11-18
 
 - **PR #460**: docs: flag ci.yml as hash-pinned by the T1 item-10 attestation
