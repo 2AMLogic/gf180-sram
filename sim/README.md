@@ -1,5 +1,12 @@
 # sim -- testbenches and PVT-corner evidence records
 
+> **PINNED INPUT** — read this before editing this file (#461): this README is
+> content-hash-pinned by the T1 item-9 testbenches-shipped attestation
+> (`sim/testbenches.signoff.json`). ANY edit — even to this note — moves the
+> pin and turns the `klt signoff (T1 tier-verdict freshness)` job red until
+> you run `./signoff/regenerate.sh` and commit the refreshed pins plus
+> `signoff/signoff-report.json` in the same PR.
+
 This directory holds the ngspice testbenches and simulation results for the
 four measurements `spec/sram.md`'s Characterization section ratifies (read
 SNM, hold SNM, write margin, read/write access time), plus the

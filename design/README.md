@@ -1,5 +1,12 @@
 # design — schematics and netlists
 
+> **PINNED INPUT** — read this before editing this file (#461): this README is
+> content-hash-pinned by the T1 item-1 design-sources attestation
+> (`design/design.signoff.json`). ANY edit — even to this note — moves the pin
+> and turns the `klt signoff (T1 tier-verdict freshness)` job red until you
+> run `./signoff/regenerate.sh` and commit the refreshed pins plus
+> `signoff/signoff-report.json` in the same PR.
+
 Schematic capture is [xschem](http://xschem.sourceforge.net/); netlisting is
 xschem's own batch netlister (invoked below); simulation is
 [ngspice](http://ngspice.sourceforge.net/), per `CLAUDE.md`'s stated flow.
