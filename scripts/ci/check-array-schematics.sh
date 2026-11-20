@@ -41,6 +41,13 @@ if ! python3 design/check_macro_pins.py; then
     status=1
 fi
 
+# The behavioural model's Verilog port list against the same expected list
+# (issue #468); stdlib python only, like the netlist leg above.
+if ! python3 design/check_macro_pins.py views/sram_256x32.v; then
+    echo "PIN LIST: views/sram_256x32.v does not match the #198 macro pin list" >&2
+    status=1
+fi
+
 if [[ $status -ne 0 ]]; then
     echo "Regenerate and commit: python3 design/generate_array.py --rows R --cols C --out design/<name>.sch" >&2
 fi

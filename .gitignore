@@ -35,6 +35,11 @@ flow/build/
 # into a commit.
 venv/
 env/
+# klt's "artifacts next to the request" convention (issue #468):
+# `klt functional-verification` keeps its build dir, transcripts and
+# results under .klt/ beside the request file (views/fv_sram_256x32.json);
+# run output is never repo content.
+.klt/
 # >>> loom-managed (do not edit) >>>
 # Loom runtime state (don't commit these)
 .loom-in-use

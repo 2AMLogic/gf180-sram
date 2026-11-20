@@ -1,12 +1,15 @@
 # views
 
 Generated abstract (`LEF`) and timing (`Liberty`) views of the 256 x 32
-array, driven by [klayout-tools](https://github.com/2AMLogic/klayout-tools)
-(`klt`), per `CLAUDE.md`. This directory feeds `spec/sram.md`'s
-"Deliverables: GDS, LEF abstract, Liberty timing" row -- the LEF abstract is
-the first of the two generated views to land (issue #120); Liberty timing
-(`spec/sram.md` deliverable 3) is the next seed, consuming this LEF's pin
-list plus `sim/access-time/`.
+array, plus the behavioural Verilog model of the 1RW macro, driven by
+[klayout-tools](https://github.com/2AMLogic/klayout-tools) (`klt`), per
+`CLAUDE.md`. This directory feeds `spec/sram.md`'s "Deliverables: GDS, LEF
+abstract, Liberty timing" row -- the LEF abstract is the first of the two
+generated views to land (issue #120); Liberty timing (`spec/sram.md`
+deliverable 3) is the next seed, consuming this LEF's pin list plus
+`sim/access-time/`. The behavioural model (issue #468) is a *functional*
+view for consumers' RTL simulation, not one of those two generated views
+-- see "The behavioural Verilog model" below.
 
 ## Status (2026-09-10): a real, generated LEF abstract of the array core
 
@@ -38,20 +41,111 @@ views/
                                         own drawn label geometry
   sram_256x32_array.socket.json         committed, deterministic socket descriptor
   sram_256x32_array.lef                 committed LEF abstract
+  sram_256x32.v                         behavioural (functional-only) Verilog model
+                                        of the 1RW macro, written from
+                                        spec/macro-interface-decision.md (issue #468)
+  tb_sram_256x32.v                      self-checking Icarus bench for the model,
+                                        incl. the sim/macro-smoke OPS replay
+  fv_sram_256x32.json                   klt functional-verification request that
+                                        runs the bench (engine: icarus)
+  check_model.sh                        the one command: pin check + bench, no PDK
   reports/
     sram_256x32_array.socket-check.json committed klt socket-check response
     sram_256x32_array.lef-abstract.json committed klt lef-abstract response
 ```
 
-## Scope: the storage-array core, not the 1RW macro interface
+## Scope: the storage-array core's LEF, and the 1RW macro interface's model
 
-Like `layout/` and `design/` (see their own README "Scope" sections), this
-abstract is of the bitcell-array **core** -- its 322 raw per-row/per-column
-ports (`WL0..WL255`, `BL0..BL31`, `BLB0..BLB31`, `VDD`, `VSS`), because no
-periphery (address decode, column mux, sense amps, write drivers) is drawn.
-It is **not** an abstract of `spec/sram.md`'s 1RW macro pin list (`A`,
-`CEN`, `CLK`, `D`, `Q`, `GWEN`, `WEN`) -- that macro-level interface does not
-exist in this repo's layout yet, and neither does its LEF.
+Like `layout/` and `design/` (see their own README "Scope" sections), the
+**LEF abstract** here is of the bitcell-array **core** -- its 322 raw
+per-row/per-column ports (`WL0..WL255`, `BL0..BL31`, `BLB0..BLB31`, `VDD`,
+`VSS`), because no periphery (address decode, column mux, sense amps,
+write drivers) is drawn. It is **not** an abstract of `spec/sram.md`'s 1RW
+macro pin list (`A`, `CEN`, `CLK`, `D`, `Q`, `GWEN`, `WEN`) -- that
+macro-level interface does not exist in this repo's layout yet, and neither
+does its LEF.
+
+The **behavioural model** (`sram_256x32.v`, below) is the other way around:
+it models exactly that 1RW macro interface -- `A[7:0] CEN GWEN CLK
+D[31:0] WEN[31:0] Q[31:0] VDD VSS`, the pin list of
+`design/netlist/sram_256x32.spice` and `spec/macro-interface-decision.md` --
+and nothing about the physical array. It exists so a consumer
+(`gf180-riscv-soc`, whose rules forbid a local macro model) can run its RTL
+suites against this macro; a consumer compiles this file in place of its
+`sram_256x32` black-box declaration (2AMLogic/gf180-sram#197).
+
+## The behavioural Verilog model (`sram_256x32.v`, issue #468)
+
+A **functional-only** model of the 1RW macro: one 256 x 32 memory array,
+one registered read port, per-bit active-low write mask. It carries **no
+timing**: no `specify` block, no delays, no setup/hold checks -- none of
+those exist until the Liberty view of #200 has real data to state them
+from. It is **not** transcribed from the foundry `gf180mcu_fd_ip_sram`
+Verilog model (this repo's comparison-not-copy stance): it is written from
+`spec/macro-interface-decision.md`'s decision table and "Behavior the
+record fixes" section, and the file header cites the row each behaviour
+comes from. It is not evidence for any spec row and does not ratify
+anything -- the record's status line is untouched.
+
+Behaviours the model implements explicitly (none implicit):
+
+* **Read** (decision rows 5, 6, 8): `CEN` = 0, `GWEN` = 1 at a rising
+  `CLK` edge loads the word at `A` into `Q`; `Q` holds it until the next
+  read. `WEN` is ignored on a read.
+* **Write** (rows 4, 6, 7): `CEN` = 0, `GWEN` = 0 at a rising edge writes
+  `D[i]` into bit `i` of the word at `A` wherever `WEN[i]` = 0; bits with
+  `WEN[i]` = 1 keep their value. `WEN` all ones with `GWEN` = 0 is a no-op
+  write (the masked assignment reduces to the word's own value).
+* **`Q` across writes and idle cycles**: `Q` is **X before the first
+  read**, holds the last read value across writes and idle cycles, and a
+  write never drives write-through data onto `Q`.
+* **`CEN` at reset** (the record's consumer-side rule, *modelled*): the
+  macro performs no operation until `CEN` has been sampled **high** once at
+  a rising `CLK` edge -- the "hold `CEN` = 1 during reset, then assert"
+  rule. The bench proves a write issued before that arming edge is a
+  no-op.
+
+Port names, widths and order follow `design/netlist/sram_256x32.spice`'s
+top `.subckt` (`A[7:0] CEN GWEN CLK D[31:0] WEN[31:0] Q[31:0] VDD VSS`;
+`VDD`/`VSS` are `inout`); `design/check_macro_pins.py` checks the model's
+expanded port list against the same expected list as the netlist, from the
+same `expected()` function `layout/macro/check_pins.py` imports.
+
+### Running the bench (one command, fresh clone, no PDK)
+
+```bash
+./views/check_model.sh        # or: npm run test:model
+```
+
+It runs the pin check, then the self-checking bench
+`views/tb_sram_256x32.v` through the pinned `klt functional-verification`
+(`klayout-tools==0.8.0`, `engine: icarus`, request
+`views/fv_sram_256x32.json`; the verdict requires the bench's
+`TB-RESULT: PASS` marker -- a silently-finished bench fails). The bench
+needs only `iverilog`/`vvp` (Icarus) on `PATH` plus the pinned `klt`
+(`uvx` resolves it; a `klt` on `PATH` at the same version works too, which
+is how CI provides it). No PDK, no klayout, no ngspice. In CI it runs in
+the `harness` job (`npm run check:ci`); the pin check also runs in the
+`array-schematics` job next to the netlist's own pin check
+(`scripts/ci/check-array-schematics.sh`).
+
+### What the bench checks, and the limit of the SPICE cross-check
+
+The bench covers: write, read, per-bit mask (including a **within-byte**
+mask -- bits 8 and 1 of byte 0 written, the rest of the byte masked -- a
+per-byte-mask fault the smoke trace's halfword mask cannot catch), `CEN`
+deselect (no write and `Q` held), `GWEN` read/write both ways, read-hold
+across writes and idle cycles, `Q` all-X before the first read, the
+`WEN`-all-ones no-op, and the arming rule above.
+
+The `sim/macro-smoke/smoke.py` `OPS` table (ten cycles: two writes, two
+reads, a per-bit-masked write, more reads, a `CEN` = 1 cycle) is replayed
+verbatim, and the model must produce the same seven expected `Q` words the
+SPICE macro produced. **This is agreement on that vector set only, not an
+equivalence claim** -- it is a cross-check that the two descriptions agree
+on the recorded stimulus, not a proof that they agree everywhere, and it
+does not transfer any timing meaning (the SPICE run is analogue; the model
+has none).
 
 ## Reproducing and re-checking
 
@@ -62,7 +156,11 @@ exist in this repo's layout yet, and neither does its LEF.
 It regenerates the socket descriptor (fails if it differs from the
 committed bytes), runs `klt socket-check`, then runs `klt lef-abstract`
 (both under the released `klayout-tools==0.8.0` via `uvx`; fails if the
-regenerated `.lef` differs from the committed bytes). Individually:
+regenerated `.lef` differs from the committed bytes), and finishes with the
+PDK-free model check of "The behavioural Verilog model" above
+(`views/check_model.sh`, which also runs standalone and in CI's `harness`
+job -- the rest of `verify.sh` needs the PDK, the model check does not).
+Individually:
 
 ```bash
 # 1. socket descriptor (byte-for-byte deterministic -- git diff stays empty)
@@ -219,6 +317,13 @@ macro is periphery-dominated and this array has none.
   Both are closed upstream and released in klt 0.6.0; issue #182 removed the
   wrapper and regenerated the LEF, and **all 322 pins now carry real, drawn
   `PORT` geometry**.
+* A behavioural model of the 1RW macro interface exists, its port list
+  checked identical (names, widths, order) to the committed netlist's by
+  the same guard CI runs on the netlist, and its function pinned by a
+  self-checking Icarus bench that agrees with the SPICE macro's recorded
+  `OPS` vector set and fails on injected faults (per-byte mask
+  quantization, write-through, flipped `GWEN`, dropped arming rule were
+  each tried during development and each caught).
 
 **Does not prove**:
 
@@ -226,16 +331,27 @@ macro is periphery-dominated and this array has none.
   `klt place-and-route` has not been run against this LEF, and there is no
   periphery. Whether the abstract passes its LEF-vs-netlist wiring
   cross-check is untested -- see "Pin geometry" above.
-* **The 1RW macro interface.** This is the storage-array core's raw
-  per-row/per-column ports, not `spec/sram.md`'s `A`/`CEN`/`CLK`/`D`/`Q`/
-  `GWEN`/`WEN` pin list -- see "Scope" above.
+* **The 1RW macro interface, physically.** The LEF is the storage-array
+  core's raw per-row/per-column ports, not `spec/sram.md`'s
+  `A`/`CEN`/`CLK`/`D`/`Q`/`GWEN`/`WEN` pin list -- see "Scope" above. The
+  *model* carries that pin list, but its function is a statement of the
+  decision record, not of silicon: no periphery has been designed or
+  simulated to match it.
 * **Liberty timing.** `spec/sram.md` deliverable 3, not started (the next
-  seed after this one).
+  seed after this one). The behavioural model is **not** a substitute for
+  it: it has no timing at all, no `specify` block, no delays, and asserts
+  nothing about cycle time, clock-to-`Q`, or setup/hold.
+* **Model-vs-SPICE equivalence.** The `OPS` replay is agreement on one
+  recorded vector set, not a proof the two descriptions agree everywhere --
+  see "What the bench checks" above.
 
 ## References
 
 - `spec/sram.md` -- ratified deliverables list this abstract is the first
   entry of.
+- `spec/macro-interface-decision.md` -- the record `sram_256x32.v` is
+  written from (decision rows 1-9 and "Behavior the record fixes").
+- `sim/macro-smoke/smoke.py` -- the `OPS` vector table the bench replays.
 - `layout/README.md` -- the array GDS, its DRC/LVS evidence, and the "A
   routed macro" bullet this issue updates.
 - `layout/sram_256x32/generate.py` -- the array generator `gen_socket.py`
@@ -248,3 +364,8 @@ macro is periphery-dominated and this array has none.
 - [gf180-sram#121](https://github.com/2AMLogic/gf180-sram/issues/121) --
   added the Metal1 wordline landing pads that closed the
   `unroutable_pins[]` gap (all 256 `WL<row>` pins).
+- [gf180-sram#468](https://github.com/2AMLogic/gf180-sram/issues/468) --
+  published the behavioural model, its bench and its pin guard (this
+  directory's `sram_256x32.v` / `tb_sram_256x32.v` / `fv_sram_256x32.json`
+  / `check_model.sh`). `klt functional-verification`'s `verilog_top` bench
+  form ran it unmodified -- no klt gap was met, none filed.
