@@ -1,0 +1,10 @@
+{
+  "engine": "icarus",
+  "sources": ["sram_256x32.v", "tb_sram_256x32.v"],
+  "hdl_toplevel": "sram_256x32",
+  "testbench": {
+    "verilog_top": "tb_sram_256x32",
+    "pass_marker": "TB-RESULT: PASS",
+    "fail_marker": "TB-RESULT: FAIL"
+  }
+}

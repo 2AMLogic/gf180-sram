@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Regenerate the socket descriptor + LEF abstract and re-run every check
-# views/README.md reports a number for. Run from the repo root:
+# Regenerate the socket descriptor + LEF abstract, re-run every check
+# views/README.md reports a number for, and re-run the PDK-free behavioural
+# model check (issue #468). Run from the repo root:
 #
 #     ./views/verify.sh
 #
 # Mirrors layout/verify.sh's own "regenerate, diff, re-check" shape. This is
 # a *views self-check*, not a substitute for reading views/README.md's own
 # "Pin geometry" section on what geometry_source: synthesized/none mean here.
+# Steps 1-3 need the PDK; step 4 (views/check_model.sh) does not and can be
+# run on its own from a fresh clone.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -69,6 +72,9 @@ else
   diff "$WORK/regen.lef" "$LEF" | head -60
   exit 1
 fi
+
+hr "4. behavioural model (PDK-free): pin check + self-checking Icarus bench"
+./views/check_model.sh
 
 echo
 echo "All views/ checks passed."

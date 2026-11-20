@@ -19,7 +19,12 @@ name: CI
 #                                 and campaign math the ngspice testbenches
 #                                 feed, plus sim/access-power/ and
 #                                 scripts/ci/) plus the Loom guard-hook tests
-#                                 (`npm run test:guards`).
+#                                 (`npm run test:guards`), plus the
+#                                 PDK-free functional check of the
+#                                 views/sram_256x32.v behavioural model
+#                                 (`npm run test:model`: pin check +
+#                                 self-checking Icarus bench via the pinned
+#                                 klt, issue #468).
 #   evidence-record format     -- scripts/ci/check-evidence-format.sh: repo
 #                                 hygiene (per-directory READMEs, no raw
 #                                 simulation artifacts, resolvable markdown
@@ -73,7 +78,26 @@ jobs:
         with:
           node-version: "22.23.4"
 
-      - name: Run harness checks (Python unit tests + Loom guard tests)
+      # Pinned, not floating "3.x", for the same reason the python jobs
+      # below pin it (klayout wheels lag new CPython releases) -- and
+      # because `pip install` against the runner's system python is
+      # PEP-668-blocked on ubuntu-24.04.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The model bench in `npm run test:model` runs under
+      # `klt functional-verification` with the icarus engine (issue #468);
+      # neither klt nor iverilog is on the stock runner image. Same
+      # klayout-tools pin as the signoff/provenance jobs; Icarus from apt
+      # is enough -- the bench asserts function, not timing.
+      - name: Install Icarus Verilog and the pinned klt for the model bench
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+          python3 -m pip install klayout-tools==0.8.0
+
+      - name: Run harness checks (Python unit tests + model bench + Loom guard tests)
         run: npm run check:ci
 
   evidence-format:

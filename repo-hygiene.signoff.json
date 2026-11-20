@@ -6,7 +6,7 @@
   "summary": "Repo-hygiene attestation: the pinned set is the root README.md (what the block is, a spec table, and an index of how to reproduce each result class), the Apache-2.0 LICENSE, and .github/workflows/ci.yml (harness and evidence-format jobs on every pull request, push to main, and merge-queue group, plus the signoff re-grade, the provenance-hygiene host-path-leak guard, the generated-array-schematics drift check, and the repo-hygiene tracked-tree gate). The pins prove these files are the ones attested; they do not run CI.",
   "provenance": {
     "input": {
-      "content_hash": "sha256:d0e159cb6bceb7b5b1cbed7caed14887f5e0b01fb9fade7880fa946bd12b833b",
+      "content_hash": "sha256:2de2811d71f3d8aafecbd07a2237e637b1bb39082fc438d07e69dfc50847cad8",
       "paths": [
         {
           "path": "README.md",
@@ -18,7 +18,7 @@
         },
         {
           "path": ".github/workflows/ci.yml",
-          "content_hash": "sha256:18ef747e280df7a7be62003032a4f7e3a4f36907f7a7ebc76626880cdf0bd73c"
+          "content_hash": "sha256:ea21ad833b9103d094edcccc7dd83e83f1d46582ea2125853dabc323f38f708e"
         }
       ]
     }
