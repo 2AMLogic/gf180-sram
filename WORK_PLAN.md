@@ -6,7 +6,7 @@ below is machine-generated and overwritten wholesale on each update; do not
 hand-edit that region.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-19T14:44:20Z (snapshot; compare against live labels)_
+_Generated: 2026-11-20T08:08:25Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -64,7 +64,7 @@ Issues carrying `loom:curated`.
 ## Proposed (Architect / Hermit)
 
 - **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)* *(held)*
-- **#330**: Split the shared periphery-layout library out of layout/periphery/column/generate.py *(hermit)*
+- **#330**: Split the shared periphery-layout library out of layout/periphery/column/generate.py *(hermit)* *(held)*
 
 ## Epics
 
