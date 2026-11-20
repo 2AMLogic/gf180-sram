@@ -1,17 +1,15 @@
 // tb_sram_256x32 -- self-checking bench for views/sram_256x32.v (issue #468).
 //
 // Covers, in order:
-//   * the "CEN at reset" rule: a write issued before CEN has been sampled
-//     high once is a no-op (verified in phase 5 by reading the cell back
-//     as all-X after real traffic has flowed);
+//   * CEN held high with the clock stopped during reset, then asserted
+//     before the first rising edge for a write, followed by a read;
 //   * the sim/macro-smoke/smoke.py OPS table replayed verbatim (ten cycles,
 //     seven expected Q words) -- agreement on that vector set only, not an
 //     equivalence claim against the SPICE macro;
 //   * Q all-X through the two writes before the first read (no
 //     write-through, Q undefined before the first read);
-//   * a within-byte per-bit mask (bits 8 and 1 of byte 0 written, the rest
-//     of the byte masked) -- a per-byte-mask fault the OPS table's
-//     halfword mask cannot catch;
+//   * a mask enabling bits 0 and 8 only (one bit in each low byte),
+//     which detects byte-wide writes that the OPS halfword mask allows;
 //   * WEN all ones with GWEN = 0 as a no-op write (state unchanged, Q
 //     holds the last read value);
 //   * read-hold across writes, masked writes, CEN-deselect cycles.
@@ -30,7 +28,7 @@ module tb_sram_256x32;
     localparam [31:0] M32 = 32'hFFFFFFFF;
 
     reg         CLK = 1'b0;
-    reg         CEN = 1'b0;              // start disarmed, to test the CEN-at-reset rule
+    reg         CEN = 1'b1;
     reg         GWEN = 1'b1;
     reg  [7:0]  A = 8'h00;
     reg  [31:0] D = 32'h00000000;
@@ -40,6 +38,17 @@ module tb_sram_256x32;
     wire        VSS = 1'b0;
 
     integer errors = 0;
+    time smoke_start;
+
+    // A separate instance keeps the smoke replay's Q at its power-up value.
+    reg         startup_cen = 1'b1;
+    reg         startup_gwen = 1'b0;
+    wire [31:0] startup_q;
+
+    sram_256x32 startup_dut (
+        .A(8'h55), .CEN(startup_cen), .GWEN(startup_gwen), .CLK(CLK),
+        .D(32'hDEADBEEF), .WEN(32'h0), .Q(startup_q), .VDD(VDD), .VSS(VSS)
+    );
 
     sram_256x32 dut (
         .A(A), .CEN(CEN), .GWEN(GWEN), .CLK(CLK),
@@ -70,23 +79,28 @@ module tb_sram_256x32;
         end
     endtask
 
-    // Drive one op half a period before a rising edge, return half a
-    // period after it, once the edge's Q update has landed.
+    // Called with CLK low. Drive the next rising edge and return on the
+    // following falling edge, after the registered Q update.
     task op(input cen, input gwen, input [7:0] a, input [31:0] d, input [31:0] wen);
         begin
-            @(negedge CLK);
             CEN = cen; GWEN = gwen; A = a; D = d; WEN = wen;
             @(negedge CLK);
         end
     endtask
 
     initial begin
-        $display("phase 1: CEN-at-reset -- a write before CEN is sampled high is a no-op");
-        // (posedge #1 samples the safe initial inputs, CEN=0, disarmed: nothing happens)
-        op(1'b0, 1'b0, 8'h55, 32'hBAD0BAD0, 32'h00000000);
-        check_x("Q all-X after the disarmed write", Q);
+        $display("phase 1: first-edge write after CEN high during reset");
+        #(T/4);
+        check_x("startup Q all-X before first edge", startup_q);
+        startup_cen = 1'b0;
+        @(negedge CLK);
+        check_x("startup Q all-X after first-edge write", startup_q);
+        startup_gwen = 1'b1;
+        @(negedge CLK);
+        check("read back first-edge write", startup_q, 32'hDEADBEEF);
 
         $display("phase 2: sim/macro-smoke/smoke.py OPS replay (10 cycles, 7 Q words)");
+        smoke_start = $time;
         op(1'b1, 1'b1, 8'h00, 32'h00000000, M32);                 // idle-init
         check_x("Q all-X after idle-init", Q);
         op(1'b0, 1'b0, 8'hA7, 32'hDEADBEEF, 32'h00000000);        // write A7
@@ -108,12 +122,17 @@ module tb_sram_256x32;
         op(1'b0, 1'b1, 8'hA7, 32'h00000000, M32);                 // read A7 after idle
         check("OPS 9 read A7 = FFFFBEEF", Q, 32'hFFFFBEEF);
 
-        $display("phase 3: within-byte per-bit mask (bits 8 and 1 of byte 0)");
+        if ($time - smoke_start != 10*T) begin
+            errors = errors + 1;
+            $display("  FAIL OPS replay took %0d ns, expected %0d ns", $time - smoke_start, 10*T);
+        end
+
+        $display("phase 3: per-bit mask enables bits 0 and 8");
         op(1'b0, 1'b0, 8'h11, 32'h00000000, 32'h00000000);        // clear cell 0x11
         check("Q holds across the clear write", Q, 32'hFFFFBEEF);
-        op(1'b0, 1'b0, 8'h11, 32'hFFFFFFFF, 32'hFFFFFEFE);        // write only bits 8, 1
+        op(1'b0, 1'b0, 8'h11, 32'hFFFFFFFF, 32'hFFFFFEFE);        // write only bits 0 and 8
         op(1'b0, 1'b1, 8'h11, 32'h00000000, M32);
-        check("masked write landed bits 8,1 only", Q, 32'h00000101);
+        check("masked write landed bits 0 and 8 only", Q, 32'h00000101);
 
         $display("phase 4: WEN all ones with GWEN=0 is a no-op write");
         op(1'b0, 1'b0, 8'h22, 32'hCAFEBABE, 32'h00000000);
@@ -123,10 +142,6 @@ module tb_sram_256x32;
         check("Q holds across the no-op write", Q, 32'hCAFEBABE);
         op(1'b0, 1'b1, 8'h22, 32'h00000000, M32);
         check("cell 0x22 unchanged by the no-op", Q, 32'hCAFEBABE);
-
-        $display("phase 5: the phase-1 disarmed write never landed");
-        op(1'b0, 1'b1, 8'h55, 32'h00000000, M32);
-        check_x("cell 0x55 reads all-X", Q);
 
         if (errors == 0) begin
             $display("TB-RESULT: PASS (all sram_256x32 model checks)");

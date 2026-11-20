@@ -44,11 +44,13 @@ def ports(netlist):
     raise SystemExit("no live .subckt sram_256x32 in " + str(netlist))
 
 
-_VERILOG_SKIP = {
-    "input", "output", "inout", "wire", "wand", "wor", "tri", "tri0", "tri1",
-    "reg", "logic", "signed", "unsigned", "supply0", "supply1", "scalared",
-    "vectored",
-}
+# ANSI header with scalar ports or one literal packed range per declaration.
+_VERILOG_PORT = re.compile(
+    r"\s*(?P<qualifiers>(?:(?:input|output|inout|wire|wand|wor|tri|tri0|tri1|"
+    r"reg|logic|signed|unsigned|supply0|supply1|scalared|vectored)\b\s*)*)"
+    r"(?:\[\s*(?P<left>\d+)\s*:\s*(?P<right>\d+)\s*\]\s*)?"
+    r"(?P<name>[A-Za-z_][\w$]*)\s*"
+)
 
 
 def verilog_ports(path):
@@ -63,22 +65,23 @@ def verilog_ports(path):
     if not m:
         raise SystemExit("no module sram_256x32(...) header in " + str(path))
     ports = []
-    pending = None
-    for tok in m.group(1).replace(",", " ").split():
-        if tok in _VERILOG_SKIP:
-            continue
-        rng = re.fullmatch(r"\[\s*(\d+)\s*:\s*(\d+)\s*\]", tok)
-        if rng:
-            hi, lo = int(rng.group(1)), int(rng.group(2))
-            pending = (hi, lo)
-            continue
-        if pending is not None:
-            hi, lo = pending
-            step = -1 if hi >= lo else 1
-            ports += [f"{tok}[{i}]" for i in range(hi, lo + step, step)]
-            pending = None
+    bits = None
+    for declaration in m.group(1).split(","):
+        port = _VERILOG_PORT.fullmatch(declaration)
+        if not port:
+            raise SystemExit(f"unsupported Verilog port in {path}: {declaration.strip()}")
+        if port["left"] is not None:
+            left, right = int(port["left"]), int(port["right"])
+            step = -1 if left > right else 1
+            bits = range(left, right + step, step)
+        elif port["qualifiers"]:
+            bits = None
+        # A bare name in the same declaration inherits the previous range.
+        name = port["name"]
+        if bits is None:
+            ports.append(name)
         else:
-            ports.append(tok)
+            ports.extend(f"{name}[{i}]" for i in bits)
     return ports
 
 

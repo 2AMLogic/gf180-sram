@@ -69,6 +69,15 @@ class VerilogPins(unittest.TestCase):
         got = ports_of(HEADER.replace("[7:0]  A", "[0:7]  A"))
         self.assertNotEqual(got, cmp_.expected())
 
+    def test_control_inheriting_address_range_fails(self):
+        got = ports_of(HEADER.replace("input  wire        CEN", "CEN"))
+        self.assertIn("CEN[7]", got)
+        self.assertNotEqual(got, cmp_.expected())
+
+    def test_grouped_data_buses_match(self):
+        got = ports_of(HEADER.replace("input  wire [31:0] WEN", "WEN"))
+        self.assertEqual(got, cmp_.expected())
+
     def test_reordered_header_fails(self):
         got = ports_of(HEADER.replace("    input  wire        CEN,\n", "")
                              .replace("    input  wire        GWEN,", "    input  wire        GWEN, CEN,"))

@@ -56,23 +56,18 @@ views/
 
 ## Scope: the storage-array core's LEF, and the 1RW macro interface's model
 
-Like `layout/` and `design/` (see their own README "Scope" sections), the
-**LEF abstract** here is of the bitcell-array **core** -- its 322 raw
-per-row/per-column ports (`WL0..WL255`, `BL0..BL31`, `BLB0..BLB31`, `VDD`,
-`VSS`), because no periphery (address decode, column mux, sense amps,
-write drivers) is drawn. It is **not** an abstract of `spec/sram.md`'s 1RW
-macro pin list (`A`, `CEN`, `CLK`, `D`, `Q`, `GWEN`, `WEN`) -- that
-macro-level interface does not exist in this repo's layout yet, and neither
-does its LEF.
+The **LEF abstract** in this directory is generated from
+`layout/sram_256x32/sram_256x32_array.gds`. It exposes the storage-array
+core's 322 pins (`WL0..WL255`, `BL0..BL31`, `BLB0..BLB31`, `VDD`, `VSS`).
+The macro layout with periphery is a separate GDS at
+`layout/macro/sram_256x32.gds`.
 
-The **behavioural model** (`sram_256x32.v`, below) is the other way around:
-it models exactly that 1RW macro interface -- `A[7:0] CEN GWEN CLK
-D[31:0] WEN[31:0] Q[31:0] VDD VSS`, the pin list of
-`design/netlist/sram_256x32.spice` and `spec/macro-interface-decision.md` --
-and nothing about the physical array. It exists so a consumer
-(`gf180-riscv-soc`, whose rules forbid a local macro model) can run its RTL
-suites against this macro; a consumer compiles this file in place of its
-`sram_256x32` black-box declaration (2AMLogic/gf180-sram#197).
+The **behavioural model** exposes the 1RW macro pins
+`A[7:0] CEN GWEN CLK D[31:0] WEN[31:0] Q[31:0] VDD VSS` in the order
+defined by `design/netlist/sram_256x32.spice`. Their behaviour follows
+`spec/macro-interface-decision.md`.
+For RTL simulation, a consumer such as `gf180-riscv-soc` compiles this
+file in place of its `sram_256x32` black-box declaration (issue #197).
 
 ## The behavioural Verilog model (`sram_256x32.v`, issue #468)
 
@@ -99,11 +94,11 @@ Behaviours the model implements explicitly (none implicit):
 * **`Q` across writes and idle cycles**: `Q` is **X before the first
   read**, holds the last read value across writes and idle cycles, and a
   write never drives write-through data onto `Q`.
-* **`CEN` at reset** (the record's consumer-side rule, *modelled*): the
-  macro performs no operation until `CEN` has been sampled **high** once at
-  a rising `CLK` edge -- the "hold `CEN` = 1 during reset, then assert"
-  rule. The bench proves a write issued before that arming edge is a
-  no-op.
+* **`CEN` at reset** is the consumer's responsibility. The macro has no
+  reset pin. The consumer holds `CEN` high during reset and may assert it
+  before the first rising edge, even if the clock was stopped throughout
+  reset. The model samples `CEN` on each rising edge and accepts a read
+  or write on that first edge.
 
 Port names, widths and order follow `design/netlist/sram_256x32.spice`'s
 top `.subckt` (`A[7:0] CEN GWEN CLK D[31:0] WEN[31:0] Q[31:0] VDD VSS`;
@@ -131,21 +126,20 @@ the `harness` job (`npm run check:ci`); the pin check also runs in the
 
 ### What the bench checks, and the limit of the SPICE cross-check
 
-The bench covers: write, read, per-bit mask (including a **within-byte**
-mask -- bits 8 and 1 of byte 0 written, the rest of the byte masked -- a
-per-byte-mask fault the smoke trace's halfword mask cannot catch), `CEN`
-deselect (no write and `Q` held), `GWEN` read/write both ways, read-hold
-across writes and idle cycles, `Q` all-X before the first read, the
-`WEN`-all-ones no-op, and the arming rule above.
+The startup test holds `CEN` high with `CLK` low, selects a write before
+the first rising edge, and reads that word on the next edge. A separate
+model instance replays the ten `sim/macro-smoke/smoke.py` `OPS` rows on ten
+consecutive rising edges. The bench samples `Q` on each following falling
+edge, after its registered update. It checks that every bit of `Q` is X
+through the first two writes and compares the next seven outputs with the
+recorded SPICE words, including the value held across the deselected write.
 
-The `sim/macro-smoke/smoke.py` `OPS` table (ten cycles: two writes, two
-reads, a per-bit-masked write, more reads, a `CEN` = 1 cycle) is replayed
-verbatim, and the model must produce the same seven expected `Q` words the
-SPICE macro produced. **This is agreement on that vector set only, not an
-equivalence claim** -- it is a cross-check that the two descriptions agree
-on the recorded stimulus, not a proof that they agree everywhere, and it
-does not transfer any timing meaning (the SPICE run is analogue; the model
-has none).
+The mask `WEN = 32'hFFFFFEFE` enables only bits 0 and 8. Reading back
+`32'h00000101` after writing all ones to a cleared word catches a model
+that writes whole bytes. A separate readback checks that a write with all
+mask bits set preserves the word. The comparison with the reduced-array
+SPICE simulation establishes functional agreement only on the recorded
+vectors. Timing and behaviour on other vectors are outside that comparison.
 
 ## Reproducing and re-checking
 
@@ -222,9 +216,8 @@ the supply straps are now entirely `PORT`, and Metal1 `OBS` drops from 33,088
 to 32,832, exactly 256 fewer (the wordline landing-pad remainders:
 each whole pad is now its pin's `PORT`, so nothing is left over for `OBS`). `SIZE` is unchanged.
 
-Not claimed: that this LEF is *routable*. The `PORT` geometry is real drawn
-metal, but `klt place-and-route` has not been run against it, and the array
-core still has no periphery.
+The `PORT` geometry comes from drawn metal in the array core. Routability
+of this LEF remains untested with `klt place-and-route`.
 
 ## Comparison against the foundry's own abstract
 
@@ -256,11 +249,9 @@ macro is periphery-dominated and this array has none.
   the `klt` on the host)
 - `klayout` pip package 0.30.12 (resolved by the `uvx` environment)
 - PDK: `gf180mcuD`, tech LEF resolved via `--cell-library
-  gf180mcu_fd_sc_mcu9t5v0` (the 9-track standard-cell library -- chosen
-  arbitrarily; no periphery exists yet to require one library's cell heights
-  over the other's, and both libraries' tech LEFs declare the same
-  Metal1-Metal3 `TYPE ROUTING`/`WIDTH` values, so the choice affects neither
-  the emitted geometry nor the OBS layer set)
+  gf180mcu_fd_sc_mcu9t5v0` (the 9-track standard-cell library). Both
+  libraries' tech LEFs declare the same Metal1-Metal3 `TYPE ROUTING` and
+  `WIDTH` values used by the array-core abstract.
 - **PDK search-root drift, disclosed rather than pinned away.** The committed
   report's `provenance.pdk` now reads `search root: ~/.ciel`, `open_pdks
   f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7` -- not the
@@ -320,23 +311,19 @@ macro is periphery-dominated and this array has none.
 * A behavioural model of the 1RW macro interface exists, its port list
   checked identical (names, widths, order) to the committed netlist's by
   the same guard CI runs on the netlist, and its function pinned by a
-  self-checking Icarus bench that agrees with the SPICE macro's recorded
-  `OPS` vector set and fails on injected faults (per-byte mask
-  quantization, write-through, flipped `GWEN`, dropped arming rule were
-  each tried during development and each caught).
+  self-checking Icarus bench. The bench checks first-edge access after
+  reset, per-bit masking, output hold and the seven expected words in the
+  reduced-array SPICE smoke trace.
 
 **Does not prove**:
 
-* **A routable macro.** The `PORT` geometry is real drawn metal now, but
-  `klt place-and-route` has not been run against this LEF, and there is no
-  periphery. Whether the abstract passes its LEF-vs-netlist wiring
-  cross-check is untested -- see "Pin geometry" above.
-* **The 1RW macro interface, physically.** The LEF is the storage-array
-  core's raw per-row/per-column ports, not `spec/sram.md`'s
-  `A`/`CEN`/`CLK`/`D`/`Q`/`GWEN`/`WEN` pin list -- see "Scope" above. The
-  *model* carries that pin list, but its function is a statement of the
-  decision record, not of silicon: no periphery has been designed or
-  simulated to match it.
+* **A routable macro.** Place-and-route and a LEF-vs-netlist wiring
+  cross-check remain untested for this array-core LEF.
+* **The physical 1RW macro interface.** The LEF exposes the array's raw
+  row and column ports. The Verilog model describes the digital behaviour
+  of the macro pins. The periphery schematics (`design/README.md`) and
+  reduced-array SPICE results (`sim/macro-smoke/README.md`) are documented
+  separately.
 * **Liberty timing.** `spec/sram.md` deliverable 3, not started (the next
   seed after this one). The behavioural model is **not** a substitute for
   it: it has no timing at all, no `specify` block, no delays, and asserts

@@ -20,10 +20,9 @@
 //                read; a write never drives Q (no write-through)
 //   "Q across    Q is undefined (X) before the first read and holds the
 //    writes"      last read value across writes and idle cycles
-//   "CEN at      the macro is not operational until CEN has been sampled
-//    reset"       high once at a rising CLK edge (the consumer-side
-//                 "hold CEN=1 during reset, then assert" rule, modelled
-//                 the same way the record states it)
+//   "CEN at      the consumer holds CEN high during reset, then asserts it.
+//    reset"       There is no reset pin. Each rising CLK edge samples CEN,
+//                 including the first edge after reset.
 //
 // Port order follows the committed top .subckt in
 // design/netlist/sram_256x32.spice (A[7:0] CEN GWEN CLK D[31:0] WEN[31:0]
@@ -49,17 +48,12 @@ module sram_256x32 (
 
     reg [31:0] mem [0:255];
 
-    // "CEN at reset": not operational until CEN has been sampled high once.
-    reg cen_armed = 1'b0;
-
     // "Q is undefined before the first read" -- explicit, though an
     // unassigned reg would read as X anyway.
     initial Q = {32{1'bx}};
 
     always @(posedge CLK) begin
-        if (CEN)
-            cen_armed <= 1'b1;
-        if (!CEN && cen_armed) begin
+        if (!CEN) begin
             if (!GWEN) begin
                 // per-bit active-low mask (rows 4, 7); with WEN all ones
                 // this assigns the word its own value -- the no-op write
