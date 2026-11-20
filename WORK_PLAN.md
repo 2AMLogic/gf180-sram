@@ -6,7 +6,7 @@ below is machine-generated and overwritten wholesale on each update; do not
 hand-edit that region.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-20T08:08:25Z (snapshot; compare against live labels)_
+_Generated: 2026-11-20T21:07:41Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -37,6 +37,7 @@ _None._
 Issues currently being built (`loom:building`).
 
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
+- **#468**: Publish a behavioural Verilog model of sram_256x32 (functional only, no timing) for consumers' simulation
 
 ## PRs Awaiting Review
 
@@ -60,6 +61,7 @@ Issues carrying `loom:curated`.
 - **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)* *(held)*
 - **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance *(curated)* *(held)*
 - **#437**: Migrate the pex write-margin by-hand legs off the retired run_corner_sweep.sh (deck-mode port + parity receipt) *(curated)* *(held)*
+- **#468**: Publish a behavioural Verilog model of sram_256x32 (functional only, no timing) for consumers' simulation *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -78,10 +80,10 @@ _None._
 | Very important | 0 |
 | Important | 2 |
 | Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
-| In Progress (`loom:building`) | 1 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 6 |
+| Curated | 7 |
 | Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
