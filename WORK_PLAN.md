@@ -6,7 +6,7 @@ below is machine-generated and overwritten wholesale on each update; do not
 hand-edit that region.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-20T21:07:41Z (snapshot; compare against live labels)_
+_Generated: 2026-11-23T12:15:00Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -30,14 +30,13 @@ _None._
 
 Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
 
-_None._
+- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
-- **#468**: Publish a behavioural Verilog model of sram_256x32 (functional only, no timing) for consumers' simulation
+_None._
 
 ## PRs Awaiting Review
 
@@ -61,12 +60,10 @@ Issues carrying `loom:curated`.
 - **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)* *(held)*
 - **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance *(curated)* *(held)*
 - **#437**: Migrate the pex write-margin by-hand legs off the retired run_corner_sweep.sh (deck-mode port + parity receipt) *(curated)* *(held)*
-- **#468**: Publish a behavioural Verilog model of sram_256x32 (functional only, no timing) for consumers' simulation *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)* *(held)*
-- **#330**: Split the shared periphery-layout library out of layout/periphery/column/generate.py *(hermit)* *(held)*
 
 ## Epics
 
@@ -79,11 +76,11 @@ _None._
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
 | Important | 2 |
-| Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
-| In Progress (`loom:building`) | 2 |
+| Ready (`loom:issue`, net of holds/building/merge-pending) | 1 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 7 |
-| Architect / Hermit proposals | 2 |
+| Curated | 6 |
+| Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->

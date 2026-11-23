@@ -8,6 +8,11 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-23
+
+- **PR #472**: layout: consolidate duplicated generator helpers into layout/common.py
+- **Issue #330** (closed): Consolidate duplicated layout-generator helpers (_load, save_options, nm) into layout/common.py
+
 ### 2026-11-20
 
 - **PR #470**: views: add behavioural sram_256x32 Verilog model, self-checking Icarus bench and pin-guard Verilog leg
