@@ -63,26 +63,17 @@ byte-for-byte.
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import os
 import sys
 
 import klayout.db as kdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
 
+from layout.common import load_module, save_options  # noqa: E402
 
-def _load(name: str, rel: str):
-    path = os.path.join(ROOT, rel)
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-row = _load("_sram_row_generate", "layout/periphery/row/generate.py")
+row = load_module("_sram_row_generate", "layout/periphery/row/generate.py")
 col = row.col  # the row generator's instance: module globals (NCOLS) must be shared
 
 G = col.G
@@ -261,7 +252,7 @@ def main() -> None:
         bb = cell.dbbox()
         print(f"{block}: {bb.width():.3f} x {bb.height():.3f} um (channel bump {bump})")
         path = os.path.join(args.out_dir, f"{block}.gds")
-        layout.write(path, col.save_options())
+        layout.write(path, save_options())
         print(f"wrote {path}")
 
 

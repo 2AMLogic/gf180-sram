@@ -107,7 +107,6 @@ from __future__ import annotations
 
 import argparse
 import heapq
-import importlib.util
 import itertools
 import math
 import os
@@ -119,19 +118,11 @@ from dataclasses import dataclass, field
 import klayout.db as kdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
 
+from layout.common import ROOT, load_module, nm, save_options  # noqa: E402
 
-def _load(name: str, rel: str):
-    path = os.path.join(ROOT, rel)
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-bitcell = _load("_sram_bitcell_generate", "layout/bitcell/generate.py")
+bitcell = load_module("_sram_bitcell_generate", "layout/bitcell/generate.py")
 NETLIST_DIR = os.path.join(ROOT, "design", "netlist")
 
 # ---------------------------------------------------------------------------
@@ -180,9 +171,8 @@ POLY_PAD_COMP = 0.10  # PL.5a_LV: field poly pad to COMP
 IMP_ENC_GATE = bitcell.IMP_ENC_GATE  # 0.23 NP.5a / PP.5a
 IMP_ENC_COMP = bitcell.IMP_ENC_COMP  # 0.16 NP.5b / PP.5b
 IMP_SPACE = bitcell.IMP_SPACE  # 0.25 between Nplus and Pplus
-NW_ENC_PCOMP = 0.45  # DF.4c_LV (0.43) + 0.02
-NW_ENC_NCOMP = 0.20  # DF.4d_LV (0.12) + 0.08
-NW_TO_NCOMP = 0.43  # DF.16_LV
+NW_ENC_PCOMP = bitcell.NW_ENC_PCOMP  # 0.45, DF.4c_LV (0.43) + 0.02
+NW_ENC_NCOMP = bitcell.NW_ENC_NCOMP  # 0.20, DF.4d_LV (0.12) + 0.08
 RAIL_H = 0.40  # Metal1 supply rail (>= 0.34, contact enclosure 0.09)
 M1_SPACE = 0.23  # M1.2a
 M1_WIDE_SPACE = 0.30  # M1.2b / M2.2b / M3.2b: shape with an edge >= 10 um
@@ -196,10 +186,6 @@ def X(c: float) -> float:
 
 def Y(j: float) -> float:
     return round(G * j, 3)
-
-
-def nm(v: float) -> int:
-    return int(round(v * 1000))
 
 
 # ---------------------------------------------------------------------------
@@ -1044,12 +1030,6 @@ def build_cell(kind: str, max_bump: int = 6):
     raise last
 
 
-def save_options() -> kdb.SaveLayoutOptions:
-    opts = kdb.SaveLayoutOptions()
-    opts.gds2_write_timestamps = False
-    return opts
-
-
 def make_band(layout: kdb.Layout, slice_cell: kdb.Cell, name: str, n: int = 32) -> kdb.Cell:
     top = layout.create_cell(name)
     top.insert(
@@ -1114,10 +1094,7 @@ def main() -> None:
         pre_band = make_band(layout, pre, "precharge_band")
         io_band = make_band(layout, io, "io_band")
         # the array's own wordline landing-pad strip sits left of its first cell
-        spec = importlib.util.spec_from_file_location(
-            "_sram_array_generate", os.path.join(ROOT, "layout/sram_256x32/generate.py"))
-        arr_gen = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(arr_gen)
+        arr_gen = load_module("_sram_array_generate", "layout/sram_256x32/generate.py")
         x_off = nm(arr_gen.WL_PAD_BAND)
         arr_h = array.bbox().top
         top = layout.create_cell("column_abut_check")

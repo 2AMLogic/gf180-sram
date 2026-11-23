@@ -19,7 +19,6 @@ D[31:0], WEN[31:0], Q[31:0], VDD, VSS. Fails on
 
 Needs the ``klayout`` module (``uv run --with klayout python3 ...``).
 """
-import importlib.util
 import os
 import re
 import sys
@@ -27,7 +26,10 @@ import sys
 import klayout.db as kdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..")))
+
+from layout.common import ROOT, load_module  # noqa: E402
+
 DEFAULT = os.path.join(HERE, "sram_256x32.gds")
 TOP = "sram_256x32"
 EDGE_UM = 1.0          # a bottom-edge pin label sits within this of the bottom of the bbox
@@ -35,9 +37,7 @@ TOP_EDGE_UM = 12.0     # the supply straps lie within this of the top of the bbo
 
 
 def expected():
-    spec = importlib.util.spec_from_file_location("_check_macro_pins", os.path.join(ROOT, "design", "check_macro_pins.py"))
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    mod = load_module("_check_macro_pins", "design/check_macro_pins.py")
     return mod.expected()
 
 
