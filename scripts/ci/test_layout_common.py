@@ -82,9 +82,12 @@ class TestLoadModule(unittest.TestCase):
         # the array generator is held under "sram_array_generate" so the bare
         # "generate" name stays free for its own `import generate as bitcell`.
         path_backup = list(sys.path)
+        # The array generator's own `import generate as bitcell` registers the
+        # bare name, so assert it was free *before* the load, not after.
+        sys.modules.pop("generate", None)
         mod = common.load_module("_loom_test_array_gen", "layout/sram_256x32/generate.py")
         try:
-            self.assertNotIn("generate", sys.modules)
+            self.assertIsNot(sys.modules["_loom_test_array_gen"], sys.modules["generate"])
             self.assertIs(sys.modules["_loom_test_array_gen"], mod)
             self.assertIs(mod.bitcell, sys.modules["generate"])
         finally:
