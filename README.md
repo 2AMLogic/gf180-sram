@@ -31,6 +31,10 @@ of record, re-graded on every PR (see
 [`signoff/README.md`](signoff/README.md)); the 2026-08-22 hand-read in
 `spec/` is retained as a dated audit snapshot only.**
 
+The assembled 1RW macro GDS is committed at `layout/macro/sram_256x32.gds`.
+Its DRC report records zero violations on the gf180mcu deck. Macro-level LVS
+is pending in #247. [Macro DRC report](layout/reports/drc-macro.json)
+
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
 spec and an append-only evidence trail — not human-authored work that agents
@@ -145,6 +149,7 @@ pinned PDK revision, a released `klt`) are stated in the linked section.
 | Monte Carlo / yield | `sim/lib/deck_adapter.py mc-build` + `klt sim` + `mc-reduce` | [`sim/README.md`](sim/README.md) § "Running a campaign" |
 | Layout, DRC, LVS, extraction | `./layout/verify.sh` (`--quick` for a subset) | [`layout/README.md`](layout/README.md) § "Reproducing and re-checking" |
 | LEF abstract | `./views/verify.sh` | [`views/README.md`](views/README.md) § "Reproducing and re-checking" |
+| Behavioural Verilog model for RTL simulation | `./views/check_model.sh` checks the macro pins and runs the self-checking Icarus bench | [`views/README.md`](views/README.md#the-behavioural-verilog-model-sram_256x32v-issue-468) |
 | Characterization report | `python3 measurements/generate_report.py > measurements/characterization-report.md` | [`measurements/README.md`](measurements/README.md) |
 | Signoff tier verdict | `./signoff/regenerate.sh` | [`signoff/README.md`](signoff/README.md) |
 
@@ -155,7 +160,7 @@ spec/          ratified spec + decision records
 design/        bitcell and periphery schematics
 sim/           testbenches + PVT corner results (ngspice)
 layout/        GDS + DRC/LVS reports (klayout-tools driven)
-views/         generated LEF / Liberty abstracts
+views/         array-core LEF abstract and behavioural Verilog model of the 1RW macro
 measurements/  aggregated characterization report (schematic-level today;
                silicon measurements supersede it after tape-out)
 signoff/       block manifest + committed `klt signoff` tier report — the
