@@ -53,31 +53,23 @@ foundry's 5 um because the control block (171 um tall) sits below the array band
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import os
 import sys
 
 import klayout.db as kdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..")))
+
+from layout.common import ROOT, load_module, nm, save_options  # noqa: E402
+
 TOP_CELL = "sram_256x32"
 OUT_GDS = os.path.join(HERE, f"{TOP_CELL}.gds")
 ARRAY64_GDS = os.path.join(ROOT, "layout", "sram_64x128", "sram_64x128_array.gds")
 
-
-def _load(name: str, rel: str):
-    path = os.path.join(ROOT, rel)
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-array = _load("_sram_array_generate", "layout/sram_256x32/generate.py")
+array = load_module("_sram_array_generate", "layout/sram_256x32/generate.py")
 bitcell = array.bitcell
-col = _load("_sram_column_generate", "layout/periphery/column/generate.py")
+col = load_module("_sram_column_generate", "layout/periphery/column/generate.py")
 
 BLOCKS = {
     "io_slice": "layout/periphery/column/io_slice.gds",
@@ -117,10 +109,6 @@ BAND_NETS = ["csel0", "csel1", "csel2", "csel3", "cseln0", "cseln1", "cseln2", "
              "clk_buf", "wl_en_n", "s_en", "q_clk", "wpn"]
 IO_BUS = {n: n for n in BAND_NETS}
 IO_BUS["clk_buf"] = "clk"
-
-
-def nm(v: float) -> int:
-    return int(round(v * 1000))
 
 
 def snap(v: float) -> float:
@@ -602,10 +590,6 @@ def wire_macro(m: Macro, cells, lab, g: dict) -> None:
 
     for name, lp, x, y in m.pins:
         m.text(lp, name, x, y)
-
-
-def save_options() -> kdb.SaveLayoutOptions:
-    return array.save_options()
 
 
 def main() -> None:

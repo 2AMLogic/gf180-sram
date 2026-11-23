@@ -79,6 +79,10 @@ import sys
 import klayout.db as kdb
 
 sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+)
+from layout.common import save_options  # noqa: E402  (repo root put on sys.path above)
+sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bitcell")
 )
 import generate as bitcell  # noqa: E402  (local sibling module, see sys.path above)
@@ -267,12 +271,6 @@ def build(rows: int = ROWS, cols: int = COLS,
                      0.5 * WL_PAD_M1_W, row * bitcell.H_CELL + wl_y)
 
     return layout
-
-
-def save_options() -> kdb.SaveLayoutOptions:
-    opts = kdb.SaveLayoutOptions()
-    opts.gds2_write_timestamps = False
-    return opts
 
 
 def main() -> None:

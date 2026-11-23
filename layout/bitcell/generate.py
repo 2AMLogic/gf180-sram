@@ -96,8 +96,15 @@ produces a byte-identical file and ``git diff`` stays empty.
 from __future__ import annotations
 
 import os
+import sys
 
 import klayout.db as kdb
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+)
+
+from layout.common import save_options  # noqa: E402  (repo root put on sys.path above)
 
 # ---------------------------------------------------------------------------
 # gf180mcu drawing layers (GDS layer/datatype), read from the PDK's own
@@ -579,14 +586,6 @@ def build() -> kdb.Layout:
     top = layout.create_cell(TOP_CELL)
     draw(layout, top)
     return layout
-
-
-def save_options() -> kdb.SaveLayoutOptions:
-    """Writer options that make the emitted GDS byte-stable (see the module
-    docstring's "Determinism" section)."""
-    opts = kdb.SaveLayoutOptions()
-    opts.gds2_write_timestamps = False
-    return opts
 
 
 def main() -> None:

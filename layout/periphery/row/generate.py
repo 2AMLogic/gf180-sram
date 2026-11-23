@@ -64,27 +64,18 @@ from __future__ import annotations
 
 import argparse
 import bisect
-import importlib.util
 import os
 import sys
 
 import klayout.db as kdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
 
+from layout.common import load_module, save_options  # noqa: E402
 
-def _load(name: str, rel: str):
-    path = os.path.join(ROOT, rel)
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-col = _load("_sram_column_generate", "layout/periphery/column/generate.py")
-array = _load("_sram_array_generate", "layout/sram_256x32/generate.py")
+col = load_module("_sram_column_generate", "layout/periphery/column/generate.py")
+array = load_module("_sram_array_generate", "layout/sram_256x32/generate.py")
 bitcell = col.bitcell
 
 TOP_CELL = "row_path"
@@ -404,7 +395,7 @@ def main() -> None:
     print(f"{TOP_CELL}: {bb.width():.3f} x {bb.height():.3f} um; array y=0 at strip y={info['y_arr0']:.3f}")
     print(f"rowdrv: {info['drv_height']:.2f} um rail to rail vs the {H_CELL:.2f} um row pitch "
           f"-> {NSTAG} interleaved driver columns")
-    layout.write(args.out, col.save_options())
+    layout.write(args.out, save_options())
     print(f"wrote {args.out}")
 
 

@@ -73,15 +73,14 @@ this descriptor.
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import os
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_ARRAY_GENERATE_PATH = os.path.join(
-    _HERE, "..", "layout", "sram_256x32", "generate.py"
-)
+sys.path.insert(0, os.path.abspath(os.path.join(_HERE, "..")))
+
+from layout.common import load_module  # noqa: E402  (repo root put on sys.path above)
 
 
 def _load_array_generator():
@@ -94,19 +93,12 @@ def _load_array_generator():
     ``"generate"`` in ``sys.modules`` first, so the array module's own later
     ``import generate as bitcell`` would find itself already cached and bind
     the array module (not the bitcell module) to ``bitcell``. Loading via
-    ``importlib.util.spec_from_file_location`` under a distinct module name
+    ``layout.common.load_module`` under a distinct module name
     (``sram_array_generate``) leaves the bare ``"generate"`` name free for
     the array module's own import to resolve correctly, exactly as it does
     when ``layout/sram_256x32/generate.py`` is run directly as a script.
     """
-    spec = importlib.util.spec_from_file_location(
-        "sram_array_generate", _ARRAY_GENERATE_PATH
-    )
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["sram_array_generate"] = module
-    spec.loader.exec_module(module)
-    return module
+    return load_module("sram_array_generate", "layout/sram_256x32/generate.py")
 
 
 def _classify(name: str) -> tuple[str, str]:
