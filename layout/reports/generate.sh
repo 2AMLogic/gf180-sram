@@ -15,6 +15,9 @@
 #     ./layout/reports/generate.sh --macro          # only the assembled macro, DRC (#326)
 #     ./layout/reports/generate.sh --array64        # only the 64 x 128 array trio (#327)
 #
+# Unknown flags (and --native without --column-path) are rejected with a
+# usage message on stderr and exit status 2 (issue #500).
+#
 # Requires: klt (klayout-tools) on PATH, python3. No PDK install needed --
 # klt's curated gf180mcu deck is bundled, same as layout/verify.sh.
 #
@@ -66,6 +69,32 @@ commit_report() {
 }
 report_status() { python3 "$REPORT_PY" status "$@"; }
 
+# --- the flat-block sequence five cells share (issue #500) -------------------
+# row_path, sram_ctrl, col_decode, precharge_slice, io_slice: flat single-top
+# cells all checked the same way -- curated-deck DRC, extract, then LVS inline
+# from the GDS (`layout.file` + `deck`; only the inline form carries the drawn
+# labels `net.supply_fragmented` and the body-tie verification need -- a
+# pre-extracted netlist with three disjoint `VDD`s compares without naming the
+# cause, layout/README.md "Known tool gaps"). commit_report rewrites the echoed
+# host-specific `layout`/`reference` paths to repo-relative names. `$cell`
+# doubles as the scratch tag, keeping the committed extract reports'
+# `netlist_path` basenames (`$cell.spice`) unchanged.
+run_flat_block() {
+  local gds="$1" cell="$2" prefix="$3"
+  klt drc --deck gf180mcu --format json "$gds" > "$WORK/drc-$cell-raw.json"
+  commit_report "$WORK/drc-$cell-raw.json" "$OUT/drc-$prefix.json"
+  klt extract --deck gf180mcu --format json "$gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
+  commit_report "$WORK/extract-$cell-raw.json" "$OUT/extract-$prefix.json"
+  cat > "$WORK/lvs-$cell-request.json" <<EOF
+{"layout":{"file":"$ROOT/$gds","deck":"gf180mcu","top":"$cell"},
+ "reference":{"netlist":"$ROOT/design/netlist/$cell.spice","form":"subckt-call"},
+ "options":{"flatten_reference":true}}
+EOF
+  klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
+  commit_report "$WORK/lvs-$cell-raw.json" "$OUT/lvs-$prefix.json" \
+    --print "$cell LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}"
+}
+
 # --- 0. column path (issue #205) -------------------------------------------
 # precharge_slice / io_slice are checked per cell (DRC, extract, LVS against
 # design/netlist/<cell>.spice), the 32-slice bands for DRC, and the bands
@@ -104,7 +133,6 @@ klt drc --deck gf180mcu --format json "$MACRO_GDS" > "$WORK/drc-macro-raw.json"
 commit_report "$WORK/drc-macro-raw.json" "$OUT/drc-macro.json" \
   --print 'drc-macro: {status} | violations: {violation_count}'
 }
-if [ "${1:-}" = "--macro" ]; then run_macro; exit 0; fi
 
 # --- 0a. the 64 x 128 array (issue #327) -------------------------------------
 # The 4:1 tiling the macro floorplan is built on (spec/periphery-architecture.md,
@@ -159,26 +187,13 @@ commit_report "$WORK/lvs-array64-raw.json" "$OUT/lvs-array-64x128.json" \
   --set '_note=layout input is the scratch extracted netlist array64.spice (klt extract of the committed GDS into a temp dir at generation time): environment.layout_sha256 and provenance.input.content_hash hash that scratch netlist, not the GDS, and environment.extracted_netlist is null -- nothing in this report binds it to layout/sram_64x128/sram_64x128_array.gds (issue #285). Regenerate via layout/reports/generate.sh --array64.' \
   --print 'lvs-array-64x128: {status} | mismatches: {mismatch_count} | errors: {error_count}'
 }
-if [ "${1:-}" = "--array64" ]; then run_array64; exit 0; fi
 
-if [ "${1:-}" != "--control" ]; then
+run_row_path() {
 hr "0r. row path (issue #204): DRC, extract, LVS"
-klt drc --deck gf180mcu --format json "$ROW_GDS" > "$WORK/drc-row-raw.json"
-commit_report "$WORK/drc-row-raw.json" "$OUT/drc-row-path.json"
-klt extract --deck gf180mcu --format json "$ROW_GDS" -o "$WORK/row_path.spice" > "$WORK/extract-row-raw.json"
-commit_report "$WORK/extract-row-raw.json" "$OUT/extract-row-path.json"
-cat > "$WORK/lvs-row-request.json" <<EOF
-{"layout":{"file":"$ROOT/$ROW_GDS","deck":"gf180mcu","top":"row_path"},
- "reference":{"netlist":"$ROOT/design/netlist/row_path.spice","form":"subckt-call"},
- "options":{"flatten_reference":true}}
-EOF
-klt lvs "$WORK/lvs-row-request.json" --format json > "$WORK/lvs-row-raw.json"
-commit_report "$WORK/lvs-row-raw.json" "$OUT/lvs-row-path.json" \
-  --print 'row_path LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}'
+run_flat_block "$ROW_GDS" row_path row-path
 report_status "$OUT/drc-row-path.json" \
   --print 'drc-row-path: {status} | violations: {violation_count}'
-fi
-if [ "${1:-}" = "--row-path" ]; then exit 0; fi
+}
 
 # --- 0c. control block + column decoder (issue #246) ------------------------
 # Two flat cells, each checked against its own design/netlist/<cell>.spice.
@@ -186,50 +201,21 @@ if [ "${1:-}" = "--row-path" ]; then exit 0; fi
 # `./layout/reports/generate.sh --control` runs only this block (~1 min).
 CTRL_DIR=layout/periphery/control
 
+run_control() {
 hr "0c. control block + column decoder (issue #246): DRC, extract, LVS"
 for cell in sram_ctrl col_decode; do
   name="${cell//_/-}"
-  klt drc --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" > "$WORK/drc-$cell-raw.json"
-  commit_report "$WORK/drc-$cell-raw.json" "$OUT/drc-$name.json"
-  klt extract --deck gf180mcu --format json "$CTRL_DIR/$cell.gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
-  commit_report "$WORK/extract-$cell-raw.json" "$OUT/extract-$name.json"
-  cat > "$WORK/lvs-$cell-request.json" <<EOF
-{"layout":{"file":"$ROOT/$CTRL_DIR/$cell.gds","deck":"gf180mcu","top":"$cell"},
- "reference":{"netlist":"$ROOT/design/netlist/$cell.spice","form":"subckt-call"},
- "options":{"flatten_reference":true}}
-EOF
-  klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
-  commit_report "$WORK/lvs-$cell-raw.json" "$OUT/lvs-$name.json" \
-    --print "$cell LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}"
+  run_flat_block "$CTRL_DIR/$cell.gds" "$cell" "$name"
   report_status "$OUT/drc-$name.json" \
     --print "drc-$name: {status} | violations: {violation_count}"
 done
-if [ "${1:-}" = "--control" ]; then exit 0; fi
+}
 
-if [ "${1:-}" != "--row-path" ]; then
+run_column_path() {
 hr "0. column path (issue #205): DRC, extract, LVS, bit-line seam"
 for cell in precharge_slice io_slice; do
   name="${cell//_/-}"
-  klt drc --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" > "$WORK/drc-column-$cell-raw.json"
-  commit_report "$WORK/drc-column-$cell-raw.json" "$OUT/drc-column-$name.json"
-  klt extract --deck gf180mcu --format json "$COLUMN_DIR/$cell.gds" -o "$WORK/$cell.spice" > "$WORK/extract-$cell-raw.json"
-  commit_report "$WORK/extract-$cell-raw.json" "$OUT/extract-column-$name.json"
-  # LVS from the GDS (inline extraction, `layout.file` + `deck`), not from a
-  # pre-extracted netlist: only the inline form carries the drawn labels that
-  # `net.supply_fragmented` and the body-tie verification need (a pre-extracted
-  # netlist with three disjoint `VDD`s -- `VDD`, `VDD$1`, `VDD$2` -- compares
-  # without naming the cause; see layout/README.md "Known tool gaps").
-  cat > "$WORK/lvs-$cell-request.json" <<EOF
-{"layout":{"file":"$ROOT/$COLUMN_DIR/$cell.gds","deck":"gf180mcu","top":"$cell"},
- "reference":{"netlist":"$ROOT/design/netlist/$cell.spice","form":"subckt-call"},
- "options":{"flatten_reference":true}}
-EOF
-  klt lvs "$WORK/lvs-$cell-request.json" --format json > "$WORK/lvs-$cell-raw.json"
-  # The echoed `layout`/`reference` paths are host-specific (this checkout);
-  # commit_report rewrites them to stable repo-relative names, as it does for
-  # every other path-bearing field in the report.
-  commit_report "$WORK/lvs-$cell-raw.json" "$OUT/lvs-column-$name.json" \
-    --print "$cell LVS status: {status} | mismatches: {mismatch_count} | errors: {error_count}"
+  run_flat_block "$COLUMN_DIR/$cell.gds" "$cell" "column-$name"
 done
 klt drc --deck gf180mcu --format json "$COLUMN_DIR/column_band.gds" > "$WORK/drc-column-band-raw.json"
 commit_report "$WORK/drc-column-band-raw.json" "$OUT/drc-column-band.json"
@@ -241,7 +227,7 @@ for f in precharge-slice io-slice band abut; do
   report_status "$OUT/drc-column-$f.json" \
     --print "drc-column-$f: {status} | violations: {violation_count}"
 done
-if [ "${2:-}" = "--native" ]; then
+if [ "${1:-}" = "--native" ]; then
   # The PDK's own native KLayout deck (all FEOL+BEOL rule tables), driven by
   # `klt drc --engine klayout`. Needs a gf180mcuD install (`klt pdk find`) and
   # the `docopt` and `klayout` packages (run_drc.py). The deck script is materialized
@@ -249,37 +235,17 @@ if [ "${2:-}" = "--native" ]; then
   # the deck silently declared fewer rule tables than the 640 it should (the
   # failure mode klayout-tools#1302 documented).
   hr "0n. column path vs the PDK's native DRC deck (klt drc --engine klayout)"
-  RUN_DRC=""
-  PDK_PIN="$(tr -d '[:space:]' < sim/lib/pdk_pin.txt)"
-  for root in "${PDK_ROOT:-}" "$HOME/.ciel" "$HOME/.volare"; do
-    if [ -n "$root" ] && [ -f "$root/gf180mcuD/libs.tech/klayout/tech/drc/run_drc.py" ]; then
-      RUN_DRC="$root/gf180mcuD/libs.tech/klayout/tech/drc/run_drc.py"
-      PDK_FOUND_ROOT="$root"
-      break
-    fi
-  done
-  [ -n "$RUN_DRC" ] || { echo "no gf180mcuD tech/drc/run_drc.py under \$PDK_ROOT, ~/.ciel or ~/.volare" >&2; exit 1; }
-  # Same revision check as sim/lib/pdk_env.sh: the tree's open_pdks revision
-  # (a /versions/<sha>/ path component, else its SOURCES file) must be the pin.
-  PDK_RESOLVED="$(cd "$PDK_FOUND_ROOT/gf180mcuD" && pwd -P)"
-  PDK_FOUND_REV=""
-  case "$PDK_RESOLVED" in
-    */versions/*) PDK_FOUND_REV="${PDK_RESOLVED#*/versions/}"; PDK_FOUND_REV="${PDK_FOUND_REV%%/*}" ;;
-  esac
-  if ! [[ "$PDK_FOUND_REV" =~ ^[0-9a-f]{40}$ ]]; then
-    PDK_FOUND_REV=""
-    for src in "$PDK_FOUND_ROOT/gf180mcuD/SOURCES" "$PDK_RESOLVED/../SOURCES"; do
-      if [ -f "$src" ]; then
-        PDK_FOUND_REV="$(grep -Eo '[0-9a-f]{40}' "$src" | head -n1 || true)"
-        [ -n "$PDK_FOUND_REV" ] && break
-      fi
-    done
-  fi
-  if [ "$PDK_FOUND_REV" != "$PDK_PIN" ]; then
-    echo "PDK revision mismatch for $PDK_FOUND_ROOT/gf180mcuD: found open_pdks '${PDK_FOUND_REV:-<undeterminable>}', pinned $PDK_PIN (sim/lib/pdk_pin.txt)." >&2
-    echo "install the pin with: ciel enable --pdk-family gf180mcu -l gf180mcu_fd_pr $PDK_PIN (PDK root ~/.ciel)" >&2
+  # PDK resolution + the sim/lib/pdk_pin.txt revision check have one tested
+  # owner, sim/lib/pdk_env.sh (issue #500) -- source it rather than keep a
+  # second drifting copy here. A full ciel/volare gf180mcuD install ships the
+  # KLayout DRC deck; a models-only one does not, hence the explicit check.
+  # shellcheck source=../../sim/lib/pdk_env.sh
+  source "$ROOT/sim/lib/pdk_env.sh"
+  RUN_DRC="$GF180_VARIANT_DIR/libs.tech/klayout/tech/drc/run_drc.py"
+  [ -f "$RUN_DRC" ] || {
+    echo "resolved PDK install ($GF180_VARIANT_DIR) has no libs.tech/klayout/tech/drc/run_drc.py -- the native deck needs a full gf180mcuD install (ciel enable --pdk-family gf180mcu -l gf180mcu_fd_pr $(tr -d '[:space:]' < sim/lib/pdk_pin.txt))" >&2
     exit 1
-  fi
+  }
   mkdir -p "$WORK/native"
   uv run --with docopt --with klayout python3 "$RUN_DRC" --macro_gen --variant=D \
     --run_dir="$WORK/native" --path="$COLUMN_DIR/io_slice.gds" > "$WORK/native/macro_gen.log" 2>&1 \
@@ -305,9 +271,10 @@ if [ "${2:-}" = "--native" ]; then
       --print "drc-native-column-$name: {status} | violations: {violation_count}"
   done
 fi
-fi
-if [ "${1:-}" = "--column-path" ]; then exit 0; fi
+}
 
+# --- 1-5. bitcell + array core, then ERC (issues #23, #124, #159) -----------
+run_core_and_erc() {
 hr "1. DRC: bitcell (klt drc --deck gf180mcu)"
 klt drc --deck gf180mcu --format json "$BITCELL_GDS" > "$WORK/drc-bitcell-raw.json"
 commit_report "$WORK/drc-bitcell-raw.json" "$OUT/drc-bitcell.json" \
@@ -451,3 +418,45 @@ run_array64
 run_macro
 
 hr "done -- reports written under $OUT/"
+}
+
+# --- dispatch (issue #500) ---------------------------------------------------
+# One dispatcher instead of the old interleaved `if [ "${1:-}" != ... ]`
+# guards, which ran the row-path and control blocks ahead of `--column-path`,
+# kept a dead `!= "--row-path"` guard after `--row-path` had already exited,
+# and silently ran the entire script on any unrecognized flag. `--native` is
+# only meaningful as the second flag after `--column-path`.
+usage() {
+  cat >&2 <<'EOF'
+usage: ./layout/reports/generate.sh [flag]
+  (no flag)      everything: steps 0r, 0c, 0, 1-5, then array64 + macro
+  --column-path  only step 0, the column path (#205); add --native to also
+                 run it against the PDK's own DRC deck
+  --row-path     only the row decoder strip (#204)
+  --control      only sram_ctrl + col_decode (#246)
+  --macro        only the assembled macro, DRC (#326)
+  --array64      only the 64 x 128 array trio (#327)
+EOF
+}
+
+if [ $# -gt 2 ] || { [ $# -eq 2 ] && { [ "$1" != "--column-path" ] || [ "$2" != "--native" ]; }; }; then
+  echo "layout/reports/generate.sh: bad arguments: $* (--native is only valid as '--column-path --native')" >&2
+  usage
+  exit 2
+fi
+
+# The full run is selected only by zero arguments: a single empty argument
+# (e.g. an unset wrapper variable) must not fall through to a full regeneration.
+if [ $# -eq 0 ]; then
+  run_row_path; run_control; run_column_path ""; run_core_and_erc
+  exit 0
+fi
+
+case "$1" in
+  --row-path)    run_row_path ;;
+  --control)     run_control ;;
+  --column-path) run_column_path "${2:-}" ;;
+  --macro)       run_macro ;;
+  --array64)     run_array64 ;;
+  *)             echo "layout/reports/generate.sh: unknown flag: $1" >&2; usage; exit 2 ;;
+esac
