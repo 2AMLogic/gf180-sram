@@ -258,7 +258,38 @@
         "check_status": "pass",
         "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae",
         "input_verified": true,
-        "exit_status": 0
+        "exit_status": 0,
+        "pex_inputs": [
+          {
+            "role": "testbenches[0].request",
+            "path": "sim/pex/access-time/requests/read-access-time.request.json",
+            "sha256": "sha256:0ea86668bb7b35ec57e4d10ced7ca51289c5e024d7995f4af60e6b33895f565c",
+            "status": "verified"
+          },
+          {
+            "role": "testbenches[0].netlist",
+            "path": "sim/pex/access-time/testbench/tb_read_access_time.pex.spice",
+            "sha256": "sha256:160ca790e5f16e2f9d8d130492a8ddb1bc672cd32aa9b2fc390a9be965c4aeac",
+            "status": "verified"
+          },
+          {
+            "role": "testbenches[0].schematic_netlist",
+            "path": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
+            "sha256": "sha256:fdaca12870325b40c631063a9e47496219d74b99b3d2fd47fa31adc664e77b23",
+            "status": "verified"
+          },
+          {
+            "role": "reference_netlist",
+            "path": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
+            "sha256": "sha256:fdaca12870325b40c631063a9e47496219d74b99b3d2fd47fa31adc664e77b23",
+            "status": "verified"
+          }
+        ],
+        "body_bias": {
+          "status": "biased",
+          "unbiased_device_count": 0,
+          "unbiased_nets": []
+        }
       }
     },
     {

@@ -145,7 +145,9 @@ row and no diagnostic naming a convergence anomaly -- inspect any
 
 ### Results
 
-**Current (post-issue-#103 bitcell, re-run by issue #106):**
+**Current (post-issue-#103 bitcell, re-run by issue #106; report envelope
+regenerated at schema 2 by issue #498 -- same geometry, same 27/27 verdicts
+and unchanged example values; see the #498 freshness section below):**
 
 `write-access-time`: extracted access time is consistently **~32-46%
 slower** than schematic across the matrix (e.g. `tt/3.300V/25C`: schematic
@@ -375,6 +377,76 @@ rather than minting a per-run record ID, issue #106 first snapshotted their
 pre-#103 output byte-for-byte into `pre-issue-103/` (see that directory's
 own `README.md`) before re-running them -- so the pre-fix evidence stays
 directly readable in the tree, not just recoverable via `git log`.
+
+## Freshness: regenerated under report schema 2 (issue #498)
+
+Issue #492 removed `access-time/generate.sh`'s post-hoc DUT-path rewrite
+(obsolete since klt 0.8.0), which left the **committed** reports one klt
+generation behind what the generator emits: schema 1 with a plain-string
+`reference_netlist`, while klt >= 0.8.0 writes report schema 2
+(klayout-tools#1261) with `reference_netlist`/`testbenches[].netlist`/
+`schematic_netlist` in the committable `{path, scope: "repo"}` shape. Issue
+#498 regenerated both benches so the evidence matches the generator
+(`access-time/generate.sh`, unchanged except its header comments), and
+re-graded the signoff manifest in the same change so
+`scripts/ci/check-signoff-freshness.sh` stays green.
+
+- **Same geometry, same verdicts.** The bitcell GDS is untouched
+  (`provenance.input.content_hash` still `sha256:53d2b7aa...`, the
+  post-#103 revision), and both benches again report `status: pass` over
+  27/27 corners with 27 passing delta rows -- the parity #492 left
+  undemonstrated. Per-corner values are unchanged from the #106 run (the
+  `tt/3.300V/25C` examples in "Results" above still read 70.9ps/98.4ps
+  write, 25.8ps/26.8ps read). The schema-1 bytes this run replaced are
+  preserved byte-for-byte under [`pre-issue-498/`](pre-issue-498/) (see
+  that directory's own `README.md`), per the append-only rule and the
+  `pre-issue-103/` precedent.
+- **Requests are now PDK-relative (batch-submittable).** The two request
+  documents' `models` block changed from the env-expanded
+  `{"lib": "$PDK_ROOT/$PDK/libs.tech/ngspice/sm141064.ngspice"}` to
+  `{"pdk": "gf180mcuD", "lib": "libs.tech/ngspice/sm141064.ngspice"}`,
+  and each request gained `batch.capacity_wait_s: 600` (the
+  `--wait-for-capacity` equivalent; `klt pex` has no such CLI flag, so
+  the request field is the only path). The old shape resolved only on a
+  host with `PDK_ROOT`/`PDK` exported to a matching install, and the
+  batch fleet refused it outright (`models_lib_pdk_unresolved`, issue
+  #497): the runner exports `$PDK` only from a declared `models.pdk`.
+  The PDK-relative shape resolves through klt's own PDK discovery on
+  whichever box runs a leg -- on the fleet runner it resolved
+  `/opt/pdk/gf180mcuD`, whose `open_pdks f6eeac7...` stamp matches this
+  repo's `sim/lib/pdk_pin.txt` pin (`pdk_stamp_comparison: match` in each
+  report's `environment.remote`).
+- **Fleet execution and the runner version gate (disclosed).** The
+  27-corner grid ran on the Spot batch fleet, one job per bench per side
+  (job ids and full receipts in each report's
+  `testbenches[].sides.<side>.environment.remote`, plus per-side
+  `batch-receipt.json` under `reports/klt-pex-artifacts/`). The fleet
+  runner image runs klt 0.9.0 and its runner-side version gate compares
+  major.minor and is not relaxable (`runner_version_check: "warn"` only
+  softens the client-side pre-check), so the repo's pinned klt 0.8.0
+  client is refused by the runner -- measured, not assumed: a 0.8.0
+  full-grid attempt errored 27/27 with `batch_job_failed` (job command
+  exited 87, "the fleet runner runs klt 0.9.0 but the submitting client
+  is 0.8.0"). The grid therefore ran under the released
+  `klayout-tools==0.9.0` PyPI wheel in a throwaway venv. Shape parity
+  between the pin and the wheel that ran was verified at one corner
+  locally (`--backend local`, `tt/3.30V/25C`): the 0.8.0 and 0.9.0
+  reports are key-for-key identical, both schema 2, and the graded
+  signoff report is still produced by the pinned 0.8.0 grader
+  (`signoff/regenerate.sh`, `check-signoff-freshness.sh` green).
+- **New in the schema-2 envelope (grading-relevant).** The reports now
+  carry a `body_bias` block (`status: biased`, 0 unbiased devices/nets --
+  the signoff item-7 citation's "no body-bias statement" disclosure is
+  retired accordingly), and the 0.8.0 grader now verifies and echoes
+  `pex_inputs` sha256 pins for the request, netlist, and DUT references.
+- **Host-path echoes (disclosed, same class as the archived artifacts).**
+  The new reports echo `sides.<side>.environment.client_ngspice_binary`
+  (the submitting host's ngspice path), and the regenerated
+  `klt-pex-artifacts/**` swapped-request copies embed the generating
+  worktree's absolute paths -- the same disclosure class the
+  `pre-issue-103/` artifacts already carry; the provenance-hygiene gate
+  that forbids host paths in committed reports covers `layout/` and
+  `views/`, not `sim/` testbench-run evidence.
 
 ## `generate.sh` / `extracted-netlist/` / `extract-report.json`
 

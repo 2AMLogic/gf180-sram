@@ -1,14 +1,24 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "pass",
-  "layout": "../../../../layout/bitcell/sram_bitcell_6t.gds",
-  "netlist": "../reports/klt-pex-artifacts/write-access-time/extracted-netlist.spice",
-  "reference_netlist": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
+  "layout": {
+    "path": "layout/bitcell/sram_bitcell_6t.gds",
+    "scope": "repo"
+  },
+  "netlist": {
+    "path": "sim/pex/access-time/reports/klt-pex-artifacts/write-access-time/extracted-netlist.spice",
+    "scope": "repo"
+  },
+  "reference_netlist": {
+    "path": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
+    "scope": "repo"
+  },
+  "reference_netlist_sha256": "sha256:fdaca12870325b40c631063a9e47496219d74b99b3d2fd47fa31adc664e77b23",
   "extraction": {
     "deck": "gf180mcu",
     "device_count": 6,
     "net_count": 7,
-    "netlist_sha256": "80133e9b2845ee8bc173ec852535eb5030b52548a504afef8ecdc234fcd84dad",
+    "netlist_sha256": "3dbb7a74729935ea42d39075040de81943ed4175d26fb581f767fe353966315c",
     "model": {
       "capacitance": "net-to-ground for every net's own (non-coupled) area/perimeter, plus net-to-net for the vertical-overlap coupling `coupling` describes below -- a coupled net pair gets a direct capacitor between their two hub nodes, not just capacitors to the deck's ground/substrate net",
       "coupling": "vertical overlap (crossover) unconditionally -- where one net's conductor on an adjacent metal level sits directly over another *distinct* net's conductor, that overlap area is charged between the two nets instead of to ground (issue #760) -- plus lateral (same-layer, sidewall) coupling, but only for a net pair naming one of the caller's declared `--critical-net` nets (issue #976): facing-edge length within that layer's own minimum-spacing lookback is charged between the two nets, *additively* (not deducted from either net's substrate fringe term, unlike the vertical case -- a known simplification). Any same-layer pair with neither side named `--critical-net`, and fringe shielding in general, are still not modelled",
@@ -17,16 +27,897 @@
     },
     "critical_nets": [],
     "distributed_rc": false,
-    "mom_rlc_override": null
+    "mom_rlc_override": null,
+    "label_layers": null,
+    "device_models": null,
+    "rename_declared_pins": false,
+    "tie_declared_pins": false,
+    "pdk": {
+      "variant": "gf180mcuD",
+      "root": {
+        "path": null,
+        "scope": "external"
+      },
+      "version": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7"
+    },
+    "parasitic_integrity": {
+      "short_threshold_ohm": 1.0,
+      "cap_tolerance": {
+        "absolute_ff": 1e-06,
+        "relative": 1e-09
+      },
+      "max_detail_items": 20,
+      "nets_checked": 7,
+      "nets_with_findings": 0,
+      "open_nets": 0,
+      "island_components": 0,
+      "orphan_nodes": 0,
+      "suspicious_resistors": 0,
+      "short_candidates": 0,
+      "capacitance_mismatches": 0,
+      "nets": [
+        {
+          "net": "BL",
+          "net_id": 1,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.498113,
+              "computed_ff": 0.498113,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        },
+        {
+          "net": "BLB",
+          "net_id": 2,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.498113,
+              "computed_ff": 0.498113,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        },
+        {
+          "net": "Q",
+          "net_id": 5,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.783841,
+              "computed_ff": 0.783841,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        },
+        {
+          "net": "QB",
+          "net_id": 4,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.792193,
+              "computed_ff": 0.792193,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        },
+        {
+          "net": "VDD",
+          "net_id": 6,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.765372,
+              "computed_ff": 0.765372,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        },
+        {
+          "net": "VSS",
+          "net_id": 8,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.804827,
+              "computed_ff": 0.804827,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        },
+        {
+          "net": "WL",
+          "net_id": 3,
+          "rc_model": "lumped",
+          "integrity": {
+            "open": {
+              "status": "not_applicable",
+              "reason": "lumped model: terminal legs attach to the hub by construction; no distributed segments to check connectivity over",
+              "disconnected_count": 0,
+              "disconnected_terminals": [],
+              "details_truncated": false
+            },
+            "islands": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "orphan_nodes": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "suspicious_resistors": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "short_candidates": {
+              "count": 0,
+              "details": [],
+              "details_truncated": false,
+              "reason": null
+            },
+            "capacitance": {
+              "status": "pass",
+              "declared_ff": 0.889491,
+              "computed_ff": 0.889491,
+              "delta_ff": 0.0,
+              "reason": null,
+              "tolerance": {
+                "absolute_ff": 1e-06,
+                "relative": 1e-09
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "body_bias": {
+    "status": "biased",
+    "unbiased_device_count": 0,
+    "unbiased_nets": [],
+    "unbiased_pmos_body_nets": []
+  },
+  "measurement": {
+    "mode": "testbench",
+    "command": null,
+    "timeout_s": null,
+    "sides": null
   },
   "testbenches": [
     {
-      "request": "../requests/write-access-time.request.json",
-      "schematic_netlist": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
+      "request": {
+        "path": "sim/pex/access-time/requests/write-access-time.request.json",
+        "scope": "repo"
+      },
+      "request_sha256": "sha256:dfcd0e01bc6fdfa0089e6eee34a8e0be38caf7b46f5bd29cee039d47af54d70a",
+      "netlist": {
+        "path": "sim/pex/access-time/testbench/tb_write_access_time.pex.spice",
+        "scope": "repo"
+      },
+      "netlist_sha256": "sha256:5455ea8aaa75e2a78d1f29ee0fd1bd1d194fc604a4d4435e5d693328dfa0aac0",
+      "schematic_netlist": {
+        "path": "sim/pex/access-time/dut/bitcell_6t_subckt.spice",
+        "scope": "repo"
+      },
+      "schematic_netlist_sha256": "sha256:fdaca12870325b40c631063a9e47496219d74b99b3d2fd47fa31adc664e77b23",
       "corner_count": 27,
       "measurement_names": [
         "write_access_time"
-      ]
+      ],
+      "sides": {
+        "schematic": {
+          "environment": {
+            "engine": "ngspice",
+            "engine_version": "47",
+            "ngspice_binary": "/usr/local/bin/ngspice",
+            "engine_host": "worker",
+            "client_ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+            "remote": {
+              "provider": "aws-batch-fleet",
+              "job_id": "klt-sim-7fb83208d3c6",
+              "region": "us-east-1",
+              "instance_id": "i-06bd64498c7ee80a2",
+              "instance_type": "m7i.4xlarge",
+              "availability_zone": "us-east-1b",
+              "ami_id": "ami-09c14f55df4958cbd",
+              "lifecycle": "spot",
+              "spot": true,
+              "state": "done",
+              "exit_code": "0",
+              "concurrency": "1",
+              "physical_cores": "8",
+              "elapsed_seconds": 10,
+              "client_submitted_at": "2026-11-24T23:51:18.781054Z",
+              "client_launched_at": "2026-11-24T23:51:46.243214Z",
+              "client_status_terminal_at": "2026-11-24T23:52:20.598807Z",
+              "client_collected_at": "2026-11-24T23:52:22.066137Z",
+              "runner_klt_version": "0.9.0",
+              "client_klt_version": "0.9.0",
+              "runner_compatibility": "match",
+              "worker_environment": {
+                "capture": "ok",
+                "simulator": {
+                  "requested_binary": "ngspice",
+                  "binary_source": "PATH",
+                  "selected_path": "/usr/local/bin/ngspice",
+                  "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+                  "version_probe": "ok"
+                },
+                "pdk": {
+                  "variant": "gf180mcuD",
+                  "root": "/opt/pdk",
+                  "stamp_scheme": "sources-sha256",
+                  "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+                  "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+                  "models_staged": false,
+                  "stamp_scope": "executed"
+                },
+                "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+                "omp_num_threads": null,
+                "image_manifest": null,
+                "model_inputs": null,
+                "diagnostics": [],
+                "pdk_stamp_comparison": {
+                  "status": "match"
+                },
+                "engine_build_comparison": {
+                  "status": "match"
+                }
+              },
+              "runner_model_inputs": null,
+              "job_ceiling": {
+                "basis": "conservative_serial_bound",
+                "unit_count": 27,
+                "per_unit_timeout_s": 60,
+                "overhead_s": 120.0,
+                "job_bound_s": 1740.0,
+                "max_job_seconds": 3600.0,
+                "max_job_seconds_source": "fleet_config",
+                "exceeds_ceiling": false,
+                "check": "warn",
+                "max_units_per_job": 58,
+                "recommended_hosts": 1
+              }
+            }
+          },
+          "corners": [
+            {
+              "corner_id": "ff/2.970V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/2.970V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/2.970V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.300V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.300V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.300V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.630V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.630V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.630V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/2.970V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/2.970V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/2.970V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.300V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.300V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.300V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.630V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.630V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.630V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/2.970V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/2.970V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/2.970V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.300V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.300V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.300V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.630V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.630V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.630V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            }
+          ]
+        },
+        "extracted": {
+          "environment": {
+            "engine": "ngspice",
+            "engine_version": "47",
+            "ngspice_binary": "/usr/local/bin/ngspice",
+            "engine_host": "worker",
+            "client_ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+            "remote": {
+              "provider": "aws-batch-fleet",
+              "job_id": "klt-sim-6961010a9ab2",
+              "region": "us-east-1",
+              "instance_id": "i-08ee65154709172c0",
+              "instance_type": "m7i.4xlarge",
+              "availability_zone": "us-east-1b",
+              "ami_id": "ami-09c14f55df4958cbd",
+              "lifecycle": "spot",
+              "spot": true,
+              "state": "done",
+              "exit_code": "0",
+              "concurrency": "1",
+              "physical_cores": "8",
+              "elapsed_seconds": 9,
+              "client_submitted_at": "2026-11-24T23:52:22.225872Z",
+              "client_launched_at": "2026-11-24T23:53:03.460156Z",
+              "client_status_terminal_at": "2026-11-24T23:53:36.337010Z",
+              "client_collected_at": "2026-11-24T23:53:37.851200Z",
+              "runner_klt_version": "0.9.0",
+              "client_klt_version": "0.9.0",
+              "runner_compatibility": "match",
+              "worker_environment": {
+                "capture": "ok",
+                "simulator": {
+                  "requested_binary": "ngspice",
+                  "binary_source": "PATH",
+                  "selected_path": "/usr/local/bin/ngspice",
+                  "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+                  "version_probe": "ok"
+                },
+                "pdk": {
+                  "variant": "gf180mcuD",
+                  "root": "/opt/pdk",
+                  "stamp_scheme": "sources-sha256",
+                  "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+                  "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+                  "models_staged": false,
+                  "stamp_scope": "executed"
+                },
+                "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+                "omp_num_threads": null,
+                "image_manifest": null,
+                "model_inputs": null,
+                "diagnostics": [],
+                "pdk_stamp_comparison": {
+                  "status": "match"
+                },
+                "engine_build_comparison": {
+                  "status": "match"
+                }
+              },
+              "runner_model_inputs": null,
+              "job_ceiling": {
+                "basis": "conservative_serial_bound",
+                "unit_count": 27,
+                "per_unit_timeout_s": 60,
+                "overhead_s": 120.0,
+                "job_bound_s": 1740.0,
+                "max_job_seconds": 3600.0,
+                "max_job_seconds_source": "fleet_config",
+                "exceeds_ceiling": false,
+                "check": "warn",
+                "max_units_per_job": 58,
+                "recommended_hosts": 1
+              }
+            }
+          },
+          "corners": [
+            {
+              "corner_id": "ff/2.970V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/2.970V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/2.970V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.300V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.300V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.300V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.630V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.630V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ff/3.630V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/2.970V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/2.970V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/2.970V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.300V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.300V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.300V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.630V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.630V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "tt/3.630V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/2.970V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/2.970V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/2.970V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.300V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.300V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.300V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.630V/-40C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.630V/25C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            },
+            {
+              "corner_id": "ss/3.630V/125C",
+              "status": "pass",
+              "diagnostics": [],
+              "produced_value": true
+            }
+          ]
+        }
+      },
+      "nothing_simulated_corners": []
     }
   ],
   "corner_count": 27,
@@ -35,237 +926,354 @@
       "spec_row": "write_access_time",
       "corner_id": "ff/2.970V/-40C",
       "schematic_value": 5.75954e-11,
-      "extracted_value": 8.12237e-11,
-      "delta_pct": 41.025,
-      "status": "pass"
+      "extracted_value": 8.12051e-11,
+      "delta_pct": 40.992,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/2.970V/25C",
       "schematic_value": 6.22584e-11,
-      "extracted_value": 8.83278e-11,
-      "delta_pct": 41.873,
-      "status": "pass"
+      "extracted_value": 8.83064e-11,
+      "delta_pct": 41.839,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/2.970V/125C",
       "schematic_value": 7.07084e-11,
-      "extracted_value": 1.00976e-10,
-      "delta_pct": 42.806,
-      "status": "pass"
+      "extracted_value": 1.00954e-10,
+      "delta_pct": 42.775,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/3.300V/-40C",
       "schematic_value": 5.68679e-11,
-      "extracted_value": 7.7334e-11,
-      "delta_pct": 35.989,
-      "status": "pass"
+      "extracted_value": 7.73174e-11,
+      "delta_pct": 35.96,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/3.300V/25C",
       "schematic_value": 6.0582e-11,
-      "extracted_value": 8.28535e-11,
-      "delta_pct": 36.763,
-      "status": "pass"
+      "extracted_value": 8.28335e-11,
+      "delta_pct": 36.73,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/3.300V/125C",
       "schematic_value": 6.73974e-11,
-      "extracted_value": 9.3121e-11,
-      "delta_pct": 38.167,
-      "status": "pass"
+      "extracted_value": 9.30991e-11,
+      "delta_pct": 38.135,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/3.630V/-40C",
       "schematic_value": 5.71501e-11,
-      "extracted_value": 7.55433e-11,
-      "delta_pct": 32.184,
-      "status": "pass"
+      "extracted_value": 7.55272e-11,
+      "delta_pct": 32.156,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/3.630V/25C",
       "schematic_value": 6.0099e-11,
-      "extracted_value": 7.99357e-11,
-      "delta_pct": 33.007,
-      "status": "pass"
+      "extracted_value": 7.9918e-11,
+      "delta_pct": 32.977,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ff/3.630V/125C",
       "schematic_value": 6.5818e-11,
-      "extracted_value": 8.83761e-11,
-      "delta_pct": 34.273,
-      "status": "pass"
+      "extracted_value": 8.83565e-11,
+      "delta_pct": 34.244,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/2.970V/-40C",
       "schematic_value": 6.88064e-11,
-      "extracted_value": 9.80683e-11,
-      "delta_pct": 42.528,
-      "status": "pass"
+      "extracted_value": 9.80483e-11,
+      "delta_pct": 42.499,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/2.970V/25C",
       "schematic_value": 7.49344e-11,
-      "extracted_value": 1.0749e-10,
-      "delta_pct": 43.445,
-      "status": "pass"
+      "extracted_value": 1.07468e-10,
+      "delta_pct": 43.416,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/2.970V/125C",
       "schematic_value": 8.58493e-11,
-      "extracted_value": 1.24121e-10,
-      "delta_pct": 44.58,
-      "status": "pass"
+      "extracted_value": 1.24098e-10,
+      "delta_pct": 44.553,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/3.300V/-40C",
       "schematic_value": 6.6092e-11,
-      "extracted_value": 9.10527e-11,
-      "delta_pct": 37.767,
-      "status": "pass"
+      "extracted_value": 9.1035e-11,
+      "delta_pct": 37.74,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/3.300V/25C",
       "schematic_value": 7.08776e-11,
-      "extracted_value": 9.83804e-11,
-      "delta_pct": 38.803,
-      "status": "pass"
+      "extracted_value": 9.83603e-11,
+      "delta_pct": 38.775,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/3.300V/125C",
       "schematic_value": 7.97971e-11,
-      "extracted_value": 1.11873e-10,
-      "delta_pct": 40.197,
-      "status": "pass"
+      "extracted_value": 1.11852e-10,
+      "delta_pct": 40.171,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/3.630V/-40C",
       "schematic_value": 6.522e-11,
-      "extracted_value": 8.73609e-11,
-      "delta_pct": 33.948,
-      "status": "pass"
+      "extracted_value": 8.73433e-11,
+      "delta_pct": 33.921,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/3.630V/25C",
       "schematic_value": 6.91011e-11,
-      "extracted_value": 9.3266e-11,
-      "delta_pct": 34.97,
-      "status": "pass"
+      "extracted_value": 9.32473e-11,
+      "delta_pct": 34.943,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "tt/3.630V/125C",
       "schematic_value": 7.6486e-11,
-      "extracted_value": 1.04434e-10,
-      "delta_pct": 36.54,
-      "status": "pass"
+      "extracted_value": 1.04414e-10,
+      "delta_pct": 36.514,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/2.970V/-40C",
       "schematic_value": 8.3698e-11,
-      "extracted_value": 1.21016e-10,
-      "delta_pct": 44.586,
-      "status": "pass"
+      "extracted_value": 1.20996e-10,
+      "delta_pct": 44.563,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/2.970V/25C",
       "schematic_value": 9.17553e-11,
-      "extracted_value": 1.33514e-10,
-      "delta_pct": 45.511,
-      "status": "pass"
+      "extracted_value": 1.33492e-10,
+      "delta_pct": 45.487,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/2.970V/125C",
       "schematic_value": 1.05998e-10,
-      "extracted_value": 1.55215e-10,
-      "delta_pct": 46.432,
-      "status": "pass"
+      "extracted_value": 1.55191e-10,
+      "delta_pct": 46.409,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/3.300V/-40C",
       "schematic_value": 7.79964e-11,
-      "extracted_value": 1.09384e-10,
-      "delta_pct": 40.242,
-      "status": "pass"
+      "extracted_value": 1.09366e-10,
+      "delta_pct": 40.219,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/3.300V/25C",
       "schematic_value": 8.43322e-11,
-      "extracted_value": 1.19128e-10,
-      "delta_pct": 41.26,
-      "status": "pass"
+      "extracted_value": 1.19109e-10,
+      "delta_pct": 41.238,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/3.300V/125C",
       "schematic_value": 9.59509e-11,
-      "extracted_value": 1.36829e-10,
-      "delta_pct": 42.603,
-      "status": "pass"
+      "extracted_value": 1.36807e-10,
+      "delta_pct": 42.58,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/3.630V/-40C",
       "schematic_value": 7.54507e-11,
-      "extracted_value": 1.02975e-10,
-      "delta_pct": 36.48,
-      "status": "pass"
+      "extracted_value": 1.02957e-10,
+      "delta_pct": 36.456,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/3.630V/25C",
       "schematic_value": 8.05235e-11,
-      "extracted_value": 1.10831e-10,
-      "delta_pct": 37.638,
-      "status": "pass"
+      "extracted_value": 1.10812e-10,
+      "delta_pct": 37.614,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     },
     {
       "spec_row": "write_access_time",
       "corner_id": "ss/3.630V/125C",
       "schematic_value": 9.02402e-11,
-      "extracted_value": 1.25593e-10,
-      "delta_pct": 39.176,
-      "status": "pass"
+      "extracted_value": 1.25573e-10,
+      "delta_pct": 39.154,
+      "status": "pass",
+      "schematic_status": "pass",
+      "extracted_status": "pass"
     }
   ],
+  "coverage": {
+    "testbenches": 1,
+    "delta_rows": 27,
+    "corners_compared": 27,
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "comparison:[0,\"ff/2.970V/-40C\",\"write_access_time\"]",
+      "comparison:[1,\"ff/2.970V/25C\",\"write_access_time\"]",
+      "comparison:[10,\"tt/2.970V/25C\",\"write_access_time\"]",
+      "comparison:[11,\"tt/2.970V/125C\",\"write_access_time\"]",
+      "comparison:[12,\"tt/3.300V/-40C\",\"write_access_time\"]",
+      "comparison:[13,\"tt/3.300V/25C\",\"write_access_time\"]",
+      "comparison:[14,\"tt/3.300V/125C\",\"write_access_time\"]",
+      "comparison:[15,\"tt/3.630V/-40C\",\"write_access_time\"]",
+      "comparison:[16,\"tt/3.630V/25C\",\"write_access_time\"]",
+      "comparison:[17,\"tt/3.630V/125C\",\"write_access_time\"]",
+      "comparison:[18,\"ss/2.970V/-40C\",\"write_access_time\"]",
+      "comparison:[19,\"ss/2.970V/25C\",\"write_access_time\"]",
+      "comparison:[2,\"ff/2.970V/125C\",\"write_access_time\"]",
+      "comparison:[20,\"ss/2.970V/125C\",\"write_access_time\"]",
+      "comparison:[21,\"ss/3.300V/-40C\",\"write_access_time\"]",
+      "comparison:[22,\"ss/3.300V/25C\",\"write_access_time\"]",
+      "comparison:[23,\"ss/3.300V/125C\",\"write_access_time\"]",
+      "comparison:[24,\"ss/3.630V/-40C\",\"write_access_time\"]",
+      "comparison:[25,\"ss/3.630V/25C\",\"write_access_time\"]",
+      "comparison:[26,\"ss/3.630V/125C\",\"write_access_time\"]",
+      "comparison:[3,\"ff/3.300V/-40C\",\"write_access_time\"]",
+      "comparison:[4,\"ff/3.300V/25C\",\"write_access_time\"]",
+      "comparison:[5,\"ff/3.300V/125C\",\"write_access_time\"]",
+      "comparison:[6,\"ff/3.630V/-40C\",\"write_access_time\"]",
+      "comparison:[7,\"ff/3.630V/25C\",\"write_access_time\"]",
+      "comparison:[8,\"ff/3.630V/125C\",\"write_access_time\"]",
+      "comparison:[9,\"tt/2.970V/-40C\",\"write_access_time\"]"
+    ],
+    "skipped": [],
+    "inapplicable": [],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
   "passed": 27,
   "failed": 0,
   "errored": 0,
+  "schematic_failed": 0,
   "pin_count_mismatch": null,
+  "backend_failure": null,
+  "flat_dut_mismatch": null,
+  "pin_order_mismatch": null,
+  "model_mismatch": null,
+  "flatten_schematic": false,
+  "schematic_flatten": null,
   "provenance": {
-    "klt_version": "0.2.0",
-    "klayout_version": "0.30.10",
+    "klt_version": "0.9.0",
+    "klt_git_commit": "5dbbad05ff42265c92a6f3d2f20d1bbcd2957d49",
+    "klt_reinstall_spec": "klayout-tools==0.9.0",
+    "klayout_version": "0.30.14",
     "pdk": {
       "name": "gf180mcuD",
       "source": "--pdk-root flag",
-      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+      "version": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7"
     },
     "deck": {
       "name": "gf180mcu",
-      "content_hash": "sha256:6a323622d93c1b4716a7874c37ee3d825bd08398c3c030c85175e44e2cc229a3"
+      "content_hash": "sha256:cf44de63f0a5b01c1d09c4d58e0535e990aa4b070bcaae17fd3a94a67a1d97e1",
+      "released": true,
+      "options": {
+        "metal_top": "9K",
+        "mim_cap": "cap_mim_2f0_m4m5_noshield",
+        "poly_res": "1k"
+      },
+      "options_explicit": {
+        "metal_top": false,
+        "mim_cap": false,
+        "poly_res": false
+      },
+      "options_hash": "sha256:6a7dc7660a470994263c5ca8ace6d8ac8c605d77e6876a9c5490949de6e7cb05"
     },
     "input": {
-      "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae"
+      "content_hash": "sha256:53d2b7aa3539199214bd85386c23b1929f1fa7c8950379476c4ba70ec4fcd4ae",
+      "role": "layout"
     }
   }
 }

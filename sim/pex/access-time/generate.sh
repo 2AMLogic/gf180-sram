@@ -29,8 +29,13 @@ SELF_DIR="$ROOT/sim/pex/access-time"
 # shellcheck source=../../lib/pdk_env.sh
 source "$ROOT/sim/lib/pdk_env.sh"
 # Normalize to PDK_ROOT/PDK regardless of which of pdk_env.sh's three
-# resolution branches fired -- ./requests/*.request.json's
-# `models.lib: "$PDK_ROOT/$PDK/..."` field needs both set consistently.
+# resolution branches fired -- the `--pdk`/`--pdk-root` CLI flags below
+# need both set consistently. (The requests' own `models` block stopped
+# depending on them in issue #498: it is now PDK-relative
+# `{"pdk": "gf180mcuD", "lib": "libs.tech/..."}` -- resolved through klt's
+# own PDK discovery on whichever host runs a leg, the only shape the batch
+# fleet accepts, where an env-expanded $PDK would reach the runner
+# unexpanded: issue #497's `models_lib_pdk_unresolved` refusal.)
 export PDK_ROOT
 export PDK
 PDK_ROOT="$(dirname "$GF180_VARIANT_DIR")"
