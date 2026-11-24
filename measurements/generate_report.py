@@ -131,7 +131,7 @@ def worst_case_rows() -> list[dict]:
             val = entry[key]
             if best_val is None or (val < best_val if bounded else val > best_val):
                 best_val, best_corner = val, corner
-        fmt = signoff.fmt_v if unit == "V" else signoff.fmt_s
+        fmt = signoff.UNIT_FORMATTERS[unit]
         verdict_fn = (
             signoff.verdict_threshold if bounded else signoff.verdict_recorded
         )
