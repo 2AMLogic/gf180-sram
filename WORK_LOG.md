@@ -10,6 +10,12 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-24
 
+- **PR #489**: refactor(sim): derive signoff table header from RECORD_CLAIMS
+- **PR #487**: refactor: drive all three evidence renderers from RECORD_CLAIMS
+- **PR #485**: refactor(sim): deduplicate staging and coverage helpers in deck_adapter
+- **Issue #488** (closed): render_signoff_table's per-corner table header and FAMILY_LABELS loops still need lockstep edits with RECORD_CLAIMS
+- **Issue #479** (closed): Consolidate duplicated RECORD_CLAIMS tables and 5-family unrolling across render_signoff_table, mint_sim_envelope, and generate_report
+- **Issue #482** (closed): Deduplicate deterministic and MC staging, coverage, and reduction helpers in sim/lib/deck_adapter.py
 - **PR #480**: refactor: consolidate layer registration and Via2/Metal3 constants into layout/common.py
 - **Issue #475** (closed): Consolidate layer registration + Metal3/Via2 constants into layout/common.py (follow-up to #330)
 
