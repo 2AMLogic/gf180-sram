@@ -445,8 +445,14 @@ if [ $# -gt 2 ] || { [ $# -eq 2 ] && { [ "$1" != "--column-path" ] || [ "$2" != 
   exit 2
 fi
 
-case "${1:-}" in
-  "")            run_row_path; run_control; run_column_path "${2:-}"; run_core_and_erc ;;
+# The full run is selected only by zero arguments: a single empty argument
+# (e.g. an unset wrapper variable) must not fall through to a full regeneration.
+if [ $# -eq 0 ]; then
+  run_row_path; run_control; run_column_path ""; run_core_and_erc
+  exit 0
+fi
+
+case "$1" in
   --row-path)    run_row_path ;;
   --control)     run_control ;;
   --column-path) run_column_path "${2:-}" ;;
