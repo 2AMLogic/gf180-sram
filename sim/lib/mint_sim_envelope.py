@@ -69,60 +69,26 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from corner_matrix import corner_id, corners  # noqa: E402 (path-injected sibling import)
 from render_signoff_table import (  # noqa: E402 (path-injected sibling import)
-    CORNER_ORDER,
+    BOUNDED_FAMILIES,
+    RECORD_CLAIMS,
     latest_record_for_claim,
     parse_record,
 )
 from repo_root import find_repo_root  # noqa: E402
 
-# The five append-only corner records, in this fixed order: (response
-# measurement name, records dir under sim/, Claim substring that finds the
-# record, RESULT key inside it, unit, bounded-by-the-Signoff-definition).
-# The aggregate input hash concatenates the five files' bytes in this
-# order, so the pin is a deterministic function of exactly these files.
-ROWS = [
-    ("read_snm_v", "read-snm/records", "read SNM", "read_snm_v", "V", True),
-    ("hold_snm_v", "hold-snm/records", "hold SNM", "hold_snm_v", "V", True),
-    (
-        "write_trip_voltage_v",
-        "write-margin/records",
-        "write margin",
-        "write_trip_voltage_v",
-        "V",
-        True,
-    ),
-    (
-        "read_access_time_s",
-        "access-time/records",
-        "read access time",
-        "read_access_time_s",
-        "s",
-        False,
-    ),
-    (
-        "write_access_time_s",
-        "access-time/records",
-        "write access time",
-        "write_access_time_s",
-        "s",
-        False,
-    ),
-]
+# The five append-only corner records, in RECORD_CLAIMS order (the single
+# owner in render_signoff_table.py, #479): the aggregate input hash
+# concatenates the five files' bytes in that order, so the pin is a
+# deterministic function of exactly these files. The envelope's
+# measurement names are the records' own RESULT keys, and which rows the
+# Signoff definition bounds comes from BOUNDED_FAMILIES -- neither is
+# restated here.
 
 #: `spec/sram.md` "### Signoff definition": read SNM, hold SNM, and write
 #: margin must be strictly positive at every one of the 27 corners.
 LIMIT_MIN = 0.0
-
-
-def _corner_parts(corner_id: str) -> dict[str, object]:
-    """Split `ff_-40c_2.97v` into klt sim's response corner fields."""
-    process, temp, vdd = corner_id.replace("c_", "_").split("_")
-    return {
-        "process": process,
-        "supply_v": {"vdd": float(vdd.rstrip("v"))},
-        "temperature_c": float(temp),
-    }
 
 
 def main() -> int:
@@ -131,7 +97,7 @@ def main() -> int:
 
     records: list[dict[str, str]] = []
     per_row_values: dict[str, dict[str, float | None]] = {}
-    for name, records_subdir, claim, key, _unit, _bounded in ROWS:
+    for family, (records_subdir, claim, key, _unit) in RECORD_CLAIMS.items():
         record_path = latest_record_for_claim(sim_dir / records_subdir, claim)
         records.append(
             {
@@ -140,36 +106,37 @@ def main() -> int:
             }
         )
         parsed = parse_record(record_path)
-        per_row_values[name] = {
+        per_row_values[family] = {
             corner: (vals.get(key) if isinstance(vals, dict) else None)
             for corner, vals in parsed.items()
         }
 
     # The aggregate input pin: sha256 over the five record files' bytes,
-    # concatenated in ROWS order -- a deterministic function of exactly the
-    # files whose values the envelope transcribes.
+    # concatenated in RECORD_CLAIMS order -- a deterministic function of
+    # exactly the files whose values the envelope transcribes.
     aggregate = hashlib.sha256()
     for record in records:
         aggregate.update((repo_root / record["file"]).read_bytes())
     aggregate_hash = f"sha256:{aggregate.hexdigest()}"
 
     measurements_rollup: list[dict[str, object]] = []
-    corners: list[dict[str, object]] = []
+    corner_rows: list[dict[str, object]] = []
     errored = 0
 
-    for corner_id in CORNER_ORDER:
+    for process, temp_c, vdd in corners():
+        cid = corner_id(process, temp_c, vdd)
         corner_measurements: list[dict[str, object]] = []
         corner_status = "pass"
-        for name, _sub, _claim, _key, unit, bounded in ROWS:
-            value = per_row_values[name].get(corner_id)
-            entry: dict[str, object] = {"name": name, "unit": unit}
+        for family, (_sub, _claim, key, unit) in RECORD_CLAIMS.items():
+            value = per_row_values[family].get(cid)
+            entry: dict[str, object] = {"name": key, "unit": unit}
             if value is None:
                 # A corner with no valid measurement for this row: an OPEN
                 # record result renders this corner errored, never dropped.
                 entry.update({"value": None, "status": "error"})
                 corner_status = "error"
                 errored += 1
-            elif bounded:
+            elif family in BOUNDED_FAMILIES:
                 status = "pass" if value > LIMIT_MIN else "fail"
                 entry.update(
                     {"value": value, "status": status, "margin": value - LIMIT_MIN}
@@ -182,10 +149,12 @@ def main() -> int:
                 # threshold (the same rule render_signoff_table.py applies).
                 entry.update({"value": value, "status": "reported"})
             corner_measurements.append(entry)
-        corners.append(
+        corner_rows.append(
             {
-                "corner_id": corner_id,
-                **_corner_parts(corner_id),
+                "corner_id": cid,
+                "process": process,
+                "supply_v": {"vdd": float(vdd)},
+                "temperature_c": float(temp_c),
                 "status": corner_status,
                 "measurements": corner_measurements,
                 "diagnostics": [],
@@ -198,22 +167,22 @@ def main() -> int:
             }
         )
 
-    failed = sum(1 for c in corners if c["status"] == "fail")
+    failed = sum(1 for c in corner_rows if c["status"] == "fail")
     status = "error" if errored else ("fail" if failed else "pass")
 
-    for name, _sub, _claim, _key, unit, bounded in ROWS:
+    for family, (_sub, _claim, key, unit) in RECORD_CLAIMS.items():
         entries = {
             c["corner_id"]: next(
-                m for m in c["measurements"] if m["name"] == name
+                m for m in c["measurements"] if m["name"] == key
             )
-            for c in corners
+            for c in corner_rows
         }
         row_open = any(e["status"] == "error" for e in entries.values())
         measurement: dict[str, object] = {
-            "name": name,
+            "name": key,
             "unit": unit,
         }
-        if bounded:
+        if family in BOUNDED_FAMILIES:
             measurement["limits"] = {"min": LIMIT_MIN}
             binding_id, binding = min(
                 entries.items(), key=lambda kv: kv[1]["value"]
@@ -252,14 +221,14 @@ def main() -> int:
     envelope: dict[str, object] = {
         "schema_version": 3,
         "status": status,
-        "corner_count": len(corners),
-        "passed": sum(1 for c in corners if c["status"] == "pass"),
+        "corner_count": len(corner_rows),
+        "passed": sum(1 for c in corner_rows if c["status"] == "pass"),
         "failed": failed,
         "errored": errored,
         "metrics": {
-            "sim__corner__count": len(corners),
+            "sim__corner__count": len(corner_rows),
             "sim__corner__passed_count": sum(
-                1 for c in corners if c["status"] == "pass"
+                1 for c in corner_rows if c["status"] == "pass"
             ),
             "sim__corner__failed_count": failed,
             "sim__corner__errored_count": errored,
@@ -299,7 +268,7 @@ def main() -> int:
             ),
         },
         "measurements": measurements_rollup,
-        "corners": corners,
+        "corners": corner_rows,
     }
 
     json.dump(envelope, sys.stdout, indent=2)
