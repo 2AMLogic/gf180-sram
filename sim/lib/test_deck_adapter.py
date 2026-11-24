@@ -604,6 +604,28 @@ def test_mc_reduce_fails_closed():
             check(f"mc {name} => OPEN", r["overall"] == "OPEN", name)
             if want:
                 check(f"mc {name} coverage text", any(want in e for e in r["coverage_errors"]), str(r["coverage_errors"]))
+    with tempfile.TemporaryDirectory() as rd:
+        rep = _mc_stub(fam, req, rd, dup=first)
+        unit_without_id = rep["units"][0].copy()
+        del unit_without_id["id"]
+        rep["units"].extend([unit_without_id, unit_without_id.copy()])
+        rep["unit_count"] = len(rep["units"])
+        name = "mc mixed missing and string duplicate ids => OPEN"
+        try:
+            r = da.reduce_mc_report(fam, req, rep, outdir=rd)
+        except TypeError as exc:
+            check(name, False, repr(exc))
+        else:
+            errors = r["coverage_errors"]
+            check(
+                name,
+                r["overall"] == "OPEN"
+                and any(
+                    e.startswith("duplicate unit ids:") and "None" in e and first in e
+                    for e in errors
+                ),
+                str(errors),
+            )
     # one aggregated, sorted error per category -- not one error per unit
     with tempfile.TemporaryDirectory() as rd:
         r = da.reduce_mc_report(fam, req, _mc_stub(fam, req, rd, deck_sha256="f" * 64), outdir=rd)
