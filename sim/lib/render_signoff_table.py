@@ -62,17 +62,40 @@ CORNER_ORDER = corner_ids()
 
 # The five characterization families' append-only evidence, in one place:
 # family -> (records dir relative to sim/, Claim substring, recorded metric
-# key, unit). render_signoff_table.main() renders its verdicts from these and
-# sim/lib/parity_compare.py (#230 full-grid deck-mode parity) compares fleet
-# results against them -- one owner so the two consumers cannot drift into
-# comparing different records, different metrics, or mislabelling a metric's
-# unit (#359: the comparator renders this unit on every max-|delta| line).
+# key, unit). render() renders its verdicts from these,
+# sim/lib/mint_sim_envelope.py mints its envelope from them (#128), and
+# measurements/generate_report.py derives its worst-case rows from them --
+# and sim/lib/parity_compare.py (#230 full-grid deck-mode parity) compares
+# fleet results against them -- one owner so the four consumers cannot drift
+# into comparing different records, different metrics, or mislabelling a
+# metric's unit (#359: the comparator renders this unit on every
+# max-|delta| line).
 RECORD_CLAIMS = {
     "read-snm": ("read-snm/records", "read SNM", "read_snm_v", "V"),
     "hold-snm": ("hold-snm/records", "hold SNM", "hold_snm_v", "V"),
     "write-margin": ("write-margin/records", "write margin", "write_trip_voltage_v", "V"),
     "read-access": ("access-time/records", "read access time", "read_access_time_s", "s"),
     "write-access": ("access-time/records", "write access time", "write_access_time_s", "s"),
+}
+
+# Which of those families `spec/sram.md`'s "### Signoff definition"
+# bounds: read SNM, hold SNM, and write margin must be strictly > 0 V at
+# every corner, while the two access-time families are record-only (a
+# measured value is RECORDED, never PASS/FAIL). render()'s verdict rule,
+# mint_sim_envelope.py's limits/worst-case rollup, and
+# measurements/generate_report.py's worst-case rows all branch on this one
+# set, so the consumers cannot disagree about which rows take a threshold
+# verdict.
+BOUNDED_FAMILIES = frozenset({"read-snm", "hold-snm", "write-margin"})
+
+# Display labels for the per-family lines render() emits (Source records
+# and Aggregate sections), keyed by RECORD_CLAIMS family.
+FAMILY_LABELS = {
+    "read-snm": "Read SNM",
+    "hold-snm": "Hold SNM",
+    "write-margin": "Write margin",
+    "read-access": "Read access time",
+    "write-access": "Write access time",
 }
 
 RESULT_RE = re.compile(r"RESULT:\s*(\w+)\s*=\s*([-+0-9.eE]+)\s*;?")
@@ -157,97 +180,81 @@ def default_repo_root() -> Path:
     return find_repo_root(Path(__file__))
 
 
-def main() -> int:
-    repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else default_repo_root()
+def fmt_value(value: float | None, unit: str) -> str:
+    return "--" if value is None else (fmt_v if unit == "V" else fmt_s)(value)
+
+
+def render(repo_root: Path) -> str:
+    """Render the signoff-summary Markdown for the records latest under
+    repo_root -- the single derivation sim/signoff-summary.md commits and
+    measurements/generate_report.py embeds in-process."""
     sim_dir = repo_root / "sim"
 
     # The five records come from RECORD_CLAIMS (see its comment): same
-    # (records dir, Claim substring) pairs main() has always resolved, now
-    # shared with parity_compare.py.
+    # (records dir, Claim substring) pairs render() has always resolved, now
+    # shared with parity_compare.py, mint_sim_envelope.py, and
+    # measurements/generate_report.py.
     records = {
         family: latest_record_for_claim(sim_dir / records_rel, claim)
         for family, (records_rel, claim, _metric, _unit) in RECORD_CLAIMS.items()
     }
-    read_snm_record = records["read-snm"]
-    hold_snm_record = records["hold-snm"]
-    write_margin_record = records["write-margin"]
-    read_at_record = records["read-access"]
-    write_at_record = records["write-access"]
+    parsed = {family: parse_record(record) for family, record in records.items()}
 
-    read_snm = parse_record(read_snm_record)
-    hold_snm = parse_record(hold_snm_record)
-    write_margin = parse_record(write_margin_record)
-    read_at = parse_record(read_at_record)
-    write_at = parse_record(write_at_record)
-
-    rows = []
-    metric_pass_counts = {
-        "read_snm": [0, 0],  # [pass, total]
-        "hold_snm": [0, 0],
-        "write_margin": [0, 0],
+    # Per-family working state, all keyed (and therefore ordered) by
+    # RECORD_CLAIMS: the per-corner measured value, its verdict, and the
+    # [verdicted, total] counter the Aggregate section reports. Bounded
+    # families (BOUNDED_FAMILIES) take the strictly-> 0 V threshold
+    # verdict; the two access-time families are record-only.
+    values: dict[str, dict[str, float | None]] = {
+        family: {
+            corner: vals.get(metric) if isinstance(vals, dict) else None
+            for corner, vals in parsed[family].items()
+        }
+        for family, (_records_rel, _claim, metric, _unit) in RECORD_CLAIMS.items()
     }
-    metric_recorded_counts = {
-        "read_access_time": [0, 0],
-        "write_access_time": [0, 0],
-    }
+    counts: dict[str, list[int]] = {family: [0, 0] for family in RECORD_CLAIMS}
     all_pass = True
 
+    rows = []
     for corner in CORNER_ORDER:
-        rs = read_snm.get(corner)
-        hs = hold_snm.get(corner)
-        wm = write_margin.get(corner)
-        rat = read_at.get(corner)
-        wat = write_at.get(corner)
+        corner_values = {
+            family: values[family].get(corner) for family in RECORD_CLAIMS
+        }
+        verdicts = {
+            family: (
+                verdict_threshold(corner_values[family])
+                if family in BOUNDED_FAMILIES
+                else verdict_recorded(corner_values[family])
+            )
+            for family in RECORD_CLAIMS
+        }
+        for family, verdict in verdicts.items():
+            counts[family][1] += 1
+            if verdict in ("PASS", "RECORDED"):
+                counts[family][0] += 1
 
-        rs_v = rs.get("read_snm_v") if isinstance(rs, dict) else None
-        hs_v = hs.get("hold_snm_v") if isinstance(hs, dict) else None
-        if isinstance(wm, dict) and "write_trip_voltage_v" in wm:
-            wm_v: float | None = wm["write_trip_voltage_v"]
-        else:
-            wm_v = None
-        rat_v = rat.get("read_access_time_s") if isinstance(rat, dict) else None
-        wat_v = wat.get("write_access_time_s") if isinstance(wat, dict) else None
-
-        rs_verdict = verdict_threshold(rs_v)
-        hs_verdict = verdict_threshold(hs_v)
-        wm_verdict = verdict_threshold(wm_v)
-        rat_verdict = verdict_recorded(rat_v)
-        wat_verdict = verdict_recorded(wat_v)
-
-        metric_pass_counts["read_snm"][1] += 1
-        metric_pass_counts["hold_snm"][1] += 1
-        metric_pass_counts["write_margin"][1] += 1
-        metric_recorded_counts["read_access_time"][1] += 1
-        metric_recorded_counts["write_access_time"][1] += 1
-        if rs_verdict == "PASS":
-            metric_pass_counts["read_snm"][0] += 1
-        if hs_verdict == "PASS":
-            metric_pass_counts["hold_snm"][0] += 1
-        if wm_verdict == "PASS":
-            metric_pass_counts["write_margin"][0] += 1
-        if rat_verdict == "RECORDED":
-            metric_recorded_counts["read_access_time"][0] += 1
-        if wat_verdict == "RECORDED":
-            metric_recorded_counts["write_access_time"][0] += 1
-
-        if rs_verdict != "PASS" or hs_verdict != "PASS" or wm_verdict != "PASS":
+        if any(
+            verdicts[family] != "PASS"
+            for family in RECORD_CLAIMS
+            if family in BOUNDED_FAMILIES
+        ):
             all_pass = False
 
-        row_overall = "PASS" if rs_verdict == hs_verdict == wm_verdict == "PASS" else "FAIL"
+        row_overall = (
+            "PASS"
+            if all(
+                verdicts[family] == "PASS"
+                for family in RECORD_CLAIMS
+                if family in BOUNDED_FAMILIES
+            )
+            else "FAIL"
+        )
 
         rows.append(
             {
                 "corner": corner,
-                "rs_v": rs_v,
-                "rs_verdict": rs_verdict,
-                "hs_v": hs_v,
-                "hs_verdict": hs_verdict,
-                "wm_v": wm_v,
-                "wm_verdict": wm_verdict,
-                "rat_v": rat_v,
-                "rat_verdict": rat_verdict,
-                "wat_v": wat_v,
-                "wat_verdict": wat_verdict,
+                "values": corner_values,
+                "verdicts": verdicts,
                 "row_overall": row_overall,
             }
         )
@@ -281,11 +288,14 @@ def main() -> int:
     lines.append("")
     lines.append("## Source records")
     lines.append("")
-    lines.append(f"- Read SNM: `{rel(read_snm_record)}`")
-    lines.append(f"- Hold SNM: `{rel(hold_snm_record)}`")
-    lines.append(f"- Write margin: `{rel(write_margin_record)}` (margin is `write_trip_voltage_v` (WTV) directly -- the minimum write-driver drive that still flips the cell)")
-    lines.append(f"- Read access time: `{rel(read_at_record)}`")
-    lines.append(f"- Write access time: `{rel(write_at_record)}`")
+    for family, label in FAMILY_LABELS.items():
+        entry = f"- {label}: `{rel(records[family])}`"
+        if family == "write-margin":
+            entry += (
+                " (margin is `write_trip_voltage_v` (WTV) directly -- the minimum"
+                " write-driver drive that still flips the cell)"
+            )
+        lines.append(entry)
     lines.append("")
     lines.append(
         "## Verdict rule (`spec/sram.md`, \"### Signoff definition\")"
@@ -334,40 +344,34 @@ def main() -> int:
     )
     lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
-        lines.append(
-            "| {corner} | {rs_v} | {rs_verdict} | {hs_v} | {hs_verdict} |"
-            " {wm_v} | {wm_verdict} | {rat_v} | {rat_verdict} | {wat_v} |"
-            " {wat_verdict} | {row_overall} |".format(
-                corner=r["corner"],
-                rs_v=fmt_v(r["rs_v"]) if r["rs_v"] is not None else "--",
-                rs_verdict=r["rs_verdict"],
-                hs_v=fmt_v(r["hs_v"]) if r["hs_v"] is not None else "--",
-                hs_verdict=r["hs_verdict"],
-                wm_v=fmt_v(r["wm_v"]) if r["wm_v"] is not None else "--",
-                wm_verdict=r["wm_verdict"],
-                rat_v=fmt_s(r["rat_v"]) if r["rat_v"] is not None else "--",
-                rat_verdict=r["rat_verdict"],
-                wat_v=fmt_s(r["wat_v"]) if r["wat_v"] is not None else "--",
-                wat_verdict=r["wat_verdict"],
-                row_overall=r["row_overall"],
-            )
-        )
+        cells = [r["corner"]]
+        for family, (_records_rel, _claim, _metric, unit) in RECORD_CLAIMS.items():
+            cells.append(fmt_value(r["values"][family], unit))
+            cells.append(r["verdicts"][family])
+        cells.append(r["row_overall"])
+        lines.append("| " + " | ".join(cells) + " |")
     lines.append("")
     lines.append("## Aggregate")
     lines.append("")
-    rs_pass, rs_total = metric_pass_counts["read_snm"]
-    hs_pass, hs_total = metric_pass_counts["hold_snm"]
-    wm_pass, wm_total = metric_pass_counts["write_margin"]
-    rat_rec, rat_total = metric_recorded_counts["read_access_time"]
-    wat_rec, wat_total = metric_recorded_counts["write_access_time"]
-    min_rs = min((r["rs_v"] for r in rows if r["rs_v"] is not None), default=None)
-    min_hs = min((r["hs_v"] for r in rows if r["hs_v"] is not None), default=None)
-    min_wm = min((r["wm_v"] for r in rows if r["wm_v"] is not None), default=None)
-    lines.append(f"- Read SNM: {rs_pass}/{rs_total} PASS (min {fmt_v(min_rs) if min_rs is not None else 'n/a'} V)")
-    lines.append(f"- Hold SNM: {hs_pass}/{hs_total} PASS (min {fmt_v(min_hs) if min_hs is not None else 'n/a'} V)")
-    lines.append(f"- Write margin: {wm_pass}/{wm_total} PASS (min {fmt_v(min_wm) if min_wm is not None else 'n/a'} V)")
-    lines.append(f"- Read access time: {rat_rec}/{rat_total} RECORDED")
-    lines.append(f"- Write access time: {wat_rec}/{wat_total} RECORDED")
+    for family, label in FAMILY_LABELS.items():
+        verdicted, total = counts[family]
+        if family in BOUNDED_FAMILIES:
+            unit = RECORD_CLAIMS[family][3]
+            fmt = fmt_v if unit == "V" else fmt_s
+            worst = min(
+                (
+                    r["values"][family]
+                    for r in rows
+                    if r["values"][family] is not None
+                ),
+                default=None,
+            )
+            lines.append(
+                f"- {label}: {verdicted}/{total} PASS"
+                f" (min {fmt(worst) if worst is not None else 'n/a'} {unit})"
+            )
+        else:
+            lines.append(f"- {label}: {verdicted}/{total} RECORDED")
     lines.append("")
     overall = "PASS" if all_pass else "FAIL"
     lines.append(
@@ -391,7 +395,12 @@ def main() -> int:
     )
     lines.append("")
 
-    sys.stdout.write("\n".join(lines) + "\n")
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    repo_root = Path(sys.argv[1]) if len(sys.argv) > 1 else default_repo_root()
+    sys.stdout.write(render(repo_root))
     return 0
 
 

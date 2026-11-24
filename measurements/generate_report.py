@@ -37,7 +37,6 @@ directly, so a human can spot staleness without running anything.
 from __future__ import annotations
 
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -55,6 +54,20 @@ MC_MEASUREMENTS = [
     ("hold-snm", "hold SNM", "Hold SNM"),
     ("write-margin", "write margin", "Write margin"),
 ]
+
+# Display labels for the worst-case table rows, keyed by
+# render_signoff_table.RECORD_CLAIMS family (#479): the (records dir,
+# Claim substring, metric key, unit) bindings and which rows take a
+# threshold verdict all come from that single owner, so this report and
+# sim/signoff-summary.md can never disagree about which record is "latest"
+# or which metric a row reads.
+WORST_CASE_ROWS = {
+    "read-snm": "Read SNM",
+    "hold-snm": "Hold SNM",
+    "write-margin": "Write margin (WTV)",
+    "read-access": "Read access time (slowest)",
+    "write-access": "Write access time (slowest)",
+}
 
 FIELD_RE = re.compile(r"^-\s+\*\*(.+?)\*\*:\s*(.*)$")
 
@@ -102,31 +115,13 @@ def worst_case_rows() -> list[dict]:
     sim/ record it was read from -- the per-number citation acceptance
     criterion #2 asks for, at the granularity that matters (the extreme
     value is what a reviewer checks first)."""
-    read_snm_record = signoff.latest_record_for_claim(
-        REPO_ROOT / "sim/read-snm/records", "read SNM"
-    )
-    hold_snm_record = signoff.latest_record_for_claim(
-        REPO_ROOT / "sim/hold-snm/records", "hold SNM"
-    )
-    write_margin_record = signoff.latest_record_for_claim(
-        REPO_ROOT / "sim/write-margin/records", "write margin"
-    )
-    read_at_record = signoff.latest_record_for_claim(
-        REPO_ROOT / "sim/access-time/records", "read access time"
-    )
-    write_at_record = signoff.latest_record_for_claim(
-        REPO_ROOT / "sim/access-time/records", "write access time"
-    )
-
-    read_snm = signoff.parse_record(read_snm_record)
-    hold_snm = signoff.parse_record(hold_snm_record)
-    write_margin = signoff.parse_record(write_margin_record)
-    read_at = signoff.parse_record(read_at_record)
-    write_at = signoff.parse_record(write_at_record)
-
-    def extreme(
-        parsed: dict, key: str, record: Path, unit: str, pick_min: bool, verdict_fn
-    ) -> dict:
+    rows = []
+    for family, (records_rel, claim, key, unit) in signoff.RECORD_CLAIMS.items():
+        record = signoff.latest_record_for_claim(REPO_ROOT / "sim" / records_rel, claim)
+        parsed = signoff.parse_record(record)
+        # A bounded row's worst case is its minimum; a record-only row's
+        # binding case is the slowest (maximum) access time.
+        bounded = family in signoff.BOUNDED_FAMILIES
         best_corner = None
         best_val = None
         for corner in signoff.CORNER_ORDER:
@@ -134,64 +129,23 @@ def worst_case_rows() -> list[dict]:
             if not isinstance(entry, dict) or key not in entry:
                 continue
             val = entry[key]
-            if best_val is None or (val < best_val if pick_min else val > best_val):
+            if best_val is None or (val < best_val if bounded else val > best_val):
                 best_val, best_corner = val, corner
         fmt = signoff.fmt_v if unit == "V" else signoff.fmt_s
-        return {
-            "value": fmt(best_val) if best_val is not None else "--",
-            "unit": unit,
-            "corner": best_corner or "--",
-            "verdict": verdict_fn(best_val),
-            "record": record,
-        }
-
-    return [
-        {
-            "measurement": "Read SNM",
-            **extreme(
-                read_snm, "read_snm_v", read_snm_record, "V", True, signoff.verdict_threshold
-            ),
-        },
-        {
-            "measurement": "Hold SNM",
-            **extreme(
-                hold_snm, "hold_snm_v", hold_snm_record, "V", True, signoff.verdict_threshold
-            ),
-        },
-        {
-            "measurement": "Write margin (WTV)",
-            **extreme(
-                write_margin,
-                "write_trip_voltage_v",
-                write_margin_record,
-                "V",
-                True,
-                signoff.verdict_threshold,
-            ),
-        },
-        {
-            "measurement": "Read access time (slowest)",
-            **extreme(
-                read_at,
-                "read_access_time_s",
-                read_at_record,
-                "s",
-                False,
-                signoff.verdict_recorded,
-            ),
-        },
-        {
-            "measurement": "Write access time (slowest)",
-            **extreme(
-                write_at,
-                "write_access_time_s",
-                write_at_record,
-                "s",
-                False,
-                signoff.verdict_recorded,
-            ),
-        },
-    ]
+        verdict_fn = (
+            signoff.verdict_threshold if bounded else signoff.verdict_recorded
+        )
+        rows.append(
+            {
+                "measurement": WORST_CASE_ROWS[family],
+                "value": fmt(best_val) if best_val is not None else "--",
+                "unit": unit,
+                "corner": best_corner or "--",
+                "verdict": verdict_fn(best_val),
+                "record": record,
+            }
+        )
+    return rows
 
 
 def parse_md_table(text: str, heading_prefix: str) -> list[list[str]]:
@@ -279,17 +233,11 @@ def embed_mc_record(slug: str, claim_substring: str) -> str:
 
 
 def render_signoff_embed() -> str:
-    """Run sim/lib/render_signoff_table.py fresh and embed its output
-    verbatim (headers demoted by one level) -- the exact same generator
-    sim/signoff-summary.md is regenerated from, so the two can never
-    silently disagree about the 27-corner data."""
-    result = subprocess.run(
-        [sys.executable, str(SIM_LIB / "render_signoff_table.py"), str(REPO_ROOT)],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    lines = result.stdout.splitlines()
+    """Render sim/lib/render_signoff_table.py's output fresh, in-process,
+    and embed it verbatim (headers demoted by one level) -- the exact same
+    generator sim/signoff-summary.md is regenerated from, so the two can
+    never silently disagree about the 27-corner data."""
+    lines = signoff.render(REPO_ROOT).splitlines()
     demoted = []
     for line in lines:
         if line.startswith("# "):
