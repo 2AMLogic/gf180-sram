@@ -211,10 +211,11 @@ why the pitch is not 0.62 or 0.60.
 `periphery/row/generate.py` draws `design/netlist/row_path.spice` as one flat
 cell `row_path`: two 3->8 predecoders (8 x `and4` for `wl_en` and the high
 address bits, 8 x `and3` for the low bits) and 64 `rowdrv` wordline drivers --
-528 devices (264 nfet + 264 pfet), 53.59 x 397.33 um. It reuses the column
-path's netlist reader, strip placer and maze router unchanged (it imports
-`periphery/column/generate.py`; only the slice-width globals are set per build),
-so the 0.65 um grid argument above applies here too.
+528 devices (264 nfet + 264 pfet), 53.59 x 397.33 um. It draws with the same
+engine as the column path -- netlist reader, strip placer and maze router (both
+import the shared `periphery/engine.py`, #505, passing their own grid width as
+the engine's `ncols` argument) -- so the 0.65 um grid argument above applies
+here too.
 
 **Scope.** The decoder strip only, for the center-fed 4:1 organization
 (`spec/wordline-rc-decision.md`, ratified by the operator's ruling on #228).
@@ -268,10 +269,10 @@ placement.
 `periphery/control/generate.py` draws `design/netlist/sram_ctrl.spice` and
 `design/netlist/col_decode.spice` as two separate flat cells (the macro top
 instantiates them as `XXctrl` / `XXcol`; assembly, #247, places them separately).
-Same flow as the row path -- the column path's netlist reader, strip placer and
-maze router, plus the row generator's per-strip rail / implant / strap helpers.
-The one change to shared code is in `periphery/column/generate.py`: poly width
-now follows each device's own `L`, so the `L = 0.6 um` delay inverter can be
+Same flow as the row path -- the shared engine's (`periphery/engine.py`,
+#505) netlist reader, strip placer and maze router, plus its per-strip rail /
+implant / strap helpers, each block passing its own grid width. Poly width
+follows each device's own `L`, so the `L = 0.6 um` delay inverter can be
 drawn (the existing GDS are byte-for-byte unchanged).
 
 | cell | devices | nets | pins | size (um) |

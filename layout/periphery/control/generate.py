@@ -10,20 +10,22 @@ assembly (#247) places them separately.
 
 ## How they are drawn
 
-This reuses ``layout/periphery/column/generate.py`` unchanged apart from one
-generalisation (poly width follows the device's own ``L``, so the ``L = 0.6 um``
-delay inverter can be drawn) -- its netlist reader, strip placer
-(``layout_strip``) and maze router -- the way ``layout/periphery/row/generate.py``
-does, and borrows that file's per-strip rail / implant / strap helpers. Device
-sizes and connectivity come from the netlists; the only hand-made placement
-input is :func:`cell_chains` (which devices share diffusion, in what order) and
-the strip tables in :data:`SRAM_CTRL_STRIPS` / :data:`COL_DECODE_STRIPS`.
+This draws with the shared periphery engine (``layout/periphery/engine.py``,
+#505 extracted it from the column generator, poly width following each
+device's own ``L`` so the ``L = 0.6 um`` delay inverter can be drawn) -- its
+netlist reader, strip placer (``layout_strip``) and maze router, plus its
+per-strip rail / implant / strap helpers -- the way
+``layout/periphery/row/generate.py`` does, passing each block's own grid width
+as the engine's ``ncols`` argument. Device sizes and connectivity come from the
+netlists; the only hand-made placement input is :func:`cell_chains` (which
+devices share diffusion, in what order) and the strip tables in
+:data:`SRAM_CTRL_STRIPS` / :data:`COL_DECODE_STRIPS`.
 
 New cell kinds relative to the row / column paths:
 
 * ``dff`` -- ``tg_s`` + ``inv`` based master/slave flop. Its devices flatten to
   the primitive transistors the placer already handles; the chain table is the
-  column path's :func:`dff_chains`, shifted to the cell's first column.
+  engine's :func:`dff_chains`, shifted to the cell's first column.
 * ``inv_dly`` -- ``L = 0.6 um`` inverter. Two consecutive delay stages share
   their supply diffusion (``y1 | g | VDD | g | y2``), so a chain of ``n`` stages
   is ``ceil(n / 2)`` five-column cells.
@@ -71,12 +73,31 @@ import klayout.db as kdb
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
 
-from layout.common import load_module, save_options  # noqa: E402
+from layout.common import save_options  # noqa: E402
+from layout.periphery.engine import (  # noqa: E402
+    HWIRE,
+    L_METAL2,
+    L_METAL2_LBL,
+    M1_WIDE_SPACE,
+    M2,
+    NETLIST_DIR,
+    X,
+    Y,
+    Ctx,
+    Plan,
+    Strip,
+    add_bottom_pin,
+    add_strap,
+    dff_chains,
+    draw_plan,
+    emit_routes,
+    flatten,
+    layout_cells,
+    parse_spice,
+    route,
+    to_cell,
+)
 
-row = load_module("_sram_row_generate", "layout/periphery/row/generate.py")
-col = row.col  # the row generator's instance: module globals (NCOLS) must be shared
-
-G = col.G
 C0 = 3  # first chain column (columns 0 / 1 carry the VSS / VDD straps)
 GAP = 1  # empty columns between cells of one strip
 STRIP_SEP = 5  # rows between one strip's top rail and the next strip's bottom rail
@@ -86,7 +107,7 @@ EDGE_ROWS = 3  # rows of clear space between the outermost rail and a pin edge
 
 
 def netlist(block: str) -> str:
-    return os.path.join(col.NETLIST_DIR, f"{block}.spice")
+    return os.path.join(NETLIST_DIR, f"{block}.spice")
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +184,7 @@ def cell_chains(kind: str, insts: list) -> tuple:
         return 7, {"P": [(0, [f"{i}.MP0@VDD", f"{i}.MP1", f"{i}.MPO"])],
                    "N": [(0, [f"{i}.MN0", f"{i}.MN1", f"{i}.MNO"])]}
     if kind == "dff":
-        return 26, col.dff_chains(i)
+        return 26, dff_chains(i)
     raise KeyError(kind)
 
 
@@ -178,47 +199,44 @@ def make_strip(name: str, items: list, chan: int, ncols: int):
         c0 += width + GAP
     c_end = c0 - GAP - 1
     assert c_end <= ncols - 2, f"strip {name} is {c_end + 1} columns wide (cell has {ncols})"
-    return col.Strip(name, "N", chains, chan=chan), c_end
+    return Strip(name, "N", chains, chan=chan), c_end
 
 
 def add_top_pin(ctx, net: str, c: int, j: int, y_top: float) -> None:
-    x = col.X(c)
-    rect = (x - col.HWIRE, col.Y(j) - col.HWIRE, x + col.HWIRE, y_top)
-    ctx.box(col.L_METAL2, *rect)
-    ctx.router.add_obstacle(col.M2, rect, net, col.M1_WIDE_SPACE)
-    ctx.term(net, [(col.M2, c, j)])
-    ctx.labels.append((col.L_METAL2_LBL, net, x, 0.5 * (col.Y(j) + y_top)))
+    x = X(c)
+    rect = (x - HWIRE, Y(j) - HWIRE, x + HWIRE, y_top)
+    ctx.box(L_METAL2, *rect)
+    ctx.router.add_obstacle(M2, rect, net, M1_WIDE_SPACE)
+    ctx.term(net, [(M2, c, j)])
+    ctx.labels.append((L_METAL2_LBL, net, x, 0.5 * (Y(j) + y_top)))
 
 
 def build(block: str, bump: int = 0):
     cfg = BLOCKS[block]
     ncols = cfg["ncols"]
-    subs = col.parse_spice(netlist(block))
-    devmap = {d.name: d for d in col.flatten(subs, block)}
+    subs = parse_spice(netlist(block))
+    devmap = {d.name: d for d in flatten(subs, block)}
 
-    col.NCOLS = ncols
-    col.SLICE_W = round(col.X(ncols - 1) + col.X0, 3)
-    ctx = col.Ctx(row_lo=1, row_hi=10_000)
-    ctx.router = row.FastRouter(1, 10_000)
-    plan = row.Plan()
+    ctx = Ctx(row_lo=1, row_hi=10_000, ncols=ncols)
+    plan = Plan()
 
     jrb = 6  # rows 0..5 under the first rail carry the bottom pin stubs
     for name, items in cfg["strips"]:
         strip, c_end = make_strip(name, items, chan_for(block, name, bump), ncols)
-        jrt, _ = row.layout_cells(ctx, plan, devmap, strip, jrb, c_vss=0, c_vdd=1, c_end=c_end)
+        jrt, _ = layout_cells(ctx, plan, devmap, strip, jrb, c_vss=0, c_vdd=1, c_end=c_end)
         jrb = jrt + STRIP_SEP
     top_row = jrt + EDGE_ROWS + 3
     ctx.router.rhi = top_row
-    row.draw_plan(ctx, plan)
+    draw_plan(ctx, plan)
 
     vss = [j for (j, net, c0, c1) in plan.rails if net == "VSS"]
     vdd = [j for (j, net, c0, c1) in plan.rails if net == "VDD"]
-    row.add_strap(ctx, "VSS", 0, vss, min(vss), max(vss))
-    row.add_strap(ctx, "VDD", 1, vdd, min(vdd), max(vdd))
+    add_strap(ctx, "VSS", 0, vss, min(vss), max(vss))
+    add_strap(ctx, "VDD", 1, vdd, min(vdd), max(vdd))
 
     for i, net in enumerate(cfg["pins"]["bottom"]):
-        col.add_bottom_pin(ctx, net, PIN_C0 + cfg["bottom_stride"] * i, jend=2)
-    y_top = col.Y(top_row) + col.HWIRE
+        add_bottom_pin(ctx, net, PIN_C0 + cfg["bottom_stride"] * i, jend=2)
+    y_top = Y(top_row) + HWIRE
     for i, net in enumerate(cfg["pins"]["top"]):
         add_top_pin(ctx, net, PIN_C0 + cfg["top_stride"] * i, top_row - 1, y_top)
     return ctx
@@ -229,13 +247,13 @@ def build_cell(layout: kdb.Layout, block: str, max_bump: int = 4):
     for bump in range(max_bump + 1):
         ctx = build(block, bump)
         try:
-            col.route(ctx, block)
+            route(ctx, block)
         except RuntimeError as exc:
             last = exc
             print(f"  {block}: chan_bump={bump}: {exc}", file=sys.stderr)
             continue
-        col.emit_routes(ctx)
-        return col.to_cell(layout, block, ctx), bump
+        emit_routes(ctx)
+        return to_cell(layout, block, ctx), bump
     raise last
 
 

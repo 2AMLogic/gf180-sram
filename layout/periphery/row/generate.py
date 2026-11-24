@@ -15,20 +15,21 @@ here claims the strip fits the array or validates a timing number.
 
 ## How it is drawn
 
-This reuses ``layout/periphery/column/generate.py`` unchanged -- its netlist
-reader, device/strip placer (``layout_strip``) and maze router -- because the
-decoder is the same kind of problem (single-finger devices, ``L = 0.28 um``,
-chains of shared diffusion between two supply rails). Only what that file
-hard-wires to one 17.84 um slice (grid width, rail extent, wells) is
-parameterised here: the module globals it reads (``NCOLS``, ``X0``, ``SLICE_W``)
-are set before each build, and rails, implants and wells are drawn per cell
+This draws with the shared periphery engine (``layout/periphery/engine.py``,
+#505 extracted it from the column generator) -- its netlist reader,
+device/strip placer (``layout_strip``) and maze router -- because the decoder
+is the same kind of problem (single-finger devices, ``L = 0.28 um``, chains of
+shared diffusion between two supply rails). Only what that engine hard-wires
+to one 17.84 um slice is parameterised here: the grid width is passed as the
+engine's ``ncols`` argument, and rails, implants and wells are drawn per cell
 rather than full-width.
 
 * Device sizes and connectivity come from ``row_path.spice``; the chain tables
   below (``rowdrv``: ``VDD-MP0-nb-MP1-VDD-MPO-y``, ...) are the only hand-made
   placement input.
 * The router keeps nets on distinct nodes of the same 0.65 um grid as the column
-  path (see that file's "Grid"), so spacing rules hold by construction.
+  path (see the column generator's "Grid"), so spacing rules hold by
+  construction.
 
 ## Does ``rowdrv`` fit the 5.40 um row pitch?  No -- and the placement says so
 
@@ -63,7 +64,6 @@ byte-for-byte.
 from __future__ import annotations
 
 import argparse
-import bisect
 import os
 import sys
 
@@ -73,18 +73,45 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
 
 from layout.common import load_module, save_options  # noqa: E402
+from layout.periphery.engine import (  # noqa: E402
+    G,
+    HWIRE,
+    HVIA,
+    L_METAL2,
+    L_METAL3,
+    L_METAL3_LBL,
+    L_VIA2,
+    M1_WIDE_SPACE,
+    M2,
+    M3,
+    NETLIST_DIR,
+    X,
+    X0,
+    Y,
+    Ctx,
+    Plan,
+    Strip,
+    add_bottom_pin,
+    add_strap,
+    bitcell,
+    draw_plan,
+    emit_routes,
+    flatten,
+    layout_cells,
+    layout_strip,
+    parse_spice,
+    route,
+    to_cell,
+)
 
-col = load_module("_sram_column_generate", "layout/periphery/column/generate.py")
 array = load_module("_sram_array_generate", "layout/sram_256x32/generate.py")
-bitcell = col.bitcell
 
 TOP_CELL = "row_path"
-NETLIST = os.path.join(col.NETLIST_DIR, "row_path.spice")
+NETLIST = os.path.join(NETLIST_DIR, "row_path.spice")
 
 # ---------------------------------------------------------------------------
 # Floorplan (grid columns of the column path's G = 0.65 um grid)
 # ---------------------------------------------------------------------------
-G = col.G
 H_CELL = bitcell.H_CELL  # 5.40: row pitch, from the array itself
 WL_Y = 0.5 * (bitcell.Y_WL_BOT + bitcell.Y_WL_TOP)  # wordline height inside a row
 NROWS = 64
@@ -95,10 +122,7 @@ N_TRUNK = 16  # ph0..7, pl0..7 -- one copy per driver column
 BLOCK_W = N_TRUNK + 2 + 1 + 7 + 1  # trunks, VSS+VDD straps, gap, rowdrv, gap
 NCOLS = NSTAG * BLOCK_W
 CELL_W = 7  # rowdrv: columns c0 .. c0+6
-X0 = col.X0
-STRIP_W = round(col.X(NCOLS - 1) + X0, 3)
-EDGE = 0.4  # rail / implant overhang past the outermost column
-WELL_EDGE = 0.55
+STRIP_W = round(X(NCOLS - 1) + X0, 3)
 
 # Predecoder strips: (cell kind, output net) per cell, left to right.
 PRED_STRIPS = [
@@ -111,47 +135,6 @@ WIDTH = {"and4": 11, "and3": 9}
 
 ADDR_PINS = ["aq2", "aq3", "aq4", "aq5", "aq6", "aq7",
              "aqb2", "aqb3", "aqb4", "aqb5", "aqb6", "aqb7", "wl_en"]
-
-
-def Y(j):
-    return col.Y(j)
-
-
-def X(c):
-    return col.X(c)
-
-
-# ---------------------------------------------------------------------------
-# Router with a cheap A* bound (the column router's bound scans every target
-# node, which is quadratic once a net owns a 500-node trunk)
-# ---------------------------------------------------------------------------
-class FastRouter(col.Router):
-    def _heuristic(self, targets):
-        bycol: dict[int, list[int]] = {}
-        for (_, c, r) in targets:
-            bycol.setdefault(c, []).append(r)
-        for rows in bycol.values():
-            rows.sort()
-        cols = sorted(bycol)
-
-        def h(node):
-            _, c, r = node
-            best = 1 << 30
-            for tc in cols:
-                dc = abs(c - tc)
-                if dc >= best:
-                    continue
-                rows = bycol[tc]
-                i = bisect.bisect_left(rows, r)
-                dr = 1 << 30
-                if i < len(rows):
-                    dr = rows[i] - r
-                if i > 0:
-                    dr = min(dr, r - rows[i - 1])
-                best = min(best, dc + dr)
-            return best
-
-        return h
 
 
 # ---------------------------------------------------------------------------
@@ -175,102 +158,30 @@ def chains_for(kind: str, inst: str, out: str):
             [f"{inst}.MNO@{out}"] + [f"{inst}.MN{i}" for i in (2, 1, 0)])
 
 
-class Plan:
-    """Everything drawn per strip that is not a device: rails, implants, wells."""
-
-    def __init__(self):
-        self.rails: list = []  # (row, net, c_from, c_to)
-        self.rows: list = []  # (kind, side, ymin, ymax, rail_y, xl, xr)
-        self.vss_rows: dict[int, list[int]] = {}  # strap column -> rail rows
-        self.vdd_rows: dict[int, list[int]] = {}
-
-
-def layout_cells(ctx, plan: Plan, devmap, strip, jrb, c_vss, c_vdd, c_end):
-    """Run the column path's ``layout_strip`` for one strip and record the
-    per-strip rails / implant extents (its own ``ctx.rails`` / ``ctx.rows`` are
-    keyed by row alone, so they are taken out after each strip)."""
-    ctx.rails, ctx.rows = {}, []
-    jrt, info = col.layout_strip(ctx, strip, devmap, jrb)
-    xl = X(min(c_vss, c_vdd)) - WELL_EDGE
-    xr = X(c_end) + X0
-    for j, net in ctx.rails.items():
-        plan.rails.append((j, net, c_vss if net == "VSS" else c_vdd, c_end))
-        (plan.vss_rows if net == "VSS" else plan.vdd_rows).setdefault(
-            c_vss if net == "VSS" else c_vdd, []).append(j)
-    for (kind, side, ymin, ymax, rail_y) in ctx.rows:
-        plan.rows.append((kind, side, ymin, ymax, rail_y, xl, xr))
-    return jrt, info
-
-
-def draw_plan(ctx, plan: Plan) -> None:
-    for (j, net, c0, c1) in plan.rails:
-        y = Y(j)
-        x0, x1 = X(c0) - EDGE, X(c1) + EDGE
-        ctx.metal1((x0, y - 0.5 * col.RAIL_H, x1, y + 0.5 * col.RAIL_H), net, col.M1_WIDE_SPACE)
-        ctx.box(col.L_COMP, X(c0) - col.COMP_HALF, y - 0.19, X(c1) + col.COMP_HALF, y + 0.19)
-        for c in range(c0 + 1, c1 + 1, 2):
-            ctx.box(col.L_CONTACT, X(c) - col.HCO, y - col.HCO, X(c) + col.HCO, y + col.HCO)
-            ctx.router.noviablock.add((c, j))
-        ctx.router.noviablock.add((c0, j))
-        if net == "VSS":
-            ctx.box(col.L_PPLUS, x0, y - 0.19 - col.IMP_ENC_COMP, x1, y + 0.19 + col.IMP_ENC_COMP)
-        else:
-            ctx.box(col.L_NPLUS, x0, y - 0.19 - col.IMP_ENC_COMP, x1, y + 0.19 + col.IMP_ENC_COMP)
-            ctx.box(col.L_NWELL, x0 - 0.05, y - 0.19 - col.NW_ENC_NCOMP, x1 + 0.05,
-                    y + 0.19 + col.NW_ENC_NCOMP)
-    for (kind, side, ymin, ymax, rail_y, xl, xr) in plan.rows:
-        lp = col.L_NPLUS if kind == "N" else col.L_PPLUS
-        ctx.box(lp, xl, ymin - col.IMP_ENC_GATE, xr, ymax + col.IMP_ENC_GATE)
-        if kind == "P":
-            y0 = ymin - col.NW_ENC_PCOMP
-            y1 = ymax + col.NW_ENC_PCOMP
-            if side == "A":
-                y0 = min(y0, rail_y - 0.19 - col.NW_ENC_NCOMP)
-            else:
-                y1 = max(y1, rail_y + 0.19 + col.NW_ENC_NCOMP)
-            ctx.box(col.L_NWELL, xl, y0, xr, y1)
-
-
-def add_strap(ctx, net: str, c: int, rows: list[int], j_lo: int, j_hi: int) -> None:
-    """Vertical Metal2 strap on grid column ``c`` from row ``j_lo`` to ``j_hi``
-    with a Via1 on every rail row in ``rows``."""
-    x = X(c)
-    rect = (x - col.HWIRE, Y(j_lo) - col.HWIRE, x + col.HWIRE, Y(j_hi) + col.HWIRE)
-    ctx.box(col.L_METAL2, *rect)
-    ctx.router.add_obstacle(col.M2, rect, net, col.M1_WIDE_SPACE)
-    for j in rows:
-        ctx.box(col.L_VIA1, x - col.HVIA, Y(j) - col.HVIA, x + col.HVIA, Y(j) + col.HVIA)
-        ctx.router.noviablock.add((c, j))
-    ctx.labels.append((col.L_METAL2_LBL, net, x, Y(j_lo) + 0.5 * col.RAIL_H))
-
-
 def add_jumper(ctx, net: str, j: int, straps: list[int]) -> None:
     """Horizontal Metal3 line on row ``j`` joined by Via2 to the Metal2 straps
     at grid columns ``straps``."""
     y = Y(j)
-    rect = (X(min(straps)) - col.HWIRE, y - col.HWIRE, X(max(straps)) + col.HWIRE, y + col.HWIRE)
-    ctx.box(col.L_METAL3, *rect)
-    ctx.router.add_obstacle(col.M3, rect, net, col.M1_WIDE_SPACE)
+    rect = (X(min(straps)) - HWIRE, y - HWIRE, X(max(straps)) + HWIRE, y + HWIRE)
+    ctx.box(L_METAL3, *rect)
+    ctx.router.add_obstacle(M3, rect, net, M1_WIDE_SPACE)
     for c in straps:
-        ctx.box(col.L_VIA2, X(c) - col.HVIA, y - col.HVIA, X(c) + col.HVIA, y + col.HVIA)
+        ctx.box(L_VIA2, X(c) - HVIA, y - HVIA, X(c) + HVIA, y + HVIA)
 
 
 def add_trunk(ctx, net: str, c: int, j_lo: int, j_hi: int) -> None:
     x = X(c)
-    rect = (x - col.HWIRE, Y(j_lo) - col.HWIRE, x + col.HWIRE, Y(j_hi) + col.HWIRE)
-    ctx.box(col.L_METAL2, *rect)
-    ctx.router.add_obstacle(col.M2, rect, net, col.M1_WIDE_SPACE)
-    ctx.term(net, [(col.M2, c, j) for j in range(j_lo, j_hi + 1)])
+    rect = (x - HWIRE, Y(j_lo) - HWIRE, x + HWIRE, Y(j_hi) + HWIRE)
+    ctx.box(L_METAL2, *rect)
+    ctx.router.add_obstacle(M2, rect, net, M1_WIDE_SPACE)
+    ctx.term(net, [(M2, c, j) for j in range(j_lo, j_hi + 1)])
 
 
 def build():
-    subs = col.parse_spice(NETLIST)
-    devmap = {d.name: d for d in col.flatten(subs, TOP_CELL)}
+    subs = parse_spice(NETLIST)
+    devmap = {d.name: d for d in flatten(subs, TOP_CELL)}
 
-    col.NCOLS = NCOLS
-    col.SLICE_W = STRIP_W
-    ctx = col.Ctx(row_lo=1, row_hi=10_000)
-    ctx.router = FastRouter(1, 10_000)
+    ctx = Ctx(row_lo=1, row_hi=10_000, ncols=NCOLS)
     plan = Plan()
 
     # ---- predecoders (three stacked strips, each with its own rail pair) ----
@@ -286,7 +197,7 @@ def build():
             chains["N"].append((c0, n))
             c0 += WIDTH[kind] + 1
         assert c0 - 1 <= NCOLS - 1, f"predecoder strip {si} is {c0} columns wide"
-        jrt, _ = layout_cells(ctx, plan, devmap, col.Strip(f"pred{si}", "N", chains, chan=CHAN),
+        jrt, _ = layout_cells(ctx, plan, devmap, Strip(f"pred{si}", "N", chains, chan=CHAN),
                               jrb, c_vss=0, c_vdd=1, c_end=c0 - 2)
         pred_rows.append((jrb, jrt))
         jrb = jrt + 5
@@ -312,15 +223,15 @@ def build():
         rk = int(round(yk / G))
         p, n = chains_for("rowdrv", f"Xrow{k}", f"wl{k}")
         if drv_off is None:
-            probe = col.Ctx(1, 10_000)
-            _jrt, _ = col.layout_strip(probe, col.Strip("p", "N", {"P": [(0, p)], "N": [(0, n)]},
-                                                       chan=CHAN), devmap, 1)
+            probe = Ctx(1, 10_000, NCOLS)
+            _jrt, _ = layout_strip(probe, Strip("p", "N", {"P": [(0, p)], "N": [(0, n)]},
+                                                chan=CHAN), devmap, 1)
             drv_off = (_jrt - 1) // 2 + 1
             drv_height = round(Y(_jrt) - Y(1), 3)
         jb = rk - drv_off
         jrt, _ = layout_cells(
             ctx, plan, devmap,
-            col.Strip(f"drv{k}", "N", {"P": [(c0, p)], "N": [(c0, n)]}, chan=CHAN),
+            Strip(f"drv{k}", "N", {"P": [(c0, p)], "N": [(c0, n)]}, chan=CHAN),
             jb, c_vss=cb + N_TRUNK, c_vdd=cb + N_TRUNK + 1, c_end=c0 + CELL_W - 1)
         block_rows[b].append((jb, jrt))
         tracks.append((k, rk, b))
@@ -353,35 +264,35 @@ def build():
             add_trunk(ctx, net, cb + i, j_trunk0, top_row - 1)
 
     # ---- wordline tracks + edge pins --------------------------------------------
-    pin_w = max(array.WL_PAD_BAND, 4 * col.HWIRE)
+    pin_w = max(array.WL_PAD_BAND, 4 * HWIRE)
     for (k, rk, b) in tracks:
         y = Y(rk)
         yk = y_arr0 + k * H_CELL + WL_Y
-        assert abs(y - yk) < 2 * col.HWIRE - 0.02, (k, y, yk)
+        assert abs(y - yk) < 2 * HWIRE - 0.02, (k, y, yk)
         net = f"wl{k}"
-        rect = (0.0, y - col.HWIRE, STRIP_W, y + col.HWIRE)
-        ctx.box(col.L_METAL3, *rect)
-        ctx.box(col.L_METAL3, 0.0, yk - col.HWIRE, pin_w, yk + col.HWIRE)
-        ctx.box(col.L_METAL3, STRIP_W - pin_w, yk - col.HWIRE, STRIP_W, yk + col.HWIRE)
-        ctx.router.add_obstacle(col.M3, rect, net, col.M1_WIDE_SPACE)
+        rect = (0.0, y - HWIRE, STRIP_W, y + HWIRE)
+        ctx.box(L_METAL3, *rect)
+        ctx.box(L_METAL3, 0.0, yk - HWIRE, pin_w, yk + HWIRE)
+        ctx.box(L_METAL3, STRIP_W - pin_w, yk - HWIRE, STRIP_W, yk + HWIRE)
+        ctx.router.add_obstacle(M3, rect, net, M1_WIDE_SPACE)
         c0 = b * BLOCK_W + N_TRUNK + 3
-        ctx.term(net, [(col.M3, c, rk) for c in range(c0, c0 + CELL_W)])
+        ctx.term(net, [(M3, c, rk) for c in range(c0, c0 + CELL_W)])
         for x in (0.5 * pin_w, STRIP_W - 0.5 * pin_w):
-            ctx.labels.append((col.L_METAL3_LBL, net, x, yk))
+            ctx.labels.append((L_METAL3_LBL, net, x, yk))
 
     # ---- address pins: Metal2 stubs on the bottom edge ----------------------------
     pin_cols = [4 + 6 * i for i in range(len(ADDR_PINS))]
     for net, c in zip(ADDR_PINS, pin_cols):
-        col.add_bottom_pin(ctx, net, c, jend=2)
+        add_bottom_pin(ctx, net, c, jend=2)
     return ctx, dict(drv_height=drv_height, y_arr0=y_arr0, top_row=top_row, pred_rows=pred_rows, j_trunk0=j_trunk0,
                      block_rows=block_rows)
 
 
 def build_cell(layout: kdb.Layout):
     ctx, info = build()
-    col.route(ctx, TOP_CELL)
-    col.emit_routes(ctx)
-    return col.to_cell(layout, TOP_CELL, ctx), info
+    route(ctx, TOP_CELL)
+    emit_routes(ctx)
+    return to_cell(layout, TOP_CELL, ctx), info
 
 
 def main() -> None:
