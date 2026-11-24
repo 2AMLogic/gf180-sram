@@ -44,7 +44,10 @@ name: CI
 #   repo hygiene               -- scripts/ci/check-repo-hygiene.sh: the
 #                                 tracked-tree gate (size cap, binary
 #                                 allowlist, venv shape) plus per-rule
-#                                 fixture self-tests.
+#                                 fixture self-tests, plus the
+#                                 layout/reports/generate.sh flag-dispatch
+#                                 contract tests under stubbed tools
+#                                 (issue #504).
 #
 # The evidence-format check runs in `evidence-format` ONLY, so it is visible
 # as its own named status check. It is deliberately NOT also invoked from
@@ -204,3 +207,11 @@ jobs:
 
       - name: Gate self-tests (per-rule fixture repos)
         run: ./scripts/ci/tests/test-check-repo-hygiene.sh
+
+      # The dispatch contract of the report generator, with every tool
+      # (klt/uv/uvx/python3) stubbed: pure bash, no PDK, seconds. Guards
+      # the "an empty argument must not start a full regeneration"
+      # invariant PR #502 had to add, and the rest of its flag table
+      # (issue #504).
+      - name: Report-generator dispatch contract tests (stubbed tools)
+        run: ./scripts/ci/tests/test-generate-dispatch.sh
