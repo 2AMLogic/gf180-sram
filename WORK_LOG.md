@@ -8,6 +8,11 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-24
+
+- **PR #480**: refactor: consolidate layer registration and Via2/Metal3 constants into layout/common.py
+- **Issue #475** (closed): Consolidate layer registration + Metal3/Via2 constants into layout/common.py (follow-up to #330)
+
 ### 2026-11-23
 
 - **PR #472**: layout: consolidate duplicated generator helpers into layout/common.py
