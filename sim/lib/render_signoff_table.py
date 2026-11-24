@@ -88,8 +88,12 @@ RECORD_CLAIMS = {
 # verdict.
 BOUNDED_FAMILIES = frozenset({"read-snm", "hold-snm", "write-margin"})
 
-# Display labels for the per-family lines render() emits (Source records
-# and Aggregate sections), keyed by RECORD_CLAIMS family.
+# Display labels for the per-family lines and per-corner table columns
+# render() emits (Source records, the per-corner header, and Aggregate),
+# indexed by RECORD_CLAIMS family: every render() loop iterates
+# RECORD_CLAIMS and looks its label up here, so a family added to
+# RECORD_CLAIMS without a label is a loud KeyError, never a short section
+# or a header that disagrees with the body (#488).
 FAMILY_LABELS = {
     "read-snm": "Read SNM",
     "hold-snm": "Hold SNM",
@@ -288,7 +292,8 @@ def render(repo_root: Path) -> str:
     lines.append("")
     lines.append("## Source records")
     lines.append("")
-    for family, label in FAMILY_LABELS.items():
+    for family in RECORD_CLAIMS:
+        label = FAMILY_LABELS[family]
         entry = f"- {label}: `{rel(records[family])}`"
         if family == "write-margin":
             entry += (
@@ -337,12 +342,13 @@ def render(repo_root: Path) -> str:
     lines.append("")
     lines.append("## Per-corner results")
     lines.append("")
-    lines.append(
-        "| Corner | Read SNM (V) | Verdict | Hold SNM (V) | Verdict |"
-        " Write margin (V) | Verdict | Read access time (s) | Verdict |"
-        " Write access time (s) | Verdict | Row overall (SNM + margin) |"
-    )
-    lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    header = ["Corner"]
+    for family, (_records_rel, _claim, _metric, unit) in RECORD_CLAIMS.items():
+        header.append(f"{FAMILY_LABELS[family]} ({unit})")
+        header.append("Verdict")
+    header.append("Row overall (SNM + margin)")
+    lines.append("| " + " | ".join(header) + " |")
+    lines.append("|" + "---|" * len(header))
     for r in rows:
         cells = [r["corner"]]
         for family, (_records_rel, _claim, _metric, unit) in RECORD_CLAIMS.items():
@@ -353,7 +359,8 @@ def render(repo_root: Path) -> str:
     lines.append("")
     lines.append("## Aggregate")
     lines.append("")
-    for family, label in FAMILY_LABELS.items():
+    for family in RECORD_CLAIMS:
+        label = FAMILY_LABELS[family]
         verdicted, total = counts[family]
         if family in BOUNDED_FAMILIES:
             unit = RECORD_CLAIMS[family][3]
