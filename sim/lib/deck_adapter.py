@@ -239,6 +239,76 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _load_testbench_and_staged(exp_dir, tb_name, staged_files, repo_root):
+    """(tb_bytes, deck_bytes, needs_staging, staged) for one family's testbench.
+
+    The load-and-validate half both deck builders share: read the family
+    testbench, compose the transport deck (`@@REPO_ROOT@@` -> `.`), and
+    resolve the family's staged DUT inputs (#437) -- validated only when
+    the testbench actually references the token, kept in FAMILIES order as
+    (repo-relative path, absolute source) pairs.
+    """
+    tb_path = Path(repo_root) / exp_dir / "testbench" / tb_name
+    tb_bytes = tb_path.read_bytes()
+    tb_text = tb_bytes.decode("utf-8")
+    deck_bytes = compose_deck(tb_text).encode("utf-8")
+    needs_staging = REPO_ROOT_TOKEN in tb_text
+    staged = []
+    for rel in staged_files:
+        src = Path(repo_root) / rel
+        if needs_staging and not src.is_file():
+            raise FileNotFoundError(f"staged deck input not found: {src}")
+        staged.append((rel, src))
+    return tb_bytes, deck_bytes, needs_staging, staged
+
+
+def _stage_unit(stage, uid, tb_name, deck_bytes, corner_inc_text, needs_staging, staged, datafile):
+    """Stage one unit dir under `stage` and return its deck-list entry.
+
+    The per-unit half both deck builders share: the deck bytes, the
+    generated `corner.inc`, the pinned run-directory `.spiceinit` (#338,
+    transported as a staged deck input because the deck path silently
+    drops `options.ngspice_init`), and -- when the testbench references
+    the REPO_ROOT token -- the family's staged DUT inputs at their
+    repo-relative paths, wrapped as the `{id, deck, timeout_s, inputs[,
+    outputs]}` entry, with a declared output colliding with the staged
+    `.spiceinit` refused.
+    """
+    unit = stage / "units" / uid
+    unit.mkdir(parents=True, exist_ok=True)
+    (unit / tb_name).write_bytes(deck_bytes)
+    (unit / "corner.inc").write_text(corner_inc_text, encoding="utf-8")
+    (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
+    if needs_staging:
+        for rel, src in staged:
+            dest = unit / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src, dest)
+    entry = {
+        "id": uid,
+        "deck": f"units/{uid}/{tb_name}",
+        "timeout_s": DECK_TIMEOUT_S,
+        "inputs": [{"path": f"units/{uid}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
+    }
+    if datafile:
+        if datafile == SPICEINIT_NAME:
+            raise ValueError(
+                f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
+            )
+        entry["outputs"] = [datafile]
+    return entry
+
+
+def _base_deck_request(decks, pdk_dir):
+    """The request envelope both builders write; `pdk_dir` must already be
+    absolutized by the caller (None leaves `models` unset so the executing
+    host resolves the `$PDK_ROOT/...` includes)."""
+    request = {"engine": "ngspice", "decks": decks, "options": {"timeout_s": DECK_TIMEOUT_S}}
+    if pdk_dir is not None:
+        request["models"] = {"pdk_root": os.path.dirname(pdk_dir)}
+    return request
+
+
 def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corner_specs=None):
     """Write per-corner unit dirs under `stage_dir` and return the request dict.
 
@@ -255,18 +325,9 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
     """
     exp_dir, tb_name, mode, staged_files = FAMILIES[family]
     kind, datafile, _label = parse_mode(mode)
-    tb_path = Path(repo_root) / exp_dir / "testbench" / tb_name
-    tb_bytes = tb_path.read_bytes()
-    tb_text = tb_bytes.decode("utf-8")
-    deck_text = compose_deck(tb_text)
-    deck_bytes = deck_text.encode("utf-8")
-    needs_staging = REPO_ROOT_TOKEN in tb_text
-    staged = []  # (repo-relative path, absolute source) in FAMILIES order
-    for rel in staged_files:
-        src = Path(repo_root) / rel
-        if needs_staging and not src.is_file():
-            raise FileNotFoundError(f"staged deck input not found: {src}")
-        staged.append((rel, src))
+    tb_bytes, deck_bytes, needs_staging, staged = _load_testbench_and_staged(
+        exp_dir, tb_name, staged_files, repo_root
+    )
 
     if pdk_dir is not None:
         pdk_dir = os.path.abspath(pdk_dir)
@@ -281,38 +342,13 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
     units = []
     for process, temp, vdd in selected:
         cid = corner_id(process, temp, vdd)
-        unit = stage / "units" / cid
-        unit.mkdir(parents=True, exist_ok=True)
-        (unit / tb_name).write_bytes(deck_bytes)
-        (unit / "corner.inc").write_text(
-            compose_corner_inc(process, temp, vdd, design_inc, model_file)
-        )
-        # The pinned run-directory .spiceinit (#338): transported as a staged
-        # deck input (decks[].inputs[] IS carried into the worker request,
-        # unlike options.ngspice_init, which the deck path silently drops).
-        (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
-        if needs_staging:
-            for rel, src in staged:
-                dest = unit / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(src, dest)
-        entry = {
-            "id": cid,
-            "deck": f"units/{cid}/{tb_name}",
-            "timeout_s": DECK_TIMEOUT_S,
-            "inputs": [{"path": f"units/{cid}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
-        }
-        if datafile:
-            if datafile == SPICEINIT_NAME:
-                raise ValueError(
-                    f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
-                )
-            entry["outputs"] = [datafile]
-        units.append(entry)
+        units.append(_stage_unit(
+            stage, cid, tb_name, deck_bytes,
+            compose_corner_inc(process, temp, vdd, design_inc, model_file),
+            needs_staging, staged, datafile,
+        ))
 
-    request = {"engine": "ngspice", "decks": units, "options": {"timeout_s": DECK_TIMEOUT_S}}
-    if pdk_dir is not None:
-        request["models"] = {"pdk_root": os.path.dirname(pdk_dir)}
+    request = _base_deck_request(units, pdk_dir)
     meta = {
         "family": family,
         "mode": mode,
@@ -343,23 +379,34 @@ def build_request(family, stage_dir, *, pdk_dir=None, repo_root=REPO_ROOT, corne
 # --------------------------------------------------------------------------
 
 
-def _snm_lines(datafile_path, label):
-    """snm_extract's stdout+stderr for one data file (launcher: `>> log 2>&1`)."""
+def _snm_extract_lines(paths, label):
+    """snm_extract's stdout+stderr for one SNM measurement: a single sweep
+    file, or the L/R pair `--pair` grades. The launcher's `>> log 2>&1`
+    shape: every RESULT/RESULT-ERROR line is captured and concatenated,
+    and an unreadable or too-short data file is a RESULT-ERROR, never a
+    crash."""
     out, err = io.StringIO(), io.StringIO()
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
         try:
-            pts = snm_extract.read_xy(str(datafile_path))
-            if len(pts) < 5:
-                print(
-                    f"RESULT-ERROR: {label} -- fewer than 5 data points in {datafile_path}",
-                    file=sys.stderr,
-                )
+            pts = [snm_extract.read_xy(str(p)) for p in paths]
+            if any(len(p) < 5 for p in pts):
+                names = " or ".join(str(p) for p in paths)
+                print(f"RESULT-ERROR: {label} -- fewer than 5 data points in {names}", file=sys.stderr)
             else:
-                pts.sort(key=lambda p: p[0])
-                snm_extract._run(pts, None, label)
+                for p in pts:
+                    p.sort(key=lambda pt: pt[0])
+                snm_extract._run(pts[0], pts[1] if len(pts) > 1 else None, label)
         except (ValueError, OSError) as exc:
             print(f"RESULT-ERROR: {label} -- {exc}", file=sys.stderr)
     return out.getvalue() + err.getvalue()
+
+
+def _snm_lines(datafile_path, label):
+    """snm_extract's stdout+stderr for one data file (launcher: `>> log 2>&1`).
+
+    Kept as its own name: sim/lib/mint_corner_records.py calls it directly
+    to mint per-corner record streams."""
+    return _snm_extract_lines([datafile_path], label)
 
 
 def expected_from_request(family, request):
@@ -408,6 +455,79 @@ def unit_stream_relpath(unit, cid, stream, *, base):
     return rel
 
 
+def _check_deck_coverage(report, expected, expected_deck_sha256, *, missing_label):
+    """(coverage_errors, by_id) for a deck report against `expected` ids.
+
+    The fail-closed coverage half both reducers share (#373): the report
+    must be a deck-list report; no duplicate, missing, or unexpected unit
+    ids; and when composed deck bytes are pinned, every executed unit's
+    `deck_sha256` must equal them, with a unit reporting none itself a
+    coverage error -- so the deck-bytes check cannot silently not-run.
+    `missing_label` names one expected id ("corners" for the deterministic
+    grid, "units" for the MC pool) in the missing-coverage error.
+    """
+    coverage_errors = []
+    if report.get("mode") != "decks" or not isinstance(report.get("units"), list):
+        coverage_errors.append("report is not a deck-list report (mode != 'decks')")
+        units = []
+    else:
+        units = report["units"]
+    ids = [u.get("id") for u in units]
+    dupes = sorted({i for i in ids if ids.count(i) > 1}, key=str)
+    if dupes:
+        coverage_errors.append(f"duplicate unit ids: {dupes}")
+    missing = [c for c in expected if c not in ids]
+    extra = [i for i in ids if i not in expected]
+    if missing:
+        coverage_errors.append(f"missing {missing_label}: {missing}")
+    if extra:
+        coverage_errors.append(f"unexpected unit ids: {extra}")
+    if expected_deck_sha256 is not None:
+        drifted = sorted(
+            (u.get("id") for u in units
+             if u.get("deck_sha256") is not None and u.get("deck_sha256") != expected_deck_sha256),
+            key=str,
+        )
+        if drifted:
+            coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
+        unreported = sorted(
+            (u.get("id") for u in units if u.get("deck_sha256") is None),
+            key=str,
+        )
+        if unreported:
+            coverage_errors.append(f"deck_sha256 not reported for: {unreported}")
+    by_id = {}
+    for u in units:
+        by_id.setdefault(u.get("id"), u)
+    return coverage_errors, by_id
+
+
+def _read_log(base, unit, uid):
+    """A unit's captured stdout+stderr text, resolved through
+    unit_stream_relpath's one stream rule (#444) -- the same rule the
+    record minter reads by -- with a stream that is not a file
+    contributing nothing."""
+    log = ""
+    for stream in ("stdout", "stderr"):
+        p = base / unit_stream_relpath(unit, uid, stream, base=base)
+        if p.is_file():
+            log += p.read_bytes().decode("utf-8", errors="replace")
+    return log
+
+
+def _unit_infra_reasons(unit):
+    """The engine-level OPEN reasons one report unit contributes: it timed
+    out, never ran, or lacked a declared output."""
+    reasons = []
+    if unit.get("timed_out") or unit.get("status") == "timeout":
+        reasons.append("engine timed out")
+    elif unit.get("exit_code") is None:
+        reasons.append("engine never ran")
+    if unit.get("missing_outputs"):
+        reasons.append(f"declared outputs missing: {unit['missing_outputs']}")
+    return reasons
+
+
 def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_deck_sha256=None):
     """Grade a `klt sim` deck report with the launcher's rules.
 
@@ -436,40 +556,9 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
             raise ValueError(f"not ratified corner ids: {unknown}")
     base = Path(outdir or report.get("outdir") or ".")
 
-    coverage_errors = []
-    if report.get("mode") != "decks" or not isinstance(report.get("units"), list):
-        coverage_errors.append("report is not a deck-list report (mode != 'decks')")
-        units = []
-    else:
-        units = report["units"]
-    ids = [u.get("id") for u in units]
-    dupes = sorted({i for i in ids if ids.count(i) > 1}, key=str)
-    if dupes:
-        coverage_errors.append(f"duplicate unit ids: {dupes}")
-    missing = [c for c in expected if c not in ids]
-    extra = [i for i in ids if i not in expected]
-    if missing:
-        coverage_errors.append(f"missing corners: {missing}")
-    if extra:
-        coverage_errors.append(f"unexpected unit ids: {extra}")
-    if expected_deck_sha256 is not None:
-        drifted = sorted(
-            (u.get("id") for u in units
-             if u.get("deck_sha256") is not None and u.get("deck_sha256") != expected_deck_sha256),
-            key=str,
-        )
-        if drifted:
-            coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
-        unreported = sorted(
-            (u.get("id") for u in units if u.get("deck_sha256") is None),
-            key=str,
-        )
-        if unreported:
-            coverage_errors.append(f"deck_sha256 not reported for: {unreported}")
-
-    by_id = {}
-    for u in units:
-        by_id.setdefault(u.get("id"), u)
+    coverage_errors, by_id = _check_deck_coverage(
+        report, expected, expected_deck_sha256, missing_label="corners"
+    )
 
     graded = []
     for cid in expected:
@@ -477,20 +566,9 @@ def reduce_report(family, report, *, outdir=None, expected_ids=None, expected_de
         if unit is None:
             graded.append({"id": cid, "status": "OPEN", "reasons": ["no unit in report"], "results": {}, "result_lines": []})
             continue
-        reasons = []
+        reasons = _unit_infra_reasons(unit)
         unit_dir = base / cid
-        stdout_path = base / unit_stream_relpath(unit, cid, "stdout", base=base)
-        stderr_path = base / unit_stream_relpath(unit, cid, "stderr", base=base)
-        log = ""
-        for p in (stdout_path, stderr_path):
-            if p.is_file():
-                log += p.read_bytes().decode("utf-8", errors="replace")
-        if unit.get("timed_out") or unit.get("status") == "timeout":
-            reasons.append("engine timed out")
-        elif unit.get("exit_code") is None:
-            reasons.append("engine never ran")
-        if unit.get("missing_outputs"):
-            reasons.append(f"declared outputs missing: {unit['missing_outputs']}")
+        log = _read_log(base, unit, cid)
         if kind == "snm":
             data = unit_dir / datafile
             if data.is_file():
@@ -613,17 +691,9 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
     exp_dir, tb_name, _, staged_files = FAMILIES[family]
     mode, key = MC_FAMILIES[family]
     kind, datafile, _label = parse_mc_mode(mode)
-    tb_path = Path(repo_root) / exp_dir / "testbench" / tb_name
-    tb_bytes = tb_path.read_bytes()
-    tb_text = tb_bytes.decode("utf-8")
-    deck_bytes = compose_deck(tb_text).encode("utf-8")
-    needs_staging = REPO_ROOT_TOKEN in tb_text
-    staged = []
-    for rel in staged_files:
-        src = Path(repo_root) / rel
-        if needs_staging and not src.is_file():
-            raise FileNotFoundError(f"staged deck input not found: {src}")
-        staged.append((rel, src))
+    tb_bytes, deck_bytes, needs_staging, staged = _load_testbench_and_staged(
+        exp_dir, tb_name, staged_files, repo_root
+    )
     if pdk_dir is not None:
         pdk_dir = os.path.abspath(pdk_dir)
         model_file = f"{pdk_dir}/libs.tech/ngspice/sm141064.ngspice"
@@ -638,36 +708,10 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
         inc = mc.build_corner_inc({"GF180_MODEL_FILE": model_file}, m["process"], m["temp"],
                                   m["vdd"], m["seed"], m["sw_stat_mismatch"])
         m["corner_inc_sha256"] = _sha256(inc.encode("utf-8"))
-        unit = stage / "units" / m["id"]
-        unit.mkdir(parents=True, exist_ok=True)
-        (unit / tb_name).write_bytes(deck_bytes)
-        (unit / "corner.inc").write_text(inc, encoding="utf-8")
-        # The pinned run-directory .spiceinit (#338) -- one copy per MC unit:
-        # one unit per (corner, kind, sample[, side]), so the same bytes are
-        # staged once per unit and named once in that unit's inputs[].
-        (unit / SPICEINIT_NAME).write_text(SPICEINIT_TEXT, encoding="utf-8")
-        if needs_staging:
-            for rel, src in staged:
-                dest = unit / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(src, dest)
-        entry = {
-            "id": m["id"],
-            "deck": f"units/{m['id']}/{tb_name}",
-            "timeout_s": DECK_TIMEOUT_S,
-            "inputs": [{"path": f"units/{m['id']}/{SPICEINIT_NAME}", "name": SPICEINIT_NAME}],
-        }
-        if datafile:
-            if datafile == SPICEINIT_NAME:
-                raise ValueError(
-                    f"declared output {datafile!r} collides with the staged {SPICEINIT_NAME}"
-                )
-            entry["outputs"] = [datafile]
-        decks.append(entry)
+        decks.append(_stage_unit(stage, m["id"], tb_name, deck_bytes, inc,
+                                 needs_staging, staged, datafile))
 
-    request = {"engine": "ngspice", "decks": decks, "options": {"timeout_s": DECK_TIMEOUT_S}}
-    if pdk_dir is not None:
-        request["models"] = {"pdk_root": os.path.dirname(pdk_dir)}
+    request = _base_deck_request(decks, pdk_dir)
     request["x_gf180_sram_adapter"] = {
         "campaign": "monte-carlo",
         "family": family,
@@ -687,42 +731,9 @@ def build_mc_request(family, stage_dir, corner_specs, *, n, n_control, n_nc, see
     return request
 
 
-def _read_log(base, unit, uid):
-    log = ""
-    for stream in ("stdout", "stderr"):
-        p = base / unit_stream_relpath(unit, uid, stream, base=base)
-        if p.is_file():
-            log += p.read_bytes().decode("utf-8", errors="replace")
-    return log
-
-
 def _snm_pair_lines(path_l, path_r, label):
     """snm_extract.py --pair's stdout+stderr, in-process."""
-    out, err = io.StringIO(), io.StringIO()
-    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-        try:
-            pts1, pts2 = snm_extract.read_xy(str(path_l)), snm_extract.read_xy(str(path_r))
-            if len(pts1) < 5 or len(pts2) < 5:
-                print(f"RESULT-ERROR: {label} -- fewer than 5 data points in {path_l} or {path_r}",
-                      file=sys.stderr)
-            else:
-                pts1.sort(key=lambda p: p[0])
-                pts2.sort(key=lambda p: p[0])
-                snm_extract._run(pts1, pts2, label)
-        except (ValueError, OSError) as exc:
-            print(f"RESULT-ERROR: {label} -- {exc}", file=sys.stderr)
-    return out.getvalue() + err.getvalue()
-
-
-def _unit_infra_reasons(unit):
-    reasons = []
-    if unit.get("timed_out") or unit.get("status") == "timeout":
-        reasons.append("engine timed out")
-    elif unit.get("exit_code") is None:
-        reasons.append("engine never ran")
-    if unit.get("missing_outputs"):
-        reasons.append(f"declared outputs missing: {unit['missing_outputs']}")
-    return reasons
+    return _snm_extract_lines([path_l, path_r], label)
 
 
 def reduce_mc_report(family, request, report, *, outdir=None, key=None, limit_min=0.0):
@@ -759,39 +770,9 @@ def reduce_mc_report(family, request, report, *, outdir=None, key=None, limit_mi
         k = f"{m['kind']}-{m['side']}" if m.get("side") else m["kind"]
         if m["seed"] != mc.derive_seed(meta.get("base_seed"), m["corner_id"], k, m["index"]):
             coverage_errors.append(f"seed drift for {m['id']}")
-    if report.get("mode") != "decks" or not isinstance(report.get("units"), list):
-        coverage_errors.append("report is not a deck-list report (mode != 'decks')")
-        units = []
-    else:
-        units = report["units"]
-    ids = [u.get("id") for u in units]
     expected = [m["id"] for m in manifest]
-    dupes = sorted({i for i in ids if ids.count(i) > 1})
-    if dupes:
-        coverage_errors.append(f"duplicate unit ids: {dupes}")
-    missing = [i for i in expected if i not in ids]
-    extra = [i for i in ids if i not in expected]
-    if missing:
-        coverage_errors.append(f"missing units: {missing}")
-    if extra:
-        coverage_errors.append(f"unexpected unit ids: {extra}")
-    if composed is not None:
-        drifted = sorted(
-            (u.get("id") for u in units
-             if u.get("deck_sha256") is not None and u.get("deck_sha256") != composed),
-            key=str,
-        )
-        if drifted:
-            coverage_errors.append(f"deck bytes differ from the composed deck for: {drifted}")
-        unreported = sorted(
-            (u.get("id") for u in units if u.get("deck_sha256") is None),
-            key=str,
-        )
-        if unreported:
-            coverage_errors.append(f"deck_sha256 not reported for: {unreported}")
-    by_id = {}
-    for u in units:
-        by_id.setdefault(u.get("id"), u)
+    deck_errors, by_id = _check_deck_coverage(report, expected, composed, missing_label="units")
+    coverage_errors += deck_errors
 
     infra = []
 
