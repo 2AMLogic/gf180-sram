@@ -206,8 +206,6 @@ class Macro:
 
     def wire(self, lp, x0, y0, x1, y1, hw=HW) -> None:
         """Rectangle between two points, ``hw`` half-width around the segment."""
-        self.box(lp, min(x0, x1) - (hw if y0 == y1 else hw), min(y0, y1) - hw,
-                 max(x0, x1) + hw, max(y0, y1) + hw) if False else None
         self.box(lp, min(x0, x1) - hw, min(y0, y1) - hw, max(x0, x1) + hw, max(y0, y1) + hw)
 
     def via(self, lp, x, y) -> None:
@@ -222,10 +220,6 @@ class Macro:
     def inst_row(self, cell: kdb.Cell, trans: kdb.Trans, n: int, pitch: float) -> None:
         self.top.insert(kdb.CellInstArray(cell.cell_index(), trans,
                                           kdb.Vector(nm(pitch), 0), kdb.Vector(0, 0), n, 1))
-
-    def route_m3_m2(self, x, y) -> None:
-        """Via2 between a Metal2 riser and a Metal3 bar crossing at (x, y)."""
-        self.via(L_V2, x, y)
 
 
 def build() -> kdb.Layout:
