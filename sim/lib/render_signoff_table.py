@@ -115,6 +115,18 @@ def check_family_classification(claims, bounded, record_only) -> None:
         raise AssertionError("; ".join(problems))
 
 
+def check_claim_units(claims, formatters) -> None:
+    """Raise unless every claim tuple's unit (its 4th field) has a
+    formatter. fmt_value() short-circuits to "--" on a None value, so a
+    unit missing from UNIT_FORMATTERS could otherwise sit silent until a
+    real value first renders (#493)."""
+    missing = sorted({claim[3] for claim in claims.values()} - set(formatters))
+    if missing:
+        raise AssertionError(
+            f"RECORD_CLAIMS units with no UNIT_FORMATTERS entry: {missing}"
+        )
+
+
 check_family_classification(RECORD_CLAIMS, BOUNDED_FAMILIES, RECORD_ONLY_FAMILIES)
 
 # Display labels for the per-family lines and per-corner table columns
@@ -199,6 +211,12 @@ def fmt_s(x: float) -> str:
 
 # unit -> formatter; an unknown unit is a loud KeyError, never a time.
 UNIT_FORMATTERS = {"V": fmt_v, "s": fmt_s}
+
+# Import-time enforcement, same contract as check_family_classification's
+# call above: every RECORD_CLAIMS unit must have a formatter here, so a
+# third unit added to the claims is caught at import (and thus at any
+# render or report generation), not at first use (#493).
+check_claim_units(RECORD_CLAIMS, UNIT_FORMATTERS)
 
 
 def verdict_threshold(value: float | None) -> str:

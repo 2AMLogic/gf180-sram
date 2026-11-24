@@ -149,6 +149,15 @@ class FamilyClassificationTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             rst.fmt_value(1.0, "A")
 
+    def test_committed_claim_units_have_formatters(self):
+        rst.check_claim_units(rst.RECORD_CLAIMS, rst.UNIT_FORMATTERS)
+
+    def test_claim_unit_without_formatter_fails(self):
+        claims = {**rst.RECORD_CLAIMS,
+                  SIXTH: (*rst.RECORD_CLAIMS["read-snm"][:3], "A")}
+        with self.assertRaisesRegex(AssertionError, "'A'"):
+            rst.check_claim_units(claims, rst.UNIT_FORMATTERS)
+
     def test_known_units_format(self):
         self.assertEqual(rst.fmt_value(0.5, "V"), "0.500000")
         self.assertEqual(rst.fmt_value(None, "A"), "--")
