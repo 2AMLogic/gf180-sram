@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for layout/common.py and its callers (issue #330).
+"""Tests for layout/common.py and its callers (issues #330 and #475).
 
 The shared helpers consolidated by issue #330 are pinned here with no PDK
 and no netlists: ``ROOT`` resolves to the repository root, ``load_module``
@@ -10,10 +10,18 @@ independent modules -- the property the periphery generators' distinct
 not installed; importing ``layout.common`` itself must never need klayout,
 which this file demonstrates by importing it first).
 
+Issue #475 added the layer-registration consolidation: the array-level
+Via2/Metal3 constants and their PDK names live in ``layout.common`` once
+(were duplicated in ``layout/periphery/column/generate.py`` and
+``layout/sram_256x32/generate.py``), and ``register_layer`` is the single
+"create the layer and attach its name" helper the generators hand-copied
+five times.
+
 The anti-duplication tests assert the consolidation sticks: no local
 ``def _load(`` and no ``def save_options(`` definitions remain anywhere
 under ``layout/`` or ``views/`` -- every generator must take them from
-``layout.common`` instead.
+``layout.common`` instead -- and (issue #475) no direct ``.set_info(``
+layer-registration call remains either.
 
 Run: python3 scripts/ci/test_layout_common.py   (or via `npm run test`)
 """
@@ -112,6 +120,49 @@ class TestSaveOptions(unittest.TestCase):
         self.assertFalse(opts.gds2_write_timestamps)
 
 
+class TestArrayLayerConstants(unittest.TestCase):
+    def test_layer_numbers_match_pdk(self):
+        self.assertEqual(common.L_VIA2, (38, 0))
+        self.assertEqual(common.L_METAL3, (42, 0))
+        self.assertEqual(common.L_METAL3_LBL, (42, 10))
+
+    def test_names_cover_exactly_the_array_level_layers(self):
+        self.assertEqual(common.ARRAY_LAYER_NAMES, {
+            common.L_VIA2: "Via2",
+            common.L_METAL3: "Metal3",
+            common.L_METAL3_LBL: "Metal3_Label",
+        })
+
+
+class TestRegisterLayer(unittest.TestCase):
+    @unittest.skipUnless(HAS_KLAYOUT, "klayout not installed (register_layer lazy-imports it)")
+    def test_attaches_pdk_name_and_returns_index(self):
+        import klayout.db as kdb
+
+        ly = kdb.Layout()
+        li = common.register_layer(ly, common.L_VIA2, common.ARRAY_LAYER_NAMES)
+        self.assertEqual(li, ly.find_layer(*common.L_VIA2))
+        self.assertEqual(ly.get_info(li).name, "Via2")
+
+    @unittest.skipUnless(HAS_KLAYOUT, "klayout not installed (register_layer lazy-imports it)")
+    def test_idempotent_on_an_already_registered_layer(self):
+        import klayout.db as kdb
+
+        ly = kdb.Layout()
+        first = common.register_layer(ly, common.L_METAL3, common.ARRAY_LAYER_NAMES)
+        second = common.register_layer(ly, common.L_METAL3, common.ARRAY_LAYER_NAMES)
+        self.assertEqual(first, second)
+
+    @unittest.skipUnless(HAS_KLAYOUT, "klayout not installed (register_layer lazy-imports it)")
+    def test_unknown_layer_registered_without_a_name(self):
+        import klayout.db as kdb
+
+        ly = kdb.Layout()
+        li = common.register_layer(ly, (99, 0), common.ARRAY_LAYER_NAMES)
+        self.assertEqual(li, ly.find_layer(99, 0))
+        self.assertEqual(ly.get_info(li).name, "")
+
+
 class TestNoDuplicateHelpers(unittest.TestCase):
     def _files_defining(self, pattern):
         offenders = []
@@ -132,6 +183,11 @@ class TestNoDuplicateHelpers(unittest.TestCase):
         offenders = self._files_defining(r"^\s*def save_options\(")
         self.assertEqual(offenders, [],
                          "def save_options() copies must be replaced by layout.common.save_options")
+
+    def test_no_direct_set_info_calls(self):
+        offenders = self._files_defining(r"\.set_info\(")
+        self.assertEqual(offenders, [],
+                         ".set_info() layer registration must go through layout.common.register_layer")
 
 
 if __name__ == "__main__":

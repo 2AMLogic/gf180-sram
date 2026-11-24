@@ -61,7 +61,7 @@ import klayout.db as kdb
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..")))
 
-from layout.common import ROOT, load_module, nm, save_options  # noqa: E402
+from layout.common import ROOT, load_module, nm, register_layer, save_options  # noqa: E402
 
 TOP_CELL = "sram_256x32"
 OUT_GDS = os.path.join(HERE, f"{TOP_CELL}.gds")
@@ -197,9 +197,7 @@ class Macro:
         self.pins: list[tuple[str, tuple[int, int], float, float]] = []
 
     def li(self, lp: tuple[int, int]) -> int:
-        i = self.ly.layer(*lp)
-        self.ly.set_info(i, kdb.LayerInfo(lp[0], lp[1], col._LAYER_NAMES.get(lp, "")))
-        return i
+        return register_layer(self.ly, lp, col._LAYER_NAMES)
 
     def box(self, lp, x0, y0, x1, y1) -> None:
         x0, x1 = sorted((x0, x1))

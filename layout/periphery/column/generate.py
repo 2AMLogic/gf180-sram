@@ -120,23 +120,32 @@ import klayout.db as kdb
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
 
-from layout.common import ROOT, load_module, nm, save_options  # noqa: E402
+from layout.common import (  # noqa: E402
+    ARRAY_LAYER_NAMES,
+    L_METAL3,
+    L_METAL3_LBL,
+    L_VIA2,
+    ROOT,
+    load_module,
+    nm,
+    register_layer,
+    save_options,
+)
 
 bitcell = load_module("_sram_bitcell_generate", "layout/bitcell/generate.py")
 NETLIST_DIR = os.path.join(ROOT, "design", "netlist")
 
 # ---------------------------------------------------------------------------
-# Layers (GDS layer/datatype) -- the bitcell's, plus Via2/Metal3 (as the array).
+# Layers (GDS layer/datatype) -- the bitcell's, plus Via2/Metal3 (as the
+# array). The Via2/Metal3 numbers and names are shared with the array
+# generator through layout.common (issue #475); the name table below covers
+# every layer this periphery draws on.
 # ---------------------------------------------------------------------------
 L_NWELL, L_COMP, L_POLY2 = bitcell.L_NWELL, bitcell.L_COMP, bitcell.L_POLY2
 L_PPLUS, L_NPLUS, L_CONTACT = bitcell.L_PPLUS, bitcell.L_NPLUS, bitcell.L_CONTACT
 L_METAL1, L_VIA1, L_METAL2 = bitcell.L_METAL1, bitcell.L_VIA1, bitcell.L_METAL2
 L_METAL1_LBL, L_METAL2_LBL = bitcell.L_METAL1_LBL, bitcell.L_METAL2_LBL
-L_VIA2 = (38, 0)
-L_METAL3 = (42, 0)
-L_METAL3_LBL = (42, 10)
-_LAYER_NAMES = dict(bitcell._LAYER_NAMES)
-_LAYER_NAMES.update({L_VIA2: "Via2", L_METAL3: "Metal3", L_METAL3_LBL: "Metal3_Label"})
+_LAYER_NAMES = {**bitcell._LAYER_NAMES, **ARRAY_LAYER_NAMES}
 METAL = (L_METAL1, L_METAL2, L_METAL3)
 
 # ---------------------------------------------------------------------------
@@ -871,12 +880,6 @@ def emit_routes(ctx: Ctx) -> None:
             ctx.box(L_VIA2, X(c) - HVIA, Y(rr) - HVIA, X(c) + HVIA, Y(rr) + HVIA)
 
 
-def _kdb_layer(layout: kdb.Layout, lp) -> int:
-    li = layout.layer(*lp)
-    layout.set_info(li, kdb.LayerInfo(lp[0], lp[1], _LAYER_NAMES[lp]))
-    return li
-
-
 def to_cell(layout: kdb.Layout, name: str, ctx: Ctx) -> kdb.Cell:
     cell = layout.create_cell(name)
     for lp in sorted(ctx.shapes):
@@ -884,9 +887,9 @@ def to_cell(layout: kdb.Layout, name: str, ctx: Ctx) -> kdb.Cell:
         for (x0, y0, x1, y1) in ctx.shapes[lp]:
             reg.insert(kdb.Box(nm(x0), nm(y0), nm(x1), nm(y1)))
         reg.merge()
-        cell.shapes(_kdb_layer(layout, lp)).insert(reg)
+        cell.shapes(register_layer(layout, lp, _LAYER_NAMES)).insert(reg)
     for lp, text, x, y in ctx.labels:
-        cell.shapes(_kdb_layer(layout, lp)).insert(kdb.Text(text, kdb.Trans(nm(x), nm(y))))
+        cell.shapes(register_layer(layout, lp, _LAYER_NAMES)).insert(kdb.Text(text, kdb.Trans(nm(x), nm(y))))
     return cell
 
 

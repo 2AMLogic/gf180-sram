@@ -104,7 +104,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 )
 
-from layout.common import save_options  # noqa: E402  (repo root put on sys.path above)
+from layout.common import register_layer, save_options  # noqa: E402  (repo root put on sys.path above)
 
 # ---------------------------------------------------------------------------
 # gf180mcu drawing layers (GDS layer/datatype), read from the PDK's own
@@ -562,8 +562,7 @@ def draw(layout: kdb.Layout, top: kdb.Cell, with_labels: bool = True) -> None:
     for lp, boxes in shapes().items():
         if not boxes:
             continue
-        li = layout.layer(*lp)
-        layout.set_info(li, kdb.LayerInfo(*lp, _LAYER_NAMES[lp]))
+        li = register_layer(layout, lp, _LAYER_NAMES)
         region = kdb.Region()
         for box in boxes:
             region.insert(kdb.Box.from_dbox(box * (1.0 / layout.dbu)))
@@ -573,8 +572,7 @@ def draw(layout: kdb.Layout, top: kdb.Cell, with_labels: bool = True) -> None:
     if not with_labels:
         return
     for lp, text, x, y in LABELS:
-        li = layout.layer(*lp)
-        layout.set_info(li, kdb.LayerInfo(*lp, _LAYER_NAMES[lp]))
+        li = register_layer(layout, lp, _LAYER_NAMES)
         top.shapes(li).insert(
             kdb.Text(text, kdb.Trans(int(round(x / layout.dbu)), int(round(y / layout.dbu))))
         )
