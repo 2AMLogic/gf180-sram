@@ -88,6 +88,35 @@ RECORD_CLAIMS = {
 # verdict.
 BOUNDED_FAMILIES = frozenset({"read-snm", "hold-snm", "write-margin"})
 
+# The complement: families that are deliberately record-only. Omission from
+# BOUNDED_FAMILIES is the *correct* default for these, which is exactly why a
+# new family forgotten there would be silently rendered RECORDED instead of
+# taking the threshold verdict (#490). So every family must be classified
+# explicitly in one of the two sets, enforced at import below.
+RECORD_ONLY_FAMILIES = frozenset({"read-access", "write-access"})
+
+
+def check_family_classification(claims, bounded, record_only) -> None:
+    """Raise unless `bounded` and `record_only` partition `claims`."""
+    both = sorted(bounded & record_only)
+    unclassified = sorted(set(claims) - bounded - record_only)
+    unknown = sorted((bounded | record_only) - set(claims))
+    problems = []
+    if both:
+        problems.append(f"in both BOUNDED_FAMILIES and RECORD_ONLY_FAMILIES: {both}")
+    if unclassified:
+        problems.append(
+            f"RECORD_CLAIMS families in neither BOUNDED_FAMILIES nor "
+            f"RECORD_ONLY_FAMILIES: {unclassified}"
+        )
+    if unknown:
+        problems.append(f"classified but absent from RECORD_CLAIMS: {unknown}")
+    if problems:
+        raise AssertionError("; ".join(problems))
+
+
+check_family_classification(RECORD_CLAIMS, BOUNDED_FAMILIES, RECORD_ONLY_FAMILIES)
+
 # Display labels for the per-family lines and per-corner table columns
 # render() emits (Source records, the per-corner header, and Aggregate),
 # indexed by RECORD_CLAIMS family: every render() loop iterates
@@ -168,6 +197,10 @@ def fmt_s(x: float) -> str:
     return f"{x:.4e}"
 
 
+# unit -> formatter; an unknown unit is a loud KeyError, never a time.
+UNIT_FORMATTERS = {"V": fmt_v, "s": fmt_s}
+
+
 def verdict_threshold(value: float | None) -> str:
     if value is None:
         return "OPEN"
@@ -185,7 +218,7 @@ def default_repo_root() -> Path:
 
 
 def fmt_value(value: float | None, unit: str) -> str:
-    return "--" if value is None else (fmt_v if unit == "V" else fmt_s)(value)
+    return "--" if value is None else UNIT_FORMATTERS[unit](value)
 
 
 def render(repo_root: Path) -> str:
@@ -364,7 +397,7 @@ def render(repo_root: Path) -> str:
         verdicted, total = counts[family]
         if family in BOUNDED_FAMILIES:
             unit = RECORD_CLAIMS[family][3]
-            fmt = fmt_v if unit == "V" else fmt_s
+            fmt = UNIT_FORMATTERS[unit]
             worst = min(
                 (
                     r["values"][family]
