@@ -6,7 +6,7 @@ below is machine-generated and overwritten wholesale on each update; do not
 hand-edit that region.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-23T12:15:00Z (snapshot; compare against live labels)_
+_Generated: 2026-11-24T03:15:00Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -23,6 +23,7 @@ _None._
 
 `loom:important`; taken before unlabelled work.
 
+- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(held)*
 - **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance *(held)*
 
@@ -30,13 +31,14 @@ _None._
 
 Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
 
+- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#475**: Consolidate layer registration + Metal3/Via2 constants into layout/common.py (follow-up to #330)
 
 ## PRs Awaiting Review
 
@@ -54,7 +56,7 @@ _None._
 
 Issues carrying `loom:curated`.
 
-- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)* *(held)*
+- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
 - **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)* *(held)*
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 - **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)* *(held)*
@@ -75,9 +77,9 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
-| Important | 2 |
-| Ready (`loom:issue`, net of holds/building/merge-pending) | 1 |
-| In Progress (`loom:building`) | 0 |
+| Important | 3 |
+| Ready (`loom:issue`, net of holds/building/merge-pending) | 2 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
 | Curated | 6 |
