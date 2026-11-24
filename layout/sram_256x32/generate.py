@@ -81,7 +81,14 @@ import klayout.db as kdb
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 )
-from layout.common import save_options  # noqa: E402  (repo root put on sys.path above)
+from layout.common import (  # noqa: E402  (repo root put on sys.path above)
+    ARRAY_LAYER_NAMES,
+    L_METAL3,
+    L_METAL3_LBL,
+    L_VIA2,
+    register_layer,
+    save_options,
+)
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bitcell")
 )
@@ -92,16 +99,9 @@ COLS = 32
 
 TOP_CELL = "sram_256x32_array"
 
-# Array-level layers (the bitcell itself draws nothing above Metal2).
-L_VIA2 = (38, 0)
-L_METAL3 = (42, 0)
-L_METAL3_LBL = (42, 10)
-
-_LAYER_NAMES = {
-    L_VIA2: "Via2",
-    L_METAL3: "Metal3",
-    L_METAL3_LBL: "Metal3_Label",
-}
+# Array-level layers (the bitcell itself draws nothing above Metal2): the
+# constants and their names are shared with the column periphery through
+# layout.common (issue #475).
 
 # Metal3 supply straps (see the module docstring). Drawn inside the top row's
 # band so they overlap the Metal2 column stripes they via down onto.
@@ -156,24 +156,16 @@ assert min(WL_PAD_M1_W, WL_PAD_M1_H) >= M1_NARROW, "WL landing pad invites CO.6a
 assert WL_PAD_BAND >= WL_PAD_M1_W, "WL landing pad overruns its own band"
 
 
-def _layer(layout: kdb.Layout, lp: tuple[int, int]) -> int:
-    index = layout.layer(*lp)
-    name = _LAYER_NAMES.get(lp)
-    if name is not None:
-        layout.set_info(index, kdb.LayerInfo(*lp, name))
-    return index
-
-
 def _insert_box(layout: kdb.Layout, cell: kdb.Cell, lp: tuple[int, int],
                 x0: float, y0: float, x1: float, y1: float) -> None:
-    cell.shapes(_layer(layout, lp)).insert(
+    cell.shapes(register_layer(layout, lp, ARRAY_LAYER_NAMES)).insert(
         kdb.Box.from_dbox(kdb.DBox(x0, y0, x1, y1) * (1.0 / layout.dbu))
     )
 
 
 def _insert_text(layout: kdb.Layout, cell: kdb.Cell, lp: tuple[int, int],
                  text: str, x: float, y: float) -> None:
-    cell.shapes(_layer(layout, lp)).insert(
+    cell.shapes(register_layer(layout, lp, ARRAY_LAYER_NAMES)).insert(
         kdb.Text(
             text,
             kdb.Trans(int(round(x / layout.dbu)), int(round(y / layout.dbu))),
