@@ -125,5 +125,34 @@ class SectionsFollowRecordClaimsTest(unittest.TestCase):
         self.assertEqual(cm.exception.args, (SIXTH,))
 
 
+class FamilyClassificationTest(unittest.TestCase):
+    """#490: every RECORD_CLAIMS family is explicitly bounded or record-only,
+    and every unit has a formatter."""
+
+    def check(self, claims, bounded, record_only):
+        rst.check_family_classification(claims, frozenset(bounded), frozenset(record_only))
+
+    def test_committed_classification_is_a_partition(self):
+        self.check(rst.RECORD_CLAIMS, rst.BOUNDED_FAMILIES, rst.RECORD_ONLY_FAMILIES)
+
+    def test_unclassified_family_fails(self):
+        claims = {**rst.RECORD_CLAIMS, SIXTH: rst.RECORD_CLAIMS["read-snm"]}
+        with self.assertRaisesRegex(AssertionError, SIXTH):
+            self.check(claims, rst.BOUNDED_FAMILIES, rst.RECORD_ONLY_FAMILIES)
+
+    def test_family_in_both_sets_fails(self):
+        with self.assertRaisesRegex(AssertionError, "read-snm"):
+            self.check(rst.RECORD_CLAIMS, rst.BOUNDED_FAMILIES,
+                       rst.RECORD_ONLY_FAMILIES | {"read-snm"})
+
+    def test_unknown_unit_raises_keyerror(self):
+        with self.assertRaises(KeyError):
+            rst.fmt_value(1.0, "A")
+
+    def test_known_units_format(self):
+        self.assertEqual(rst.fmt_value(0.5, "V"), "0.500000")
+        self.assertEqual(rst.fmt_value(None, "A"), "--")
+
+
 if __name__ == "__main__":
     unittest.main()
