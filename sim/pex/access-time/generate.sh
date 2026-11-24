@@ -53,22 +53,17 @@ mkdir -p "$OUT_DIR"
 # and this report's `provenance.pdk` block already carries its identity
 # without a path -- verified this does not leak here).
 #
-# `reference_netlist`/`testbenches[].schematic_netlist` are a separate case:
-# klt resolves those internally from the testbench's own DUT `.include` line
-# and *does* re-normalize that resolved path to absolute before echoing it
-# back, regardless of whether the CLI arguments above were relative or
-# absolute (verified 2026-08-25, `klt 0.2.0`) -- a tool-side normalization
-# this repo's invocation has no lever over. Since the DUT file both
-# testbenches `.include` is fixed (`./dut/bitcell_6t_subckt.spice`, always
-# resolving to the same repo-relative path), the post-processing step below
-# rewrites that one known absolute value back to its repo-relative
-# equivalent rather than leaving it leaked, the same "rewrite what's echoed
-# back" pattern layout/reports/generate.sh's array-LVS `reference` field
-# fix and write-margin/dut/generate.sh's `pdk.root` fix use. Filed as
-# klayout-tools#1378 (both the `--outdir` relative-path join bug noted below
-# and this `reference_netlist`/`schematic_netlist` absolute-echo).
-DUT_NETLIST="$SELF_DIR/dut/bitcell_6t_subckt.spice"
-DUT_NETLIST_REL="$(python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))" "$DUT_NETLIST" "$ROOT")"
+# `reference_netlist`/`testbenches[].schematic_netlist` need no such care
+# any more: since klt 0.8.0 (report schema 2, klayout-tools#1261) `klt pex`
+# emits those fields itself in the committable `{path, scope}` shape of
+# `env_provenance.repo_relative_path` (`{"path":
+# "sim/pex/access-time/dut/bitcell_6t_subckt.spice", "scope": "repo"}` for
+# both testbenches here), never an absolute path. The pre-0.8.0 workaround
+# -- rewriting the one known absolute echo back to its repo-relative
+# equivalent after the fact (klt 0.2.0 behavior, klayout-tools#1378
+# finding 2, since fixed and closed) -- was removed in issue #492: the
+# committed report is now exactly the bytes `klt pex` wrote, and the
+# summary step below only ever reads it.
 relpath() { python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))" "$1" "$2"; }
 
 for name in write-access-time read-access-time; do
@@ -111,26 +106,22 @@ for name in write-access-time read-access-time; do
     exit 1
   fi
   python3 -c "
-import json, os
-path = '$report'
-d = json.load(open(path))
-# klt's echoed reference_netlist/schematic_netlist is not itself
-# normalized (it may carry an unresolved 'requests/../testbench/../dut/...'
-# traversal) -- compare on the normalized form, but only ever substitute
-# the exact known-good repo-relative value, never a derived one.
-dut_abs_norm = os.path.normpath('$DUT_NETLIST')
-dut_rel = '$DUT_NETLIST_REL'
-if os.path.normpath(d.get('reference_netlist') or '') == dut_abs_norm:
-    d['reference_netlist'] = dut_rel
-for tb in d.get('testbenches') or []:
-    if os.path.normpath(tb.get('schematic_netlist') or '') == dut_abs_norm:
-        tb['schematic_netlist'] = dut_rel
-json.dump(d, open(path, 'w'), indent=2)
-open(path, 'a').write('\n')
+import json
+d = json.load(open('$report'))
 print('status:', d.get('status'), '| corners:', d.get('corner_count'), '| delta rows:', len(d.get('delta') or []), '| passed/failed/errored:', d.get('passed'), d.get('failed'), d.get('errored'))
 print('reference_netlist:', d.get('reference_netlist'))
 pcm = d.get('pin_count_mismatch')
 print('pin_count_mismatch:', 'null' if pcm is None else pcm)
 "
+  # Issue #492: exit 4 (errored corners -- the report is still written and
+  # parsed above, so its diagnostics print first) or any other nonzero
+  # status is a failed run: propagate klt's own exit status so a failed run
+  # can never look like success now that the summary step no longer
+  # rewrites (and so no longer crashes on) the report. See docs/cli/pex.md
+  # "Exit codes".
+  if [[ "$status" -ne 0 && "$status" -ne 3 ]]; then
+    echo "klt pex exited $status for $name -- see $report" >&2
+    exit "$status"
+  fi
   echo "Wrote $report"
 done

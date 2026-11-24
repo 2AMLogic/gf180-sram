@@ -500,15 +500,19 @@ upstream, independent of this repo-side conclusion.
   carries the PDK's identity with no path. Filed during #109;
   `write-margin/dut/generate.sh` nulls the field itself before committing
   the report in the meantime (see that script's own comment).
-- **klayout-tools#1378** -- two `klt pex` findings from #109: (1) a
+- **klayout-tools#1378** (closed) -- two `klt pex` findings from #109: (1) a
   relative `--outdir` containing a `../` segment corrupts `klt pex`'s own
   internal intermediate-artifact path join and the run fails outright, so
   `access-time/generate.sh` keeps `--outdir` absolute as a workaround; (2)
-  `reference_netlist`/`testbenches[].schematic_netlist` are always echoed
+  `reference_netlist`/`testbenches[].schematic_netlist` were always echoed
   absolute regardless of whether every other path argument was passed
-  relative, so `access-time/generate.sh` rewrites that one known value back
-  to its repo-relative equivalent after the fact (see that script's own
-  comments for both).
+  relative, so `access-time/generate.sh` rewrote that one known value back
+  to its repo-relative equivalent after the fact. Finding (2) is fixed as
+  of klt 0.8.0 (report schema 2, per klayout-tools#1261: those fields are
+  emitted in the repo-relative `{path, scope}` shape
+  `env_provenance.repo_relative_path` defines, never an absolute path), so
+  the rewrite was removed in #492 and the committed report is exactly the
+  bytes `klt pex` wrote (see that script's own comments for both).
 - **gf180-sram#106** -- re-extract and re-run everything in this directory
   against the issue #103 bitcell revision. **Done** -- see "Freshness"
   above.
