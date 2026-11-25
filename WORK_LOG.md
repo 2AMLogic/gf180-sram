@@ -10,6 +10,14 @@ by the Guide role's document maintenance phase. Newest entries first.
 
 ### 2026-11-24
 
+- **PR #497**: fix: drop obsolete DUT-path rewrite from access-time PEX generator
+- **PR #496**: refactor(sim): enforce RECORD_CLAIMS unit coverage at import
+- **PR #495**: test: cover mixed duplicate IDs in Monte Carlo reports
+- **PR #491**: refactor(sim): make signoff family classification total and unit formatting a checked table
+- **Issue #493** (closed): Unit formatting is a checked table in the renderer only: generate_report.py keeps the silent ternary, and no check covers the unit set
+- **Issue #492** (closed): Remove the obsolete DUT path rewrite from access-time PEX reports
+- **Issue #490** (closed): BOUNDED_FAMILIES and fmt_value are the last two silent lockstep edits with RECORD_CLAIMS in render_signoff_table
+- **Issue #486** (closed): Pin the MC-side None-id duplicate-unit case in test_deck_adapter.py
 - **PR #489**: refactor(sim): derive signoff table header from RECORD_CLAIMS
 - **PR #487**: refactor: drive all three evidence renderers from RECORD_CLAIMS
 - **PR #485**: refactor(sim): deduplicate staging and coverage helpers in deck_adapter
