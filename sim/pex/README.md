@@ -145,9 +145,12 @@ row and no diagnostic naming a convergence anomaly -- inspect any
 
 ### Results
 
-**Current (post-issue-#103 bitcell, re-run by issue #106; report envelope
-regenerated at schema 2 by issue #498 -- same geometry, same 27/27 verdicts
-and unchanged example values; see the #498 freshness section below):**
+**Current (post-issue-#103 bitcell, re-run by issue #106 and regenerated at
+report schema 2 under klt 0.9.0 by issue #498 -- same geometry, same 27/27
+`pass` verdicts; extracted series R decreased between klt 0.2.0 and
+0.8.0/0.9.0, nudging `extracted_value` and `delta_pct` slightly at all 27
+corners while the 3-sig-fig `tt/3.300V/25C` examples and summary bands
+below still hold; see the #498 freshness section below):**
 
 `write-access-time`: extracted access time is consistently **~32-46%
 slower** than schematic across the matrix (e.g. `tt/3.300V/25C`: schematic
@@ -391,16 +394,67 @@ generation behind what the generator emits: schema 1 with a plain-string
 re-graded the signoff manifest in the same change so
 `scripts/ci/check-signoff-freshness.sh` stays green.
 
-- **Same geometry, same verdicts.** The bitcell GDS is untouched
+- **Same geometry and verdicts; extracted R and per-corner values shifted
+  from the `klt 0.2.0` (#106) baseline.** The bitcell GDS is untouched
   (`provenance.input.content_hash` still `sha256:53d2b7aa...`, the
-  post-#103 revision), and both benches again report `status: pass` over
-  27/27 corners with 27 passing delta rows -- the parity #492 left
-  undemonstrated. Per-corner values are unchanged from the #106 run (the
-  `tt/3.300V/25C` examples in "Results" above still read 70.9ps/98.4ps
-  write, 25.8ps/26.8ps read). The schema-1 bytes this run replaced are
-  preserved byte-for-byte under [`pre-issue-498/`](pre-issue-498/) (see
-  that directory's own `README.md`), per the append-only rule and the
-  `pre-issue-103/` precedent.
+  post-#103 revision), `schematic_value` is unchanged at all 27 corners of
+  both benches, and both benches again report `status: pass` over 27/27
+  corners with 27 passing delta rows -- the parity #492 left
+  undemonstrated. The regenerated `extracted-netlist.spice` for both
+  benches did change relative to the #106 (`klt 0.2.0`) artifacts archived
+  under [`pre-issue-498/`](pre-issue-498/):
+  - **Observed netlist diff** (`pre-issue-498/` vs live, identical in both
+    benches): all 10 `Q`/`QB` terminal star resistors scaled by **x0.700**
+    (`RQ_t0`/`RQB_t0` `19.5605550824` -> `13.6875065396` ohm,
+    `RQ_t1`/`RQB_t2` `20.1080678035` -> `14.0706287935` ohm,
+    `RQ_t2`/`RQB_t1` `24.5260897033` -> `17.162141452` ohm,
+    `RQ_t3`/`RQB_t3` `23.9573630229` -> `16.7641747213` ohm,
+    `RQ_t4`/`RQB_t4` `13.616924388` -> `9.52844849363` ohm); both
+    word-line star resistors (`RWL_t0`, `RWL_t1`) scaled by **x0.837**
+    (`102.29785` -> `85.64375` ohm); `BL`/`BLB`/`VDD`/`VSS` resistors and
+    every capacitance (substrate and coupling, e.g. `CQ Q vsubs
+    7.83841e-16`) are byte-identical; and extraction now emits `.GLOBAL
+    vsubs` plus `Rvsubs_dctie vsubs 0 1e+12` (with a header line
+    documenting `--substrate-tie-ohms`, the upstream fix for
+    klayout-tools#1263).
+  - **Observed per-corner shift** (54 changed fields per bench: all 27
+    `extracted_value` and all 27 `delta_pct` rows moved slightly faster):
+    `read-access-time` `extracted_value` shifted by `-17.1` to `-23.1` fs
+    (`-0.044%` to `-0.133%`) and `delta_pct` by `-0.045` to `-0.140`
+    percentage points (range `2.984-5.418%` -> `2.939-5.278%`; e.g.
+    `ff/2.970V/-40C` `1.73739e-11` -> `1.73522e-11` s, `delta_pct` `5.36`
+    -> `5.229`; `tt/3.300V/25C` `2.68356e-11` -> `2.68147e-11` s,
+    `delta_pct` `3.863` -> `3.782`). `write-access-time` `extracted_value`
+    shifted by `-16.1` to `-24.0` fs (`-0.015%` to `-0.024%`) and
+    `delta_pct` by `-0.022` to `-0.034` percentage points (range
+    `32.184-46.432%` -> `32.156-46.409%`; e.g. `ff/2.970V/25C`
+    `8.83278e-11` -> `8.83064e-11` s, `delta_pct` `41.873` -> `41.839`;
+    `tt/3.300V/25C` `9.83804e-11` -> `9.83603e-11` s, `delta_pct` `38.803`
+    -> `38.775`). At 3 significant figures, the `tt/3.300V/25C` examples
+    in "Results" above still round to 70.9ps/98.4ps write and
+    25.8ps/26.8ps read.
+  - **Attribution (measured: `0.2.0` -> `0.8.0`, not `0.8.0` -> `0.9.0`).**
+    A single-corner local run (`KLT_SIM_BACKEND=local`, `tt/3.300V/25C`)
+    under throwaway `klayout-tools==0.8.0` and `klayout-tools==0.9.0`
+    environments (`uvx`) produced **byte-identical**
+    `extracted-netlist.spice` files (`diff -u` exit 0 against each other
+    and against the committed `reports/klt-pex-artifacts/*/extracted-netlist.spice`:
+    `0.8.0` already emits `RQ_t0 = 13.6875065396` ohm, `RWL_t0 = 85.64375`
+    ohm, and `Rvsubs_dctie vsubs 0 1e+12`) and **value-identical**
+    `delta[0]` rows on both benches (`read_access_time`:
+    `2.58375e-11` / `2.68147e-11` s, `delta_pct: 3.782`;
+    `write_access_time`: `7.08776e-11` / `9.83603e-11` s,
+    `delta_pct: 38.775`, matching the committed `0.9.0` fleet rows
+    digit-for-digit). So the `klt extract` R-model and `vsubs` DC-tie
+    changes landed between `klt 0.2.0` (which minted the #106 reports,
+    deck `sha256:6a323622...`) and `klt 0.8.0` (deck `sha256:0eb6df1b...`;
+    `0.9.0` deck `sha256:cf44de63...` leaves this cell's extracted netlist
+    untouched), and the repo's pinned `klayout-tools==0.8.0` reproduces
+    the committed extraction and per-corner values identically.
+  - The schema-1 bytes this run replaced are preserved byte-for-byte under
+    [`pre-issue-498/`](pre-issue-498/) (see that directory's own
+    `README.md`), per the append-only rule and the `pre-issue-103/`
+    precedent.
 - **Requests are now PDK-relative (batch-submittable).** The two request
   documents' `models` block changed from the env-expanded
   `{"lib": "$PDK_ROOT/$PDK/libs.tech/ngspice/sm141064.ngspice"}` to
@@ -422,31 +476,38 @@ re-graded the signoff manifest in the same change so
   `testbenches[].sides.<side>.environment.remote`, plus per-side
   `batch-receipt.json` under `reports/klt-pex-artifacts/`). The fleet
   runner image runs klt 0.9.0 and its runner-side version gate compares
-  major.minor and is not relaxable (`runner_version_check: "warn"` only
-  softens the client-side pre-check), so the repo's pinned klt 0.8.0
-  client is refused by the runner -- measured, not assumed: a 0.8.0
-  full-grid attempt errored 27/27 with `batch_job_failed` (job command
-  exited 87, "the fleet runner runs klt 0.9.0 but the submitting client
-  is 0.8.0"). The grid therefore ran under the released
-  `klayout-tools==0.9.0` PyPI wheel in a throwaway venv. Shape parity
-  between the pin and the wheel that ran was verified at one corner
-  locally (`--backend local`, `tt/3.30V/25C`): the 0.8.0 and 0.9.0
-  reports are key-for-key identical, both schema 2, and the graded
-  signoff report is still produced by the pinned 0.8.0 grader
+  major.minor and refused the repo's pinned klt 0.8.0 `klt pex` client --
+  measured, not assumed: a 0.8.0 full-grid attempt errored 27/27 with
+  `batch_job_failed` (job command exited 87, "the fleet runner runs klt
+  0.9.0 but the submitting client is 0.8.0"; filed as
+  klayout-tools#7857). The grid therefore ran under the released
+  `klayout-tools==0.9.0` PyPI wheel in a throwaway venv. Both report-shape
+  and extracted-value parity between the 0.8.0 pin and the 0.9.0 wheel
+  were verified locally at `tt/3.300V/25C` (`KLT_SIM_BACKEND=local`, see
+  above): key-for-key schema-2 envelope parity, byte-identical
+  `extracted-netlist.spice`, and identical `delta[0]` numbers, while the
+  graded signoff report is still produced by the pinned 0.8.0 grader
   (`signoff/regenerate.sh`, `check-signoff-freshness.sh` green).
 - **New in the schema-2 envelope (grading-relevant).** The reports now
   carry a `body_bias` block (`status: biased`, 0 unbiased devices/nets --
   the signoff item-7 citation's "no body-bias statement" disclosure is
   retired accordingly), and the 0.8.0 grader now verifies and echoes
   `pex_inputs` sha256 pins for the request, netlist, and DUT references.
-- **Host-path echoes (disclosed, same class as the archived artifacts).**
-  The new reports echo `sides.<side>.environment.client_ngspice_binary`
-  (the submitting host's ngspice path), and the regenerated
-  `klt-pex-artifacts/**` swapped-request copies embed the generating
-  worktree's absolute paths -- the same disclosure class the
-  `pre-issue-103/` artifacts already carry; the provenance-hygiene gate
-  that forbids host paths in committed reports covers `layout/` and
-  `views/`, not `sim/` testbench-run evidence.
+- **Host-path echoes (disclosed).** Unlike the archived schema-1
+  `*.pex.json` reports (which contained no `/home/...` strings), the
+  regenerated batch reports echo
+  `sides.<side>.environment.client_ngspice_binary`
+  (`"/home/ubuntu/.local/bin/ngspice"`, the submitting host's binary path).
+  That upstream batch-report echo is tracked by `klayout-tools#7381`
+  (closed after the released `klayout-tools==0.9.0` wheel was cut, adding
+  portable batch-report output that omits `client_ngspice_binary`), so it
+  is expected to be eliminable on a future klt pin bump. Separately, the
+  regenerated `klt-pex-artifacts/**` swapped-request copies embed the
+  generating worktree's absolute `--outdir` path (though `models` is now
+  PDK-relative and no longer embeds a host `.volare` path) -- the same
+  scratch-artifact class `pre-issue-103/` and `pre-issue-498/` already
+  carry; CI's provenance-hygiene gate covers `layout/` and `views/`, not
+  `sim/` testbench-run evidence.
 
 ## `generate.sh` / `extracted-netlist/` / `extract-report.json`
 
