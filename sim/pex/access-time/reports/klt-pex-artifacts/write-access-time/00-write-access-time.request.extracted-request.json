@@ -1,8 +1,9 @@
 {
-  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-106/sim/pex/access-time/reports/klt-pex-artifacts/write-access-time/00-write-access-time.request.extracted-dut-testbench.spice",
+  "netlist": "/home/ubuntu/GitHub/gf180-sram/.loom/worktrees/issue-498/sim/pex/access-time/reports/klt-pex-artifacts/write-access-time/00-write-access-time.request.extracted-dut-testbench.spice",
   "engine": "ngspice",
   "models": {
-    "lib": "/home/ubuntu/.volare/gf180mcuD/libs.tech/ngspice/sm141064.ngspice"
+    "pdk": "gf180mcuD",
+    "lib": "libs.tech/ngspice/sm141064.ngspice"
   },
   "corners": {
     "process": [
@@ -52,5 +53,8 @@
   "netlist_source": "extracted",
   "options": {
     "timeout_s": 60
+  },
+  "batch": {
+    "capacity_wait_s": 600
   }
 }

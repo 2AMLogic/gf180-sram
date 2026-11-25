@@ -4,6 +4,8 @@
 * - coupling: vertical overlap (crossover) unconditionally -- where one net's conductor on an adjacent metal level sits directly over another *distinct* net's conductor, that overlap area is charged between the two nets instead of to ground (issue #760) -- plus lateral (same-layer, sidewall) coupling, but only for a net pair naming one of the caller's declared `--critical-net` nets (issue #976): facing-edge length within that layer's own minimum-spacing lookback is charged between the two nets, *additively* (not deducted from either net's substrate fringe term, unlike the vertical case -- a known simplification). Any same-layer pair with neither side named `--critical-net`, and fringe shielding in general, are still not modelled
 * - resistance: single lumped series resistance per net, distributed as a star across that net's device terminals (issue #592) -- not a per-segment, distributed RC ladder, *unless* `--distributed-rc` names this net via `--critical-net` (issue #977, Epic #709 Phase 2b): then the net's terminals are ordered along their approximate physical spread and its total R/C is broken into a chain of per-segment resistors (segment length proportional to inter-terminal distance) with a ground capacitor at each terminal node (proportional to its adjacent segment length/2), instead of one star hub -- still an approximation (terminal position is a device-placement proxy, not true per-segment routing geometry), but a strictly finer-grained one than the single-hub star
 * - frequency: quasi-static -- one frequency-independent R and C per net; no skin effect, no distributed transmission-line behavior
+* - substrate tie: 1e+12 ohm to ground -- the substrate is capacitively floating in transient analysis (DC reference only); see --substrate-tie-ohms
+.GLOBAL vsubs
 
 * cell sram_bitcell_6t
 * pin BL
@@ -41,27 +43,27 @@ RBLB_t0 BLB__t0 BLB 1.62
 * device instance BLB r0 *1 0,0 
 CBLB BLB vsubs 4.98113e-16
 * device instance Q_t0 r0 *1 0,0 
-RQ_t0 Q__t0 Q 19.5605550824
+RQ_t0 Q__t0 Q 13.6875065396
 * device instance Q_t1 r0 *1 0,0 
-RQ_t1 Q__t1 Q 20.1080678035
+RQ_t1 Q__t1 Q 14.0706287935
 * device instance Q_t2 r0 *1 0,0 
-RQ_t2 Q__t2 Q 24.5260897033
+RQ_t2 Q__t2 Q 17.162141452
 * device instance Q_t3 r0 *1 0,0 
-RQ_t3 Q__t3 Q 23.9573630229
+RQ_t3 Q__t3 Q 16.7641747213
 * device instance Q_t4 r0 *1 0,0 
-RQ_t4 Q__t4 Q 13.616924388
+RQ_t4 Q__t4 Q 9.52844849363
 * device instance Q r0 *1 0,0 
 CQ Q vsubs 7.83841e-16
 * device instance QB_t0 r0 *1 0,0 
-RQB_t0 QB__t0 QB 19.5605550824
+RQB_t0 QB__t0 QB 13.6875065396
 * device instance QB_t1 r0 *1 0,0 
-RQB_t1 QB__t1 QB 24.5260897033
+RQB_t1 QB__t1 QB 17.162141452
 * device instance QB_t2 r0 *1 0,0 
-RQB_t2 QB__t2 QB 20.1080678035
+RQB_t2 QB__t2 QB 14.0706287935
 * device instance QB_t3 r0 *1 0,0 
-RQB_t3 QB__t3 QB 23.9573630229
+RQB_t3 QB__t3 QB 16.7641747213
 * device instance QB_t4 r0 *1 0,0 
-RQB_t4 QB__t4 QB 13.616924388
+RQB_t4 QB__t4 QB 9.52844849363
 * device instance QB r0 *1 0,0 
 CQB QB vsubs 7.92193e-16
 * device instance VDD_t0 r0 *1 0,0 
@@ -89,9 +91,9 @@ RVSS_t5 VSS__t5 VSS 0.221531660384
 * device instance VSS r0 *1 0,0 
 CVSS VSS vsubs 8.04827e-16
 * device instance WL_t0 r0 *1 0,0 
-RWL_t0 WL__t0 WL 102.29785
+RWL_t0 WL__t0 WL 85.64375
 * device instance WL_t1 r0 *1 0,0 
-RWL_t1 WL__t1 WL 102.29785
+RWL_t1 WL__t1 WL 85.64375
 * device instance WL r0 *1 0,0 
 CWL WL vsubs 8.89491e-16
 * device instance cc_Q_VDD r0 *1 0,0 
@@ -102,4 +104,6 @@ Ccc_Q_VSS Q VSS 7.862e-18
 Ccc_QB_VSS QB VSS 7.862e-18
 * device instance cc_VDD_VSS r0 *1 0,0 
 Ccc_VDD_VSS VDD VSS 3.3634e-17
+* device instance vsubs_dctie r0 *1 0,0 
+Rvsubs_dctie vsubs 0 1e+12
 .ENDS sram_bitcell_6t

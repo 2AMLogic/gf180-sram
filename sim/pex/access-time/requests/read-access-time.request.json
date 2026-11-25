@@ -2,7 +2,8 @@
   "netlist": "../testbench/tb_read_access_time.pex.spice",
   "engine": "ngspice",
   "models": {
-    "lib": "$PDK_ROOT/$PDK/libs.tech/ngspice/sm141064.ngspice"
+    "pdk": "gf180mcuD",
+    "lib": "libs.tech/ngspice/sm141064.ngspice"
   },
   "corners": {
     "process": [
@@ -22,5 +23,6 @@
     }
   ],
   "netlist_source": "schematic",
-  "options": { "timeout_s": 60 }
+  "options": { "timeout_s": 60 },
+  "batch": { "capacity_wait_s": 600 }
 }
