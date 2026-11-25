@@ -61,8 +61,8 @@ def load_module(name: str, rel: str):
 # once (issue #475) so a layer renumbered in one generator cannot silently
 # diverge from the others. ``ARRAY_LAYER_NAMES`` holds their PDK display
 # names; the below-Metal3 names stay in layout/bitcell/generate.py's
-# ``_LAYER_NAMES``, and layout/periphery/column/generate.py merges the two
-# tables for the layers its periphery draws on.
+# ``_LAYER_NAMES``, and layout/periphery/engine.py merges the two
+# tables for the layers the periphery draws on.
 # ---------------------------------------------------------------------------
 L_VIA2 = (38, 0)
 L_METAL3 = (42, 0)
