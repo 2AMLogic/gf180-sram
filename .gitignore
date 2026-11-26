@@ -40,6 +40,7 @@ env/
 # results under .klt/ beside the request file (views/fv_sram_256x32.json);
 # run output is never repo content.
 .klt/
+/.loom/account-ranking.*
 # >>> loom-managed (do not edit) >>>
 # Loom runtime state (don't commit these)
 .loom-in-use
