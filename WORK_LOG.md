@@ -8,6 +8,12 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-26
+
+- **PR #510**: fix: ignore Loom account-ranking caches
+- **Issue #481** (closed): gitignore the daemon-owned .loom/account-ranking.* runtime cache (trips check-main-clean)
+- **Issue #343** (closed): Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance
+
 ### 2026-11-25
 
 - **PR #506**: refactor(layout): extract shared periphery engine, pass ncols explicitly

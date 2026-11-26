@@ -6,7 +6,6 @@ below is machine-generated and overwritten wholesale on each update; do not
 hand-edit that region.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-24T14:15:00Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -24,26 +23,25 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS
-- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(held)*
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS
 
 ## Ready
 
-Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
+Human-approved issues ready for implementation (`loom:issue`).
 
-- **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#498**: Regenerate the access-time PEX evidence under klt report schema 2 *(curated)*
+_None._
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#264**: feat: store new evidence bytes in the artifact store, commit manifests only *(held)*
+- **#264**: feat: store new evidence bytes in the artifact store, commit manifests only
 
 ## Approved (Awaiting Merge)
 
@@ -56,16 +54,16 @@ _None._
 Issues carrying `loom:curated`.
 
 - **#206**: Assemble macro-level GDS with ratified pins; macro DRC and LVS *(curated)*
-- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)* *(held)*
+- **#247**: Assemble the sram_256x32 macro GDS with pins, macro DRC and LVS *(curated)*
 - **#262**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
-- **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)* *(held)*
-- **#343**: Set guide.docsMaintenance debounce windows: 64% of merged PRs (75/116 in 30 days) are Guide doc-maintenance *(curated)* *(held)*
-- **#437**: Migrate the pex write-margin by-hand legs off the retired run_corner_sweep.sh (deck-mode port + parity receipt) *(curated)* *(held)*
-- **#498**: Regenerate the access-time PEX evidence under klt report schema 2 *(curated, building)*
+- **#285**: T1 item 4 (LVS): re-run array LVS under pinned klt 0.8.0 so its input binds a committed file (input_verified is null) *(curated)*
+- **#437**: Migrate the pex write-margin by-hand legs off the retired run_corner_sweep.sh (deck-mode port + parity receipt) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
-- **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)* *(held)*
+- **#252**: Consolidate duplicated layout-generator helpers (_load, save_options) *(hermit)*
+- **#476**: Retire sim/lib/parity_compare.py and test_parity_compare.py after #230/#272 (~2,215 LOC) *(hermit)*
+- **#477**: Remove mint_records.py corner subcommand: unused alias over mint_corner_records *(hermit)*
 
 ## Epics
 
@@ -78,11 +76,11 @@ _None._
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
 | Important | 2 |
-| Ready (`loom:issue`, net of holds/building/merge-pending) | 2 |
-| In Progress (`loom:building`) | 1 |
+| Ready (`loom:issue`) | 1 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 7 |
-| Architect / Hermit proposals | 1 |
+| Curated | 5 |
+| Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
