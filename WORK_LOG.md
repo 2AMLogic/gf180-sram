@@ -8,8 +8,21 @@ by the Guide role's document maintenance phase. Newest entries first.
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 - [2026-08](work_log/WORK_LOG_2026-08.md)
 
+### 2026-11-25
+
+- **PR #506**: refactor(layout): extract shared periphery engine, pass ncols explicitly
+- **PR #508**: sim(pex): regenerate access-time evidence at klt report schema 2
+- **Issue #505** (closed): Extract shared periphery layout engine from layout/periphery/column/generate.py
+- **Issue #498** (closed): Regenerate the access-time PEX evidence under klt report schema 2
+
 ### 2026-11-24
 
+- **PR #507**: test(ci): pin generate.sh flag-dispatch contract under stubbed tools
+- **PR #502**: refactor: dedupe flat-block checks and fix flag dispatch in report generator
+- **PR #503**: layout: remove dead Macro.route_m3_m2 and inert statement in wire
+- **Issue #504** (closed): No regression guard for layout/reports/generate.sh's flag-dispatch contract
+- **Issue #500** (closed): Simplify layout/reports/generate.sh: deduplicate PDK pin check, flat-block DRC/extract/LVS, and fix flag dispatch
+- **Issue #501** (closed): Remove dead Macro.route_m3_m2 and no-op statement in Macro.wire
 - **PR #497**: fix: drop obsolete DUT-path rewrite from access-time PEX generator
 - **PR #496**: refactor(sim): enforce RECORD_CLAIMS unit coverage at import
 - **PR #495**: test: cover mixed duplicate IDs in Monte Carlo reports
